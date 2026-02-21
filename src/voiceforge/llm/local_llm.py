@@ -41,7 +41,7 @@ def _ollama_request(path: str, data: dict, timeout: float = 10) -> dict | None:
         )
         with urllib.request.urlopen(req, timeout=timeout) as resp:  # nosec B310  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
             return json.loads(resp.read().decode())
-    except (urllib.error.URLError, urllib.error.HTTPError, json.JSONDecodeError, OSError) as e:
+    except (urllib.error.URLError, json.JSONDecodeError, OSError) as e:
         log.debug("ollama.request_failed", path=path, error=str(e))
         return None
 

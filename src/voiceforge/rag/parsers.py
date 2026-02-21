@@ -45,7 +45,12 @@ def parse_markdown(path: str | Path) -> list[str]:
     raw = re.sub(r"_([^_]+)_", r"\1", raw)
     # Split by double newline (paragraphs)
     segments = [p.strip() for p in raw.split("\n\n") if p.strip()]
-    return segments if segments else [raw.strip()] if raw.strip() else []
+    if segments:
+        return segments
+    stripped = raw.strip()
+    if stripped:
+        return [stripped]
+    return []
 
 
 class _TextExtractor(HTMLParser):
@@ -80,7 +85,12 @@ def parse_html(path: str | Path) -> list[str]:
     if parser._current:
         parser.text.append(" ".join(parser._current).strip())
     segments = [s for s in parser.text if s]
-    return segments if segments else [raw.strip()] if raw.strip() else []
+    if segments:
+        return segments
+    stripped = raw.strip()
+    if stripped:
+        return [stripped]
+    return []
 
 
 def parse_txt(path: str | Path) -> list[str]:
@@ -90,7 +100,12 @@ def parse_txt(path: str | Path) -> list[str]:
         raise FileNotFoundError(str(path))
     raw = path.read_text(encoding="utf-8", errors="replace")
     segments = [p.strip() for p in re.split(r"\n\s*\n", raw) if p.strip()]
-    return segments if segments else [raw.strip()] if raw.strip() else []
+    if segments:
+        return segments
+    stripped = raw.strip()
+    if stripped:
+        return [stripped]
+    return []
 
 
 def parse_docx(path: str | Path) -> list[str]:

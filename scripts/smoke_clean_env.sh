@@ -4,6 +4,7 @@ set -euo pipefail
 tmp="$(mktemp -d -p "${PWD}" .tmp-smoke.XXXXXX)"
 cleanup() {
   rm -rf "$tmp"
+  return 0
 }
 trap cleanup EXIT
 

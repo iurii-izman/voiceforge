@@ -11,17 +11,17 @@ jobs:
     env:
       UV_VERSION: "0.8"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - uses: astral-sh/setup-uv@v4
+      - uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b # v7
         with:
           python-version: "3.12"
           version: ${{ env.UV_VERSION }}
       - run: uv sync --extra all
       - run: uv run pip-audit --desc --ignore-vuln CVE-2025-69872
       - run: uv run bandit -r src -ll -q --configfile .bandit.yaml
-      - uses: gitleaks/gitleaks-action@v2
+      - uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_CONFIG: .gitleaks.toml

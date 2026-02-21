@@ -58,7 +58,7 @@ class KBWatcher:
         now = time.monotonic()
         to_process: list[str] = []
         with self._lock:
-            for path, ts in list(self._pending.items()):
+            for path, ts in tuple(self._pending.items()):
                 if now - ts >= self.debounce_sec:
                     to_process.append(path)
                     del self._pending[path]
@@ -122,15 +122,17 @@ class KBWatcher:
         conn.close()
 
         class Handler(FileSystemEventHandler):
-            def on_created(inner_self, event):
+            @staticmethod
+            def _handle_event(event) -> None:
                 if event.is_directory:
                     return
                 self._on_pdf_event(event.src_path)
 
+            def on_created(inner_self, event):
+                inner_self._handle_event(event)
+
             def on_modified(inner_self, event):
-                if event.is_directory:
-                    return
-                self._on_pdf_event(event.src_path)
+                inner_self._handle_event(event)
 
         observer = Observer()
         observer.schedule(Handler(), str(self.watch_dir), recursive=True)
@@ -146,7 +148,10 @@ class KBWatcher:
         )
         try:
             while not self._stop.wait(self.poll_interval):
-                pass
+                with self._lock:
+                    pending_count = len(self._pending)
+                if pending_count:
+                    log.debug("watcher.pending", pending=pending_count)
         except KeyboardInterrupt:
             pass
         finally:

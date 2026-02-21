@@ -18,8 +18,8 @@ jobs:
     env:
       UV_VERSION: "0.8"
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v4
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b # v7
         with:
           python-version: ${{ matrix.python-version }}
           version: ${{ env.UV_VERSION }}
@@ -28,7 +28,7 @@ jobs:
       - run: uv run ruff check src tests scripts
       - run: uv run mypy src/voiceforge/core src/voiceforge/llm src/voiceforge/rag src/voiceforge/stt --ignore-missing-imports
       - run: uv run pytest tests -q --cov=src/voiceforge --cov-report=xml --cov-fail-under=0
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: coverage-${{ matrix.python-version }}
@@ -40,8 +40,8 @@ jobs:
     env:
       UV_VERSION: "0.8"
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v4
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b # v7
         with:
           python-version: "3.12"
           version: ${{ env.UV_VERSION }}
@@ -54,8 +54,8 @@ jobs:
     env:
       UV_VERSION: "0.8"
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v4
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b # v7
         with:
           python-version: "3.12"
           version: ${{ env.UV_VERSION }}
@@ -68,8 +68,8 @@ jobs:
     env:
       UV_VERSION: "0.8"
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v4
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b # v7
         with:
           python-version: "3.12"
           version: ${{ env.UV_VERSION }}
@@ -82,8 +82,8 @@ jobs:
     env:
       UV_VERSION: "0.8"
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v4
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b # v7
         with:
           python-version: "3.12"
           version: ${{ env.UV_VERSION }}

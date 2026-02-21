@@ -53,6 +53,9 @@ class Transcriber:
         else:
             audio_f = audio.astype(np.float32)
 
+        if sample_rate != 16000:
+            log.debug("transcribe.sample_rate_ignored", sample_rate=sample_rate, expected=16000)
+
         vad_params = vad_parameters or {"min_silence_duration_ms": 600}
         # faster-whisper expects 16 kHz float32; we pass pre-resampled audio
         segments_iter, info = self._model.transcribe(
