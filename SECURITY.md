@@ -37,6 +37,6 @@ Include:
 - Semgrep suppressions are allowed only via registry with owner + issue + expiry
   (see `docs/SEMGREP_POLICY.md` and `.github/semgrep_suppressions.json`).
 - Temporary CVE exceptions must have owner + expiry + tracking issue
-  (see ADR-013 in `docs/DECISIONS.md`).
+  (see `docs/runbooks/security.md`).
 - Sonar quality gate is focused on New Code to prevent legacy noise masking new risks
-  (see ADR-014 in `docs/DECISIONS.md`).
+  (see `docs/runbooks/repo-governance.md` and `docs/runbooks/release.md`).

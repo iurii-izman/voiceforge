@@ -1,4 +1,4 @@
-.PHONY: bootstrap verify smoke release-check cli-contract db-migrations e2e-smoke doctor toolchain security governance milestone sonar-status
+.PHONY: bootstrap verify smoke release-check cli-contract db-migrations e2e-smoke doctor toolchain security governance governance-check milestone sonar-status
 
 bootstrap:
 	./scripts/bootstrap.sh
@@ -35,6 +35,9 @@ security:
 
 governance:
 	./scripts/apply_main_ruleset.sh
+
+governance-check:
+	./scripts/check_repo_governance.sh
 
 milestone:
 	./scripts/create_alpha_milestone_issues.sh
