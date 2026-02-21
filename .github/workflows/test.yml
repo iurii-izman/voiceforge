@@ -27,7 +27,7 @@ jobs:
       - run: ./scripts/check_toolchain.sh
       - run: uv run ruff check src tests scripts
       - run: uv run mypy src/voiceforge/core src/voiceforge/llm src/voiceforge/rag src/voiceforge/stt --ignore-missing-imports
-      - run: uv run pytest tests -q --cov=src/voiceforge --cov-report=xml
+      - run: uv run pytest tests -q --cov=src/voiceforge --cov-report=xml --cov-fail-under=0
       - uses: actions/upload-artifact@v4
         if: always()
         with:

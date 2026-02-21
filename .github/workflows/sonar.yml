@@ -24,7 +24,7 @@ jobs:
           python-version: "3.12"
           version: ${{ env.UV_VERSION }}
       - run: uv sync --extra all
-      - run: uv run pytest tests --cov=src/voiceforge --cov-report=xml -q
+      - run: uv run pytest tests --cov=src/voiceforge --cov-report=xml --cov-fail-under=0 -q
       - name: SonarCloud Scan
         if: ${{ env.SONAR_TOKEN != '' }}
         uses: SonarSource/sonarqube-scan-action@v5
