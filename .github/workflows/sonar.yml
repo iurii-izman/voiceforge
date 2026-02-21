@@ -25,6 +25,7 @@ jobs:
           version: ${{ env.UV_VERSION }}
       - run: uv sync --extra all
       - run: uv run pytest tests --cov=src/voiceforge --cov-report=xml --cov-fail-under=0 -q
+      # nosemgrep: generic.secrets.security.detected-sonarqube-docs-api-key.detected-sonarqube-docs-api-key
       - name: SonarCloud Scan
         id: sonar_scan
         if: ${{ env.SONAR_TOKEN != '' }}
