@@ -1,4 +1,4 @@
-"""Speaker diarization via pyannote.audio. STRICT 3.3.2 — 4.x = OOM."""
+"""Speaker diarization via pyannote.audio (3.x/4.x compatible loading)."""
 
 import gc
 import os
@@ -95,16 +95,23 @@ class Diarizer:
                 _prev = os.environ.get("TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD")
                 os.environ["TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD"] = "1"
                 try:
-                    self._pipeline = Pipeline.from_pretrained(
-                        self._model_id,
-                        use_auth_token=self._auth_token,
-                    )
+                    try:
+                        kwargs: dict[str, Any] = {"token": self._auth_token}
+                        loaded = Pipeline.from_pretrained(self._model_id, **kwargs)
+                    except TypeError:
+                        kwargs = {"use_auth_token": self._auth_token}
+                        loaded = Pipeline.from_pretrained(self._model_id, **kwargs)
+                    if loaded is None:
+                        raise RuntimeError(f"pyannote pipeline failed to load: {self._model_id}")
+                    self._pipeline = loaded
                 finally:
                     if _prev is None:
                         os.environ.pop("TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD", None)
                     else:
                         os.environ["TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD"] = _prev
                 self._pipeline_created_at = time.monotonic()
+            if self._pipeline is None:
+                raise RuntimeError("pyannote pipeline is unavailable")
             return self._pipeline
 
     def _memory_guard(self) -> None:
