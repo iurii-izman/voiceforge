@@ -14,6 +14,7 @@ jobs:
     continue-on-error: true
     env:
       UV_VERSION: "0.8"
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -25,11 +26,11 @@ jobs:
       - run: uv sync --extra all
       - run: uv run pytest tests --cov=src/voiceforge --cov-report=xml -q
       - name: SonarCloud Scan
-        if: ${{ secrets.SONAR_TOKEN != '' }}
+        if: ${{ env.SONAR_TOKEN != '' }}
         uses: SonarSource/sonarqube-scan-action@v5
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
       - name: SonarCloud Skip (no token)
-        if: ${{ secrets.SONAR_TOKEN == '' }}
+        if: ${{ env.SONAR_TOKEN == '' }}
         run: echo "SONAR_TOKEN is not configured; scan skipped."
