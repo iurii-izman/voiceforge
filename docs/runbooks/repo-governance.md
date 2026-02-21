@@ -7,15 +7,16 @@ Target: `main`
 Required policies:
 1. No direct pushes.
 2. Require pull request before merge.
-3. Require up-to-date branch before merge.
-4. Require status checks:
+3. Solo mode: pull request approval count is `0` (status checks remain mandatory).
+4. Require up-to-date branch before merge.
+5. Require status checks:
    - `quality (3.12)`
    - `quality (3.13)`
    - `cli-contract`
    - `db-migrations`
    - `e2e-smoke`
-5. Require linear history.
-6. Restrict force pushes and deletions.
+6. Require linear history.
+7. Restrict force pushes and deletions.
 
 `scripts/apply_main_ruleset.sh` can apply these settings via GitHub API (requires authenticated `gh`).
 
