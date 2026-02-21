@@ -118,3 +118,71 @@ def test_cli_service_install_uninstall_smoke(monkeypatch, tmp_path) -> None:
         ["systemctl", "--user", "enable", "--now", "voiceforge.service"],
         ["systemctl", "--user", "disable", "--now", "voiceforge.service"],
     ]
+
+
+def test_cli_index_watch_smoke_with_mocks(monkeypatch, tmp_path) -> None:
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
+    monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "runtime"))
+
+    kb_dir = tmp_path / "kb"
+    kb_dir.mkdir()
+    (kb_dir / "note.txt").write_text("hello world")
+    (kb_dir / "readme.md").write_text("# title")
+
+    records: dict[str, object] = {
+        "indexer_init": [],
+        "add_file": [],
+        "prune_args": None,
+        "watcher_init": None,
+        "watch_run": False,
+        "watch_stop": False,
+    }
+
+    class _FakeKnowledgeIndexer:
+        def __init__(self, db_path: str) -> None:
+            records["indexer_init"].append(db_path)  # type: ignore[union-attr]
+
+        def add_file(self, path) -> int:
+            records["add_file"].append(str(path))  # type: ignore[union-attr]
+            return 2
+
+        def prune_sources_not_in(self, keep_sources: set[str], only_under_prefix: str | None = None) -> int:
+            records["prune_args"] = (keep_sources, only_under_prefix)
+            return 1
+
+        def close(self) -> None:
+            return None
+
+    class _FakeKBWatcher:
+        def __init__(self, watch_dir, db_path) -> None:
+            records["watcher_init"] = (str(watch_dir), str(db_path))
+
+        def run(self) -> None:
+            records["watch_run"] = True
+
+        def stop(self) -> None:
+            records["watch_stop"] = True
+
+    fake_indexer_module = types.ModuleType("voiceforge.rag.indexer")
+    fake_indexer_module.KnowledgeIndexer = _FakeKnowledgeIndexer
+    monkeypatch.setitem(sys.modules, "voiceforge.rag.indexer", fake_indexer_module)
+
+    fake_watcher_module = types.ModuleType("voiceforge.rag.watcher")
+    fake_watcher_module.KBWatcher = _FakeKBWatcher
+    monkeypatch.setitem(sys.modules, "voiceforge.rag.watcher", fake_watcher_module)
+
+    index_file_result = runner.invoke(main_mod.app, ["index", str(kb_dir / "note.txt")])
+    assert index_file_result.exit_code == 0, index_file_result.stdout
+    assert "Добавлено чанков: 2" in index_file_result.stdout
+
+    index_dir_result = runner.invoke(main_mod.app, ["index", str(kb_dir)])
+    assert index_dir_result.exit_code == 0, index_dir_result.stdout
+    assert "Удалено чанков (файлы удалены): 1" in index_dir_result.stdout
+    assert "Добавлено чанков: 4" in index_dir_result.stdout
+
+    watch_result = runner.invoke(main_mod.app, ["watch", str(kb_dir)])
+    assert watch_result.exit_code == 0, watch_result.stdout
+    assert "VoiceForge watch:" in watch_result.stdout
+
+    assert records["watch_run"] is True
+    assert records["watcher_init"] is not None
