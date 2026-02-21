@@ -19,6 +19,18 @@ Required policies:
 7. Restrict force pushes and deletions.
 
 `scripts/apply_main_ruleset.sh` can apply these settings via GitHub API (requires authenticated `gh`).
+`scripts/check_repo_governance.sh` validates active ruleset and required checks.
+
+## Security Settings Baseline
+
+Repository-level security baseline:
+1. Dependabot alerts endpoint enabled.
+2. Dependabot security updates enabled.
+3. Secret scanning enabled.
+4. Secret scanning push protection enabled.
+
+Verification command:
+- `./scripts/check_repo_governance.sh`
 
 ## Alpha0.1 Milestone Planning
 
