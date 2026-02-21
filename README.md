@@ -55,6 +55,7 @@ uv run voiceforge daemon
 uv run ruff check src tests scripts
 uv run pytest tests -q
 ./scripts/verify_pr.sh
+./scripts/smoke_clean_env.sh
 ```
 
 ## Documentation

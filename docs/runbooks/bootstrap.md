@@ -11,6 +11,7 @@ Manual path:
 ```bash
 uv sync --extra all
 uv run voiceforge status
+./scripts/smoke_clean_env.sh
 ```
 
 Optional service mode:

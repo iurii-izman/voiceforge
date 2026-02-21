@@ -21,6 +21,8 @@ node_modules/
 voiceforge.yaml
 reports/
 *.json.bak
+gitleaks-report.json
+.tmp-smoke.*/
 
 # Coverage
 .coverage
