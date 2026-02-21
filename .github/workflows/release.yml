@@ -15,7 +15,7 @@ jobs:
       UV_VERSION: "0.8"
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v4
+      - uses: astral-sh/setup-uv@v7
         with:
           python-version: "3.12"
           version: ${{ env.UV_VERSION }}
