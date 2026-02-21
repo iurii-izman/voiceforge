@@ -87,3 +87,34 @@ def test_cli_pipeline_listen_analyze_history(monkeypatch, tmp_path) -> None:
     assert detail_payload["ok"] is True
     assert detail_payload["data"]["session_id"] == session_id
     assert detail_payload["data"]["segments"]
+
+
+def test_cli_service_install_uninstall_smoke(monkeypatch, tmp_path) -> None:
+    service_src = tmp_path / "voiceforge.service"
+    service_src.write_text("[Unit]\nDescription=voiceforge test service\n")
+
+    monkeypatch.setenv("VOICEFORGE_SERVICE_FILE", str(service_src))
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "config"))
+
+    calls: list[list[str]] = []
+
+    def fake_subprocess_run(cmd: list[str], check: bool = True) -> types.SimpleNamespace:
+        calls.append(cmd)
+        assert check is True
+        return types.SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(main_mod.subprocess, "run", fake_subprocess_run)
+
+    install_result = runner.invoke(main_mod.app, ["install-service"])
+    assert install_result.exit_code == 0, install_result.stdout
+    installed = tmp_path / "config" / "systemd" / "user" / "voiceforge.service"
+    assert installed.exists()
+
+    uninstall_result = runner.invoke(main_mod.app, ["uninstall-service"])
+    assert uninstall_result.exit_code == 0, uninstall_result.stdout
+
+    assert calls == [
+        ["systemctl", "--user", "daemon-reload"],
+        ["systemctl", "--user", "enable", "--now", "voiceforge.service"],
+        ["systemctl", "--user", "disable", "--now", "voiceforge.service"],
+    ]
