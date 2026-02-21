@@ -1,0 +1,17 @@
+# Local env/cache
+.venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.uv-cache/
+
+# Build artifacts
+dist/
+build/
+htmlcov/
+reports/
+
+# VCS and editor noise
+.git/
+.cursor/
+.claude/

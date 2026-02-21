@@ -1,0 +1,7 @@
+exclude_dirs:
+  - tests
+  - .venv
+  - .mypy_cache
+  - .pytest_cache
+  - .ruff_cache
+skips: []

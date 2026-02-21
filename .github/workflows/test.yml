@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          python-version: "3.12"
+      - run: uv sync --extra all
+      - run: uv run ruff check src tests scripts
+      - run: uv run mypy src/voiceforge/core src/voiceforge/llm src/voiceforge/rag src/voiceforge/stt --ignore-missing-imports
+      - run: uv run pytest tests -q
+      - run: uv run pip-audit --desc --ignore-vuln CVE-2025-69872
+      - run: uv run bandit -r src -ll -q --configfile .bandit.yaml

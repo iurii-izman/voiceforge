@@ -1,0 +1,21 @@
+# Block 6.4: VoiceForge daemon — systemd user unit (autostart at login).
+# Install: voiceforge install-service
+# Logs: journalctl --user -u voiceforge -f
+
+[Unit]
+Description=VoiceForge daemon (D-Bus, listen, analyze)
+After=graphical-session.target dbus.service
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=distrobox enter voiceforge -- uv run voiceforge daemon
+Restart=on-failure
+RestartSec=5
+# Pass session env into distrobox so D-Bus and runtime dir work
+Environment=DBUS_SESSION_BUS_ADDRESS=%E(DBUS_SESSION_BUS_ADDRESS)
+Environment=XDG_RUNTIME_DIR=%E(XDG_RUNTIME_DIR)
+Environment=HOME=%E(HOME)
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,43 @@
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+dist/
+build/
+*.wav
+*.mp3
+*.raw
+*.onnx
+*.db
+*.db-wal
+data/
+target/
+node_modules/
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+.uv-cache/
+.env
+voiceforge.yaml
+reports/
+*.json.bak
+
+# Coverage
+.coverage
+.coverage.*
+htmlcov/
+
+# Build outputs
+app/dist/
+app/build/
+app/src-tauri/target/
+
+# Runtime temp fixtures (keep local only)
+tmp_config/
+tmp_plugins/
+
+# IDE metadata
+.cursor/
+.cursorrules
+.cursorignore
+.claude/

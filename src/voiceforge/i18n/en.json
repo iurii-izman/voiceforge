@@ -1,0 +1,23 @@
+{
+  "status.ram": "RAM: {used:.1f} / {total:.1f} GB ({percent}%)",
+  "status.cost_today": "Cost today: ${cost:.4f}",
+  "status.ollama_available": "Ollama: available",
+  "status.ollama_unavailable": "Ollama: unavailable",
+  "doctor.config_ok": "voiceforge.yaml / defaults loaded",
+  "doctor.keyring_ok": "API key(s) set (anthropic/openai)",
+  "doctor.keyring_fail": "No anthropic/openai key in keyring",
+  "doctor.rag_ok": "RAG DB exists",
+  "doctor.rag_optional": "RAG DB not created yet (optional)",
+  "doctor.ring_ok": "Ring buffer exists",
+  "doctor.ring_absent": "Ring file absent (run listen first)",
+  "doctor.ollama_ok": "Ollama available (localhost:11434)",
+  "doctor.ollama_fail": "Ollama not reachable (optional)",
+  "doctor.ram_ok": "Available RAM: {gb:.1f} GB",
+  "doctor.ram_fail": "Low RAM: {gb:.1f} GB (need ~2+ GB for pipeline)",
+  "doctor.llm_ok": "LLM module (litellm) importable",
+  "doctor.llm_fail": "Install [llm]: uv sync --extra llm",
+  "doctor.stt_ok": "STT (faster-whisper) importable",
+  "doctor.stt_fail": "STT not available",
+  "status.cmd_help": "RAM and cost for today.",
+  "doctor.cmd_help": "Diagnostics: check components, API keys, models, RAM."
+}
