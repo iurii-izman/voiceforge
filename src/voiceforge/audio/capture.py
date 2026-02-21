@@ -62,7 +62,8 @@ class AudioCapture:
         self._monitor_buffer = RingBuffer(self._buffer_seconds, self._sample_rate)
 
         try:
-            self._mic_proc = subprocess.Popen(  # nosec B603 B607 — pw-record is a trusted system binary
+            # pw-record is an expected system binary on Linux desktop targets.
+            self._mic_proc = subprocess.Popen(  # nosec B603
                 PW_RECORD_CMD,
                 stdin=subprocess.DEVNULL,
                 stdout=subprocess.PIPE,
@@ -82,7 +83,8 @@ class AudioCapture:
         # Monitor: pw-record from default or from loopback source (Block 6.3)
         monitor_cmd = _pw_record_cmd(self._monitor_source)
         try:
-            self._monitor_proc = subprocess.Popen(  # nosec B603 B607 — pw-record monitor, trusted
+            # pw-record monitor capture follows the same trusted binary path.
+            self._monitor_proc = subprocess.Popen(  # nosec B603
                 monitor_cmd,
                 stdin=subprocess.DEVNULL,
                 stdout=subprocess.PIPE,

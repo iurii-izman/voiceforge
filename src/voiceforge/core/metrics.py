@@ -121,7 +121,7 @@ def _migrate_cost_daily_if_exists(conn: sqlite3.Connection) -> None:
         return
     cursor = conn.cursor()
     for day_str, cost in data.items():
-        if not isinstance(cost, (int, float)) or cost <= 0:
+        if not isinstance(cost, int | float) or cost <= 0:
             continue
         try:
             ts = datetime.fromisoformat(day_str).replace(tzinfo=UTC).isoformat()
