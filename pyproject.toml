@@ -57,6 +57,7 @@ voiceforge = "voiceforge.main:main"
 
 [dependency-groups]
 dev = [
+    "pre-commit>=3.8",
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
     "pytest-cov>=5.0",

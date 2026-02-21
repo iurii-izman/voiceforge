@@ -10,10 +10,16 @@ fi
 
 uv sync --extra all
 
+echo "Installing git hooks (pre-commit + pre-push)..."
+uv run pre-commit install --hook-type pre-commit --hook-type pre-push
+
 echo "Set keyring entries if missing:"
 echo "  keyring set voiceforge anthropic"
 echo "  keyring set voiceforge openai"
 echo "  keyring set voiceforge huggingface"
+
+echo "Doctor check:"
+./scripts/doctor.sh || true
 
 echo "Smoke check:"
 uv run voiceforge status || true

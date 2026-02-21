@@ -1,0 +1,36 @@
+name: Release Regression
+description: Report a regression found during or after alpha release.
+title: "[release-regression] "
+labels: ["chore"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What regressed?
+    validations:
+      required: true
+  - type: input
+    id: release_tag
+    attributes:
+      label: Release tag
+      description: Example v0.1.0-alpha.1
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: rollback
+    attributes:
+      label: Rollback action taken
+      description: Link to rollback runbook action and PR/issue.

@@ -1,0 +1,27 @@
+name: Weekly Security
+
+on:
+  schedule:
+    - cron: "0 5 * * 1"
+  workflow_dispatch:
+
+jobs:
+  deps-and-static:
+    runs-on: ubuntu-latest
+    env:
+      UV_VERSION: "0.8"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v4
+        with:
+          python-version: "3.12"
+          version: ${{ env.UV_VERSION }}
+      - run: uv sync --extra all
+      - run: uv run pip-audit --desc --ignore-vuln CVE-2025-69872
+      - run: uv run bandit -r src -ll -q --configfile .bandit.yaml
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml

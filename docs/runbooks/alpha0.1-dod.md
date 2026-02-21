@@ -40,7 +40,9 @@ A build is considered ready for alpha0.1 only when all checks below are true.
 
 1. `./scripts/verify_pr.sh` passes.
 2. `./scripts/smoke_clean_env.sh` passes.
-3. Security scans pass with current temporary exception:
+3. `./scripts/check_cli_contract.sh` passes.
+4. DB migrations tests pass (`uv run pytest tests/test_db_migrations.py -q`).
+5. Security scans pass with current temporary exception:
    - `CVE-2025-69872` is ignored until upstream fix is released.
 
 ## Release readiness
@@ -49,3 +51,4 @@ A build is considered ready for alpha0.1 only when all checks below are true.
    - package version `0.1.0a1`
    - release tag `v0.1.0-alpha.1`
 2. Release runbook steps in `docs/runbooks/release.md` are complete.
+3. `CHANGELOG.md` includes current release notes.

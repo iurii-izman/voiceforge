@@ -1,0 +1,46 @@
+name-template: "v$RESOLVED_VERSION"
+tag-template: "v$RESOLVED_VERSION"
+change-template: "- $TITLE (#$NUMBER) @$AUTHOR"
+template: |
+  ## Changes
+
+  $CHANGES
+
+  ## Verification
+
+  - [ ] `./scripts/verify_pr.sh`
+  - [ ] `./scripts/smoke_clean_env.sh`
+
+categories:
+  - title: "Features"
+    labels:
+      - "feat"
+      - "feature"
+  - title: "Fixes"
+    labels:
+      - "fix"
+      - "bug"
+  - title: "Maintenance"
+    labels:
+      - "chore"
+      - "refactor"
+      - "ci"
+      - "docs"
+      - "test"
+
+exclude-labels:
+  - "skip-changelog"
+
+version-resolver:
+  major:
+    labels:
+      - "major"
+  minor:
+    labels:
+      - "minor"
+      - "feature"
+  patch:
+    labels:
+      - "patch"
+      - "fix"
+  default: patch

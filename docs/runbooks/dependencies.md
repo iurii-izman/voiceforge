@@ -6,6 +6,14 @@
 2. `uv.lock` is the pinned, reproducible source of installed versions.
 3. Runtime and CI must use `uv sync --extra all` unless explicitly scoped.
 
+## Toolchain contract
+
+1. Python versions supported in CI: `3.12`, `3.13`.
+2. `pyproject.toml` `requires-python` must stay `>=3.12`.
+3. CI uses pinned `uv` major/minor line (`0.8`).
+4. Validate locally and in CI with:
+   - `./scripts/check_toolchain.sh`
+
 ## Update policy
 
 1. Default mode: no ad-hoc upgrades.

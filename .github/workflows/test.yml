@@ -9,15 +9,84 @@ on:
 
 jobs:
   quality:
+    name: quality (${{ matrix.python-version }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13"]
+    env:
+      UV_VERSION: "0.8"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          version: ${{ env.UV_VERSION }}
+      - run: uv sync --extra all
+      - run: ./scripts/check_toolchain.sh
+      - run: uv run ruff check src tests scripts
+      - run: uv run mypy src/voiceforge/core src/voiceforge/llm src/voiceforge/rag src/voiceforge/stt --ignore-missing-imports
+      - run: uv run pytest tests -q --cov=src/voiceforge --cov-report=xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-${{ matrix.python-version }}
+          path: coverage.xml
+
+  cli-contract:
+    name: cli-contract
+    runs-on: ubuntu-latest
+    env:
+      UV_VERSION: "0.8"
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v4
         with:
           python-version: "3.12"
+          version: ${{ env.UV_VERSION }}
       - run: uv sync --extra all
-      - run: uv run ruff check src tests scripts
-      - run: uv run mypy src/voiceforge/core src/voiceforge/llm src/voiceforge/rag src/voiceforge/stt --ignore-missing-imports
-      - run: uv run pytest tests -q
+      - run: ./scripts/check_cli_contract.sh
+
+  db-migrations:
+    name: db-migrations
+    runs-on: ubuntu-latest
+    env:
+      UV_VERSION: "0.8"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          python-version: "3.12"
+          version: ${{ env.UV_VERSION }}
+      - run: uv sync --extra all
+      - run: uv run pytest tests/test_db_migrations.py -q
+
+  e2e-smoke:
+    name: e2e-smoke
+    runs-on: ubuntu-latest
+    env:
+      UV_VERSION: "0.8"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          python-version: "3.12"
+          version: ${{ env.UV_VERSION }}
+      - run: uv sync --extra all
+      - run: uv run pytest tests/test_cli_e2e_smoke.py -q
+
+  security:
+    name: security
+    runs-on: ubuntu-latest
+    env:
+      UV_VERSION: "0.8"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          python-version: "3.12"
+          version: ${{ env.UV_VERSION }}
+      - run: uv sync --extra all
       - run: uv run pip-audit --desc --ignore-vuln CVE-2025-69872
       - run: uv run bandit -r src -ll -q --configfile .bandit.yaml

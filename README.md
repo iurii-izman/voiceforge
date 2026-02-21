@@ -56,7 +56,17 @@ uv run ruff check src tests scripts
 uv run pytest tests -q
 ./scripts/verify_pr.sh
 ./scripts/smoke_clean_env.sh
+./scripts/doctor.sh
+# or:
+make verify
+make smoke
+make release-check
 ```
+
+Contribution/process:
+- `CONTRIBUTING.md`
+- `.github/pull_request_template.md`
+- `CHANGELOG.md`
 
 ## Documentation
 
@@ -66,4 +76,8 @@ uv run pytest tests -q
 - `docs/runbooks/bootstrap.md`
 - `docs/runbooks/security.md`
 - `docs/runbooks/release.md`
+- `docs/runbooks/config-env-contract.md`
+- `docs/runbooks/repo-governance.md`
+- `docs/runbooks/rollback-alpha-release.md`
+- `docs/runbooks/test-operations.md`
 - `docs/adr/`

@@ -8,6 +8,10 @@ Active documentation set:
 - `docs/runbooks/dependencies.md`
 - `docs/runbooks/security.md`
 - `docs/runbooks/release.md`
+- `docs/runbooks/config-env-contract.md`
+- `docs/runbooks/repo-governance.md`
+- `docs/runbooks/rollback-alpha-release.md`
+- `docs/runbooks/test-operations.md`
 - `docs/adr/0001-core-scope-0.1.md`
 - `docs/adr/0002-archive-first-cleanup.md`
 - `docs/adr/0003-version-reset-0.1-alpha1.md`

@@ -1,0 +1,38 @@
+name: Security Incident
+description: Track a potential or confirmed security incident.
+title: "[security-incident] "
+labels: ["chore"]
+body:
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Critical
+        - High
+        - Medium
+        - Low
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened and what is impacted?
+    validations:
+      required: true
+  - type: textarea
+    id: indicators
+    attributes:
+      label: Indicators
+      description: Logs, alerts, or evidence.
+  - type: textarea
+    id: containment
+    attributes:
+      label: Containment
+      description: Immediate mitigation actions.
+  - type: textarea
+    id: followup
+    attributes:
+      label: Follow-up
+      description: Required remediation and prevention tasks.

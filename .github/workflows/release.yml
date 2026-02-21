@@ -11,15 +11,26 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      UV_VERSION: "0.8"
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v4
         with:
           python-version: "3.12"
+          version: ${{ env.UV_VERSION }}
       - run: uv sync --extra all
       - run: uv build --wheel
+      - uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: cyclonedx-json
+          output-file: dist/sbom.cdx.json
       - uses: softprops/action-gh-release@v2
         with:
-          files: dist/*.whl
+          files: |
+            dist/*.whl
+            dist/sbom.cdx.json
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

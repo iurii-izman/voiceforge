@@ -13,3 +13,12 @@ repos:
       - id: ruff
         args: [--fix]
       - id: ruff-format
+
+  - repo: local
+    hooks:
+      - id: block-direct-main-push
+        name: block direct push to main
+        entry: scripts/block_direct_main_push.sh
+        language: system
+        pass_filenames: false
+        stages: [pre-push]

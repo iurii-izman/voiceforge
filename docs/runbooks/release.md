@@ -7,14 +7,19 @@ Version line:
 Pre-release checklist:
 1. `./scripts/verify_pr.sh` passes.
 2. `./scripts/smoke_clean_env.sh` passes.
-3. `uv build --wheel` succeeds.
-4. Version and tag line are aligned (`0.1.0a1` / `v0.1.0-alpha.1`).
+3. `./scripts/check_cli_contract.sh` passes.
+4. DB migration tests pass (`uv run pytest tests/test_db_migrations.py -q`).
+5. Draft release exists and notes are up to date (workflow `Release Draft`).
+6. `uv build --wheel` succeeds.
+7. Version and tag line are aligned (`0.1.0a1` / `v0.1.0-alpha.1`).
 
 Release commands:
 
 ```bash
 ./scripts/verify_pr.sh
 ./scripts/smoke_clean_env.sh
+./scripts/check_cli_contract.sh
+uv run pytest tests/test_db_migrations.py -q
 uv build --wheel
 git tag -a v0.1.0-alpha.1 -m "voiceforge alpha0.1"
 ```
@@ -24,3 +29,7 @@ Expected outputs:
 1. `verify_pr.sh: ALL CHECKS PASSED`
 2. `smoke_clean_env.sh: OK`
 3. `uv build --wheel` produces `dist/*.whl`
+4. Release workflow uploads `dist/sbom.cdx.json` (CycloneDX SBOM)
+
+Rollback:
+- `docs/runbooks/rollback-alpha-release.md`
