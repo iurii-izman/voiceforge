@@ -391,7 +391,11 @@ def history(
                 raise SystemExit(1)
             segments, analysis = detail
             if output == "json":
-                typer.echo(json.dumps(_cli_success_payload(build_session_detail_payload(session_id, segments, analysis)), ensure_ascii=False))
+                typer.echo(
+                    json.dumps(
+                        _cli_success_payload(build_session_detail_payload(session_id, segments, analysis)), ensure_ascii=False
+                    )
+                )
                 return
             for line in render_session_detail_lines(session_id, segments, analysis):
                 typer.echo(line)
