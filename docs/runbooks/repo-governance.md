@@ -47,3 +47,7 @@ Priority issue set (10-15):
 3. Configure repository secret `SONAR_TOKEN`.
 4. Run SonarCloud as non-blocking initially.
 5. Move to required check only after stable baseline.
+
+Manual gate visibility:
+- `./scripts/check_sonar_status.sh` polls GitHub check-runs for `SonarCloud Code Analysis`.
+- Use `./scripts/check_sonar_status.sh --required` before release tagging on `main`.
