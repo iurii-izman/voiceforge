@@ -21,6 +21,12 @@ Required policies:
 `scripts/apply_main_ruleset.sh` can apply these settings via GitHub API (requires authenticated `gh`).
 `scripts/check_repo_governance.sh` validates active ruleset and required checks.
 
+## Порядок на GitHub (ветки и PR)
+
+- После мержа PR: удалить ветку в GitHub (кнопка "Delete branch" на странице PR или `gh pr merge 23 --delete-branch`).
+- Локально: `git fetch --prune` и удалить локальные ветки слитых фич (`git branch -d feat/...`).
+- Активная разработка — в feature-ветках; мерж в `main` только через PR при зелёных required checks (Sonar не блокирует, см. раздел SonarCloud).
+
 ## Security Settings Baseline
 
 Repository-level security baseline:
