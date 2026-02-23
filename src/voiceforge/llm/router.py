@@ -89,6 +89,7 @@ def _template_schema(template: str):
         SprintReviewOutput,
         StandupOutput,
     )
+
     schemas = {
         "standup": (StandupOutput, TEMPLATE_PROMPTS["standup"]),
         "sprint_review": (SprintReviewOutput, TEMPLATE_PROMPTS["sprint_review"]),
@@ -232,7 +233,9 @@ def update_action_item_statuses(
         desc = ai.get("description", "")
         assignee = ai.get("assignee") or ""
         lines.append(f"  [{i}] {desc}" + (f" (assignee: {assignee})" if assignee else ""))
-    user_content = "Action items from previous meeting:\n" + "\n".join(lines) + "\n\nTranscript of follow-up meeting:\n" + transcript_for_llm
+    user_content = (
+        "Action items from previous meeting:\n" + "\n".join(lines) + "\n\nTranscript of follow-up meeting:\n" + transcript_for_llm
+    )
     prompt = [
         {"role": "system", "content": STATUS_UPDATE_SYSTEM},
         {"role": "user", "content": user_content},

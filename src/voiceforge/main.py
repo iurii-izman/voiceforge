@@ -349,8 +349,16 @@ def _live_summary_listen_worker(stop_event: threading.Event) -> None:
 @app.command()
 def listen(
     duration: int = typer.Option(0, help="Секунды (0 = бесконечно)"),
-    stream: bool = typer.Option(None, "--stream/--no-stream", help="Показывать partial/final транскрипт в реальном времени (по умолчанию — из конфига streaming_stt)"),
-    live_summary: bool = typer.Option(False, "--live-summary/--no-live-summary", help="Периодически выводить краткий саммари (ключевые моменты + действия) по последним 90 с"),
+    stream: bool = typer.Option(
+        None,
+        "--stream/--no-stream",
+        help="Показывать partial/final транскрипт в реальном времени (по умолчанию — из конфига streaming_stt)",
+    ),
+    live_summary: bool = typer.Option(
+        False,
+        "--live-summary/--no-live-summary",
+        help="Периодически выводить краткий саммари (ключевые моменты + действия) по последним 90 с",
+    ),
 ) -> None:
     """Start microphone/system recording to ring buffer for analyze."""
     cfg = _get_config()

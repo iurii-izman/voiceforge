@@ -211,6 +211,7 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
         if path == "/api/status":
             try:
                 from voiceforge.cli.status_helpers import get_status_data
+
                 self._send_json(get_status_data())
             except Exception as e:
                 self._send_error_json(str(e), 500)
@@ -219,6 +220,7 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
             try:
                 from voiceforge.cli.history_helpers import build_sessions_payload
                 from voiceforge.core.transcript_log import TranscriptLog
+
                 log_db = TranscriptLog()
                 try:
                     sessions = log_db.get_sessions(last_n=50)
@@ -236,6 +238,7 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
             try:
                 from voiceforge.cli.history_helpers import build_session_detail_payload
                 from voiceforge.core.transcript_log import TranscriptLog
+
                 log_db = TranscriptLog()
                 try:
                     detail = log_db.get_session_detail(int(sid))
@@ -259,6 +262,7 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
                 from datetime import date
 
                 from voiceforge.core.metrics import get_stats, get_stats_range
+
                 if from_str and to_str:
                     fd = date.fromisoformat(from_str)
                     td = date.fromisoformat(to_str)
@@ -269,11 +273,13 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
                 else:
                     days = max(1, min(365, int(days_str) if days_str.isdigit() else 30))
                     data = get_stats(days=days)
-                self._send_json({
-                    "total_cost_usd": data.get("total_cost_usd", 0),
-                    "total_calls": data.get("total_calls", 0),
-                    "by_day": data.get("by_day", []),
-                })
+                self._send_json(
+                    {
+                        "total_cost_usd": data.get("total_cost_usd", 0),
+                        "total_calls": data.get("total_calls", 0),
+                        "by_day": data.get("by_day", []),
+                    }
+                )
             except ValueError as e:
                 self._send_error_json("invalid date: " + str(e), 400)
             except Exception as e:
@@ -293,6 +299,7 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
             try:
                 from voiceforge.cli.history_helpers import build_session_markdown, session_not_found_message
                 from voiceforge.core.transcript_log import TranscriptLog
+
                 log_db = TranscriptLog()
                 try:
                     detail = log_db.get_session_detail(session_id)
@@ -316,6 +323,7 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
             import os as _os
             import subprocess
             import tempfile
+
             with tempfile.NamedTemporaryFile(suffix=".md", delete=False) as tmp:
                 tmp.write(md_text.encode("utf-8"))
                 tmp_md = tmp.name
@@ -408,12 +416,14 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
             status_data[f"{from_session}:{idx}"] = status
         if updates:
             _save_action_item_status(status_data)
-        self._send_json({
-            "from_session": from_session,
-            "next_session": next_session,
-            "updates": [{"id": i, "status": s} for i, s in updates],
-            "cost_usd": cost_usd,
-        })
+        self._send_json(
+            {
+                "from_session": from_session,
+                "next_session": next_session,
+                "updates": [{"id": i, "status": s} for i, s in updates],
+                "cost_usd": cost_usd,
+            }
+        )
 
     def do_POST(self) -> None:
         path, _ = self._parse_path()
@@ -437,10 +447,12 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
             try:
                 from voiceforge.core.transcript_log import TranscriptLog
                 from voiceforge.main import run_analyze_pipeline
+
                 display_text, segments_for_log, analysis_for_log = run_analyze_pipeline(seconds, template=template)
                 error_message = None
                 try:
                     from voiceforge.core.contracts import extract_error_message
+
                     error_message = extract_error_message(display_text, legacy_prefix="Ошибка:")
                 except Exception:
                     pass
@@ -464,11 +476,13 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
                     log_db.close()
                 except Exception:
                     pass
-                self._send_json({
-                    "session_id": session_id,
-                    "display_text": display_text,
-                    "analysis": analysis_for_log,
-                })
+                self._send_json(
+                    {
+                        "session_id": session_id,
+                        "display_text": display_text,
+                        "analysis": analysis_for_log,
+                    }
+                )
             except Exception as e:
                 self._send_error_json(str(e), 500)
             return

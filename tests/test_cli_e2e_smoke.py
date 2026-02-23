@@ -51,9 +51,7 @@ def test_cli_pipeline_listen_analyze_history(monkeypatch, tmp_path) -> None:
     listen_result = runner.invoke(main_mod.app, ["listen", "--duration", "1"])
     assert listen_result.exit_code == 0, listen_result.stdout
 
-    def fake_pipeline(
-        seconds: int, template: str | None = None
-    ) -> tuple[str, list[dict[str, object]], dict[str, object]]:
+    def fake_pipeline(seconds: int, template: str | None = None) -> tuple[str, list[dict[str, object]], dict[str, object]]:
         return (
             f"analysis-ok-{seconds}",
             [{"start_sec": 0.0, "end_sec": 1.0, "speaker": "S1", "text": "hello"}],
@@ -217,9 +215,7 @@ def test_cli_export_md_smoke(monkeypatch, tmp_path) -> None:
     monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
     monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "runtime"))
 
-    def fake_pipeline(
-        seconds: int, template: str | None = None
-    ) -> tuple[str, list[dict[str, object]], dict[str, object]]:
+    def fake_pipeline(seconds: int, template: str | None = None) -> tuple[str, list[dict[str, object]], dict[str, object]]:
         return (
             "ok",
             [{"start_sec": 0.0, "end_sec": 1.0, "speaker": "S1", "text": "hello"}],
@@ -241,9 +237,7 @@ def test_cli_export_md_smoke(monkeypatch, tmp_path) -> None:
     assert isinstance(session_id, int)
 
     out_md = tmp_path / "session.md"
-    export_result = runner.invoke(
-        main_mod.app, ["export", "--id", str(session_id), "--format", "md", "--output", str(out_md)]
-    )
+    export_result = runner.invoke(main_mod.app, ["export", "--id", str(session_id), "--format", "md", "--output", str(out_md)])
     assert export_result.exit_code == 0, export_result.stdout
     assert out_md.exists()
     content = out_md.read_text(encoding="utf-8")
@@ -257,9 +251,7 @@ def test_cli_analyze_template_standup_smoke(monkeypatch, tmp_path) -> None:
     monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
     monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "runtime"))
 
-    def fake_pipeline(
-        seconds: int, template: str | None = None
-    ) -> tuple[str, list[dict[str, object]], dict[str, object]]:
+    def fake_pipeline(seconds: int, template: str | None = None) -> tuple[str, list[dict[str, object]], dict[str, object]]:
         return (
             "--- Сделано ---\n  • x\n--- Планы ---\n  • y\n--- Блокеры ---\n  • z",
             [{"start_sec": 0.0, "end_sec": 1.0, "speaker": "S1", "text": "hi"}],
@@ -290,9 +282,7 @@ def test_cli_action_items_update_smoke(monkeypatch, tmp_path) -> None:
     monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
     monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "runtime"))
 
-    def fake_pipeline(
-        seconds: int, template: str | None = None
-    ) -> tuple[str, list[dict[str, object]], dict[str, object]]:
+    def fake_pipeline(seconds: int, template: str | None = None) -> tuple[str, list[dict[str, object]], dict[str, object]]:
         return (
             "ok",
             [{"start_sec": 0.0, "end_sec": 1.0, "speaker": "S1", "text": "we did the task"}],
