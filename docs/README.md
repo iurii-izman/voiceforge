@@ -1,22 +1,54 @@
-# VoiceForge Docs (alpha0.1)
+# Документация VoiceForge (alpha)
 
-Active documentation set:
-- `docs/first-meeting-5min.md` — первая встреча за 5 минут
-- `docs/roadmap-priority.md`
-- `docs/architecture/overview.md`
-- `docs/architecture/runtime-flow.md`
-- `docs/runbooks/bootstrap.md`
-- `docs/runbooks/alpha0.1-dod.md`
-- `docs/runbooks/dependencies.md`
-- `docs/runbooks/security.md`
-- `docs/runbooks/release.md`
-- `docs/runbooks/config-env-contract.md`
-- `docs/runbooks/repo-governance.md`
-- `docs/runbooks/rollback-alpha-release.md`
-- `docs/runbooks/test-operations.md`
-- `docs/runbooks/cursor-agent-setup.md`
-- `docs/adr/0001-core-scope-0.1.md`
-- `docs/adr/0002-archive-first-cleanup.md`
-- `docs/adr/0003-version-reset-0.1-alpha1.md`
+Единая точка входа. Структура по смыслу, без дублирования.
 
-This repo intentionally contains only active docs for alpha0.1 core.
+---
+
+## Старт
+
+| Кому | Документ |
+|------|----------|
+| **Пользователь: первая встреча** | [first-meeting-5min.md](first-meeting-5min.md) — полный сценарий за 5 минут |
+| **Краткий сценарий** | [runbooks/quickstart.md](runbooks/quickstart.md) — линейные шаги + ссылка на полную версию |
+| **Агент (Cursor)** | [runbooks/agent-context.md](runbooks/agent-context.md) — контекст, правила, приоритеты; не искать по проекту |
+
+---
+
+## Архитектура
+
+- [architecture/overview.md](architecture/overview.md) — пайплайн, модули, runtime flow (mermaid)
+- [architecture/voiceforge-arch.jsx](architecture/voiceforge-arch.jsx) — интерактивный визуал (нужен React)
+- [architecture/README.md](architecture/README.md) — что где лежит
+
+---
+
+## План и приоритеты
+
+- [roadmap-priority.md](roadmap-priority.md) — приоритет внедрения фич (1–20)
+- [development-plan-post-audit-2026.md](development-plan-post-audit-2026.md) — план развития по аудиту; сверка с кодом — в [runbooks/claude-proposal-alignment.md](runbooks/claude-proposal-alignment.md)
+- [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md) — фокус следующей итерации (обновляет агент)
+
+---
+
+## Runbooks
+
+Операционные инструкции и справочники — [runbooks/README.md](runbooks/README.md). Кратко:
+
+- **Контекст и агент:** agent-context, next-iteration-focus, cursor-agent-setup, voiceforge-cursor-tz (ТЗ и промпты для Cursor)
+- **Конфиг и среда:** config-env-contract, keyring-keys-reference, bootstrap, desktop-build-deps
+- **Релизы:** alpha2-checklist, release, rollback-alpha-release
+- **Остальное:** quickstart, dependencies, repo-governance, security, test-operations, web-api, alpha0.1-dod
+
+---
+
+## Десктоп (Tauri)
+
+- Сборка в toolbox: [runbooks/desktop-build-deps.md](runbooks/desktop-build-deps.md); скрипт `./scripts/setup-desktop-toolbox.sh`, затем `cd desktop && npm run tauri build`
+- Перед запуском десктопа обязательно: **voiceforge daemon**
+- План реализации: [desktop-tauri-implementation-plan.md](desktop-tauri-implementation-plan.md)
+
+---
+
+## ADR
+
+Решения по архитектуре и процессу — [adr/README.md](adr/README.md). Активные: 0001 (core scope), 0002 (action items), 0003 (version reset), 0004 (desktop Tauri D-Bus).

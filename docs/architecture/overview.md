@@ -15,3 +15,21 @@ Core runtime modules:
 - `src/voiceforge/llm/`
 - `src/voiceforge/core/`
 - `src/voiceforge/main.py`
+
+## Runtime flow
+
+```mermaid
+sequenceDiagram
+  participant U as User
+  participant CLI as voiceforge CLI
+  participant P as Pipeline
+  participant DB as SQLite
+
+  U->>CLI: listen
+  CLI->>P: capture to ring buffer
+
+  U->>CLI: analyze --seconds N
+  CLI->>P: STT -> diarize -> rag -> llm
+  P->>DB: save session + analysis
+  CLI-->>U: structured text/json
+```
