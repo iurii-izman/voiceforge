@@ -18,7 +18,7 @@
 
 ## Рекомендательные приоритетные задачи (что делать дальше)
 
-1. **Roadmap #10** — Live summary: интервал вынесен в конфиг (`live_summary_interval_sec` / `VOICEFORGE_LIVE_SUMMARY_INTERVAL_SEC`, default 90). Дальше — при необходимости UX (например вывод в отдельный поток/файл).
+1. **Roadmap #10** — Live summary: закрыто. Интервал в конфиге; при включении `listen --live-summary` сообщение показывает настроенный интервал (i18n `{interval}`). Дальше по желанию — вывод саммари в отдельный поток/файл.
 2. **Roadmap #9** — Стриминг STT: добавлен unit-тест `test_streaming_transcriber_passes_language_to_transcribe`; при доработках — дополнять тестами.
 3. **Roadmap #7** — Явный язык для STT: реализован (language → Whisper hint в CLI и daemon), задокументирован в CHANGELOG и config-env-contract.
 4. **Покрытие (W10):** при доработках daemon/smart_trigger/streaming дополнять unit-тестами.

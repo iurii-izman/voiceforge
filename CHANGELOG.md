@@ -19,6 +19,7 @@ The format is based on Keep a Changelog and this project follows SemVer pre-rele
 
 ### Changed
 
+- **listen --live-summary (Roadmap #10):** сообщение при включении показывает настроенный интервал (`live_summary_interval_sec`) в ru/en (i18n с плейсхолдером `{interval}`).
 - **W4 GetSettings D-Bus:** в config-env-contract.md задокументировано: `privacy_mode` — алиас `pii_mode` (для совместимости UI).
 - **W6 i18n:** оставшиеся пользовательские строки в `main.py` переведены на `t(key)`: ошибки, listen/analyze/action-items/index/watch/install-service/cost/export (ru/en).
 - **Экспорт PDF:** в quickstart и first-meeting-5min явно указано, что PDF опционален и требует pandoc/pdflatex.

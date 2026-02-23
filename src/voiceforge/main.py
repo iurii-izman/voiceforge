@@ -403,7 +403,7 @@ def listen(
             daemon=True,
         )
         live_summary_thread.start()
-        typer.echo(t("listen.live_summary_on"), err=True)
+        typer.echo(t("listen.live_summary_on", interval=interval_sec), err=True)
 
     def on_signal(*args: object) -> None:
         nonlocal stop

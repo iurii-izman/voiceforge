@@ -10,7 +10,7 @@
   "error.rag_deps": "Install RAG dependencies: uv sync --extra rag",
   "error.pandoc": "Pandoc error: {err}",
   "listen.streaming_on": "Streaming STT on — partial/final in terminal.",
-  "listen.live_summary_on": "Live summary on — every 90 s for last 90 s.",
+  "listen.live_summary_on": "Live summary on — every {interval} s for last {interval} s.",
   "analyze.unknown_template": "Unknown template: {template}. Available: {choices}",
   "action_items.no_analysis": "Session {session_id} has no analysis (action items).",
   "action_items.none_to_update": "No action items to update.",

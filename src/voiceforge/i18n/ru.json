@@ -10,7 +10,7 @@
   "error.rag_deps": "Установите зависимости RAG: uv sync --extra rag",
   "error.pandoc": "Ошибка pandoc: {err}",
   "listen.streaming_on": "Стриминг STT включён — partial/final в терминале.",
-  "listen.live_summary_on": "Live summary включён — каждые 90 с по последним 90 с.",
+  "listen.live_summary_on": "Live summary включён — каждые {interval} с по последним {interval} с.",
   "analyze.unknown_template": "Неизвестный шаблон: {template}. Доступны: {choices}",
   "action_items.no_analysis": "В сессии {session_id} нет анализа (action items).",
   "action_items.none_to_update": "Нет action items для обновления.",
