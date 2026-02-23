@@ -4,6 +4,7 @@ set -euo pipefail
 coverage_file="coverage.json"
 fail_under="85"
 base_ref=""
+exclude_patterns=""
 
 usage() {
   cat <<'EOF'
@@ -13,6 +14,7 @@ Options:
   --coverage-file <path>  Coverage JSON file (default: coverage.json)
   --fail-under <percent>  Minimum required coverage for changed executable lines (default: 85)
   --base <git-ref>        Git base ref for diff (default: auto-detect)
+  --exclude <pattern>     Exclude file paths containing pattern from aggregate (repeatable)
   -h, --help              Show this help
 EOF
 }
@@ -29,6 +31,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --base)
       base_ref="${2:-}"
+      shift 2
+      ;;
+    --exclude)
+      exclude_patterns="${exclude_patterns}${exclude_patterns:+ }${2:-}"
       shift 2
       ;;
     -h|--help)
@@ -76,7 +82,7 @@ if ! git rev-parse --verify --quiet "${base_ref}" >/dev/null; then
   exit 1
 fi
 
-python - "${coverage_file}" "${base_ref}" "${fail_under}" <<'PY'
+python - "${coverage_file}" "${base_ref}" "${fail_under}" "${exclude_patterns}" <<'PY'
 from __future__ import annotations
 
 import json
@@ -89,6 +95,7 @@ from pathlib import Path
 coverage_path = Path(sys.argv[1])
 base_ref = sys.argv[2]
 fail_under = float(sys.argv[3])
+exclude_patterns = (sys.argv[4] or "").strip().split()
 
 if not coverage_path.is_file():
     raise SystemExit(f"Coverage file not found: {coverage_path}")
@@ -142,12 +149,12 @@ def find_cov_entry(path: str) -> dict[str, list[int]] | None:
 
 total_covered = 0
 total_relevant = 0
-rows: list[tuple[str, int, int, float]] = []
+rows: list[tuple[str, int, int, float, bool]] = []
 
 for path in sorted(changed_lines_by_file):
     entry = find_cov_entry(path)
     if entry is None:
-        rows.append((path, 0, 0, 100.0))
+        rows.append((path, 0, 0, 100.0, True))
         continue
     changed = changed_lines_by_file[path]
     executed = set(entry.get("executed_lines", []))
@@ -158,13 +165,16 @@ for path in sorted(changed_lines_by_file):
     relevant_n = len(relevant)
     covered_n = len(covered)
     pct = 100.0 if relevant_n == 0 else (covered_n * 100.0 / relevant_n)
-    rows.append((path, covered_n, relevant_n, pct))
-    total_covered += covered_n
-    total_relevant += relevant_n
+    excluded = any(p in path for p in exclude_patterns)
+    rows.append((path, covered_n, relevant_n, pct, excluded))
+    if not excluded:
+        total_covered += covered_n
+        total_relevant += relevant_n
 
 print(f"new-code-coverage: base={base_ref}, threshold={fail_under:.1f}%")
-for path, covered_n, relevant_n, pct in rows:
-    print(f"  {path}: {covered_n}/{relevant_n} ({pct:.1f}%)")
+for path, covered_n, relevant_n, pct, excluded in rows:
+    suffix = " (excluded)" if excluded else ""
+    print(f"  {path}: {covered_n}/{relevant_n} ({pct:.1f}%){suffix}")
 
 if total_relevant == 0:
     print("new-code-coverage: no executable changed lines detected")

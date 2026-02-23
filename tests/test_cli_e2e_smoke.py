@@ -226,12 +226,13 @@ def test_cli_export_md_smoke(monkeypatch, tmp_path) -> None:
                 "recommendations": [],
                 "action_items": [],
                 "cost_usd": 0.0,
+                "template": "standup",
             },
         )
 
     monkeypatch.setattr(main_mod, "run_analyze_pipeline", fake_pipeline)
 
-    analyze_result = runner.invoke(main_mod.app, ["analyze", "--seconds", "10", "--output", "json"])
+    analyze_result = runner.invoke(main_mod.app, ["analyze", "--seconds", "10", "--template", "standup", "--output", "json"])
     assert analyze_result.exit_code == 0, analyze_result.stdout
     session_id = _last_json_line(analyze_result.stdout)["data"]["session_id"]
     assert isinstance(session_id, int)
@@ -242,6 +243,7 @@ def test_cli_export_md_smoke(monkeypatch, tmp_path) -> None:
     assert out_md.exists()
     content = out_md.read_text(encoding="utf-8")
     assert "# Сессия" in content
+    assert "Шаблон:" in content
     assert "## Транскрипт" in content
     assert "## Анализ" in content
 
