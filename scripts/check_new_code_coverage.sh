@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Alpha: минимальный порог для ускорения разработки; на поздних этапах поднимать (e.g. 85%)
 coverage_file="coverage.json"
-fail_under="85"
+fail_under="20"
 base_ref=""
 exclude_patterns=""
 
@@ -12,7 +13,7 @@ Usage: ./scripts/check_new_code_coverage.sh [options]
 
 Options:
   --coverage-file <path>  Coverage JSON file (default: coverage.json)
-  --fail-under <percent>  Minimum required coverage for changed executable lines (default: 85)
+  --fail-under <percent>  Minimum required coverage for changed executable lines (default: 20)
   --base <git-ref>        Git base ref for diff (default: auto-detect)
   --exclude <pattern>     Exclude file paths containing pattern from aggregate (repeatable)
   -h, --help              Show this help

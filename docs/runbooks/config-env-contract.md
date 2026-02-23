@@ -44,9 +44,20 @@ Priority order:
 
 Service name: `voiceforge`
 
-Supported key names:
-- `anthropic`
-- `openai`
-- `huggingface`
+**Используются в коде (LiteLLM / pipeline):**
+- `anthropic` → ANTHROPIC_API_KEY
+- `openai` → OPENAI_API_KEY
+- `huggingface` → pyannote/STT
+- `google` → GEMINI_API_KEY (опционально)
+
+**Справочник всех ключей в keyring (service=voiceforge)** — для агента и автоматизации; значения только из keyring, не коммитить:
+- `anthropic`, `openai`, `huggingface`, `google` — API для LLM/STT
+- `sonar_token` — SonarCloud (CI, quality gate)
+- `github_token`, `github_token_pat` — GitHub (API, push, PR)
+- `codecov_token`, `codecov_token_codecov.yml` — Codecov
+- `webhook_telegram`, `b24webhook` — интеграции (Telegram, Bitrix24)
+- `MCPcode` — прочие сервисы (не для коммита)
+
+Полный список имён: см. `docs/runbooks/keyring-keys-reference.md`.
 
 Never pass these keys through git-tracked files.

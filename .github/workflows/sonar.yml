@@ -35,7 +35,8 @@ jobs:
           SONAR_HOST_URL: https://sonarcloud.io
       - name: SonarCloud Non-Blocking Note
         if: ${{ env.SONAR_TOKEN != '' && steps.sonar_scan.outcome == 'failure' }}
-        run: echo "::warning::SonarCloud scan failed in non-blocking mode. Check if Automatic Analysis is enabled in SonarCloud project settings."
+        run: |
+          echo "::warning::SonarCloud scan failed (quality gate or analysis). See SonarCloud dashboard for details. Non-blocking until baseline is stable (see docs/runbooks/repo-governance.md)."
       - name: SonarCloud Skip (no token)
         if: ${{ env.SONAR_TOKEN == '' }}
         run: echo "SONAR_TOKEN is not configured; scan skipped."

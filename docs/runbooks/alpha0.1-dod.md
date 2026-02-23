@@ -42,7 +42,7 @@ A build is considered ready for alpha0.1 only when all checks below are true.
 2. `./scripts/smoke_clean_env.sh` passes.
 3. `./scripts/check_cli_contract.sh` passes.
 4. DB migrations tests pass (`uv run pytest tests/test_db_migrations.py -q`).
-5. New-code coverage gate passes (`./scripts/check_new_code_coverage.sh`).
+5. New-code coverage gate passes (`./scripts/check_new_code_coverage.sh`, default 20%; поднимать на поздних этапах).
 6. Security scans pass with current temporary exception:
    - `CVE-2025-69872` is ignored until upstream fix is released.
 

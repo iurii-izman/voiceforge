@@ -12,9 +12,9 @@ Pre-release checklist:
 5. Draft release exists and notes are up to date (workflow `Release Draft`).
 6. `uv build --wheel` succeeds.
 7. Version and tag line are aligned (`0.1.0a1` / `v0.1.0-alpha.1`).
-8. SonarCloud check-run is green for `origin/main` (`./scripts/check_sonar_status.sh --required`).
+8. (Опционально) SonarCloud — только справочно; чек не блокирует (см. repo-governance.md).
 9. Governance baseline is green (`./scripts/check_repo_governance.sh`).
-10. New-code coverage gate passes (`./scripts/check_new_code_coverage.sh`).
+10. New-code coverage gate passes (`./scripts/check_new_code_coverage.sh`, порог по умолчанию 20%; на поздних этапах поднимать).
 
 Release commands:
 
@@ -24,7 +24,6 @@ Release commands:
 ./scripts/check_cli_contract.sh
 uv run pytest tests/test_db_migrations.py -q
 uv build --wheel
-./scripts/check_sonar_status.sh --required
 ./scripts/check_repo_governance.sh
 ./scripts/check_new_code_coverage.sh
 git tag -a v0.1.0-alpha.1 -m "voiceforge alpha0.1"

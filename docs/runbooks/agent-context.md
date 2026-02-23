@@ -15,7 +15,7 @@
 - **Правила**: `.cursor/rules/cost-and-environment.mdc`
   Эффективность и стоимость: точечный поиск (grep/codebase_search), параллельные чтения, без лишних шагов. Ключи только в keyring; разработка в Fedora Atomic Cosmic (toolbox/uv).
 - **Конфиг и ключи**: `docs/runbooks/config-env-contract.md`
-  `VOICEFORGE_*`, keyring сервис `voiceforge`, ключи: `anthropic`, `openai`, `huggingface`. Не коммитить ключи; в облаке/без keyring — Cursor My Secrets.
+  `VOICEFORGE_*`, keyring сервис `voiceforge`, ключи: `anthropic`, `openai`, `huggingface`. Полный список имён ключей (sonar_token, github_token, codecov, …) — `docs/runbooks/keyring-keys-reference.md`. Не коммитить ключи; в облаке/без keyring — Cursor My Secrets.
 - **Cursor/агент**: `docs/runbooks/cursor-agent-setup.md`
   My Secrets только если нет keyring; локально — keyring, `./scripts/bootstrap.sh`, `uv sync --extra all`, `./scripts/doctor.sh`.
 

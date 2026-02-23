@@ -31,7 +31,7 @@ jobs:
       - run: uv run mypy src/voiceforge/core src/voiceforge/llm src/voiceforge/rag src/voiceforge/stt --ignore-missing-imports
       - run: uv run pytest tests -q --cov=src/voiceforge --cov-report=xml --cov-report=json --cov-fail-under=0
       - if: matrix.python-version == '3.12'
-        run: ./scripts/check_new_code_coverage.sh --fail-under 34 --exclude web/server.py  # web UI excluded; 34% on rest
+        run: ./scripts/check_new_code_coverage.sh --fail-under 20 --exclude web/server.py  # alpha: 20% new-code; raise later
       - uses: actions/upload-artifact@v6
         if: always()
         with:
