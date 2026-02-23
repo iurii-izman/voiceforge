@@ -1,0 +1,53 @@
+:root {
+  --bg: #1a1a1a;
+  --bg-card: #252525;
+  --fg: #e0e0e0;
+  --muted: #888;
+  --error: #e57373;
+  --ok: #81c784;
+  --accent: #64b5f6;
+  --border: #333;
+}
+* { box-sizing: border-box; }
+body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--fg); margin: 0; }
+.app { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 160px; background: var(--bg-card); border-right: 1px solid var(--border);
+  padding: 0.5rem 0;
+}
+.nav-item {
+  padding: 0.5rem 1rem; cursor: pointer; border-radius: 4px; margin: 0 0.25rem;
+}
+.nav-item:hover { background: #333; }
+.nav-item.active { background: var(--accent); color: #111; }
+.content { flex: 1; padding: 1rem 1.5rem; overflow: auto; }
+.content h1 { font-size: 1.25rem; margin: 0 0 1rem; }
+.status { padding: 0.5rem; border-radius: 6px; margin-bottom: 0.5rem; }
+.status.daemon-ok { background: rgba(129,199,132,0.2); color: var(--ok); }
+.status.daemon-off { background: rgba(229,115,115,0.2); color: var(--error); }
+.btn {
+  background: #333; color: var(--fg); border: 1px solid #555;
+  padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; margin-right: 0.5rem;
+}
+.btn:hover:not(:disabled) { background: #444; }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn.primary { background: #2e7d32; border-color: #388e3c; }
+.btn.primary:hover:not(:disabled) { background: #388e3c; }
+.btn.secondary { background: #555; }
+.btn.small { padding: 0.25rem 0.5rem; font-size: 0.875rem; }
+.card {
+  background: var(--bg-card); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;
+  border: 1px solid var(--border);
+}
+.card h2 { font-size: 0.95rem; margin: 0 0 0.5rem; color: var(--muted); }
+.card label { display: inline-block; margin-right: 1rem; margin-bottom: 0.5rem; }
+.card input[type="number"], .card select { margin-left: 0.25rem; padding: 0.25rem; background: #333; border: 1px solid #555; color: var(--fg); border-radius: 4px; }
+.muted { color: var(--muted); font-size: 0.9rem; }
+pre { background: #1a1a1a; padding: 0.75rem; border-radius: 6px; overflow: auto; font-size: 0.85rem; white-space: pre-wrap; margin: 0.5rem 0; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+#sessions-list table { width: 100%; border-collapse: collapse; }
+#sessions-list th, #sessions-list td { text-align: left; padding: 0.5rem; border-bottom: 1px solid var(--border); }
+#sessions-list tr:hover { background: #333; cursor: pointer; }
+#session-detail-body { margin-top: 0.5rem; }
+#analytics-content pre { margin-top: 0.5rem; }

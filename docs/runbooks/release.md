@@ -16,6 +16,11 @@ Pre-release checklist:
 9. Governance baseline is green (`./scripts/check_repo_governance.sh`).
 10. New-code coverage gate passes (`./scripts/check_new_code_coverage.sh`, порог по умолчанию 20%; на поздних этапах поднимать).
 
+**Для альфа2 (с десктопом):**
+- Версия: 0.2.0a1 (pyproject.toml и desktop/ в согласовании с тегом `v0.2.0-alpha.1`).
+- Сборка десктопа: `cd desktop && npm run build && cargo tauri build`; артефакты в `desktop/src-tauri/target/release/bundle/`. При наличии Flatpak — шаг сборки Flatpak по инструкции в `desktop/` или `docs/runbooks/desktop-build-deps.md`.
+- Чеклист: сценарий «запуск демона → запуск Tauri → анализ → просмотр сессии» выполняется; CHANGELOG обновлён.
+
 Release commands:
 
 ```bash

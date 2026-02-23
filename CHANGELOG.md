@@ -8,6 +8,7 @@ The format is based on Keep a Changelog and this project follows SemVer pre-rele
 
 ### Added
 
+- **Десктопный UI (Tauri, Roadmap #13):** приложение в `desktop/` — Tauri 2 + D-Bus-клиент к демону `com.voiceforge.App`. Экраны: Главная (статус демона, старт/стоп записи, анализ с секундами и шаблоном, стриминг), Сессии (список, детали, экспорт Markdown/PDF через CLI), Затраты (GetAnalytics 7d/30d), Настройки (только чтение). Архитектура: ADR-0004; зависимости и проверка окружения: `docs/runbooks/desktop-build-deps.md`, `scripts/check-desktop-deps.sh`. Контракт D-Bus: `desktop/DBUS.md`.
 - **PII UX (Roadmap #11):** в вывод `status` (текст и `--output json`) добавлен текущий режим PII (`pii_mode`: OFF/ON/EMAIL_ONLY). Ключ i18n `status.pii_mode`. Контракт: config-env-contract.md (CLI status включает pii_mode).
 - **Расширенные e2e (#8):** тесты `test_cli_cost_from_to_smoke` (cost --from/--to --output json), `test_cli_status_detailed_json_smoke` (status --detailed --output json), `test_cli_doctor_json_smoke` (status --doctor --output json); в `test_cli_cost_status_smoke` — проверка `pii_mode` в status.
 - **Локализация e2e:** в тестах, проверяющих русский вывод (index/watch, export md, history --output md), задаётся `VOICEFORGE_LANGUAGE=ru` для стабильных проверок независимо от LANG.

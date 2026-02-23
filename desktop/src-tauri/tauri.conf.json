@@ -1,0 +1,26 @@
+{
+  "productName": "VoiceForge",
+  "version": "0.2.0-alpha.1",
+  "identifier": "com.voiceforge.app",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build",
+    "devUrl": "http://localhost:5173",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "VoiceForge",
+        "width": 900,
+        "height": 700,
+        "resizable": true
+      }
+    ]
+  },
+  "bundle": {
+    "active": true,
+    "icon": []
+  },
+  "plugins": {}
+}

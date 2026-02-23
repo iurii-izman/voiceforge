@@ -29,7 +29,11 @@
    - `uv run voiceforge status --detailed` — разбивка по моделям/дням и % от бюджета
    - `uv run voiceforge status --doctor` — проверка окружения
 
-6. **Следующие шаги**
+6. **Десктоп (Tauri)**
+   - Сборка: см. [desktop-build-deps.md](desktop-build-deps.md); из корня `./scripts/check-desktop-deps.sh`, затем `cd desktop && npm install && npm run tauri dev`.
+   - Перед запуском десктопа обязательно запустите демон: `voiceforge daemon` (в отдельном терминале или как сервис).
+
+7. **Следующие шаги**
    - Action items: `uv run voiceforge action-items update --from-session 1 --next-session 2`
    - Конфиг и переменные: [config-env-contract.md](config-env-contract.md)
    - Приоритет фич: [../roadmap-priority.md](../roadmap-priority.md)
