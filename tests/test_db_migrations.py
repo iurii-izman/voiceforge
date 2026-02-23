@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import sqlite3
 from pathlib import Path
 
@@ -42,6 +43,9 @@ def test_transcript_migrations_on_existing_db(tmp_path) -> None:
     try:
         conn.execute("DROP TABLE IF EXISTS daily_reports")
         conn.execute("DROP TABLE IF EXISTS period_reports")
+        # Roll back analyses to post-001 state: remove column added in 004 so re-run can add it again
+        with contextlib.suppress(sqlite3.OperationalError):
+            conn.execute("ALTER TABLE analyses DROP COLUMN template")
         conn.execute("UPDATE schema_version SET version = 1")
         conn.commit()
     finally:

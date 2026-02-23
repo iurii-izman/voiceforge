@@ -29,8 +29,9 @@ def _step1_stt(
     audio: np.ndarray,
     sample_rate: int,
     model_size: str,
+    language_hint: str | None = None,
 ) -> tuple[list[Any], str]:
-    """Step 1: STT only. Returns (segments, transcript). Block 10.4: use ModelManager if set."""
+    """Step 1: STT only. Returns (segments, transcript). Block 10.4: use ModelManager if set. Language hint for Whisper."""
     from voiceforge.core.model_manager import get_model_manager
     from voiceforge.stt.transcriber import Transcriber
 
@@ -40,7 +41,7 @@ def _step1_stt(
         transcriber = manager.get_transcriber()
     else:
         transcriber = Transcriber(model_size=model_size)
-    segments = transcriber.transcribe(audio, sample_rate=sample_rate)
+    segments = transcriber.transcribe(audio, sample_rate=sample_rate, language=language_hint)
     transcript = " ".join(s.text for s in segments if s.text).strip() or "(тишина)"
     log.info("pipeline.step1_stt", segments=len(segments), duration_sec=round(time.monotonic() - t0, 2))
     return (segments, transcript)
@@ -95,13 +96,13 @@ def _step2_rag(transcript: str, rag_db_path: str) -> str:
     return context
 
 
-def _step2_pii(transcript: str) -> str:
-    """PII redaction. Runs in thread."""
+def _step2_pii(transcript: str, pii_mode: str = "ON") -> str:
+    """PII redaction. Runs in thread. pii_mode: OFF | ON | EMAIL_ONLY."""
     t0 = time.monotonic()
     try:
         from voiceforge.llm.pii_filter import redact
 
-        out = redact(transcript) or transcript
+        out = redact(transcript, mode=pii_mode) or transcript
     except ImportError:
         out = transcript
     except Exception as e:
@@ -132,11 +133,16 @@ class AnalysisPipeline:
         audio = np.frombuffer(raw, dtype=np.int16)
         log.info("pipeline.start", seconds=seconds, samples=len(audio))
 
+        language_hint = None
+        lang = getattr(self._cfg, "language", "auto")
+        if lang and lang != "auto":
+            language_hint = lang
         try:
             segments, transcript = _step1_stt(
                 audio,
                 sample_rate=self._cfg.sample_rate,
                 model_size=self._cfg.model_size,
+                language_hint=language_hint,
             )
         except ImportError:
             return (None, "Ошибка: установите зависимости (uv sync).")
@@ -165,7 +171,7 @@ class AnalysisPipeline:
                     transcript,
                     self._cfg.get_rag_db_path(),
                 ),
-                "pii": executor.submit(_step2_pii, transcript),
+                "pii": executor.submit(_step2_pii, transcript, getattr(self._cfg, "pii_mode", "ON")),
             }
 
             done, not_done = wait(futures.values(), timeout=timeout_sec)

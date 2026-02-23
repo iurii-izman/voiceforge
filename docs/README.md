@@ -1,6 +1,8 @@
 # VoiceForge Docs (alpha0.1)
 
 Active documentation set:
+- `docs/first-meeting-5min.md` — первая встреча за 5 минут
+- `docs/roadmap-priority.md`
 - `docs/architecture/overview.md`
 - `docs/architecture/runtime-flow.md`
 - `docs/runbooks/bootstrap.md`
@@ -12,6 +14,7 @@ Active documentation set:
 - `docs/runbooks/repo-governance.md`
 - `docs/runbooks/rollback-alpha-release.md`
 - `docs/runbooks/test-operations.md`
+- `docs/runbooks/cursor-agent-setup.md`
 - `docs/adr/0001-core-scope-0.1.md`
 - `docs/adr/0002-archive-first-cleanup.md`
 - `docs/adr/0003-version-reset-0.1-alpha1.md`

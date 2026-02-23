@@ -52,11 +52,13 @@ class StreamingTranscriber:
         chunk_duration_sec: float = CHUNK_DURATION_SEC,
         overlap_sec: float = CHUNK_OVERLAP_SEC,
         *,
+        language: str | None = None,
         on_partial: Callable[[str], None] | None = None,
         on_final: Callable[[StreamingSegment], None] | None = None,
     ) -> None:
         self._transcriber = transcriber
         self._sample_rate = sample_rate
+        self._language = language
         self._chunk_duration = chunk_duration_sec
         self._overlap = overlap_sec
         self._step_sec = chunk_duration_sec - overlap_sec
@@ -123,6 +125,7 @@ class StreamingTranscriber:
         segments = self._transcriber.transcribe(
             audio,
             sample_rate=self._sample_rate,
+            language=self._language,
             beam_size=1,
             vad_filter=True,
         )

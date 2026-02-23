@@ -89,11 +89,12 @@ class VoiceForgeDaemon:
                 log.error("dbus.emitter.failed", error=str(e))
         log.info("dbus.emitter.stopped")
 
-    def analyze(self, seconds: int) -> str:
-        """Run full pipeline, return formatted text. Lazy-loads models on first call."""
+    def analyze(self, seconds: int, template: str | None = None) -> str:
+        """Run full pipeline, return formatted text. Lazy-loads models on first call.
+        template: optional meeting template (standup, sprint_review, one_on_one, brainstorm, interview)."""
         from voiceforge.main import run_analyze_pipeline
 
-        text, _segments, _analysis = run_analyze_pipeline(seconds)
+        text, _segments, _analysis = run_analyze_pipeline(seconds, template=template)
         return text
 
     def status(self) -> str:
@@ -242,7 +243,7 @@ class VoiceForgeDaemon:
                 "smart_trigger": c.smart_trigger,
                 "sample_rate": c.sample_rate,
                 "streaming_stt": c.streaming_stt,
-                "privacy_mode": getattr(c, "privacy_mode", "OFF"),
+                "pii_mode": getattr(c, "pii_mode", "ON"),
             },
             ensure_ascii=False,
         )
@@ -335,9 +336,12 @@ class VoiceForgeDaemon:
             with self._streaming_lock:
                 self._streaming_finals.append({"text": t, "start": start, "end": end})
 
+        stt_lang = getattr(self._cfg, "language", "auto")
+        language_hint = None if stt_lang in ("auto", "") else stt_lang
         stream = StreamingTranscriber(
             transcriber,
             sample_rate=self._cfg.sample_rate,
+            language=language_hint,
             on_partial=on_partial,
             on_final=on_final,
         )
@@ -446,8 +450,11 @@ def run_daemon() -> None:
     pid_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Must create iface first, then pass it to daemon, which wires it to emitter thread
+    def _dummy_analyze(seconds: int, template: str | None = None) -> str:
+        return ""
+
     iface = DaemonVoiceForgeInterface(
-        analyze_fn=lambda s: "",  # dummy, will be replaced
+        analyze_fn=_dummy_analyze,
         status_fn=lambda: "",
         listen_start_fn=lambda: None,
         listen_stop_fn=lambda: None,

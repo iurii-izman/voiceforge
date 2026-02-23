@@ -44,10 +44,59 @@ calls and produce structured output.
 - Output only valid JSON matching the schema (questions, answers, recommendations,
   next_directions, action_items)."""
 
+# Block 1: Meeting templates — system prompts per template (schemas in llm/schemas.py)
+TEMPLATE_PROMPTS = {
+    "standup": """You are a standup meeting analyst. Extract from the transcript:
+- done: what was done since last standup
+- planned: what is planned next
+- blockers: blockers or impediments
+Write in the same language as the transcript. Be concise. Output only valid JSON matching the schema.""",
+    "sprint_review": """You are a sprint review analyst. Extract from the transcript:
+- demos: what was demoed
+- metrics: metrics or KPIs mentioned
+- feedback: feedback from stakeholders
+Write in the same language as the transcript. Be concise. Output only valid JSON matching the schema.""",
+    "one_on_one": """You are a 1:1 meeting analyst. Extract from the transcript:
+- mood: how the person is feeling (short)
+- growth: growth or development topics
+- blockers: blockers or concerns
+- action_items: action items agreed (description, assignee, deadline when stated)
+Write in the same language as the transcript. Be concise. Output only valid JSON matching the schema.""",
+    "brainstorm": """You are a brainstorm session analyst. Extract from the transcript:
+- ideas: ideas proposed
+- voting: votes or preferences expressed
+- next_steps: next steps agreed
+Write in the same language as the transcript. Be concise. Output only valid JSON matching the schema.""",
+    "interview": """You are an interview analyst. Extract from the transcript:
+- questions_asked: questions asked to the candidate
+- assessment: assessment or evaluation points
+- decision: hire / no hire / follow-up (or empty if not decided)
+Write in the same language as the transcript. Be concise. Output only valid JSON matching the schema.""",
+}
+
 
 def _is_claude_model(model_id: str) -> bool:
     """True if model is Anthropic Claude (prompt caching supported)."""
     return "anthropic/" in model_id and "claude" in model_id.lower()
+
+
+def _template_schema(template: str):
+    """Return response model and system prompt for template, or (None, None)."""
+    from voiceforge.llm.schemas import (
+        BrainstormOutput,
+        InterviewOutput,
+        OneOnOneOutput,
+        SprintReviewOutput,
+        StandupOutput,
+    )
+    schemas = {
+        "standup": (StandupOutput, TEMPLATE_PROMPTS["standup"]),
+        "sprint_review": (SprintReviewOutput, TEMPLATE_PROMPTS["sprint_review"]),
+        "one_on_one": (OneOnOneOutput, TEMPLATE_PROMPTS["one_on_one"]),
+        "brainstorm": (BrainstormOutput, TEMPLATE_PROMPTS["brainstorm"]),
+        "interview": (InterviewOutput, TEMPLATE_PROMPTS["interview"]),
+    }
+    return schemas.get(template, (None, None))
 
 
 def analyze_meeting(
@@ -57,21 +106,34 @@ def analyze_meeting(
     model: str | None = None,
     template: str | None = None,
     transcript_pre_redacted: str | None = None,
+    ollama_model: str | None = None,
+    pii_mode: str = "ON",
 ) -> tuple[Any, float]:
-    """Return (MeetingAnalysis, cost_usd).
-    Block 10.2: transcript_pre_redacted skips in-call redact (use when PII already done in pipeline)."""
+    """Return (MeetingAnalysis | template schema instance, cost_usd).
+    Block 1: template in (standup, sprint_review, one_on_one, brainstorm, interview) uses template schema.
+    Block 4: ollama_model for local classify/simple_answer.
+    Block 10.2: transcript_pre_redacted skips in-call redact (use when PII already done in pipeline).
+    Block 11: pii_mode (OFF | ON | EMAIL_ONLY) used when transcript_pre_redacted is None."""
+    from voiceforge.llm.local_llm import DEFAULT_MODEL as OLLAMA_DEFAULT
     from voiceforge.llm.schemas import MeetingAnalysis
 
-    _ = template
-
     model_id = model or DEFAULT_MODEL
+    response_model: type[MeetingAnalysis] | None = MeetingAnalysis
+    system_prompt_override: str | None = None
+    if template:
+        schema_cls, prompt = _template_schema(template)
+        if schema_cls is not None and prompt is not None:
+            response_model = schema_cls
+            system_prompt_override = prompt
+
+    local_model = (ollama_model or OLLAMA_DEFAULT).strip() or OLLAMA_DEFAULT
     try:
         from voiceforge.llm.local_llm import classify, is_available, simple_answer
 
-        if is_available():
-            kind = classify(transcript)
+        if is_available() and response_model is MeetingAnalysis:
+            kind = classify(transcript, model=local_model)
             if kind == "faq":
-                answer = simple_answer(transcript, context)
+                answer = simple_answer(transcript, context, model=local_model)
                 if answer:
                     stub = MeetingAnalysis(
                         questions=[],
@@ -86,16 +148,96 @@ def analyze_meeting(
         pass
     except Exception as e:
         log.warning("llm.ollama_fallback_failed", error=str(e))
+
+    if response_model is None:
+        response_model = MeetingAnalysis
     result, cost = complete_structured(
         prompt=_analysis_prompt(
             transcript,
             context,
             model_id=model_id,
             transcript_pre_redacted=transcript_pre_redacted,
+            system_prompt_override=system_prompt_override,
+            pii_mode=pii_mode,
         ),
-        response_model=MeetingAnalysis,
+        response_model=response_model,
         model=model_id,
     )
+    return (result, cost)
+
+
+# Block 10: Live summary during listen — short key points + action items
+LIVE_SUMMARY_SYSTEM = """You are a meeting analyst. Given a transcript fragment, produce a SHORT live summary:
+- key_points: 3–5 bullet points (main topics, decisions, outcomes).
+- action_items: only concrete action items with description; assignee and deadline if clearly stated.
+
+Write in the same language as the transcript. Be very concise. Output only valid JSON matching the schema (key_points, action_items)."""
+
+
+def analyze_live_summary(
+    transcript: str,
+    context: str = "",
+    *,
+    model: str | None = None,
+    transcript_pre_redacted: str | None = None,
+    pii_mode: str = "ON",
+) -> tuple[Any, float]:
+    """Return (LiveSummaryOutput, cost_usd). Block 10: short key points + action items for listen --live-summary."""
+    from voiceforge.llm.schemas import LiveSummaryOutput
+
+    model_id = model or DEFAULT_MODEL
+    text_for_llm = transcript_pre_redacted if transcript_pre_redacted is not None else redact(transcript, mode=pii_mode)
+    user_content = f"Context (RAG):\n{context}\n\nTranscript:\n{text_for_llm}"
+    prompt = [
+        {"role": "system", "content": LIVE_SUMMARY_SYSTEM},
+        {"role": "user", "content": user_content},
+    ]
+    if _is_claude_model(model_id):
+        prompt = [
+            {
+                "role": "system",
+                "content": [  # type: ignore[dict-item]
+                    {"type": "text", "text": LIVE_SUMMARY_SYSTEM, "cache_control": {"type": "ephemeral"}},
+                ],
+            },
+            {"role": "user", "content": user_content},
+        ]
+    result, cost = complete_structured(prompt, response_model=LiveSummaryOutput, model=model_id)
+    return (result, cost)
+
+
+STATUS_UPDATE_SYSTEM = """You are an assistant that updates action item statuses. You are given:
+1. A list of action items from a previous meeting (each with index 0, 1, 2, ...).
+2. The transcript of the FOLLOW-UP meeting.
+
+Your task: determine which action items were mentioned in the follow-up as DONE or CANCELLED. Output only the list of (id, status) for items that were clearly stated as done or cancelled. Use the same language as the transcript for any reasoning; output only valid JSON matching the schema (updates: list of {id, status})."""
+
+
+def update_action_item_statuses(
+    action_items: list[dict[str, Any]],
+    next_meeting_transcript: str,
+    *,
+    model: str | None = None,
+    pii_mode: str = "ON",
+) -> tuple[Any, float]:
+    """Return (StatusUpdateResponse, cost_usd). Block 2: which items are done/cancelled per next meeting."""
+    from voiceforge.llm.schemas import StatusUpdateResponse
+
+    if not action_items:
+        return (StatusUpdateResponse(updates=[]), 0.0)
+    model_id = model or DEFAULT_MODEL
+    transcript_for_llm = redact(next_meeting_transcript, mode=pii_mode) or next_meeting_transcript
+    lines = []
+    for i, ai in enumerate(action_items):
+        desc = ai.get("description", "")
+        assignee = ai.get("assignee") or ""
+        lines.append(f"  [{i}] {desc}" + (f" (assignee: {assignee})" if assignee else ""))
+    user_content = "Action items from previous meeting:\n" + "\n".join(lines) + "\n\nTranscript of follow-up meeting:\n" + transcript_for_llm
+    prompt = [
+        {"role": "system", "content": STATUS_UPDATE_SYSTEM},
+        {"role": "user", "content": user_content},
+    ]
+    result, cost = complete_structured(prompt, response_model=StatusUpdateResponse, model=model_id)
     return (result, cost)
 
 
@@ -104,22 +246,25 @@ def _analysis_prompt(
     context: str,
     model_id: str = "",
     transcript_pre_redacted: str | None = None,
+    system_prompt_override: str | None = None,
+    pii_mode: str = "ON",
 ) -> list[dict[str, Any]]:
     """Build messages for completion. For Claude: system content with cache_control (ephemeral)."""
-    text_for_llm = transcript_pre_redacted if transcript_pre_redacted is not None else redact(transcript)
+    text_for_llm = transcript_pre_redacted if transcript_pre_redacted is not None else redact(transcript, mode=pii_mode)
     user_content = f"Context (RAG):\n{context}\n\nTranscript:\n{text_for_llm}"
+    system_text = system_prompt_override if system_prompt_override is not None else SYSTEM_PROMPT
     if _is_claude_model(model_id):
         return [
             {
                 "role": "system",
                 "content": [
-                    {"type": "text", "text": SYSTEM_PROMPT, "cache_control": {"type": "ephemeral"}},
+                    {"type": "text", "text": system_text, "cache_control": {"type": "ephemeral"}},
                 ],
             },
             {"role": "user", "content": user_content},
         ]
     return [
-        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "system", "content": system_text},
         {"role": "user", "content": user_content},
     ]
 

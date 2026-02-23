@@ -126,7 +126,7 @@ class DaemonVoiceForgeInterface(ServiceInterface):
 
     def __init__(
         self,
-        analyze_fn: Callable[[int], str],
+        analyze_fn: Callable[[int, str | None], str],
         status_fn: Callable[[], str],
         listen_start_fn: Callable[[], None],
         listen_stop_fn: Callable[[], None],
@@ -163,17 +163,22 @@ class DaemonVoiceForgeInterface(ServiceInterface):
     ANALYZE_MAX_SECONDS = 3600
 
     @dbus_method()
-    async def Analyze(self, seconds: DBusUint32) -> DBusStr:
+    async def Analyze(self, seconds: DBusUint32, template: DBusStr = "") -> DBusStr:
         """Run pipeline for last N seconds; return formatted result string.
+        template: optional meeting template (standup, sprint_review, one_on_one, brainstorm, interview).
         Semaphore(1) prevents concurrent calls from loading two Whisper instances."""
         if seconds < 1 or seconds > self.ANALYZE_MAX_SECONDS:
             return _make_ipc_error(
                 "INVALID_SECONDS",
                 f"seconds must be 1..{self.ANALYZE_MAX_SECONDS}, got {seconds}",
             )
-        log.info("dbus.Analyze.called", seconds=seconds)
+        template_val = (template or "").strip() or None
+        _VALID_TEMPLATES = ("standup", "sprint_review", "one_on_one", "brainstorm", "interview")
+        if template_val is not None and template_val not in _VALID_TEMPLATES:
+            return _make_ipc_error("INVALID_TEMPLATE", f"template must be one of: {', '.join(_VALID_TEMPLATES)}")
+        log.info("dbus.Analyze.called", seconds=seconds, template=template_val)
         async with self._analyze_sem:
-            result = await asyncio.to_thread(self._analyze, seconds)
+            result = await asyncio.to_thread(self._analyze, seconds, template_val)
         # Treat result starting with "Ошибка:" (Russian) or structured {"error":...} as error
         try:
             parsed = json.loads(result)

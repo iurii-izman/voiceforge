@@ -86,7 +86,7 @@ known-first-party = ["voiceforge"]
 
 [tool.ruff.lint.per-file-ignores]
 "src/voiceforge/stt/diarizer.py" = ["E402"]
-"src/voiceforge/main.py" = ["B904", "SIM105"]
+"src/voiceforge/main.py" = ["B904", "B008", "SIM105"]
 "src/voiceforge/i18n/__init__.py" = ["SIM105"]
 
 [tool.pytest.ini_options]

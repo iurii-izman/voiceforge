@@ -27,6 +27,8 @@ gitleaks-report.json
 # Coverage
 .coverage
 .coverage.*
+coverage.xml
+coverage.json
 htmlcov/
 
 # Build outputs

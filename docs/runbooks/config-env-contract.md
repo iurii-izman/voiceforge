@@ -25,7 +25,9 @@ Priority order:
 | `pyannote_restart_hours` | `VOICEFORGE_PYANNOTE_RESTART_HOURS` | `2` | Periodic pyannote restart |
 | `pipeline_step2_timeout_sec` | `VOICEFORGE_PIPELINE_STEP2_TIMEOUT_SEC` | `25.0` | Timeout for parallel stage |
 | `streaming_stt` | `VOICEFORGE_STREAMING_STT` | `false` | Live transcript in listen mode |
-| `language` | `VOICEFORGE_LANGUAGE` | `auto` | UI language: `auto/ru/en` |
+| `language` | `VOICEFORGE_LANGUAGE` | `auto` | UI language; when `ru`/`en` also passed to Whisper as STT hint |
+| `ollama_model` | `VOICEFORGE_OLLAMA_MODEL` | `phi3:mini` | Ollama model for local classify/simple_answer |
+| `pii_mode` | `VOICEFORGE_PII_MODE` | `ON` | PII redaction before LLM: `OFF` (none), `ON` (full regex+GLiNER), `EMAIL_ONLY` (email only) |
 
 ## Non-VOICEFORGE Environment Inputs
 

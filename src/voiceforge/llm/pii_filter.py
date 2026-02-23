@@ -68,10 +68,14 @@ def _apply_gliner(out: str) -> str:
     return out
 
 
-def redact(text: str | None) -> str | None:
-    """Replace PII with placeholders. Regex first, then GLiNER if installed (graceful fallback)."""
+def redact(text: str | None, mode: str = "ON") -> str | None:
+    """Replace PII with placeholders. mode: OFF=no change, EMAIL_ONLY=email only, ON=full (regex+GLiNER)."""
     if not text:
         return text
+    if mode == "OFF":
+        return text
+    if mode == "EMAIL_ONLY":
+        return _RE_EMAIL.sub(_PLACEHOLDER_EMAIL, text)
     out = _RE_EMAIL.sub(_PLACEHOLDER_EMAIL, text)
     out = _RE_PHONE.sub(_PLACEHOLDER_PHONE, out)
     out = _RE_INN.sub(_PLACEHOLDER_INN, out)

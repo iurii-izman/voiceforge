@@ -51,7 +51,9 @@ def test_cli_pipeline_listen_analyze_history(monkeypatch, tmp_path) -> None:
     listen_result = runner.invoke(main_mod.app, ["listen", "--duration", "1"])
     assert listen_result.exit_code == 0, listen_result.stdout
 
-    def fake_pipeline(seconds: int) -> tuple[str, list[dict[str, object]], dict[str, object]]:
+    def fake_pipeline(
+        seconds: int, template: str | None = None
+    ) -> tuple[str, list[dict[str, object]], dict[str, object]]:
         return (
             f"analysis-ok-{seconds}",
             [{"start_sec": 0.0, "end_sec": 1.0, "speaker": "S1", "text": "hello"}],
@@ -186,3 +188,146 @@ def test_cli_index_watch_smoke_with_mocks(monkeypatch, tmp_path) -> None:
 
     assert records["watch_run"] is True
     assert records["watcher_init"] is not None
+
+
+def test_cli_cost_status_smoke(monkeypatch, tmp_path) -> None:
+    """E2E: cost and status return valid JSON with expected keys."""
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
+    monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "runtime"))
+
+    cost_result = runner.invoke(main_mod.app, ["cost", "--days", "7", "--output", "json"])
+    assert cost_result.exit_code == 0, cost_result.stdout
+    cost_payload = _last_json_line(cost_result.stdout)
+    assert cost_payload.get("ok") is True
+    data = cost_payload.get("data") or {}
+    assert "by_model" in data
+    assert "by_day" in data
+    assert "total_cost_usd" in data
+
+    status_result = runner.invoke(main_mod.app, ["status", "--output", "json"])
+    assert status_result.exit_code == 0, status_result.stdout
+    status_payload = _last_json_line(status_result.stdout)
+    assert status_payload.get("ok") is True
+    status_data = status_payload.get("data") or {}
+    assert "cost_today_usd" in status_data
+
+
+def test_cli_export_md_smoke(monkeypatch, tmp_path) -> None:
+    """E2E: export --id N --format md creates file with expected sections."""
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
+    monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "runtime"))
+
+    def fake_pipeline(
+        seconds: int, template: str | None = None
+    ) -> tuple[str, list[dict[str, object]], dict[str, object]]:
+        return (
+            "ok",
+            [{"start_sec": 0.0, "end_sec": 1.0, "speaker": "S1", "text": "hello"}],
+            {
+                "model": "test",
+                "questions": [],
+                "answers": [],
+                "recommendations": [],
+                "action_items": [],
+                "cost_usd": 0.0,
+            },
+        )
+
+    monkeypatch.setattr(main_mod, "run_analyze_pipeline", fake_pipeline)
+
+    analyze_result = runner.invoke(main_mod.app, ["analyze", "--seconds", "10", "--output", "json"])
+    assert analyze_result.exit_code == 0, analyze_result.stdout
+    session_id = _last_json_line(analyze_result.stdout)["data"]["session_id"]
+    assert isinstance(session_id, int)
+
+    out_md = tmp_path / "session.md"
+    export_result = runner.invoke(
+        main_mod.app, ["export", "--id", str(session_id), "--format", "md", "--output", str(out_md)]
+    )
+    assert export_result.exit_code == 0, export_result.stdout
+    assert out_md.exists()
+    content = out_md.read_text(encoding="utf-8")
+    assert "# Сессия" in content
+    assert "## Транскрипт" in content
+    assert "## Анализ" in content
+
+
+def test_cli_analyze_template_standup_smoke(monkeypatch, tmp_path) -> None:
+    """E2E: analyze --template standup returns template-shaped analysis (done, planned, blockers)."""
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
+    monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "runtime"))
+
+    def fake_pipeline(
+        seconds: int, template: str | None = None
+    ) -> tuple[str, list[dict[str, object]], dict[str, object]]:
+        return (
+            "--- Сделано ---\n  • x\n--- Планы ---\n  • y\n--- Блокеры ---\n  • z",
+            [{"start_sec": 0.0, "end_sec": 1.0, "speaker": "S1", "text": "hi"}],
+            {
+                "template": "standup",
+                "model": "test",
+                "questions": [],
+                "answers": ["x", "y", "z"],
+                "recommendations": [],
+                "action_items": [],
+                "cost_usd": 0.0,
+            },
+        )
+
+    monkeypatch.setattr(main_mod, "run_analyze_pipeline", fake_pipeline)
+
+    result = runner.invoke(main_mod.app, ["analyze", "--seconds", "30", "--template", "standup", "--output", "json"])
+    assert result.exit_code == 0, result.stdout
+    payload = _last_json_line(result.stdout)
+    assert payload.get("ok") is True
+    analysis = (payload.get("data") or {}).get("analysis") or {}
+    assert analysis.get("template") == "standup"
+    assert "answers" in analysis
+
+
+def test_cli_action_items_update_smoke(monkeypatch, tmp_path) -> None:
+    """E2E: action-items update --from-session A --next-session B with mocked LLM."""
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
+    monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "runtime"))
+
+    def fake_pipeline(
+        seconds: int, template: str | None = None
+    ) -> tuple[str, list[dict[str, object]], dict[str, object]]:
+        return (
+            "ok",
+            [{"start_sec": 0.0, "end_sec": 1.0, "speaker": "S1", "text": "we did the task"}],
+            {
+                "model": "test",
+                "questions": [],
+                "answers": [],
+                "recommendations": [],
+                "action_items": [{"description": "do x", "assignee": "A"}],
+                "cost_usd": 0.0,
+            },
+        )
+
+    monkeypatch.setattr(main_mod, "run_analyze_pipeline", fake_pipeline)
+
+    a_result = runner.invoke(main_mod.app, ["analyze", "--seconds", "10", "--output", "json"])
+    assert a_result.exit_code == 0, a_result.stdout
+    session_a = _last_json_line(a_result.stdout)["data"]["session_id"]
+    b_result = runner.invoke(main_mod.app, ["analyze", "--seconds", "10", "--output", "json"])
+    assert b_result.exit_code == 0, b_result.stdout
+    session_b = _last_json_line(b_result.stdout)["data"]["session_id"]
+
+    from voiceforge.llm.schemas import ActionItemStatusUpdate, StatusUpdateResponse
+
+    def fake_update(action_items, transcript, model, pii_mode):
+        return (StatusUpdateResponse(updates=[ActionItemStatusUpdate(id=0, status="done")]), 0.01)
+
+    monkeypatch.setattr("voiceforge.llm.router.update_action_item_statuses", fake_update)
+
+    update_result = runner.invoke(
+        main_mod.app,
+        ["action-items", "update", "--from-session", str(session_a), "--next-session", str(session_b), "--output", "json"],
+    )
+    assert update_result.exit_code == 0, update_result.stdout
+    update_payload = _last_json_line(update_result.stdout)
+    assert update_payload.get("ok") is True
+    assert "updates" in (update_payload.get("data") or {})
+    assert (update_payload.get("data") or {}).get("cost_usd") is not None
