@@ -85,6 +85,10 @@ class Settings(BaseSettings):
         default=False,
         description="Block 4.4: auto-analyze on semantic pause (silence > 3s after >= 30s speech)",
     )
+    smart_trigger_template: str | None = Field(
+        default=None,
+        description="Optional template for smart-trigger analyze (e.g. standup, one_on_one). None = free-form.",
+    )
     monitor_source: str | None = Field(
         default=None,
         description="Block 6.3: PipeWire source name for app capture (e.g. VoiceForge_Monitor.monitor).",
@@ -104,6 +108,10 @@ class Settings(BaseSettings):
     streaming_stt: bool = Field(
         default=False,
         description="Block 10.1: during listen, show partial/final transcript in real time (chunk-based STT).",
+    )
+    live_summary_interval_sec: int = Field(
+        default=90,
+        description="Block 10: interval (and window) in seconds for listen --live-summary (e.g. every 90s for last 90s).",
     )
     language: str = Field(
         default="auto",
@@ -173,6 +181,13 @@ class Settings(BaseSettings):
     def _pyannote_restart_positive(cls, v: int) -> int:
         if v < 1:
             raise ValueError("pyannote_restart_hours must be >= 1")
+        return v
+
+    @field_validator("live_summary_interval_sec")
+    @classmethod
+    def _live_summary_interval_positive(cls, v: int) -> int:
+        if v < 1:
+            raise ValueError("live_summary_interval_sec must be >= 1")
         return v
 
     @classmethod

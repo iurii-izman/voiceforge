@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import numpy as np
 import pytest
 
 
@@ -98,3 +99,33 @@ def test_streaming_transcriber_class_exists() -> None:
     from voiceforge.stt import streaming
 
     assert hasattr(streaming, "StreamingTranscriber")
+
+
+def test_streaming_transcriber_passes_language_to_transcribe() -> None:
+    """StreamingTranscriber passes language hint to transcriber.transcribe (Roadmap #9/#7)."""
+    from voiceforge.stt.transcriber import Segment
+    from voiceforge.stt.streaming import StreamingTranscriber
+
+    mock_transcriber = MagicMock()
+    mock_transcriber.transcribe.return_value = [
+        Segment(start=0.0, end=1.0, text="hello", language="ru", confidence=0.95),
+    ]
+    chunks: list[tuple[object, object]] = []
+
+    def on_final(seg: object) -> None:
+        chunks.append(("final", seg))
+
+    stream = StreamingTranscriber(
+        mock_transcriber,
+        sample_rate=16000,
+        language="ru",
+        on_final=on_final,
+    )
+    audio = np.zeros(200, dtype=np.float32)
+    stream.process_chunk(audio, start_offset_sec=0.0)
+
+    mock_transcriber.transcribe.assert_called_once()
+    call_kw = mock_transcriber.transcribe.call_args[1]
+    assert call_kw.get("language") == "ru"
+    assert len(chunks) == 1
+    assert chunks[0][0] == "final"

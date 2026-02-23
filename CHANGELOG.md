@@ -8,24 +8,25 @@ The format is based on Keep a Changelog and this project follows SemVer pre-rele
 
 ### Added
 
+- **Live summary (Roadmap #10):** интервал и окно настраиваются через `live_summary_interval_sec` (env `VOICEFORGE_LIVE_SUMMARY_INTERVAL_SEC`, default 90). Используется в `listen --live-summary` (каждые N с по последним N с).
+- **Явный язык для STT (Roadmap #7):** `VOICEFORGE_LANGUAGE` (ru/en) передаётся в Whisper как hint в CLI `listen` (стриминг) и в демоне; при `auto` hint не передаётся.
+- **Smart trigger template (Roadmap #15):** опциональная настройка `smart_trigger_template` (env `VOICEFORGE_SMART_TRIGGER_TEMPLATE`): при срабатывании авто-анализа демон передаёт шаблон в pipeline и сохраняет в лог сессии.
+- **E2E:** тест `test_cli_history_output_md_smoke` — проверка вывода `history --id N --output md` (секции Сессия, Транскрипт, Анализ).
+- **Cost report (Roadmap #6):** в текстовом выводе `cost` добавлена разбивка по моделям (как в `status --detailed`).
+
+### Changed
+
+- **W4 GetSettings D-Bus:** в config-env-contract.md задокументировано: `privacy_mode` — алиас `pii_mode` (для совместимости UI).
+- **W6 i18n:** оставшиеся пользовательские строки в `main.py` переведены на `t(key)`: ошибки, listen/analyze/action-items/index/watch/install-service/cost/export (ru/en).
+- **Экспорт PDF:** в quickstart и first-meeting-5min явно указано, что PDF опционален и требует pandoc/pdflatex.
+
+### Documentation
+
+- **config-env-contract.md:** поле `live_summary_interval_sec`; раздел D-Bus GetSettings (privacy_mode = alias pii_mode); поле `smart_trigger_template`.
 - **План развития (аудит фев 2026):** сверка с кодом выполнена — Часть I (1–10) и Часть II (W1–W3, W8) реализованы; добавлены валидаторы Settings: `ollama_model` (non-empty), `ring_seconds` (positive), `pyannote_restart_hours` (≥ 1). Тесты `tests/test_config_settings.py` для W8.
 - **history --output md:** вывод детали сессии в Markdown при `history --id N --output md`; в Markdown (в т.ч. `export`) добавлена дата сессии (started_at). Сообщение об ошибке при `--output md` без `--id` выведено через i18n.
 - **Action items (ADR-0002):** Отдельная таблица `action_items` (миграция 005), cross-session трекинг. Флаг `history --action-items` — список задач по сессиям; `action-items update` сохраняет статусы и в БД.
 - **Unit-тесты (W10):** daemon (get_settings, get_analytics), smart_trigger, model_manager, streaming (см. `tests/test_daemon_streaming_smart_trigger_model_manager.py`).
-
-### Changed
-
-- **Settings (W8):** валидация при загрузке: `ollama_model`, `ring_seconds`, `pyannote_restart_hours`; контракт в config-env-contract.md обновлён.
-- **I.2 (plan):** при `listen` с `--stream` или `streaming_stt=true` partial/final транскрипт выводится в терминал в реальном времени (реализация проверена).
-- **W2 (sample_rate):** в стриминге (CLI listen и daemon) при `sample_rate` ≠ 16 kHz аудио ресэмплируется в 16 kHz перед STT; при отсутствии scipy — предупреждение в лог.
-- **W3 (RAG):** константа `RAG_QUERY_MAX_CHARS=1000` в pipeline; контекст запроса RAG — до 1000 символов транскрипта.
-- **GetSettings D-Bus (W4):** в ответ добавлено поле `privacy_mode` (алиас `pii_mode`).
-- **D-Bus (W7):** envelope по умолчанию включён (`VOICEFORGE_IPC_ENVELOPE=true`); для старых клиентов — `VOICEFORGE_IPC_ENVELOPE=false`.
-- **LLM (W5):** при невалидном JSON от модели — один retry запрос перед падением.
-- **i18n (W6):** в `main.py` ошибки и сообщения history используют `t(key)` (ru/en).
-
-### Documentation
-
 - **config-env-contract.md:** источник правды для cost_usd (W9): metrics.db — тоталы и отчёты; transcripts.db — снимок стоимости по сессии. Обновлён дефолт `VOICEFORGE_IPC_ENVELOPE`.
 
 - Sprint hardening: contributing/process docs, CI hardening, release draft and SBOM automation, DB migration tests, doctor script.

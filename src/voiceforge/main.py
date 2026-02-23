@@ -157,12 +157,12 @@ def run_analyze_pipeline(
         pipeline = AnalysisPipeline(cfg)
         result, err = pipeline.run(seconds)
     except ImportError:
-        return ("Ошибка: установите зависимости (uv sync).", [], {})
+        return (t("error.install_deps"), [], {})
 
     if err is not None:
         return (err, [], {})
     if result is None:
-        return ("Ошибка: pipeline вернул пустой результат.", [], {})
+        return (t("error.pipeline_empty"), [], {})
 
     segments = result.segments
     transcript = result.transcript
@@ -193,10 +193,10 @@ def run_analyze_pipeline(
             pii_mode=cfg.pii_mode,
         )
     except ImportError:
-        return ("Ошибка: установите LLM зависимости (uv sync --extra llm).", [], {})
+        return (t("error.install_llm_deps"), [], {})
     except Exception as e:
         log.warning("analyze.llm_failed", error=str(e))
-        return (f"Ошибка LLM: {e}", [], {})
+        return (t("error.llm_failed", e=str(e)), [], {})
 
     if template and hasattr(llm_result, "model_dump"):
         lines, analysis_for_log = _format_template_result(template, llm_result)
@@ -242,10 +242,10 @@ def run_live_summary_pipeline(seconds: int) -> tuple[list[str], float]:
         pipeline = AnalysisPipeline(cfg)
         result, err = pipeline.run(seconds)
     except ImportError:
-        return (["Ошибка: установите зависимости (uv sync)."], 0.0)
+        return ([t("error.install_deps")], 0.0)
 
     if err is not None or result is None:
-        return ([err or "Ошибка: pipeline вернул пустой результат."], 0.0)
+        return ([err or t("error.pipeline_empty")], 0.0)
 
     transcript = result.transcript
     context = result.context
@@ -262,10 +262,10 @@ def run_live_summary_pipeline(seconds: int) -> tuple[list[str], float]:
             pii_mode=cfg.pii_mode,
         )
     except ImportError:
-        return (["Ошибка: установите LLM зависимости (uv sync --extra llm)."], 0.0)
+        return ([t("error.install_llm_deps")], 0.0)
     except Exception as e:
         log.warning("live_summary.llm_failed", error=str(e))
-        return ([f"Ошибка LLM: {e}"], 0.0)
+        return ([t("error.llm_failed", e=str(e))], 0.0)
 
     lines: list[str] = []
     if getattr(live_result, "key_points", None):
@@ -336,16 +336,11 @@ def _streaming_listen_worker(
             log.warning("listen.streaming_stt.failed", error=str(e))
 
 
-# Block 10: interval (seconds) between live summaries during listen
-LIVE_SUMMARY_INTERVAL_SEC = 90
-LIVE_SUMMARY_LAST_SEC = 90
-
-
-def _live_summary_listen_worker(stop_event: threading.Event) -> None:
+def _live_summary_listen_worker(stop_event: threading.Event, interval_sec: int) -> None:
     """Block 10: periodically run live summary on ring buffer and print to stdout."""
-    while not stop_event.wait(timeout=LIVE_SUMMARY_INTERVAL_SEC):
-        lines, cost = run_live_summary_pipeline(LIVE_SUMMARY_LAST_SEC)
-        if not lines or (len(lines) == 1 and lines[0].startswith("Ошибка")):
+    while not stop_event.wait(timeout=interval_sec):
+        lines, cost = run_live_summary_pipeline(interval_sec)
+        if not lines or (len(lines) == 1 and (lines[0].startswith("Ошибка") or lines[0].startswith("Error"))):
             continue
         sys.stdout.write("\n--- Live summary ---\n")
         for line in lines:
@@ -373,7 +368,7 @@ def listen(
     try:
         from voiceforge.audio.capture import AudioCapture
     except ImportError:
-        typer.echo("Ошибка: модуль audio не найден.", err=True)
+        typer.echo(t("error.audio_module_not_found"), err=True)
         raise SystemExit(1) from None
 
     ring_path = cfg.get_ring_file_path()
@@ -396,18 +391,19 @@ def listen(
             daemon=True,
         )
         streaming_thread.start()
-        typer.echo("Стриминг STT включён — partial/final в терминале.", err=True)
+        typer.echo(t("listen.streaming_on"), err=True)
 
     live_summary_stop = threading.Event()
     live_summary_thread: threading.Thread | None = None
     if live_summary:
+        interval_sec = getattr(cfg, "live_summary_interval_sec", 90)
         live_summary_thread = threading.Thread(
             target=_live_summary_listen_worker,
-            args=(live_summary_stop,),
+            args=(live_summary_stop, interval_sec),
             daemon=True,
         )
         live_summary_thread.start()
-        typer.echo("Live summary включён — каждые 90 с по последним 90 с.", err=True)
+        typer.echo(t("listen.live_summary_on"), err=True)
 
     def on_signal(*args: object) -> None:
         nonlocal stop
@@ -432,7 +428,8 @@ def listen(
             streaming_thread.join(timeout=4.0)
         live_summary_stop.set()
         if live_summary_thread:
-            live_summary_thread.join(timeout=LIVE_SUMMARY_INTERVAL_SEC + 60.0)
+            interval_sec = getattr(cfg, "live_summary_interval_sec", 90)
+            live_summary_thread.join(timeout=interval_sec + 60.0)
         if streaming_stt:
             sys.stdout.write("\n")
             sys.stdout.flush()
@@ -454,7 +451,7 @@ def analyze(
 ) -> None:
     """Analyze ring-buffer fragment: transcribe -> diarize -> rag -> llm."""
     if template is not None and template not in _TEMPLATE_CHOICES:
-        typer.echo(f"Неизвестный шаблон: {template}. Доступны: {', '.join(_TEMPLATE_CHOICES)}", err=True)
+        typer.echo(t("analyze.unknown_template", template=template, choices=", ".join(_TEMPLATE_CHOICES)), err=True)
         raise SystemExit(1)
     display_text, segments_for_log, analysis_for_log = run_analyze_pipeline(seconds, template=template)
     error_message = _extract_error_message(display_text)
@@ -537,7 +534,7 @@ def action_items_update(
         from voiceforge.core.transcript_log import TranscriptLog
         from voiceforge.llm.router import update_action_item_statuses
     except ImportError as e:
-        typer.echo(f"Ошибка: {e}", err=True)
+        typer.echo(t("error.generic", msg=str(e)), err=True)
         raise SystemExit(1) from None
 
     log_db = TranscriptLog()
@@ -554,15 +551,15 @@ def action_items_update(
     segments_next, _ = detail_next
     analysis_from = detail_from[1]
     if analysis_from is None:
-        typer.echo(f"В сессии {from_session} нет анализа (action items).", err=True)
+        typer.echo(t("action_items.no_analysis", session_id=from_session), err=True)
         raise SystemExit(1)
     action_items = analysis_from.action_items
     if not action_items:
-        typer.echo("Нет action items для обновления.", err=True)
+        typer.echo(t("action_items.none_to_update"), err=True)
         raise SystemExit(0)
     transcript_next = "\n".join(s.text for s in segments_next).strip()
     if not transcript_next:
-        typer.echo(f"В сессии {next_session} нет текста сегментов.", err=True)
+        typer.echo(t("action_items.no_segments", session_id=next_session), err=True)
         raise SystemExit(1)
 
     cfg = _get_config()
@@ -574,7 +571,7 @@ def action_items_update(
             pii_mode=cfg.pii_mode,
         )
     except Exception as e:
-        typer.echo(f"Ошибка LLM: {e}", err=True)
+        typer.echo(t("error.llm_failed", e=str(e)), err=True)
         raise SystemExit(1) from None
 
     updates = [(u.id, u.status) for u in response.updates]
@@ -608,7 +605,7 @@ def action_items_update(
         for idx, status in updates:
             typer.echo(f"  [{idx}] {status}")
         if updates and save:
-            typer.echo(f"Сохранено в {_action_item_status_path()}")
+            typer.echo(t("action_items.saved_to", path=str(_action_item_status_path())))
 
 
 @app.command()
@@ -627,17 +624,17 @@ def index(
     try:
         from voiceforge.rag.indexer import KnowledgeIndexer
     except ImportError:
-        typer.echo("Установите зависимости RAG: uv sync --extra rag", err=True)
+        typer.echo(t("error.rag_deps"), err=True)
         raise SystemExit(1) from None
 
     indexer = KnowledgeIndexer(db_path)
     try:
         if p.is_file():
             if p.suffix.lower() not in _INDEX_EXTENSIONS:
-                typer.echo(f"Формат не поддерживается: {p.suffix}", err=True)
+                typer.echo(t("index.unsupported_format", suffix=p.suffix), err=True)
                 raise SystemExit(1)
             added = indexer.add_file(p)
-            typer.echo(f"Добавлено чанков: {added}")
+            typer.echo(t("index.chunks_added", n=added))
             return
         if p.is_dir():
             total = 0
@@ -650,13 +647,13 @@ def index(
                         total += indexer.add_file(f)
                         indexed_paths.add(str(f.resolve()))
                     except Exception as e:
-                        typer.echo(f"Пропуск {f}: {e}", err=True)
+                        typer.echo(t("index.skip_file", path=str(f), e=str(e)), err=True)
             pruned = indexer.prune_sources_not_in(indexed_paths, only_under_prefix=str(p.resolve()))
             if pruned:
-                typer.echo(f"Удалено чанков (файлы удалены): {pruned}")
-            typer.echo(f"Добавлено чанков: {total}")
+                typer.echo(t("index.chunks_pruned", n=pruned))
+            typer.echo(t("index.chunks_added", n=total))
             return
-        typer.echo("Укажите файл или папку.", err=True)
+        typer.echo(t("index.specify_file_or_dir"), err=True)
         raise SystemExit(1)
     finally:
         indexer.close()
@@ -678,12 +675,12 @@ def watch(
         from voiceforge.rag.watcher import KBWatcher
 
         watcher = KBWatcher(watch_dir, Path(db_path))
-        typer.echo(f"VoiceForge watch: {path} -> {db_path} (Ctrl+C для остановки)")
+        typer.echo(t("watch.banner", path=path, db_path=db_path))
         signal.signal(signal.SIGINT, lambda *a: watcher.stop())
         signal.signal(signal.SIGTERM, lambda *a: watcher.stop())
         watcher.run()
     except ImportError:
-        typer.echo("Установите зависимости RAG: uv sync --extra rag", err=True)
+        typer.echo(t("error.rag_deps"), err=True)
         raise SystemExit(1) from None
 
 
@@ -719,17 +716,17 @@ def install_service() -> None:
     user_dir.mkdir(parents=True, exist_ok=True)
     unit_dst = user_dir / "voiceforge.service"
     shutil.copy2(unit_src, unit_dst)
-    typer.echo(f"Скопировано: {unit_dst}")
+    typer.echo(t("install_service.copied", path=str(unit_dst)))
     subprocess.run(["systemctl", "--user", "daemon-reload"], check=True)  # nosec B603 B607
     subprocess.run(["systemctl", "--user", "enable", "--now", "voiceforge.service"], check=True)  # nosec B603 B607
-    typer.echo("Сервис включён. Логи: journalctl --user -u voiceforge -f")
+    typer.echo(t("install_service.enabled"))
 
 
 @app.command("uninstall-service")
 def uninstall_service() -> None:
     """Disable and stop systemd user service."""
     subprocess.run(["systemctl", "--user", "disable", "--now", "voiceforge.service"], check=True)  # nosec B603 B607
-    typer.echo("Сервис voiceforge отключён и остановлен.")
+    typer.echo(t("uninstall_service.done"))
 
 
 @app.command()
@@ -749,7 +746,7 @@ def cost(
             fd = date.fromisoformat(from_date)
             td = date.fromisoformat(to_date)
         except ValueError as e:
-            typer.echo(f"Неверный формат даты (ожидается YYYY-MM-DD): {e}", err=True)
+            typer.echo(t("cost.date_invalid", e=str(e)), err=True)
             raise SystemExit(1) from e
         if fd > td:
             typer.echo(t("history.from_after_to"), err=True)
@@ -764,15 +761,20 @@ def cost(
     # Текстовый вывод: итог + по дням
     total = data.get("total_cost_usd") or 0
     calls = data.get("total_calls") or 0
-    typer.echo(f"Затраты: ${total:.4f} (вызовов: {calls})")
+    typer.echo(t("cost.summary", total=total, calls=calls))
+    by_model = data.get("by_model") or []
+    if by_model:
+        typer.echo(t("cost.by_models"))
+        for row in by_model:
+            typer.echo(t("cost.model_line", model=row.get("model", ""), cost=row.get("cost_usd") or 0, calls=row.get("calls") or 0))
     by_day = data.get("by_day") or []
     if by_day:
-        typer.echo("По дням:")
+        typer.echo(t("cost.by_days"))
         for row in by_day[-10:]:  # последние 10 дней
             d = row.get("date", "")
             c = row.get("cost_usd") or 0
             n = row.get("calls") or 0
-            typer.echo(f"  {d}: ${c:.4f} ({n})")
+            typer.echo(t("cost.day_line", date=d, cost=c, calls=n))
 
 
 @app.command()
@@ -822,7 +824,7 @@ def export_session(
     from voiceforge.core.transcript_log import TranscriptLog
 
     if format not in ("md", "pdf"):
-        typer.echo("Формат должен быть md или pdf.", err=True)
+        typer.echo(t("export.format_md_or_pdf"), err=True)
         raise SystemExit(1)
     log_db = TranscriptLog()
     try:
@@ -840,7 +842,7 @@ def export_session(
     out_path = output or Path(f"session_{session_id}.{format}")
     if format == "md":
         out_path.write_text(md_text, encoding="utf-8")
-        typer.echo(f"Экспорт: {out_path}")
+        typer.echo(t("export.saved", path=str(out_path)))
         return
     # PDF: write temp md, run pandoc
     tmp_md = out_path.with_suffix(".md")
@@ -852,13 +854,13 @@ def export_session(
             capture_output=True,
         )
         tmp_md.unlink(missing_ok=True)
-        typer.echo(f"Экспорт: {out_path}")
+        typer.echo(t("export.saved", path=str(out_path)))
     except FileNotFoundError:
-        typer.echo("Для PDF установите pandoc и pdflatex (или: pandoc -o out.pdf session.md).", err=True)
-        typer.echo(f"Markdown сохранён: {tmp_md}")
+        typer.echo(t("export.pdf_install"), err=True)
+        typer.echo(t("export.md_fallback", path=str(tmp_md)))
         raise SystemExit(1)
     except subprocess.CalledProcessError as e:
-        typer.echo(f"Ошибка pandoc: {e.stderr.decode() if e.stderr else e}", err=True)
+        typer.echo(t("error.pandoc", err=e.stderr.decode() if e.stderr else str(e)), err=True)
         raise SystemExit(1) from e
 
 

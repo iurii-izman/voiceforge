@@ -13,6 +13,7 @@ def test_settings_defaults_load() -> None:
     assert cfg.ollama_model == "phi3:mini"
     assert cfg.ring_seconds == 300.0
     assert cfg.pyannote_restart_hours == 2
+    assert cfg.live_summary_interval_sec == 90
 
 
 def test_settings_ollama_model_empty_raises() -> None:
@@ -39,3 +40,11 @@ def test_settings_pyannote_restart_hours_below_one_raises() -> None:
 
     with pytest.raises(ValueError, match="pyannote_restart_hours must be >= 1"):
         Settings(pyannote_restart_hours=0)
+
+
+def test_settings_live_summary_interval_below_one_raises() -> None:
+    """live_summary_interval_sec < 1 raises ValueError."""
+    from voiceforge.core.config import Settings
+
+    with pytest.raises(ValueError, match="live_summary_interval_sec must be >= 1"):
+        Settings(live_summary_interval_sec=0)
