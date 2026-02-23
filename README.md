@@ -7,15 +7,17 @@ Baseline: `0.1.0-alpha.1` (`0.1.0a1` Python package version).
 ## Alpha0.1 Core
 
 Core CLI commands:
-- `listen`
-- `analyze`
+- `listen` (optional `--stream`, `--live-summary`)
+- `analyze` (optional `--template`: standup, sprint_review, one_on_one, brainstorm, interview)
 - `status`
-- `history`
-- `index`
-- `watch`
+- `history` (list or `--id N` for detail)
+- `cost` (cost report by days or `--from`/`--to`)
+- `export` (session to md/pdf)
+- `action-items update` (from-session / next-session)
+- `index`, `watch`
 - `daemon`
-- `install-service`
-- `uninstall-service`
+- `install-service`, `uninstall-service`
+- `web` (local Web UI)
 
 ## Requirements
 
@@ -71,6 +73,10 @@ Contribution/process:
 ## Documentation
 
 - `docs/README.md`
+- `docs/first-meeting-5min.md` — quick start (5 min)
+- `docs/roadmap-priority.md` — feature priorities
+- `docs/runbooks/agent-context.md` — agent context
+- `docs/runbooks/web-api.md` — Web UI API contract
 - `docs/architecture/overview.md`
 - `docs/architecture/runtime-flow.md`
 - `docs/runbooks/bootstrap.md`

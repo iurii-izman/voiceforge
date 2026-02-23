@@ -17,11 +17,12 @@ import structlog
 log = structlog.get_logger()
 
 DB_NAME = "transcripts.db"
-SCHEMA_VERSION_TARGET = 3  # Block 11.7: run migrations 001..003
+SCHEMA_VERSION_TARGET = 4  # Block 11.7: run migrations 001..004
 MIGRATION_HASHES = {
     "001_initial.sql": "59b9076a9a928c7d2b43e0b63b14e16cf0a4a2ec1a9f00a400aaf57efbc315f5",
     "002_add_daily_reports.sql": "0cdbaa0a88a392d97539d5768cbf62bd98f58394cbd96476c77d846240763844",
     "003_add_period_reports.sql": "3b58a4ec71e9445e77e9d7189b6b4811f33045123cfb1a550f1d5656182d77de",
+    "004_add_template.sql": "534b84d0d2c6602f7b32ff6fd3faddb8828dd0c7e628cbead279f7d342efd7a6",
 }
 
 
@@ -128,6 +129,7 @@ class AnalysisRow:
     recommendations: list[str]
     action_items: list[dict[str, Any]]
     cost_usd: float
+    template: str | None = None
 
 
 def _init_db(conn: sqlite3.Connection) -> None:
@@ -180,10 +182,11 @@ def _insert_analysis(
     recommendations: list[str] | None,
     action_items: list[dict[str, Any]] | None,
     cost_usd: float,
+    template: str | None = None,
 ) -> None:
     cursor.execute(
         "INSERT INTO analyses (session_id, timestamp, model, questions, answers, "
-        "recommendations, action_items, cost_usd) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        "recommendations, action_items, cost_usd, template) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (
             session_id,
             ended_at.isoformat(),
@@ -193,6 +196,7 @@ def _insert_analysis(
             json.dumps(recommendations or []),
             json.dumps(action_items or []),
             cost_usd,
+            template or "",
         ),
     )
 
@@ -225,6 +229,7 @@ class TranscriptLog:
         recommendations: list[str] | None = None,
         action_items: list[dict[str, Any]] | None = None,
         cost_usd: float = 0.0,
+        template: str | None = None,
     ) -> int:
         """Write one session (segments + analysis). Returns session_id."""
         started_at = started_at or datetime.now(UTC)
@@ -238,7 +243,9 @@ class TranscriptLog:
         )
         session_id = cursor.lastrowid or 0
         _insert_segments(cursor, session_id, segments)
-        _insert_analysis(cursor, session_id, ended_at, model, questions, answers, recommendations, action_items, cost_usd)
+        _insert_analysis(
+            cursor, session_id, ended_at, model, questions, answers, recommendations, action_items, cost_usd, template
+        )
         conn.commit()
         log.info("transcript_log.log_session", session_id=session_id, segments=len(segments))
         return session_id
@@ -446,13 +453,17 @@ class TranscriptLog:
             for row in cursor.fetchall()
         ]
         cursor.execute(
-            "SELECT timestamp, model, questions, answers, recommendations, action_items, cost_usd "
+            "SELECT timestamp, model, questions, answers, recommendations, action_items, cost_usd, template "
             "FROM analyses WHERE session_id = ? ORDER BY id DESC LIMIT 1",
             (session_id,),
         )
         row = cursor.fetchone()
         if not row:
             return (segments, None)
+        try:
+            template_val = row["template"] if row["template"] else None
+        except (KeyError, TypeError):
+            template_val = None
         analysis = AnalysisRow(
             timestamp=row["timestamp"],
             model=row["model"],
@@ -461,6 +472,7 @@ class TranscriptLog:
             recommendations=json.loads(row["recommendations"] or "[]"),
             action_items=json.loads(row["action_items"] or "[]"),
             cost_usd=row["cost_usd"] or 0.0,
+            template=template_val,
         )
         return (segments, analysis)
 

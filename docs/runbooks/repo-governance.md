@@ -21,6 +21,12 @@ Required policies:
 `scripts/apply_main_ruleset.sh` can apply these settings via GitHub API (requires authenticated `gh`).
 `scripts/check_repo_governance.sh` validates active ruleset and required checks.
 
+## Порядок на GitHub (ветки и PR)
+
+- После мержа PR: удалить ветку в GitHub (кнопка "Delete branch" на странице PR или `gh pr merge 23 --delete-branch`).
+- Локально: `git fetch --prune` и удалить локальные ветки слитых фич (`git branch -d feat/...`).
+- Активная разработка — в feature-ветках; мерж в `main` только через PR при зелёных required checks (Sonar не блокирует, см. раздел SonarCloud).
+
 ## Security Settings Baseline
 
 Repository-level security baseline:
@@ -53,14 +59,10 @@ Priority issue set (10-15):
 11. Bootstrap installs pre-commit hooks
 12. Rollback runbook for failed alpha release
 
-## SonarCloud (non-blocking bootstrap)
+## SonarCloud (только справочно)
 
-1. Add `sonar-project.properties` to repo root.
-2. Add workflow `.github/workflows/sonar.yml`.
-3. Configure repository secret `SONAR_TOKEN`.
-4. Run SonarCloud as non-blocking initially.
-5. Move to required check only after stable baseline.
+Текущий план SonarCloud не позволяет назначить проекту Quality Gate иной, чем **Sonar way (Default)** — менять gate нельзя.
 
-Manual gate visibility:
-- `./scripts/check_sonar_status.sh` polls GitHub check-runs for `SonarCloud Code Analysis`.
-- Use `./scripts/check_sonar_status.sh --required` before release tagging on `main`.
+- Скан в CI включён (workflow `sonar.yml`, `sonar-project.properties`), отчёт доступен в [SonarCloud](https://sonarcloud.io) для просмотра.
+- **Используем Sonar только как справочную информацию**: не блокируем merge по чеку, не требуем зелёный gate перед релизом. На поздних этапах при необходимости можно снова ввести проверку (`check_sonar_status.sh --required` в release runbook).
+- Список ключей keyring (в т.ч. `sonar_token`): `docs/runbooks/keyring-keys-reference.md`.

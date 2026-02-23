@@ -16,7 +16,7 @@ def session_not_found_error(session_id: int) -> tuple[str, str, bool]:
 
 
 def build_session_detail_payload(session_id: int, segments: list[object], analysis: object | None) -> dict[str, Any]:
-    """Build JSON-serializable payload for one session detail."""
+    """Build JSON-serializable payload for one session detail (includes template if set)."""
     return {
         "session_id": session_id,
         "segments": [vars(s) for s in segments],
@@ -33,6 +33,8 @@ def render_session_detail_lines(session_id: int, segments: list[object], analysi
         lines.append(f"  {getattr(s, 'start_sec', 0.0):.1f}-{getattr(s, 'end_sec', 0.0):.1f}s {prefix}{getattr(s, 'text', '')}")
     if analysis:
         lines.append("--- Анализ ---")
+        if getattr(analysis, "template", None):
+            lines.append(f"  Шаблон: {analysis.template}")
         lines.append(f"  Модель: {getattr(analysis, 'model', '')}")
         for q in getattr(analysis, "questions", []):
             lines.append(f"  Вопрос: {q}")
@@ -67,6 +69,54 @@ def sessions_list_lines(sessions: list[object]) -> list[str]:
     if not sessions:
         return [no_saved_sessions_message()]
     return render_sessions_table_lines(sessions)
+
+
+def build_session_markdown(session_id: int, segments: list[object], analysis: object | None) -> str:
+    """Build Markdown text for one session (export)."""
+    lines = [f"# Сессия {session_id}", ""]
+    if analysis and getattr(analysis, "template", None):
+        lines.append(f"- **Шаблон:** {analysis.template}")
+        lines.append("")
+    lines.append("## Транскрипт")
+    lines.append("")
+    for s in segments:
+        speaker = getattr(s, "speaker", "")
+        prefix = f"**{speaker}** " if speaker else ""
+        lines.append(f"- {getattr(s, 'start_sec', 0.0):.1f}–{getattr(s, 'end_sec', 0.0):.1f}s {prefix}{getattr(s, 'text', '')}")
+    if analysis:
+        lines.append("")
+        lines.append("## Анализ")
+        lines.append("")
+        lines.append(f"- **Модель:** {getattr(analysis, 'model', '')}")
+        qs = getattr(analysis, "questions", [])
+        if qs:
+            lines.append("- **Вопросы:**")
+            for q in qs:
+                lines.append(f"  - {q}")
+        ans = getattr(analysis, "answers", [])
+        if ans:
+            lines.append("- **Ответы/выводы:**")
+            for a in ans:
+                lines.append(f"  - {a}")
+        recs = getattr(analysis, "recommendations", [])
+        if recs:
+            lines.append("- **Рекомендации:**")
+            for r in recs:
+                lines.append(f"  - {r}")
+        items = getattr(analysis, "action_items", [])
+        if items:
+            lines.append("- **Действия:**")
+            for ai in items:
+                desc = ai.get("description", "") if isinstance(ai, dict) else getattr(ai, "description", "")
+                assignee = ai.get("assignee") if isinstance(ai, dict) else getattr(ai, "assignee", None)
+                if assignee:
+                    lines.append(f"  - {desc} ({assignee})")
+                else:
+                    lines.append(f"  - {desc}")
+        cost = getattr(analysis, "cost_usd", None)
+        if cost is not None:
+            lines.append(f"- **Стоимость:** ${cost:.4f}")
+    return "\n".join(lines)
 
 
 def render_sessions_table_lines(sessions: list[object]) -> list[str]:

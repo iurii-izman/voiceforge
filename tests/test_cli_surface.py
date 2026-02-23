@@ -29,14 +29,17 @@ def test_help_exposes_only_core_commands() -> None:
         "listen",
         "analyze",
         "status",
+        "cost",
         "history",
+        "export",
+        "web",
         "index",
         "watch",
         "daemon",
         "install-service",
         "uninstall-service",
     }
-    removed = {"dashboard", "analytics", "privacy", "update", "prefetch", "tasks", "summary", "export", "plugin", "speaker"}
+    removed = {"dashboard", "analytics", "privacy", "update", "prefetch", "tasks", "summary", "plugin", "speaker"}
     assert _normalized_command_names() == expected
     result = runner.invoke(app, ["--help"])
     assert result.exit_code == 0, result.stdout

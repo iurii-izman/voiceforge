@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import structlog
 from pydantic import Field
@@ -108,6 +108,14 @@ class Settings(BaseSettings):
     language: str = Field(
         default="auto",
         description="Block 11.4: CLI/UI locale: auto (from LANG/LC_ALL) | ru | en.",
+    )
+    ollama_model: str = Field(
+        default="phi3:mini",
+        description="Block 4: Ollama model for local classify/simple_answer (e.g. phi3:mini, llama3.2).",
+    )
+    pii_mode: Literal["OFF", "ON", "EMAIL_ONLY"] = Field(
+        default="ON",
+        description="PII redaction before LLM: OFF=no redaction, ON=full (regex+GLiNER), EMAIL_ONLY=email regex only.",
     )
 
     @classmethod
