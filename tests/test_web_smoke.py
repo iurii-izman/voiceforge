@@ -7,8 +7,6 @@ import threading
 import urllib.request
 from http.server import HTTPServer
 
-import pytest
-
 
 def _free_port() -> int:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
