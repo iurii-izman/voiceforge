@@ -20,7 +20,8 @@
   },
   "bundle": {
     "active": true,
-    "icon": []
+    "icon": ["icons/icon.png"],
+    "targets": ["deb", "rpm"]
   },
   "plugins": {}
 }

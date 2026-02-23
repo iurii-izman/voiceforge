@@ -2,14 +2,21 @@
 
 For building the VoiceForge desktop app on **Fedora** (including Fedora Atomic Cosmic). Develop inside **toolbox** or distrobox; install the packages below there.
 
-## System packages (Fedora)
+## Системные пакеты (Fedora)
+
+Для сборки в toolbox или на хосте:
 
 ```bash
 sudo dnf install -y \
+  gcc \
+  nodejs \
+  npm \
   webkit2gtk4.1-devel \
   gtk3-devel \
   openssl-devel
 ```
+
+Либо один скрипт из корня репо (внутри toolbox): `./scripts/setup-desktop-toolbox.sh`
 
 Optional (for system tray later):
 
