@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """SonarCloud: назначить проекту relaxed quality gate (keyring voiceforge/sonar_token).
 Текущий план SonarCloud не позволяет менять gate — скрипт оставлен как справочный; см. repo-governance.md."""
+
 from __future__ import annotations
 
 import json
@@ -16,6 +17,7 @@ RELAXED_GATE_NAME = "VoiceForge relaxed"
 
 def get_token() -> str:
     from voiceforge.core.secrets import get_api_key
+
     token = get_api_key("sonar_token")
     if not token or not token.strip():
         print("sonar_token not found in keyring (service=voiceforge)", file=sys.stderr)
@@ -51,7 +53,10 @@ def main() -> None:
         body = e.read().decode() if e.fp else ""
         if e.code == 403:
             print("API: no permission to set project quality gate (403).", file=sys.stderr)
-            print(f"Manual: SonarCloud → Project voiceforge → Settings → Quality Gate → select '{RELAXED_GATE_NAME}'", file=sys.stderr)
+            print(
+                f"Manual: SonarCloud → Project voiceforge → Settings → Quality Gate → select '{RELAXED_GATE_NAME}'",
+                file=sys.stderr,
+            )
         else:
             print(f"Select failed: {e.code} {body}", file=sys.stderr)
         sys.exit(1)
