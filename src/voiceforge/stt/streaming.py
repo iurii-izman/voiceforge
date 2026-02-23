@@ -13,6 +13,29 @@ from voiceforge.stt.transcriber import Segment, Transcriber
 
 log = structlog.get_logger()
 
+TARGET_SAMPLE_RATE = 16000  # faster-whisper expects 16 kHz (W2: resample when capture rate differs)
+
+
+def _resample_float_to_16k(audio_f: np.ndarray, from_rate: int) -> tuple[np.ndarray, int]:
+    """Resample float32 mono audio to 16 kHz. Returns (audio_float32, TARGET_SAMPLE_RATE) or (input, from_rate) on failure."""
+    if from_rate == TARGET_SAMPLE_RATE:
+        return (audio_f, TARGET_SAMPLE_RATE)
+    try:
+        from scipy.signal import resample
+    except ImportError:
+        log.warning(
+            "streaming.resample_skipped",
+            from_rate=from_rate,
+            hint="Install scipy for resampling; quality may degrade",
+        )
+        return (audio_f, from_rate)
+    n = int(len(audio_f) * TARGET_SAMPLE_RATE / from_rate)
+    if n < 1:
+        return (audio_f, from_rate)
+    out = resample(audio_f.astype(np.float64), n).astype(np.float32)
+    return (out, TARGET_SAMPLE_RATE)
+
+
 # Chunk 2s, overlap 0.5s → step 1.5s (latency ~2s for first partial)
 CHUNK_DURATION_SEC = 2.0
 CHUNK_OVERLAP_SEC = 0.5
@@ -110,7 +133,10 @@ class StreamingTranscriber:
         if not chunks:
             return
         chunk = np.concatenate(chunks) if len(chunks) > 1 else chunks[0]
-        self._process_chunk(chunk, start_time)
+        eff: int | None = None
+        if self._sample_rate != TARGET_SAMPLE_RATE:
+            chunk, eff = _resample_float_to_16k(chunk, self._sample_rate)
+        self._process_chunk(chunk, start_time, effective_rate=eff)
         # Push back last overlap_sec so next window overlaps
         if overlap_samples > 0 and chunk.size >= overlap_samples:
             tail = chunk[-overlap_samples:]
@@ -118,13 +144,19 @@ class StreamingTranscriber:
             self._buffer.appendleft((tail, overlap_time))
             self._buffer_duration += self._overlap
 
-    def _process_chunk(self, audio: np.ndarray, start_offset_sec: float = 0.0) -> None:
+    def _process_chunk(
+        self,
+        audio: np.ndarray,
+        start_offset_sec: float = 0.0,
+        effective_rate: int | None = None,
+    ) -> None:
         """Transcribe one chunk and call on_partial / on_final for each segment."""
         if audio.size < 100:  # too short
             return
+        rate = effective_rate if effective_rate is not None else self._sample_rate
         segments = self._transcriber.transcribe(
             audio,
-            sample_rate=self._sample_rate,
+            sample_rate=rate,
             language=self._language,
             beam_size=1,
             vad_filter=True,
@@ -146,11 +178,15 @@ class StreamingTranscriber:
 
     def process_chunk(self, audio: np.ndarray, start_offset_sec: float = 0.0) -> None:
         """Process a pre-cut chunk (e.g. last 2s from ring buffer). No internal buffering.
-        Use from listen/daemon: get_chunk(2) → process_chunk(mic)."""
+        Use from listen/daemon: get_chunk(2) → process_chunk(mic).
+        W2: when sample_rate != 16 kHz, resample to 16k before transcribe."""
         if audio.size == 0:
             return
         if audio.dtype == np.int16:
             audio = audio.astype(np.float32) / 32768.0
         else:
             audio = audio.astype(np.float32).copy()
-        self._process_chunk(audio, start_offset_sec)
+        effective_rate: int | None = None
+        if self._sample_rate != TARGET_SAMPLE_RATE:
+            audio, effective_rate = _resample_float_to_16k(audio, self._sample_rate)
+        self._process_chunk(audio, start_offset_sec, effective_rate=effective_rate)

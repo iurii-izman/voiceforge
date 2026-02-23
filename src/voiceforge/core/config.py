@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 import structlog
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 log = structlog.get_logger()
@@ -117,6 +117,63 @@ class Settings(BaseSettings):
         default="ON",
         description="PII redaction before LLM: OFF=no redaction, ON=full (regex+GLiNER), EMAIL_ONLY=email regex only.",
     )
+
+    @field_validator("model_size")
+    @classmethod
+    def _model_size_allowed(cls, v: str) -> str:
+        allowed = ("tiny", "base", "small", "medium", "large-v2", "large-v3", "large")
+        if v.lower() not in allowed:
+            raise ValueError(f"model_size must be one of: {', '.join(allowed)}")
+        return v.lower()
+
+    @field_validator("default_llm")
+    @classmethod
+    def _default_llm_nonempty(cls, v: str) -> str:
+        if not (v and v.strip()):
+            raise ValueError("default_llm must be non-empty")
+        return v.strip()
+
+    @field_validator("budget_limit_usd")
+    @classmethod
+    def _budget_positive(cls, v: float) -> float:
+        if v < 0:
+            raise ValueError("budget_limit_usd must be >= 0")
+        return v
+
+    @field_validator("pipeline_step2_timeout_sec")
+    @classmethod
+    def _timeout_positive(cls, v: float) -> float:
+        if v <= 0:
+            raise ValueError("pipeline_step2_timeout_sec must be positive")
+        return v
+
+    @field_validator("sample_rate")
+    @classmethod
+    def _sample_rate_positive(cls, v: int) -> int:
+        if v <= 0 or v > 192000:
+            raise ValueError("sample_rate must be in 1..192000")
+        return v
+
+    @field_validator("ollama_model")
+    @classmethod
+    def _ollama_model_nonempty(cls, v: str) -> str:
+        if not (v and v.strip()):
+            raise ValueError("ollama_model must be non-empty")
+        return v.strip()
+
+    @field_validator("ring_seconds")
+    @classmethod
+    def _ring_seconds_positive(cls, v: float) -> float:
+        if v <= 0:
+            raise ValueError("ring_seconds must be positive")
+        return v
+
+    @field_validator("pyannote_restart_hours")
+    @classmethod
+    def _pyannote_restart_positive(cls, v: int) -> int:
+        if v < 1:
+            raise ValueError("pyannote_restart_hours must be >= 1")
+        return v
 
     @classmethod
     def settings_customise_sources(

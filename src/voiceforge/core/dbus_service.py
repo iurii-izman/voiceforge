@@ -57,11 +57,8 @@ def _wrap_envelope_with_json_key(key: str, payload: str) -> str:
 
 
 def _uses_ipc_envelope() -> bool:
-    """Capability-gated contract mode for D-Bus string payloads.
-
-    Disabled by default to preserve compatibility with old clients expecting plain strings.
-    """
-    return _env_flag("VOICEFORGE_IPC_ENVELOPE", default=False)
+    """Capability-gated contract mode for D-Bus string payloads (W7: envelope by default)."""
+    return _env_flag("VOICEFORGE_IPC_ENVELOPE", default=True)
 
 
 class VoiceForgeAppInterface(ServiceInterface):

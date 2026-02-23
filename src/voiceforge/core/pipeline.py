@@ -13,6 +13,25 @@ import structlog
 
 log = structlog.get_logger()
 
+TARGET_SAMPLE_RATE = 16000  # faster-whisper expects 16 kHz
+RAG_QUERY_MAX_CHARS = 1000  # W3: max transcript prefix for RAG search (was 200)
+
+
+def _resample_to_16k(audio: np.ndarray, from_rate: int) -> np.ndarray:
+    """Resample audio to 16 kHz if from_rate != 16000. Returns int16 array."""
+    if from_rate == TARGET_SAMPLE_RATE:
+        return audio
+    try:
+        from scipy.signal import resample
+    except ImportError:
+        log.warning("pipeline.resample_skipped", from_rate=from_rate, hint="Install scipy for resampling")
+        return audio
+    n = int(len(audio) * TARGET_SAMPLE_RATE / from_rate)
+    if n < 1:
+        return audio
+    out = resample(audio.astype(np.float64), n)
+    return (out.clip(-32768, 32767)).astype(np.int16)
+
 
 @dataclass
 class PipelineResult:
@@ -85,7 +104,7 @@ def _step2_rag(transcript: str, rag_db_path: str) -> str:
             from voiceforge.rag.searcher import HybridSearcher
 
             searcher = HybridSearcher(rag_db_path)
-            results = searcher.search(transcript[:200] or "meeting", top_k=3)
+            results = searcher.search(transcript[:RAG_QUERY_MAX_CHARS] or "meeting", top_k=3)
             context = "\n".join(r.content[:300] for r in results)
             searcher.close()
     except ImportError:
@@ -131,6 +150,11 @@ class AnalysisPipeline:
         if len(raw) < self._cfg.sample_rate * 2:
             return (None, "Ошибка: недостаточно аудио в буфере.")
         audio = np.frombuffer(raw, dtype=np.int16)
+        effective_rate = self._cfg.sample_rate
+        if effective_rate != TARGET_SAMPLE_RATE:
+            audio = _resample_to_16k(audio, effective_rate)
+            effective_rate = TARGET_SAMPLE_RATE
+            log.info("pipeline.resampled", original_rate=self._cfg.sample_rate, target=TARGET_SAMPLE_RATE)
         log.info("pipeline.start", seconds=seconds, samples=len(audio))
 
         language_hint = None
@@ -140,7 +164,7 @@ class AnalysisPipeline:
         try:
             segments, transcript = _step1_stt(
                 audio,
-                sample_rate=self._cfg.sample_rate,
+                sample_rate=effective_rate,
                 model_size=self._cfg.model_size,
                 language_hint=language_hint,
             )
@@ -163,7 +187,7 @@ class AnalysisPipeline:
                 "diarization": executor.submit(
                     _step2_diarization,
                     audio_f,
-                    self._cfg.sample_rate,
+                    effective_rate,
                     self._cfg.pyannote_restart_hours,
                 ),
                 "rag": executor.submit(

@@ -233,8 +233,9 @@ class VoiceForgeDaemon:
             return "{}"
 
     def get_settings(self) -> str:
-        """Return JSON with current settings for UI."""
+        """Return JSON with current settings for UI. privacy_mode is alias for pii_mode (W4)."""
         c = self._cfg
+        pii = getattr(c, "pii_mode", "ON")
         return json.dumps(
             {
                 "model_size": c.model_size,
@@ -243,7 +244,8 @@ class VoiceForgeDaemon:
                 "smart_trigger": c.smart_trigger,
                 "sample_rate": c.sample_rate,
                 "streaming_stt": c.streaming_stt,
-                "pii_mode": getattr(c, "pii_mode", "ON"),
+                "pii_mode": pii,
+                "privacy_mode": pii,
             },
             ensure_ascii=False,
         )
@@ -268,9 +270,22 @@ class VoiceForgeDaemon:
             return "[]"
 
     def get_analytics(self, last: str) -> str:
-        """Deprecated in alpha0.1 minimal core."""
-        _ = last
-        return "{}"
+        """Return JSON analytics for period (e.g. last='7d' or '30d'). Block 11.5."""
+        days = 30
+        if last:
+            s = (last or "").strip().lower()
+            if s.endswith("d") and s[:-1].isdigit():
+                days = min(365, max(1, int(s[:-1])))
+            elif s.isdigit():
+                days = min(365, max(1, int(s)))
+        try:
+            from voiceforge.core.metrics import get_stats
+
+            data = get_stats(days=days)
+            return json.dumps(data, ensure_ascii=False)
+        except Exception as e:
+            log.warning("daemon.get_analytics_failed", error=str(e))
+            return "{}"
 
     def get_api_version(self) -> str:
         """D-Bus API contract version."""

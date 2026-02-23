@@ -27,7 +27,15 @@ def test_transcript_migrations_on_clean_db(tmp_path) -> None:
         version = conn.execute("SELECT version FROM schema_version LIMIT 1").fetchone()
         assert version is not None
         assert int(version[0]) == SCHEMA_VERSION_TARGET
-        for table in ("sessions", "segments", "analyses", "segments_fts", "daily_reports", "period_reports"):
+        for table in (
+            "sessions",
+            "segments",
+            "analyses",
+            "segments_fts",
+            "daily_reports",
+            "period_reports",
+            "action_items",
+        ):
             assert _table_exists(conn, table), table
     finally:
         conn.close()
@@ -62,6 +70,7 @@ def test_transcript_migrations_on_existing_db(tmp_path) -> None:
         assert int(version[0]) == SCHEMA_VERSION_TARGET
         assert _table_exists(conn, "daily_reports")
         assert _table_exists(conn, "period_reports")
+        assert _table_exists(conn, "action_items")
     finally:
         conn.close()
 

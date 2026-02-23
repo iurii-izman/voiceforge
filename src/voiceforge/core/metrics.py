@@ -1,4 +1,4 @@
-"""LLM call metrics: structlog + SQLite (llm_calls), budget $75/mo."""
+"""LLM call metrics: structlog + SQLite (llm_calls). Budget limit from Settings when needed."""
 
 from __future__ import annotations
 
@@ -12,8 +12,6 @@ from pathlib import Path
 import structlog
 
 log = structlog.get_logger()
-
-BUDGET_MONTHLY_USD = 75.0
 
 TABLE_DDL = """
 CREATE TABLE IF NOT EXISTS llm_calls (

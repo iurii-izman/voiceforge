@@ -25,10 +25,19 @@ def _iface() -> DaemonVoiceForgeInterface:
 
 
 def test_dbus_capabilities_snapshot_default(monkeypatch) -> None:
+    """Default: envelope on (W7)."""
     monkeypatch.delenv("VOICEFORGE_IPC_ENVELOPE", raising=False)
     iface = _iface()
     payload = json.loads(DaemonVoiceForgeInterface.GetCapabilities.__wrapped__(iface))
-    assert payload == {"api_version": "1.0", "features": {"envelope_v1": False}}
+    assert payload == {"api_version": "1.0", "features": {"envelope_v1": True}}
+
+
+def test_dbus_capabilities_snapshot_legacy_no_envelope(monkeypatch) -> None:
+    """Legacy: VOICEFORGE_IPC_ENVELOPE=0 gives envelope_v1 False."""
+    monkeypatch.setenv("VOICEFORGE_IPC_ENVELOPE", "0")
+    iface = _iface()
+    payload = json.loads(DaemonVoiceForgeInterface.GetCapabilities.__wrapped__(iface))
+    assert payload["features"]["envelope_v1"] is False
 
 
 def test_dbus_sessions_snapshot_with_envelope(monkeypatch) -> None:

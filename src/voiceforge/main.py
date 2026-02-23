@@ -24,13 +24,21 @@ from voiceforge.cli.history_helpers import (
     render_sessions_table_lines,
     session_not_found_message,
 )
-from voiceforge.cli.status_helpers import get_status_data, get_status_text
+from voiceforge.cli.status_helpers import (
+    get_doctor_data,
+    get_doctor_text,
+    get_status_data,
+    get_status_detailed_data,
+    get_status_detailed_text,
+    get_status_text,
+)
 from voiceforge.core.config import Settings
 from voiceforge.core.contracts import (
     build_cli_error_payload,
     build_cli_success_payload,
     extract_error_message,
 )
+from voiceforge.i18n import t
 
 log = structlog.get_logger()
 app = typer.Typer(help="VoiceForge — local-first AI assistant (alpha0.1 core)")
@@ -538,10 +546,10 @@ def action_items_update(
     log_db.close()
 
     if detail_from is None:
-        typer.echo(f"Сессия не найдена: {from_session}", err=True)
+        typer.echo(t("history.session_not_found", session_id=from_session), err=True)
         raise SystemExit(1)
     if detail_next is None:
-        typer.echo(f"Сессия не найдена: {next_session}", err=True)
+        typer.echo(t("history.session_not_found", session_id=next_session), err=True)
         raise SystemExit(1)
     segments_next, _ = detail_next
     analysis_from = detail_from[1]
@@ -575,6 +583,12 @@ def action_items_update(
         for idx, status in updates:
             status_data[f"{from_session}:{idx}"] = status
         _save_action_item_status(status_data)
+        try:
+            log_db2 = TranscriptLog()
+            log_db2.update_action_item_statuses_in_db(from_session, updates)
+            log_db2.close()
+        except Exception:
+            pass
 
     if output == "json":
         typer.echo(
@@ -607,7 +621,7 @@ def index(
     db_path = db or cfg.get_rag_db_path()
     p = Path(path)
     if not p.exists():
-        typer.echo(f"Ошибка: путь не найден: {path}", err=True)
+        typer.echo(t("error.path_not_found", path=path), err=True)
         raise SystemExit(1)
 
     try:
@@ -658,7 +672,7 @@ def watch(
     db_path = db or cfg.get_rag_db_path()
     watch_dir = Path(path)
     if not watch_dir.is_dir():
-        typer.echo(f"Ошибка: папка не найдена: {path}", err=True)
+        typer.echo(t("error.folder_not_found", path=path), err=True)
         raise SystemExit(1)
     try:
         from voiceforge.rag.watcher import KBWatcher
@@ -738,7 +752,7 @@ def cost(
             typer.echo(f"Неверный формат даты (ожидается YYYY-MM-DD): {e}", err=True)
             raise SystemExit(1) from e
         if fd > td:
-            typer.echo("Дата --from не должна быть позже --to.", err=True)
+            typer.echo(t("history.from_after_to"), err=True)
             raise SystemExit(1)
         data = get_stats_range(fd, td)
     else:
@@ -764,8 +778,28 @@ def cost(
 @app.command()
 def status(
     output: str = typer.Option("text", "--output", help="Формат вывода: text | json"),
+    detailed: bool = typer.Option(False, "--detailed", help="Разбивка затрат по моделям/дням и % от бюджета"),
+    doctor: bool = typer.Option(False, "--doctor", help="Диагностика окружения (конфиг, keyring, RAG, ring, Ollama, RAM, импорты)"),
 ) -> None:
     """Show RAM and cost snapshot."""
+    if doctor:
+        if output == "json":
+            typer.echo(json.dumps(_cli_success_payload(get_doctor_data()), ensure_ascii=False))
+        else:
+            typer.echo(get_doctor_text())
+        return
+    if detailed:
+        cfg = _get_config()
+        if output == "json":
+            typer.echo(
+                json.dumps(
+                    _cli_success_payload(get_status_detailed_data(cfg.budget_limit_usd)),
+                    ensure_ascii=False,
+                )
+            )
+        else:
+            typer.echo(get_status_detailed_text(cfg.budget_limit_usd))
+        return
     if output == "json":
         typer.echo(json.dumps(_cli_success_payload(get_status_data()), ensure_ascii=False))
     else:
@@ -797,7 +831,9 @@ def export_session(
             typer.echo(session_not_found_message(session_id), err=True)
             raise SystemExit(1)
         segments, analysis = detail
-        md_text = build_session_markdown(session_id, segments, analysis)
+        meta = log_db.get_session_meta(session_id)
+        started_at = meta[0] if meta else None
+        md_text = build_session_markdown(session_id, segments, analysis, started_at=started_at)
     finally:
         log_db.close()
 
@@ -830,13 +866,105 @@ def export_session(
 def history(
     session_id: int | None = typer.Option(None, "--id", help="Показать детали сессии"),
     last_n: int = typer.Option(10, "--last", help="Сколько последних сессий показать"),
-    output: str = typer.Option("text", "--output", help="Формат вывода: text | json"),
+    output: str = typer.Option("text", "--output", help="Формат вывода: text | json | md (md только с --id)"),
+    search: str | None = typer.Option(None, "--search", help="Поиск по тексту транскриптов (FTS5)"),
+    date: str | None = typer.Option(None, "--date", help="Сессии за день YYYY-MM-DD"),
+    from_date: str | None = typer.Option(None, "--from", help="Начало периода (с --to)"),
+    to_date: str | None = typer.Option(None, "--to", help="Конец периода (с --from)"),
+    action_items: bool = typer.Option(False, "--action-items", help="Список action items по сессиям (cross-session)"),
 ) -> None:
     """Show recent sessions or one detailed session."""
+    from datetime import date as date_type
+
     from voiceforge.core.transcript_log import TranscriptLog
 
     log_db = TranscriptLog()
     try:
+        if output == "md" and session_id is None:
+            typer.echo(t("history.md_requires_id"), err=True)
+            raise SystemExit(1)
+        if action_items:
+            items = log_db.get_action_items(limit=100)
+            if output == "json":
+                typer.echo(
+                    json.dumps(
+                        _cli_success_payload(
+                            {
+                                "action_items": [
+                                    {
+                                        "session_id": r.session_id,
+                                        "idx": r.idx_in_analysis,
+                                        "description": r.description,
+                                        "assignee": r.assignee,
+                                        "deadline": r.deadline,
+                                        "status": r.status,
+                                    }
+                                    for r in items
+                                ]
+                            }
+                        ),
+                        ensure_ascii=False,
+                    )
+                )
+            else:
+                if not items:
+                    typer.echo(t("history.no_action_items"))
+                else:
+                    for r in items:
+                        assign = f" ({r.assignee})" if r.assignee else ""
+                        typer.echo(f"  [{r.session_id}] #{r.idx_in_analysis} {r.status}: {r.description}{assign}")
+            return
+        if search is not None:
+            hits = log_db.search_transcripts(search.strip(), limit=30)
+            if output == "json":
+                typer.echo(
+                    json.dumps(
+                        _cli_success_payload(
+                            {
+                                "query": search,
+                                "hits": [
+                                    {"session_id": s, "start_sec": st, "end_sec": e, "snippet": sn}
+                                    for s, _tx, st, e, sn in hits
+                                ],
+                            }
+                        ),
+                        ensure_ascii=False,
+                    )
+                )
+            else:
+                if not hits:
+                    typer.echo(t("history.no_results"))
+                    return
+                for sid, _text, start_sec, end_sec, snippet in hits:
+                    typer.echo(f"session_id={sid} | {start_sec:.1f}s | {snippet}")
+            return
+        if date is not None or (from_date is not None and to_date is not None):
+            try:
+                if date is not None:
+                    if from_date or to_date:
+                        typer.echo(t("history.date_or_range"), err=True)
+                        raise SystemExit(1)
+                    day = date_type.fromisoformat(date)
+                    sessions = log_db.get_sessions_for_date(day)
+                else:
+                    fd = date_type.fromisoformat(from_date)
+                    td = date_type.fromisoformat(to_date)
+                    if fd > td:
+                        typer.echo(t("history.from_after_to"), err=True)
+                        raise SystemExit(1)
+                    sessions = log_db.get_sessions_in_range(fd, td)
+            except ValueError as e:
+                typer.echo(t("history.date_invalid", err=str(e)), err=True)
+                raise SystemExit(1) from e
+            if output == "json":
+                typer.echo(json.dumps(_cli_success_payload(build_sessions_payload(sessions)), ensure_ascii=False))
+            else:
+                if not sessions:
+                    typer.echo(t("history.no_sessions_period"))
+                else:
+                    for line in render_sessions_table_lines(sessions):
+                        typer.echo(line)
+            return
         if session_id is not None:
             detail = log_db.get_session_detail(session_id)
             if detail is None:
@@ -854,6 +982,11 @@ def history(
                     )
                 )
                 return
+            if output == "md":
+                meta = log_db.get_session_meta(session_id)
+                started_at = meta[0] if meta else None
+                typer.echo(build_session_markdown(session_id, segments, analysis, started_at=started_at))
+                return
             for line in render_session_detail_lines(session_id, segments, analysis):
                 typer.echo(line)
             return
@@ -863,13 +996,13 @@ def history(
             if output == "json":
                 typer.echo(json.dumps(_cli_success_payload({"sessions": []}), ensure_ascii=False))
             else:
-                typer.echo("Нет сохранённых сессий. Запустите voiceforge analyze.")
-            return
-        if output == "json":
-            typer.echo(json.dumps(_cli_success_payload(build_sessions_payload(sessions)), ensure_ascii=False))
-            return
-        for line in render_sessions_table_lines(sessions):
-            typer.echo(line)
+                typer.echo(t("history.no_sessions"))
+        else:
+            if output == "json":
+                typer.echo(json.dumps(_cli_success_payload(build_sessions_payload(sessions)), ensure_ascii=False))
+            else:
+                for line in render_sessions_table_lines(sessions):
+                    typer.echo(line)
     finally:
         log_db.close()
 

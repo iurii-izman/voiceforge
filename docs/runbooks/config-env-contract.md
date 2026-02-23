@@ -29,6 +29,8 @@ Priority order:
 | `ollama_model` | `VOICEFORGE_OLLAMA_MODEL` | `phi3:mini` | Ollama model for local classify/simple_answer |
 | `pii_mode` | `VOICEFORGE_PII_MODE` | `ON` | PII redaction before LLM: `OFF` (none), `ON` (full regex+GLiNER), `EMAIL_ONLY` (email only) |
 
+**Validation:** Settings validates `model_size` (allowed: tiny, base, small, medium, large-v2, large-v3, large), `sample_rate` (1..192000), `default_llm` (non-empty), `budget_limit_usd` (≥ 0), `pipeline_step2_timeout_sec` (positive), `ollama_model` (non-empty), `ring_seconds` (positive), `pyannote_restart_hours` (≥ 1). Invalid values raise at load.
+
 ## Non-VOICEFORGE Environment Inputs
 
 | Variable | Default | Description |
@@ -37,8 +39,14 @@ Priority order:
 | `XDG_DATA_HOME` | `~/.local/share` | Data base path (transcripts/metrics/rag) |
 | `XDG_RUNTIME_DIR` | `~/.cache` | Runtime path for ring buffer |
 | `VOICEFORGE_SERVICE_FILE` | unset | Override systemd unit file source |
-| `VOICEFORGE_IPC_ENVELOPE` | `false` | IPC envelope mode in daemon/dbus |
+| `VOICEFORGE_IPC_ENVELOPE` | `true` | IPC envelope mode in daemon/dbus (set to `false` for legacy plain-string clients) |
 | `OLLAMA_HOST` | `http://localhost:11434` | Local LLM endpoint |
+
+## Cost (cost_usd) source of truth (W9)
+
+- **metrics.db** (`llm_calls`): source of truth for **totals and reporting**. All LLM calls are logged here with `cost_usd`; `get_stats(days)`, `get_cost_today()`, and D-Bus `GetAnalytics` use this DB.
+- **transcripts.db** (`analyses.cost_usd`): **per-session snapshot** of the cost of the analyze call that produced that analysis. Used for session detail and export. Not re-synced if metrics are migrated or recalculated.
+- For consistency: prefer metrics.db for dashboards and budgets; use analyses.cost_usd only for “cost of this session”.
 
 ## Keyring Contract
 

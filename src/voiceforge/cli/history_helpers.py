@@ -71,9 +71,18 @@ def sessions_list_lines(sessions: list[object]) -> list[str]:
     return render_sessions_table_lines(sessions)
 
 
-def build_session_markdown(session_id: int, segments: list[object], analysis: object | None) -> str:
+def build_session_markdown(
+    session_id: int,
+    segments: list[object],
+    analysis: object | None,
+    started_at: str | None = None,
+) -> str:
     """Build Markdown text for one session (export)."""
     lines = [f"# Сессия {session_id}", ""]
+    if started_at:
+        date_part = started_at[:10] if len(started_at) >= 10 else started_at
+        lines.append(f"**Дата:** {date_part}")
+        lines.append("")
     if analysis and getattr(analysis, "template", None):
         lines.append(f"- **Шаблон:** {analysis.template}")
         lines.append("")

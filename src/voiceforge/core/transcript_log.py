@@ -17,12 +17,13 @@ import structlog
 log = structlog.get_logger()
 
 DB_NAME = "transcripts.db"
-SCHEMA_VERSION_TARGET = 4  # Block 11.7: run migrations 001..004
+SCHEMA_VERSION_TARGET = 5  # Block 11.7: run migrations 001..005 (005 = action_items table, ADR-0002)
 MIGRATION_HASHES = {
     "001_initial.sql": "59b9076a9a928c7d2b43e0b63b14e16cf0a4a2ec1a9f00a400aaf57efbc315f5",
     "002_add_daily_reports.sql": "0cdbaa0a88a392d97539d5768cbf62bd98f58394cbd96476c77d846240763844",
     "003_add_period_reports.sql": "3b58a4ec71e9445e77e9d7189b6b4811f33045123cfb1a550f1d5656182d77de",
     "004_add_template.sql": "534b84d0d2c6602f7b32ff6fd3faddb8828dd0c7e628cbead279f7d342efd7a6",
+    "005_action_items_table.sql": "507b784b3482c1b5f0cf7b66f4f18dbe7dc88b8c1182726176241e1910072aec",
 }
 
 
@@ -121,6 +122,18 @@ class SegmentRow:
 
 
 @dataclass
+class ActionItemRow:
+    """One row from action_items table (ADR-0002)."""
+
+    session_id: int
+    idx_in_analysis: int
+    description: str
+    assignee: str | None
+    deadline: str | None
+    status: str
+
+
+@dataclass
 class AnalysisRow:
     timestamp: str
     model: str
@@ -201,6 +214,37 @@ def _insert_analysis(
     )
 
 
+def _insert_action_items(
+    cursor: sqlite3.Cursor,
+    session_id: int,
+    action_items: list[dict[str, Any]] | None,
+) -> None:
+    """Insert action items into action_items table (ADR-0002). No-op if table missing (pre-005)."""
+    if not action_items:
+        return
+    try:
+        for idx, ai in enumerate(action_items):
+            desc = str(ai.get("description") or "").strip() or "(без описания)"
+            assignee = (ai.get("assignee") or "").strip() or None
+            deadline = ai.get("deadline")
+            if deadline is not None and hasattr(deadline, "isoformat"):
+                deadline = deadline.isoformat()
+            elif isinstance(deadline, str):
+                deadline = deadline.strip() or None
+            else:
+                deadline = None
+            cursor.execute(
+                "INSERT INTO action_items (session_id, idx_in_analysis, description, assignee, deadline, status) "
+                "VALUES (?, ?, ?, ?, ?, 'open')",
+                (session_id, idx, desc, assignee, deadline),
+            )
+    except sqlite3.OperationalError as e:
+        if "action_items" in str(e).lower() or "no such table" in str(e).lower():
+            log.debug("action_items table not yet available", error=str(e))
+        else:
+            raise
+
+
 class TranscriptLog:
     """Persistent log: sessions, segments, analyses. FTS5 search on segment text."""
 
@@ -246,6 +290,7 @@ class TranscriptLog:
         _insert_analysis(
             cursor, session_id, ended_at, model, questions, answers, recommendations, action_items, cost_usd, template
         )
+        _insert_action_items(cursor, session_id, action_items)
         conn.commit()
         log.info("transcript_log.log_session", session_id=session_id, segments=len(segments))
         return session_id
@@ -475,6 +520,68 @@ class TranscriptLog:
             template=template_val,
         )
         return (segments, analysis)
+
+    def get_action_items(
+        self,
+        limit: int = 50,
+        session_id: int | None = None,
+    ) -> list[ActionItemRow]:
+        """Return action items from action_items table (ADR-0002). Newest first. Empty if table missing."""
+        try:
+            conn = self._get_conn()
+            cursor = conn.cursor()
+            if session_id is not None:
+                cursor.execute(
+                    "SELECT session_id, idx_in_analysis, description, assignee, deadline, status "
+                    "FROM action_items WHERE session_id = ? ORDER BY idx_in_analysis",
+                    (session_id,),
+                )
+            else:
+                cursor.execute(
+                    "SELECT session_id, idx_in_analysis, description, assignee, deadline, status "
+                    "FROM action_items ORDER BY session_id DESC, idx_in_analysis LIMIT ?",
+                    (limit,),
+                )
+            return [
+                ActionItemRow(
+                    session_id=row["session_id"],
+                    idx_in_analysis=row["idx_in_analysis"],
+                    description=row["description"] or "",
+                    assignee=row["assignee"] if row["assignee"] else None,
+                    deadline=row["deadline"] if row["deadline"] else None,
+                    status=row["status"] or "open",
+                )
+                for row in cursor.fetchall()
+            ]
+        except sqlite3.OperationalError as e:
+            if "no such table" in str(e).lower():
+                return []
+            raise
+
+    def update_action_item_statuses_in_db(
+        self,
+        from_session_id: int,
+        updates: list[tuple[int, str]],
+    ) -> None:
+        """Set status (done/cancelled) for action items by session_id and idx_in_analysis. ADR-0002."""
+        if not updates:
+            return
+        try:
+            conn = self._get_conn()
+            cursor = conn.cursor()
+            for idx, status in updates:
+                if status not in ("done", "cancelled"):
+                    continue
+                cursor.execute(
+                    "UPDATE action_items SET status = ? WHERE session_id = ? AND idx_in_analysis = ?",
+                    (status, from_session_id, idx),
+                )
+            conn.commit()
+        except sqlite3.OperationalError as e:
+            if "no such table" in str(e).lower():
+                log.debug("action_items table not available for status update")
+                return
+            raise
 
     def search_transcripts(self, query: str, limit: int = 20) -> list[tuple[int, str, float, float, str]]:
         """FTS5 search on segment text. Returns (session_id, text, start_sec, end_sec, snippet)."""

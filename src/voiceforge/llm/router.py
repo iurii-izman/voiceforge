@@ -307,7 +307,25 @@ def complete_structured(
     if not raw_content.strip():
         log.warning("llm.empty_response", model=model_id)
     content = raw_content or "{}"
-    parsed = response_model.model_validate_json(content)
+    try:
+        parsed = response_model.model_validate_json(content)
+    except Exception as parse_err:
+        log.warning("llm.invalid_json_retry", model=model_id, error=str(parse_err))
+        raw = completion(
+            model=model_id,
+            messages=prompt,
+            fallbacks=fallbacks if fallbacks else None,
+            max_tokens=1024,
+            response_format=response_model,
+        )
+        choices = getattr(raw, "choices", None) or []
+        if not choices:
+            raise RuntimeError("LLM retry returned empty choices") from parse_err
+        first = choices[0]
+        message = getattr(first, "message", None)
+        raw_content = (getattr(message, "content", None) or "") if message else ""
+        content = raw_content or "{}"
+        parsed = response_model.model_validate_json(content)
     # Detect all-empty structured response (LLM returned nothing useful)
     model_fields = getattr(response_model, "model_fields", None)
     if isinstance(model_fields, dict):
