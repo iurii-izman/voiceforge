@@ -779,7 +779,9 @@ def cost(
 def status(
     output: str = typer.Option("text", "--output", help="Формат вывода: text | json"),
     detailed: bool = typer.Option(False, "--detailed", help="Разбивка затрат по моделям/дням и % от бюджета"),
-    doctor: bool = typer.Option(False, "--doctor", help="Диагностика окружения (конфиг, keyring, RAG, ring, Ollama, RAM, импорты)"),
+    doctor: bool = typer.Option(
+        False, "--doctor", help="Диагностика окружения (конфиг, keyring, RAG, ring, Ollama, RAM, импорты)"
+    ),
 ) -> None:
     """Show RAM and cost snapshot."""
     if doctor:
@@ -923,8 +925,7 @@ def history(
                             {
                                 "query": search,
                                 "hits": [
-                                    {"session_id": s, "start_sec": st, "end_sec": e, "snippet": sn}
-                                    for s, _tx, st, e, sn in hits
+                                    {"session_id": s, "start_sec": st, "end_sec": e, "snippet": sn} for s, _tx, st, e, sn in hits
                                 ],
                             }
                         ),

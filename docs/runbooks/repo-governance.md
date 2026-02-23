@@ -17,7 +17,7 @@ Target: `main`. Для простоты включены только необх
 - **Включить:** `./scripts/ruleset_enforcement.sh require-pr` — применяется `.github/rulesets/main-protection.json` (добавляются `pull_request` и `required_status_checks`).
 - **Вернуть минимальный:** `./scripts/ruleset_enforcement.sh allow-direct-push` — снова только три правила выше.
 
-`scripts/apply_main_ruleset.sh` — применить/обновить полный ruleset из JSON.  
+`scripts/apply_main_ruleset.sh` — применить/обновить полный ruleset из JSON.
 `scripts/check_repo_governance.sh` — проверка полного набора (при require-pr); при минимальном наборе часть проверок не выполняется.
 
 ## Порядок на GitHub
