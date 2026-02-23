@@ -15,7 +15,7 @@
 
 - [ ] I ran `./scripts/verify_pr.sh`
 - [ ] I ran `./scripts/smoke_clean_env.sh`
-- [ ] CLI contract is unchanged (9 commands) or intentionally updated with explicit note
+- [ ] CLI contract is unchanged (see `tests/test_cli_surface.py`) or intentionally updated with explicit note
 - [ ] DB migration behavior on clean and existing DB is covered by tests
 - [ ] Config/env contract docs are up to date (`docs/runbooks/config-env-contract.md`)
 - [ ] `CHANGELOG.md` updated for user-visible changes
