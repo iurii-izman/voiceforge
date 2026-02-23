@@ -1,40 +1,29 @@
 # Repo Governance (alpha0.1)
 
-## Main Branch Ruleset
+## Main Branch Ruleset — минимальный набор
 
-Target: `main`
+Target: `main`. Для простоты включены только необходимые правила:
 
-Required policies (when enforcement is `active`):
-1. No direct pushes.
-2. Require pull request before merge.
-3. Solo mode: pull request approval count is `0` (status checks remain mandatory).
-4. Require up-to-date branch before merge.
-5. Require status checks:
-   - `quality (3.12)`
-   - `quality (3.13)`
-   - `cli-contract`
-   - `db-migrations`
-   - `e2e-smoke`
-6. Require linear history.
-7. Restrict force pushes and deletions.
+1. **deletion** — запрет удаления ветки `main`
+2. **non_fast_forward** — запрет force-push (только fast-forward)
+3. **required_linear_history** — линейная история
 
-`scripts/apply_main_ruleset.sh` can apply these settings via GitHub API (requires authenticated `gh`).
-`scripts/check_repo_governance.sh` validates active ruleset and required checks.
+Прямой пуш в `main` разрешён. Никаких обязательных PR и status checks.
 
-### Временное разрешение прямого пуша в main
+### Полный набор (опционально, на более поздних этапах)
 
-Для скорости разработки можно снять требование PR, потом вернуть его на более поздних этапах.
+Когда понадобится обязательный PR и зелёные CI-чеки перед мержем:
 
-- **Разрешить прямой пуш в main:** `./scripts/ruleset_enforcement.sh allow-direct-push` — из ruleset временно удаляются правила `pull_request` и `required_status_checks` (остаются deletion, non_fast_forward, required_linear_history).
-- **Вернуть обязательный PR:** `./scripts/ruleset_enforcement.sh require-pr` — применяется полный ruleset из `.github/rulesets/main-protection.json`.
+- **Включить:** `./scripts/ruleset_enforcement.sh require-pr` — применяется `.github/rulesets/main-protection.json` (добавляются `pull_request` и `required_status_checks`).
+- **Вернуть минимальный:** `./scripts/ruleset_enforcement.sh allow-direct-push` — снова только три правила выше.
 
-Режим enforcement=`evaluate` (проверки без блокировки) доступен только в GitHub Enterprise; на Free/Team используется снятие правила.
+`scripts/apply_main_ruleset.sh` — применить/обновить полный ruleset из JSON.  
+`scripts/check_repo_governance.sh` — проверка полного набора (при require-pr); при минимальном наборе часть проверок не выполняется.
 
-## Порядок на GitHub (ветки и PR)
+## Порядок на GitHub
 
-- После мержа PR: удалить ветку в GitHub (кнопка "Delete branch" на странице PR или `gh pr merge 23 --delete-branch`).
-- Локально: `git fetch --prune` и удалить локальные ветки слитых фич (`git branch -d feat/...`).
-- Активная разработка — в feature-ветках; мерж в `main` только через PR при зелёных required checks (Sonar не блокирует, см. раздел SonarCloud).
+- На remote — по возможности только `main`; после мержа PR удалять ветку (`gh pr merge N --delete-branch`).
+- Локально: `git fetch --prune`, при необходимости `git branch -d <ветка>`.
 
 ## Security Settings Baseline
 
