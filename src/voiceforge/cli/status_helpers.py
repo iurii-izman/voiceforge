@@ -107,6 +107,7 @@ def _doctor_checks() -> list[tuple[bool, str, str]]:
 
     try:
         import keyring
+
         found = []
         for name in ("anthropic", "openai", "huggingface"):
             try:
@@ -135,6 +136,7 @@ def _doctor_checks() -> list[tuple[bool, str, str]]:
 
     try:
         from voiceforge.llm.local_llm import is_available
+
         if is_available():
             results.append((True, t("doctor.ollama_ok"), "doctor.ollama_ok"))
         else:
@@ -144,6 +146,7 @@ def _doctor_checks() -> list[tuple[bool, str, str]]:
 
     try:
         import psutil
+
         mem = psutil.virtual_memory()
         gb = mem.available / 1024**3
         if gb >= 2.0:
@@ -156,7 +159,13 @@ def _doctor_checks() -> list[tuple[bool, str, str]]:
     for mod in ("litellm", "faster_whisper"):
         try:
             importlib.import_module(mod.replace("-", "_"))
-            results.append((True, t("doctor.llm_ok" if mod == "litellm" else "doctor.stt_ok"), "doctor.llm_ok" if mod == "litellm" else "doctor.stt_ok"))
+            results.append(
+                (
+                    True,
+                    t("doctor.llm_ok" if mod == "litellm" else "doctor.stt_ok"),
+                    "doctor.llm_ok" if mod == "litellm" else "doctor.stt_ok",
+                )
+            )
         except Exception:
             msg = t("doctor.llm_fail") if mod == "litellm" else t("doctor.stt_fail")
             results.append((False, msg, "doctor.llm_fail" if mod == "litellm" else "doctor.stt_fail"))
