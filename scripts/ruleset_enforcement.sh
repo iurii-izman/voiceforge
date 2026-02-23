@@ -35,17 +35,17 @@ if [[ -z "${ruleset_id}" ]]; then
 fi
 
 if [[ "$mode" == "allow-direct-push" ]]; then
-  echo "Removing pull_request rule from ruleset (direct push to main allowed)."
+  echo "Removing pull_request and required_status_checks (direct push to main allowed)."
   payload="$(gh api "repos/${repo}/rulesets/${ruleset_id}" | jq '
     del(._links, .created_at, .updated_at, .node_id, .source, .source_type, .current_user_can_bypass) |
-    .rules |= map(select(.type != "pull_request"))
+    .rules |= map(select(.type != "pull_request" and .type != "required_status_checks"))
   ')"
   echo "$payload" | gh api \
     --method PUT \
     -H "Accept: application/vnd.github+json" \
     "repos/${repo}/rulesets/${ruleset_id}" \
     --input - >/dev/null
-  echo "Done. pull_request rule removed."
+  echo "Done. pull_request and required_status_checks removed."
 else
   if [[ ! -f "$payload_file" ]]; then
     echo "Missing ruleset file: $payload_file" >&2

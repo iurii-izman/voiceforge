@@ -25,7 +25,7 @@ Required policies (when enforcement is `active`):
 
 Для скорости разработки можно снять требование PR, потом вернуть его на более поздних этапах.
 
-- **Разрешить прямой пуш в main:** `./scripts/ruleset_enforcement.sh allow-direct-push` — из ruleset временно удаляется правило `pull_request` (остальные правила остаются).
+- **Разрешить прямой пуш в main:** `./scripts/ruleset_enforcement.sh allow-direct-push` — из ruleset временно удаляются правила `pull_request` и `required_status_checks` (остаются deletion, non_fast_forward, required_linear_history).
 - **Вернуть обязательный PR:** `./scripts/ruleset_enforcement.sh require-pr` — применяется полный ruleset из `.github/rulesets/main-protection.json`.
 
 Режим enforcement=`evaluate` (проверки без блокировки) доступен только в GitHub Enterprise; на Free/Team используется снятие правила.
