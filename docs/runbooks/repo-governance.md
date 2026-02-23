@@ -4,7 +4,7 @@
 
 Target: `main`
 
-Required policies:
+Required policies (when enforcement is `active`):
 1. No direct pushes.
 2. Require pull request before merge.
 3. Solo mode: pull request approval count is `0` (status checks remain mandatory).
@@ -20,6 +20,15 @@ Required policies:
 
 `scripts/apply_main_ruleset.sh` can apply these settings via GitHub API (requires authenticated `gh`).
 `scripts/check_repo_governance.sh` validates active ruleset and required checks.
+
+### Временное разрешение прямого пуша в main
+
+Для скорости разработки можно снять требование PR, потом вернуть его на более поздних этапах.
+
+- **Разрешить прямой пуш в main:** `./scripts/ruleset_enforcement.sh allow-direct-push` — из ruleset временно удаляется правило `pull_request` (остальные правила остаются).
+- **Вернуть обязательный PR:** `./scripts/ruleset_enforcement.sh require-pr` — применяется полный ruleset из `.github/rulesets/main-protection.json`.
+
+Режим enforcement=`evaluate` (проверки без блокировки) доступен только в GitHub Enterprise; на Free/Team используется снятие правила.
 
 ## Порядок на GitHub (ветки и PR)
 
