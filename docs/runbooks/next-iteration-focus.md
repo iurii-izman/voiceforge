@@ -4,6 +4,8 @@
 
 **Обновлено:** 2026-02-23
 
+**Последняя итерация:** расширенные e2e (#8), cost report e2e (cost --from/--to), PII UX (#11 — pii_mode в status), локализация e2e (VOICEFORGE_LANGUAGE=ru в тестах с русским выводом), config-env-contract и CHANGELOG.
+
 ---
 
 ## Сверка плана развития (development-plan-post-audit-2026.md)
@@ -19,8 +21,8 @@
 1. **Roadmap #10** — Live summary: интервал вынесен в конфиг (`live_summary_interval_sec` / `VOICEFORGE_LIVE_SUMMARY_INTERVAL_SEC`, default 90). Дальше — при необходимости UX (например вывод в отдельный поток/файл).
 2. **Roadmap #9** — Стриминг STT: добавлен unit-тест `test_streaming_transcriber_passes_language_to_transcribe`; при доработках — дополнять тестами.
 3. **Roadmap #7** — Явный язык для STT: реализован (language → Whisper hint в CLI и daemon), задокументирован в CHANGELOG и config-env-contract.
-4. **Покрытие (W10):** при доработках daemon/smart_trigger/streaming дополнять unit-тестами (как в этой итерации).
-5. **Локализация e2e:** при смене локали (LANG=en) тесты index/watch проверяют русские подписи; при необходимости — фиксировать locale в тестах или проверять по ключам.
+4. **Покрытие (W10):** при доработках daemon/smart_trigger/streaming дополнять unit-тестами.
+5. **Локализация e2e:** закрыто — в тестах index/watch, export md, history md задаётся `VOICEFORGE_LANGUAGE=ru` для стабильных проверок.
 
 ---
 

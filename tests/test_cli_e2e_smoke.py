@@ -123,6 +123,7 @@ def test_cli_service_install_uninstall_smoke(monkeypatch, tmp_path) -> None:
 def test_cli_index_watch_smoke_with_mocks(monkeypatch, tmp_path) -> None:
     monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
     monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "runtime"))
+    monkeypatch.setenv("VOICEFORGE_LANGUAGE", "ru")  # e2e asserts Russian index/watch output
 
     kb_dir = tmp_path / "kb"
     kb_dir.mkdir()
@@ -208,12 +209,65 @@ def test_cli_cost_status_smoke(monkeypatch, tmp_path) -> None:
     assert status_payload.get("ok") is True
     status_data = status_payload.get("data") or {}
     assert "cost_today_usd" in status_data
+    assert "pii_mode" in status_data
+    assert status_data["pii_mode"] in ("OFF", "ON", "EMAIL_ONLY")
+
+
+def test_cli_cost_from_to_smoke(monkeypatch, tmp_path) -> None:
+    """E2E: cost --from YYYY-MM-DD --to YYYY-MM-DD --output json returns valid structure."""
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
+    monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "runtime"))
+
+    cost_result = runner.invoke(
+        main_mod.app,
+        ["cost", "--from", "2025-01-01", "--to", "2025-01-15", "--output", "json"],
+    )
+    assert cost_result.exit_code == 0, cost_result.stdout
+    payload = _last_json_line(cost_result.stdout)
+    assert payload.get("ok") is True
+    data = payload.get("data") or {}
+    assert "total_cost_usd" in data
+    assert "by_model" in data
+    assert "by_day" in data
+
+
+def test_cli_status_detailed_json_smoke(monkeypatch, tmp_path) -> None:
+    """E2E: status --detailed --output json returns stats_7d, stats_30d, budget_limit_usd."""
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
+    monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "runtime"))
+
+    result = runner.invoke(main_mod.app, ["status", "--detailed", "--output", "json"])
+    assert result.exit_code == 0, result.stdout
+    payload = _last_json_line(result.stdout)
+    assert payload.get("ok") is True
+    data = payload.get("data") or {}
+    assert "stats_7d" in data
+    assert "stats_30d" in data
+    assert "budget_limit_usd" in data
+    assert "pii_mode" in data
+
+
+def test_cli_doctor_json_smoke(monkeypatch, tmp_path) -> None:
+    """E2E: status --doctor --output json returns checks list and errors count."""
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
+    monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "runtime"))
+
+    result = runner.invoke(main_mod.app, ["status", "--doctor", "--output", "json"])
+    assert result.exit_code == 0, result.stdout
+    payload = _last_json_line(result.stdout)
+    assert payload.get("ok") is True
+    data = payload.get("data") or {}
+    assert "checks" in data
+    assert "errors" in data
+    assert isinstance(data["checks"], list)
+    assert isinstance(data["errors"], int)
 
 
 def test_cli_export_md_smoke(monkeypatch, tmp_path) -> None:
     """E2E: export --id N --format md creates file with expected sections."""
     monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
     monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "runtime"))
+    monkeypatch.setenv("VOICEFORGE_LANGUAGE", "ru")  # asserts Russian headings in export md
 
     def fake_pipeline(seconds: int, template: str | None = None) -> tuple[str, list[dict[str, object]], dict[str, object]]:
         return (
@@ -323,3 +377,38 @@ def test_cli_action_items_update_smoke(monkeypatch, tmp_path) -> None:
     assert update_payload.get("ok") is True
     assert "updates" in (update_payload.get("data") or {})
     assert (update_payload.get("data") or {}).get("cost_usd") is not None
+
+
+def test_cli_history_output_md_smoke(monkeypatch, tmp_path) -> None:
+    """E2E: history --id N --output md prints session as Markdown (sections: Сессия, Транскрипт, Анализ)."""
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
+    monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "runtime"))
+    monkeypatch.setenv("VOICEFORGE_LANGUAGE", "ru")  # asserts Russian section headings
+
+    def fake_pipeline(seconds: int, template: str | None = None) -> tuple[str, list[dict[str, object]], dict[str, object]]:
+        return (
+            "ok",
+            [{"start_sec": 0.0, "end_sec": 1.0, "speaker": "S1", "text": "hello"}],
+            {
+                "model": "test",
+                "questions": [],
+                "answers": [],
+                "recommendations": [],
+                "action_items": [],
+                "cost_usd": 0.0,
+            },
+        )
+
+    monkeypatch.setattr(main_mod, "run_analyze_pipeline", fake_pipeline)
+
+    analyze_result = runner.invoke(main_mod.app, ["analyze", "--seconds", "10", "--output", "json"])
+    assert analyze_result.exit_code == 0, analyze_result.stdout
+    session_id = _last_json_line(analyze_result.stdout)["data"]["session_id"]
+    assert isinstance(session_id, int)
+
+    md_result = runner.invoke(main_mod.app, ["history", "--id", str(session_id), "--output", "md"])
+    assert md_result.exit_code == 0, md_result.stdout
+    md_text = md_result.stdout
+    assert "# Сессия" in md_text or "Сессия" in md_text
+    assert "## Транскрипт" in md_text or "Транскрипт" in md_text
+    assert "## Анализ" in md_text or "Анализ" in md_text

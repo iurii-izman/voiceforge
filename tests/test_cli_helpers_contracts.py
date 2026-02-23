@@ -56,11 +56,13 @@ def test_status_helpers_text_and_data(monkeypatch) -> None:
     text = sh.get_status_text()
     assert "status.ram" in text
     assert "status.cost_today" in text
+    assert "status.pii_mode" in text
     assert "status.ollama_available" in text
 
     data = sh.get_status_data()
     assert data["ram"] == {"used_gb": 8.0, "total_gb": 16.0, "percent": 50.0}
     assert data["cost_today_usd"] == 1.234568
+    assert data["pii_mode"] in ("OFF", "ON", "EMAIL_ONLY")
     assert data["ollama_available"] is True
 
 

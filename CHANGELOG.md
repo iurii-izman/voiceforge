@@ -8,6 +8,9 @@ The format is based on Keep a Changelog and this project follows SemVer pre-rele
 
 ### Added
 
+- **PII UX (Roadmap #11):** в вывод `status` (текст и `--output json`) добавлен текущий режим PII (`pii_mode`: OFF/ON/EMAIL_ONLY). Ключ i18n `status.pii_mode`. Контракт: config-env-contract.md (CLI status включает pii_mode).
+- **Расширенные e2e (#8):** тесты `test_cli_cost_from_to_smoke` (cost --from/--to --output json), `test_cli_status_detailed_json_smoke` (status --detailed --output json), `test_cli_doctor_json_smoke` (status --doctor --output json); в `test_cli_cost_status_smoke` — проверка `pii_mode` в status.
+- **Локализация e2e:** в тестах, проверяющих русский вывод (index/watch, export md, history --output md), задаётся `VOICEFORGE_LANGUAGE=ru` для стабильных проверок независимо от LANG.
 - **Live summary (Roadmap #10):** интервал и окно настраиваются через `live_summary_interval_sec` (env `VOICEFORGE_LIVE_SUMMARY_INTERVAL_SEC`, default 90). Используется в `listen --live-summary` (каждые N с по последним N с).
 - **Явный язык для STT (Roadmap #7):** `VOICEFORGE_LANGUAGE` (ru/en) передаётся в Whisper как hint в CLI `listen` (стриминг) и в демоне; при `auto` hint не передаётся.
 - **Smart trigger template (Roadmap #15):** опциональная настройка `smart_trigger_template` (env `VOICEFORGE_SMART_TRIGGER_TEMPLATE`): при срабатывании авто-анализа демон передаёт шаблон в pipeline и сохраняет в лог сессии.
@@ -22,7 +25,7 @@ The format is based on Keep a Changelog and this project follows SemVer pre-rele
 
 ### Documentation
 
-- **config-env-contract.md:** поле `live_summary_interval_sec`; раздел D-Bus GetSettings (privacy_mode = alias pii_mode); поле `smart_trigger_template`.
+- **config-env-contract.md:** CLI status (и status --output json) включает `pii_mode` для PII UX; поле `live_summary_interval_sec`; раздел D-Bus GetSettings (privacy_mode = alias pii_mode); поле `smart_trigger_template`.
 - **План развития (аудит фев 2026):** сверка с кодом выполнена — Часть I (1–10) и Часть II (W1–W3, W8) реализованы; добавлены валидаторы Settings: `ollama_model` (non-empty), `ring_seconds` (positive), `pyannote_restart_hours` (≥ 1). Тесты `tests/test_config_settings.py` для W8.
 - **history --output md:** вывод детали сессии в Markdown при `history --id N --output md`; в Markdown (в т.ч. `export`) добавлена дата сессии (started_at). Сообщение об ошибке при `--output md` без `--id` выведено через i18n.
 - **Action items (ADR-0002):** Отдельная таблица `action_items` (миграция 005), cross-session трекинг. Флаг `history --action-items` — список задач по сессиям; `action-items update` сохраняет статусы и в БД.

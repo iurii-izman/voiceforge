@@ -50,6 +50,8 @@ Method `GetSettings` returns a JSON object with settings for UI. It includes:
 - `model_size`, `default_llm`, `budget_limit_usd`, `smart_trigger`, `sample_rate`, `streaming_stt`, `pii_mode`.
 - **`privacy_mode`** — alias for `pii_mode` (same value); kept for UI compatibility. There is no separate Settings field; both keys reflect `pii_mode` / `VOICEFORGE_PII_MODE`.
 
+**CLI** `status` and `status --output json` also include `pii_mode` (and in text output: `status.pii_mode` line) for PII UX (#11).
+
 ## Cost (cost_usd) source of truth (W9)
 
 - **metrics.db** (`llm_calls`): source of truth for **totals and reporting**. All LLM calls are logged here with `cost_usd`; `get_stats(days)`, `get_cost_today()`, and D-Bus `GetAnalytics` use this DB.

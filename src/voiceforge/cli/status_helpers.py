@@ -8,9 +8,10 @@ from typing import Any
 
 
 def get_status_text() -> str:
-    """Return status string (RAM + cost + Ollama) for CLI or D-Bus."""
+    """Return status string (RAM + cost + Ollama + PII) for CLI or D-Bus."""
     import psutil
 
+    from voiceforge.core.config import Settings
     from voiceforge.core.metrics import get_cost_today
     from voiceforge.i18n import t
 
@@ -18,9 +19,11 @@ def get_status_text() -> str:
     cost = get_cost_today()
     used_gb = mem.used / 1024**3
     total_gb = mem.total / 1024**3
+    cfg = Settings()
     lines = [
         t("status.ram", used=used_gb, total=total_gb, percent=mem.percent),
         t("status.cost_today", cost=cost),
+        t("status.pii_mode", mode=getattr(cfg, "pii_mode", "ON")),
     ]
     try:
         from voiceforge.llm.local_llm import is_available
@@ -32,9 +35,10 @@ def get_status_text() -> str:
 
 
 def get_status_data() -> dict[str, Any]:
-    """Return machine-readable status data."""
+    """Return machine-readable status data (includes pii_mode for PII UX)."""
     import psutil
 
+    from voiceforge.core.config import Settings
     from voiceforge.core.metrics import get_cost_today
 
     mem = psutil.virtual_memory()
@@ -45,6 +49,7 @@ def get_status_data() -> dict[str, Any]:
         ollama_available = bool(is_available())
     except ImportError:
         ollama_available = False
+    cfg = Settings()
     return {
         "ram": {
             "used_gb": round(mem.used / 1024**3, 2),
@@ -52,6 +57,7 @@ def get_status_data() -> dict[str, Any]:
             "percent": float(mem.percent),
         },
         "cost_today_usd": round(float(get_cost_today()), 6),
+        "pii_mode": getattr(cfg, "pii_mode", "ON"),
         "ollama_available": ollama_available,
     }
 
