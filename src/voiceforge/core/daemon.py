@@ -432,8 +432,11 @@ class VoiceForgeDaemon:
             try:
                 from voiceforge.main import run_analyze_pipeline
 
-                text, segments_for_log, analysis_for_log = run_analyze_pipeline(trigger.analyze_seconds)
-                if text.startswith("Ошибка:"):
+                template = getattr(self._cfg, "smart_trigger_template", None)
+                text, segments_for_log, analysis_for_log = run_analyze_pipeline(
+                    trigger.analyze_seconds, template=template
+                )
+                if text.startswith("Ошибка:") or text.startswith("Error:"):
                     log.warning("smart_trigger.analyze_failed", message=text[:100])
                     continue
                 from voiceforge.core.transcript_log import TranscriptLog
@@ -449,6 +452,7 @@ class VoiceForgeDaemon:
                         recommendations=analysis_for_log.get("recommendations"),
                         action_items=analysis_for_log.get("action_items"),
                         cost_usd=analysis_for_log.get("cost_usd", 0.0),
+                        template=analysis_for_log.get("template"),
                     )
                     log.info("smart_trigger.logged", session_id=session_id)
                 finally:

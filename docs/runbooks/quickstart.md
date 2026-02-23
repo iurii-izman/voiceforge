@@ -21,7 +21,8 @@
    - `uv run voiceforge history --id N` — детали сессии; `--output md` — вывод в Markdown в stdout
    - `uv run voiceforge history --search "текст"` — поиск по транскриптам
    - `uv run voiceforge history --date 2026-02-23` или `--from YYYY-MM-DD --to YYYY-MM-DD`
-   - `uv run voiceforge export --id N --format md` — экспорт в Markdown/PDF
+   - `uv run voiceforge export --id N --format md` — экспорт в Markdown (всегда доступен)
+   - `uv run voiceforge export --id N --format pdf` — экспорт в PDF **опционален**: нужны `pandoc` и `pdflatex` (например `dnf install pandoc texlive-scheme-basic`). Без них выводится подсказка, Markdown сохраняется во временный файл.
 
 5. **Затраты и диагностика**
    - `uv run voiceforge cost --days 30` — отчёт по затратам

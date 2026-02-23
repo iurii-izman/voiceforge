@@ -58,7 +58,7 @@ uv run voiceforge history --last 10
 ```bash
 uv run voiceforge history --id 1
 uv run voiceforge export --id 1 --format md -o meeting.md
-uv run voiceforge export --id 1 --format pdf   # нужен pandoc + pdflatex
+uv run voiceforge export --id 1 --format pdf   # опционально: нужны pandoc и pdflatex (dnf install pandoc texlive-scheme-basic)
 ```
 
 ## 5. Отчёт по затратам
