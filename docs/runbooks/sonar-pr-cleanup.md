@@ -2,11 +2,12 @@
 
 Как навести порядок, когда в Sonar висит много анализов по веткам/PR и хочется уменьшить шум.
 
-**Быстрый чеклист:**
-1. `gh pr list --state open` — посмотреть открытые PR, закрыть или смержить устаревшие.
-2. После мержа PR — удалить ветку (кнопка в GitHub или `gh pr merge N --delete-branch`).
-3. `uv run python scripts/sonar_list_branches.py` — посмотреть ветки в Sonar (опционально).
-4. В SonarCloud → Project → Pull Requests — при желании ориентироваться, что там висит; удалять старые анализы можно только вручную в Activity (если план даёт такую возможность).
+**Быстрый чеклист (или автопилот):**
+1. **Автоочистка:** `uv run python scripts/cleanup_github_pr_sonar.py [--dry-run] [--days 90]` — через `gh` CLI закрывает PR без активности N+ дней и удаляет их ветку, затем выводит список веток в Sonar. По умолчанию 90 дней; `--dry-run` только показывает, что было бы закрыто.
+2. Вручную: `gh pr list --state open` — посмотреть открытые PR, закрыть или смержить устаревшие.
+3. После мержа PR — удалить ветку (кнопка в GitHub или `gh pr merge N --delete-branch`).
+4. `uv run python scripts/sonar_list_branches.py` — посмотреть ветки в Sonar (опционально).
+5. В SonarCloud → Project → Pull Requests — при желании ориентироваться, что там висит; удалять старые анализы можно только вручную в Activity (если план даёт такую возможность).
 
 ## Что копится
 
@@ -62,8 +63,17 @@ uv run python scripts/sonar_list_branches.py --json
 - После мержа PR: удалять ветку (`gh pr merge N --delete-branch` или кнопка в GitHub).
 - При желании уменьшить список в Sonar: раз в какое-то время заходить в SonarCloud → Project → Activity и удалять старые снимки (если интерфейс даёт такую возможность).
 
+## Автоочистка (gh CLI)
+
+Скрипт `scripts/cleanup_github_pr_sonar.py` использует авторизованный `gh` и keyring для Sonar:
+
+- Список открытых PR → закрывает те, где нет активности `--days` дней (по умолчанию 90), удаляет их ветку, выводит список веток в Sonar.
+- Запуск: `uv run python scripts/cleanup_github_pr_sonar.py` (реально) или с `--dry-run` только посмотреть.
+- Требуется: `gh auth login` выполнен, в keyring есть `sonar_token` для вывода Sonar веток.
+
 ## См. также
 
 - `repo-governance.md` — политика репо, Sonar только как справочник.
 - `scripts/sonar_fetch_issues.py` — список открытых issues по коду.
 - `scripts/sonar_list_branches.py` — список веток/анализов в SonarCloud.
+- `scripts/cleanup_github_pr_sonar.py` — автоочистка stale PR + отчёт Sonar.
