@@ -248,8 +248,8 @@ class KnowledgeIndexer:
         parser = _PARSERS[suffix]
         try:
             sections = parser(path)
-        except ImportError as e:
-            raise e
+        except ImportError:
+            raise
         added, updated, deleted = self._add_texts(str(path), sections)
         log.info(
             "indexer.add_file",
