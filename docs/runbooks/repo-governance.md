@@ -65,3 +65,4 @@ Priority issue set (10-15):
 - **Список issues локально:** `uv run python scripts/sonar_fetch_issues.py` (токен из keyring `voiceforge/sonar_token`). Вывод: файл:строка [severity] правило | сообщение; опция `--json` — полный JSON.
 - **Используем Sonar только как справочную информацию**: не блокируем merge по чеку, не требуем зелёный gate перед релизом. На поздних этапах при необходимости можно снова ввести проверку (`check_sonar_status.sh --required` в release runbook).
 - Список ключей keyring (в т.ч. `sonar_token`): `docs/runbooks/keyring-keys-reference.md`.
+- **Порядок в Sonar и PR (много анализов/пул реквестов):** `docs/runbooks/sonar-pr-cleanup.md`.
