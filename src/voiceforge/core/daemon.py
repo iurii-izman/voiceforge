@@ -28,6 +28,12 @@ log = structlog.get_logger()
 PID_FILE_NAME = "voiceforge.pid"
 
 
+def _streaming_language_hint(cfg: object) -> str | None:
+    """Language hint for streaming STT from config (auto → None)."""
+    lang = getattr(cfg, "language", "auto")
+    return None if lang in ("auto", "") else lang
+
+
 def _env_flag(name: str, default: bool = False) -> bool:
     raw = os.environ.get(name)
     if raw is None:
@@ -349,8 +355,7 @@ class VoiceForgeDaemon:
             with self._streaming_lock:
                 self._streaming_finals.append({"text": t, "start": start, "end": end})
 
-        stt_lang = getattr(self._cfg, "language", "auto")
-        language_hint = None if stt_lang in ("auto", "") else stt_lang
+        language_hint = _streaming_language_hint(self._cfg)
         stream = StreamingTranscriber(
             transcriber,
             sample_rate=self._cfg.sample_rate,

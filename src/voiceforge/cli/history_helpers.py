@@ -71,6 +71,28 @@ def sessions_list_lines(sessions: list[object]) -> list[str]:
     return render_sessions_table_lines(sessions)
 
 
+def _format_analysis_block(analysis: object) -> list[str]:
+    """Format '## Анализ' section lines."""
+    lines = [f"- **Модель:** {getattr(analysis, 'model', '')}"]
+    for attr, label in [("questions", "Вопросы"), ("answers", "Ответы/выводы"), ("recommendations", "Рекомендации")]:
+        items = getattr(analysis, attr, [])
+        if items:
+            lines.append(f"- **{label}:**")
+            for x in items:
+                lines.append(f"  - {x}")
+    action_items = getattr(analysis, "action_items", [])
+    if action_items:
+        lines.append("- **Действия:**")
+        for ai in action_items:
+            desc = ai.get("description", "") if isinstance(ai, dict) else getattr(ai, "description", "")
+            assignee = ai.get("assignee") if isinstance(ai, dict) else getattr(ai, "assignee", None)
+            lines.append(f"  - {desc} ({assignee})" if assignee else f"  - {desc}")
+    cost = getattr(analysis, "cost_usd", None)
+    if cost is not None:
+        lines.append(f"- **Стоимость:** ${cost:.4f}")
+    return lines
+
+
 def build_session_markdown(
     session_id: int,
     segments: list[object],
@@ -93,38 +115,8 @@ def build_session_markdown(
         prefix = f"**{speaker}** " if speaker else ""
         lines.append(f"- {getattr(s, 'start_sec', 0.0):.1f}–{getattr(s, 'end_sec', 0.0):.1f}s {prefix}{getattr(s, 'text', '')}")
     if analysis:
-        lines.append("")
-        lines.append("## Анализ")
-        lines.append("")
-        lines.append(f"- **Модель:** {getattr(analysis, 'model', '')}")
-        qs = getattr(analysis, "questions", [])
-        if qs:
-            lines.append("- **Вопросы:**")
-            for q in qs:
-                lines.append(f"  - {q}")
-        ans = getattr(analysis, "answers", [])
-        if ans:
-            lines.append("- **Ответы/выводы:**")
-            for a in ans:
-                lines.append(f"  - {a}")
-        recs = getattr(analysis, "recommendations", [])
-        if recs:
-            lines.append("- **Рекомендации:**")
-            for r in recs:
-                lines.append(f"  - {r}")
-        items = getattr(analysis, "action_items", [])
-        if items:
-            lines.append("- **Действия:**")
-            for ai in items:
-                desc = ai.get("description", "") if isinstance(ai, dict) else getattr(ai, "description", "")
-                assignee = ai.get("assignee") if isinstance(ai, dict) else getattr(ai, "assignee", None)
-                if assignee:
-                    lines.append(f"  - {desc} ({assignee})")
-                else:
-                    lines.append(f"  - {desc}")
-        cost = getattr(analysis, "cost_usd", None)
-        if cost is not None:
-            lines.append(f"- **Стоимость:** ${cost:.4f}")
+        lines.extend(["", "## Анализ", ""])
+        lines.extend(_format_analysis_block(analysis))
     return "\n".join(lines)
 
 

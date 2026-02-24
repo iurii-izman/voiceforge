@@ -82,6 +82,45 @@ def _chunk_text(text: str, token_approx: int = CHUNK_TOKENS, overlap_ratio: floa
     return chunks
 
 
+def _add_texts_legacy_reindex(
+    cursor: sqlite3.Cursor,
+    conn: sqlite3.Connection,
+    source: str,
+    new_chunks: list,
+    embedder: object,
+    ts: str,
+    dup_threshold: float,
+) -> tuple[int, int, int]:
+    """Backward compat: old DB without content_hash → full re-index for this source."""
+    cursor.execute("SELECT id FROM chunks WHERE source = ?", (source,))
+    for (cid,) in cursor.fetchall():
+        incremental_delete_chunk(cursor, cid)
+    added = 0
+    for n in new_chunks:
+        emb = embedder.encode([n.content])[0]
+        if _is_duplicate_via_vec(cursor, emb, dup_threshold):
+            continue
+        cursor.execute(
+            "INSERT INTO chunks(source, page, chunk_index, timestamp, content, content_hash) VALUES (?,?,?,?,?,?)",
+            (source, n.page, n.chunk_index, ts, n.content, n.content_hash),
+        )
+        chunk_id = cursor.lastrowid
+        if chunk_id is None:
+            raise RuntimeError("Failed to get chunk id after insert")
+        _insert_vec(cursor, chunk_id, emb)
+        cursor.execute(_INSERT_FTS_CHUNKS, (n.content, chunk_id))
+        added += 1
+    conn.commit()
+    log.info(
+        "incremental.full_reindex",
+        source=source,
+        chunks_added=added,
+        chunks_updated=0,
+        chunks_deleted=0,
+    )
+    return (added, 0, 0)
+
+
 def _init_db(conn: sqlite3.Connection) -> None:
     if sqlite_vec is None:
         raise ImportError("Install [rag]: uv sync --extra rag (sqlite-vec)")
@@ -163,34 +202,7 @@ class KnowledgeIndexer:
                 )
 
         if not has_content_hash_column(cursor):
-            # Backward compat: old DB without hash → full re-index for this source
-            cursor.execute("SELECT id FROM chunks WHERE source = ?", (source,))
-            for (cid,) in cursor.fetchall():
-                incremental_delete_chunk(cursor, cid)
-            added = 0
-            for n in new_chunks:
-                emb = embedder.encode([n.content])[0]
-                if _is_duplicate_via_vec(cursor, emb, self.dup_threshold):
-                    continue
-                cursor.execute(
-                    "INSERT INTO chunks(source, page, chunk_index, timestamp, content, content_hash) VALUES (?,?,?,?,?,?)",
-                    (source, n.page, n.chunk_index, ts, n.content, n.content_hash),
-                )
-                chunk_id = cursor.lastrowid
-                if chunk_id is None:
-                    raise RuntimeError("Failed to get chunk id after insert")
-                _insert_vec(cursor, chunk_id, emb)
-                cursor.execute(_INSERT_FTS_CHUNKS, (n.content, chunk_id))
-                added += 1
-            conn.commit()
-            log.info(
-                "incremental.full_reindex",
-                source=source,
-                chunks_added=added,
-                chunks_updated=0,
-                chunks_deleted=0,
-            )
-            return (added, 0, 0)
+            return _add_texts_legacy_reindex(cursor, conn, source, new_chunks, embedder, ts, self.dup_threshold)
 
         existing = get_existing_chunks(cursor, source)
         to_add, to_update, to_delete_ids = plan_diff(existing, new_chunks)

@@ -61,6 +61,33 @@ def _uses_ipc_envelope() -> bool:
     return _env_flag("VOICEFORGE_IPC_ENVELOPE", default=True)
 
 
+def _analyze_result_is_error(result: str) -> bool:
+    """True if result is error (Russian prefix or JSON with 'error')."""
+    try:
+        parsed = json.loads(result)
+        return isinstance(parsed, dict) and "error" in parsed
+    except (json.JSONDecodeError, TypeError):
+        return result.startswith("Ошибка:")
+
+
+def _analyze_ipc_return(result: str, is_error: bool) -> str:
+    """Format Analyze result for IPC envelope (error or success)."""
+    if not is_error:
+        return _make_ipc_success({"text": result})
+    try:
+        parsed = json.loads(result)
+        if isinstance(parsed, dict) and "error" in parsed:
+            err = parsed["error"]
+            return _make_ipc_error(
+                str(err.get("code", "ANALYZE_FAILED")),
+                str(err.get("message", "Analyze failed")),
+                bool(err.get("retryable", False)),
+            )
+    except (json.JSONDecodeError, TypeError, AttributeError):
+        pass
+    return _make_ipc_error("ANALYZE_FAILED", result, retryable=False)
+
+
 class VoiceForgeAppInterface(ServiceInterface):
     """D-Bus interface com.voiceforge.App: Analyze, Toggle, Status (standalone hotkeys).
 
@@ -181,31 +208,11 @@ class DaemonVoiceForgeInterface(ServiceInterface):
         log.info("dbus.Analyze.called", seconds=seconds, template=template_val)
         async with self._analyze_sem:
             result = await asyncio.to_thread(self._analyze, seconds, template_val)
-        # Treat result starting with "Ошибка:" (Russian) or structured {"error":...} as error
-        try:
-            parsed = json.loads(result)
-            is_error = isinstance(parsed, dict) and "error" in parsed
-        except (json.JSONDecodeError, TypeError):
-            is_error = result.startswith("Ошибка:")
-        status = "error" if is_error else "ok"
-        self.AnalysisDone(status)
-        # session_id is not available at interface layer; emit 0 as generic update trigger.
+        is_error = _analyze_result_is_error(result)
+        self.AnalysisDone("error" if is_error else "ok")
         self.TranscriptUpdated(0)
         if _uses_ipc_envelope():
-            if is_error:
-                try:
-                    parsed = json.loads(result)
-                    if isinstance(parsed, dict) and "error" in parsed:
-                        err = parsed["error"]
-                        return _make_ipc_error(
-                            str(err.get("code", "ANALYZE_FAILED")),
-                            str(err.get("message", "Analyze failed")),
-                            bool(err.get("retryable", False)),
-                        )
-                except (json.JSONDecodeError, TypeError, AttributeError):
-                    pass
-                return _make_ipc_error("ANALYZE_FAILED", result, retryable=False)
-            return _make_ipc_success({"text": result})
+            return _analyze_ipc_return(result, is_error)
         return result
 
     @dbus_method()

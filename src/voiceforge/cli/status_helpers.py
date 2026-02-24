@@ -66,30 +66,32 @@ def get_status_data() -> dict[str, Any]:
     }
 
 
+def _format_stats_block(data: dict, budget_limit_usd: float, label: str) -> list[str]:
+    """Format one block of stats (by_model, by_day, rate) for status --detailed."""
+    lines: list[str] = []
+    total = data.get("total_cost_usd") or 0
+    pct = (total / budget_limit_usd * 100) if budget_limit_usd > 0 else 0
+    lines.append(f"Затраты за {label}: ${total:.4f} ({pct:.1f}% от бюджета ${budget_limit_usd:.0f})")
+    for e in data.get("by_model") or []:
+        lines.append(f"  {e.get('model', '')}: ${(e.get('cost_usd') or 0):.4f} ({e.get('calls', 0)} вызовов)")
+    by_day = data.get("by_day") or []
+    if by_day:
+        lines.append("  По дням:")
+        for row in by_day[-7:]:
+            lines.append(f"    {row.get('date', '')}: ${(row.get('cost_usd') or 0):.4f}")
+    rate = data.get("response_cache_hit_rate")
+    if rate is not None:
+        lines.append(f"  Cache hit rate: {rate * 100:.1f}%")
+    return lines
+
+
 def get_status_detailed_text(budget_limit_usd: float) -> str:
     """Return multi-line status with cost by model/day, cache hit rate, budget % (for status --detailed)."""
     from voiceforge.core.metrics import get_stats
 
     lines: list[str] = [get_status_text(), ""]
     for days, label in [(7, "7 дней"), (30, "30 дней")]:
-        data = get_stats(days=days)
-        total = data.get("total_cost_usd") or 0
-        pct = (total / budget_limit_usd * 100) if budget_limit_usd > 0 else 0
-        lines.append(f"Затраты за {label}: ${total:.4f} ({pct:.1f}% от бюджета ${budget_limit_usd:.0f})")
-        by_model = data.get("by_model") or []
-        if by_model:
-            for e in by_model:
-                lines.append(f"  {e.get('model', '')}: ${(e.get('cost_usd') or 0):.4f} ({e.get('calls', 0)} вызовов)")
-        by_day = data.get("by_day") or []
-        if by_day:
-            lines.append("  По дням:")
-            for row in by_day[-7:]:
-                d = row.get("date", "")
-                c = row.get("cost_usd") or 0
-                lines.append(f"    {d}: ${c:.4f}")
-        rate = data.get("response_cache_hit_rate")
-        if rate is not None:
-            lines.append(f"  Cache hit rate: {rate * 100:.1f}%")
+        lines.extend(_format_stats_block(get_stats(days=days), budget_limit_usd, label))
         lines.append("")
     return "\n".join(lines).rstrip()
 
@@ -105,16 +107,7 @@ def get_status_detailed_data(budget_limit_usd: float) -> dict[str, Any]:
     return base
 
 
-def _doctor_checks() -> list[tuple[bool, str, str]]:
-    """Run doctor checks. Returns list of (ok: bool, message: str, i18n_key: str)."""
-    from voiceforge.core.config import Settings
-    from voiceforge.i18n import t
-
-    cfg = Settings()
-    results: list[tuple[bool, str, str]] = []
-
-    results.append((True, t("doctor.config_ok"), "doctor.config_ok"))
-
+def _doctor_check_keyring(t: Any) -> tuple[bool, str, str]:
     try:
         import keyring
         from keyring.errors import KeyringError
@@ -126,61 +119,78 @@ def _doctor_checks() -> list[tuple[bool, str, str]]:
                     found.append(name)
             except KeyringError:
                 pass
-        if found:
-            results.append((True, t("doctor.keyring_ok"), "doctor.keyring_ok"))
-        else:
-            results.append((False, t(_DOCTOR_KEYRING_FAIL), _DOCTOR_KEYRING_FAIL))
+        return (
+            (True, t("doctor.keyring_ok"), "doctor.keyring_ok")
+            if found
+            else (False, t(_DOCTOR_KEYRING_FAIL), _DOCTOR_KEYRING_FAIL)
+        )
     except Exception as e:
-        results.append((False, f"keyring: {e}", _DOCTOR_KEYRING_FAIL))
+        return (False, f"keyring: {e}", _DOCTOR_KEYRING_FAIL)
 
-    rag_path = Path(cfg.get_rag_db_path())
-    if rag_path.exists():
-        results.append((True, t("doctor.rag_ok"), "doctor.rag_ok"))
+
+def _doctor_check_rag_ring(cfg: Any, t: Any) -> list[tuple[bool, str, str]]:
+    out: list[tuple[bool, str, str]] = []
+    if Path(cfg.get_rag_db_path()).exists():
+        out.append((True, t("doctor.rag_ok"), "doctor.rag_ok"))
     else:
-        results.append((True, t("doctor.rag_optional"), "doctor.rag_optional"))
-
-    ring_path = Path(cfg.get_ring_file_path())
-    if ring_path.exists():
-        results.append((True, t("doctor.ring_ok"), "doctor.ring_ok"))
+        out.append((True, t("doctor.rag_optional"), "doctor.rag_optional"))
+    if Path(cfg.get_ring_file_path()).exists():
+        out.append((True, t("doctor.ring_ok"), "doctor.ring_ok"))
     else:
-        results.append((False, t("doctor.ring_absent"), "doctor.ring_absent"))
+        out.append((False, t("doctor.ring_absent"), "doctor.ring_absent"))
+    return out
 
+
+def _doctor_check_ollama(t: Any) -> tuple[bool, str, str]:
     try:
         from voiceforge.llm.local_llm import is_available
 
-        if is_available():
-            results.append((True, t("doctor.ollama_ok"), "doctor.ollama_ok"))
-        else:
-            results.append((True, t(_DOCTOR_OLLAMA_FAIL), _DOCTOR_OLLAMA_FAIL))
+        return (
+            (True, t("doctor.ollama_ok"), "doctor.ollama_ok")
+            if is_available()
+            else (True, t(_DOCTOR_OLLAMA_FAIL), _DOCTOR_OLLAMA_FAIL)
+        )
     except ImportError:
-        results.append((True, t(_DOCTOR_OLLAMA_FAIL), _DOCTOR_OLLAMA_FAIL))
+        return (True, t(_DOCTOR_OLLAMA_FAIL), _DOCTOR_OLLAMA_FAIL)
 
+
+def _doctor_check_ram(t: Any) -> tuple[bool, str, str]:
     try:
         import psutil
 
-        mem = psutil.virtual_memory()
-        gb = mem.available / 1024**3
-        if gb >= 2.0:
-            results.append((True, t("doctor.ram_ok", gb=gb), "doctor.ram_ok"))
-        else:
-            results.append((False, t(_DOCTOR_RAM_FAIL, gb=gb), _DOCTOR_RAM_FAIL))
+        gb = psutil.virtual_memory().available / 1024**3
+        return (
+            (True, t("doctor.ram_ok", gb=gb), "doctor.ram_ok")
+            if gb >= 2.0
+            else (False, t(_DOCTOR_RAM_FAIL, gb=gb), _DOCTOR_RAM_FAIL)
+        )
     except Exception:
-        results.append((False, "RAM check failed", _DOCTOR_RAM_FAIL))
+        return (False, "RAM check failed", _DOCTOR_RAM_FAIL)
 
+
+def _doctor_check_module(mod: str, t: Any) -> tuple[bool, str, str]:
+    try:
+        importlib.import_module(mod.replace("-", "_"))
+        key = "doctor.llm_ok" if mod == "litellm" else "doctor.stt_ok"
+        return (True, t(key), key)
+    except Exception:
+        key = "doctor.llm_fail" if mod == "litellm" else "doctor.stt_fail"
+        return (False, t(key), key)
+
+
+def _doctor_checks() -> list[tuple[bool, str, str]]:
+    """Run doctor checks. Returns list of (ok: bool, message: str, i18n_key: str)."""
+    from voiceforge.core.config import Settings
+    from voiceforge.i18n import t
+
+    cfg = Settings()
+    results: list[tuple[bool, str, str]] = [(True, t("doctor.config_ok"), "doctor.config_ok")]
+    results.append(_doctor_check_keyring(t))
+    results.extend(_doctor_check_rag_ring(cfg, t))
+    results.append(_doctor_check_ollama(t))
+    results.append(_doctor_check_ram(t))
     for mod in ("litellm", "faster_whisper"):
-        try:
-            importlib.import_module(mod.replace("-", "_"))
-            results.append(
-                (
-                    True,
-                    t("doctor.llm_ok" if mod == "litellm" else "doctor.stt_ok"),
-                    "doctor.llm_ok" if mod == "litellm" else "doctor.stt_ok",
-                )
-            )
-        except Exception:
-            msg = t("doctor.llm_fail") if mod == "litellm" else t("doctor.stt_fail")
-            results.append((False, msg, "doctor.llm_fail" if mod == "litellm" else "doctor.stt_fail"))
-
+        results.append(_doctor_check_module(mod, t))
     return results
 
 

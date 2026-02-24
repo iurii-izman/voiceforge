@@ -41,11 +41,7 @@ def _ollama_request(path: str, data: dict, timeout: float = 10) -> dict | None:
         )
         with urllib.request.urlopen(req, timeout=timeout) as resp:  # nosec B310  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
             return json.loads(resp.read().decode())
-    except (
-        urllib.error.URLError,
-        json.JSONDecodeError,
-        OSError,
-    ) as e:  # NOSONAR S5713: no redundant Exception class in this module
+    except (urllib.error.URLError, json.JSONDecodeError, OSError) as e:  # NOSONAR S5713
         log.debug("ollama.request_failed", path=path, error=str(e))
         return None
 
@@ -56,7 +52,7 @@ def is_available(timeout: float = 2.0) -> bool:
         req = urllib.request.Request(f"{_ollama_base()}/api/tags", method="GET")
         with urllib.request.urlopen(req, timeout=timeout) as _:  # nosec B310  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
             return True
-    except Exception:
+    except Exception:  # NOSONAR S5713
         return False
 
 
