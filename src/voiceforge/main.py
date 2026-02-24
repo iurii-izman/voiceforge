@@ -538,7 +538,7 @@ def _load_action_item_status() -> dict[str, str]:
 
 
 def _save_action_item_status(data: dict[str, str]) -> None:
-    path = _action_item_status_path()
+    path = _action_item_status_path()  # NOSONAR S2083: path validated under home in _action_item_status_path()
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2))
 

@@ -75,7 +75,7 @@ def _validate_migration_sql(sql_file: Path, sql_text: str) -> None:
 def _apply_migration(conn: sqlite3.Connection, sql_file: Path, version: int) -> None:
     sql = sql_file.read_text()
     _validate_migration_sql(sql_file, sql)
-    conn.executescript(sql)
+    conn.executescript(sql)  # NOSONAR S3649: sql from internal migration files, not user input
     conn.execute(
         "INSERT OR IGNORE INTO schema_migrations(version, applied_at) VALUES (?, ?)",
         (f"{version:03d}_{sql_file.stem.split('_', 1)[-1]}", datetime.now(UTC).isoformat()),
@@ -215,6 +215,15 @@ def _insert_analysis(
     )
 
 
+def _format_deadline(deadline: Any) -> str | None:
+    """Normalize deadline to ISO string or None for action_items insert."""
+    if deadline is not None and hasattr(deadline, "isoformat"):
+        return deadline.isoformat()
+    if isinstance(deadline, str):
+        return deadline.strip() or None
+    return None
+
+
 def _insert_action_items(
     cursor: sqlite3.Cursor,
     session_id: int,
@@ -227,13 +236,7 @@ def _insert_action_items(
         for idx, ai in enumerate(action_items):
             desc = str(ai.get("description") or "").strip() or "(без описания)"
             assignee = (ai.get("assignee") or "").strip() or None
-            deadline = ai.get("deadline")
-            if deadline is not None and hasattr(deadline, "isoformat"):
-                deadline = deadline.isoformat()
-            elif isinstance(deadline, str):
-                deadline = deadline.strip() or None
-            else:
-                deadline = None
+            deadline = _format_deadline(ai.get("deadline"))
             cursor.execute(
                 "INSERT INTO action_items (session_id, idx_in_analysis, description, assignee, deadline, status) "
                 "VALUES (?, ?, ?, ?, ?, 'open')",

@@ -280,10 +280,8 @@ function loadSettings() {
   }
 }
 
-(async () => {
-  const ok = await checkDaemon();
-  if (ok) {
-    await updateListenState();
-    loadSettings();
-  }
-})();
+const ok = await checkDaemon();
+if (ok) {
+  await updateListenState();
+  loadSettings();
+}

@@ -100,6 +100,39 @@ def _template_schema(template: str):
     return schemas.get(template, (None, None))
 
 
+def _try_ollama_faq(
+    transcript: str,
+    context: str,
+    local_model: str,
+    response_model: type[Any],
+) -> tuple[Any, float] | None:
+    """If Ollama is available and transcript is FAQ, return (MeetingAnalysis stub, 0.0); else None."""
+    try:
+        from voiceforge.llm.local_llm import classify, is_available, simple_answer
+        from voiceforge.llm.schemas import MeetingAnalysis
+    except ImportError:
+        return None
+    if not is_available() or response_model is not MeetingAnalysis:
+        return None
+    kind = classify(transcript, model=local_model)
+    if kind != "faq":
+        return None
+    answer = simple_answer(transcript, context, model=local_model)
+    if not answer:
+        return None
+    log.info("llm.ollama_faq", used=True)
+    return (
+        MeetingAnalysis(
+            questions=[],
+            answers=[answer],
+            recommendations=[],
+            next_directions=[],
+            action_items=[],
+        ),
+        0.0,
+    )
+
+
 def analyze_meeting(
     transcript: str,
     context: str = "",
@@ -129,24 +162,9 @@ def analyze_meeting(
 
     local_model = (ollama_model or OLLAMA_DEFAULT).strip() or OLLAMA_DEFAULT
     try:
-        from voiceforge.llm.local_llm import classify, is_available, simple_answer
-
-        if is_available() and response_model is MeetingAnalysis:
-            kind = classify(transcript, model=local_model)
-            if kind == "faq":
-                answer = simple_answer(transcript, context, model=local_model)
-                if answer:
-                    stub = MeetingAnalysis(
-                        questions=[],
-                        answers=[answer],
-                        recommendations=[],
-                        next_directions=[],
-                        action_items=[],
-                    )
-                    log.info("llm.ollama_faq", used=True)
-                    return (stub, 0.0)
-    except ImportError:
-        pass
+        ollama_result = _try_ollama_faq(transcript, context, local_model, response_model)
+        if ollama_result is not None:
+            return ollama_result
     except Exception as e:
         log.warning("llm.ollama_fallback_failed", error=str(e))
 

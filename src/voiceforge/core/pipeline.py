@@ -115,6 +115,12 @@ def _step2_rag(transcript: str, rag_db_path: str) -> str:
     return context
 
 
+def _get_language_hint(cfg: Any) -> str | None:
+    """Return language hint for STT from config, or None for auto."""
+    lang = getattr(cfg, "language", "auto")
+    return lang if lang and lang != "auto" else None
+
+
 def _step2_pii(transcript: str, pii_mode: str = "ON") -> str:
     """PII redaction. Runs in thread. pii_mode: OFF | ON | EMAIL_ONLY."""
     t0 = time.monotonic()
@@ -157,10 +163,7 @@ class AnalysisPipeline:
             log.info("pipeline.resampled", original_rate=self._cfg.sample_rate, target=TARGET_SAMPLE_RATE)
         log.info("pipeline.start", seconds=seconds, samples=len(audio))
 
-        language_hint = None
-        lang = getattr(self._cfg, "language", "auto")
-        if lang and lang != "auto":
-            language_hint = lang
+        language_hint = _get_language_hint(self._cfg)
         try:
             segments, transcript = _step1_stt(
                 audio,

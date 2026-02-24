@@ -314,11 +314,9 @@ class VoiceForgeDaemon:
     def _streaming_loop(self) -> None:
         """Block 10.1: every 1.5s get 2s chunk, transcribe, update _streaming_partial/_streaming_finals."""
         capture = self._streaming_capture
-        if capture is None:
+        if capture is None or not getattr(capture, "get_chunk", None):
             return
         get_chunk = getattr(capture, "get_chunk", None)
-        if not get_chunk:
-            return
         try:
             from voiceforge.stt.streaming import StreamingTranscriber
             from voiceforge.stt.transcriber import Transcriber
@@ -433,9 +431,7 @@ class VoiceForgeDaemon:
                 from voiceforge.main import run_analyze_pipeline
 
                 template = getattr(self._cfg, "smart_trigger_template", None)
-                text, segments_for_log, analysis_for_log = run_analyze_pipeline(
-                    trigger.analyze_seconds, template=template
-                )
+                text, segments_for_log, analysis_for_log = run_analyze_pipeline(trigger.analyze_seconds, template=template)
                 if text.startswith("Ошибка:") or text.startswith("Error:"):
                     log.warning("smart_trigger.analyze_failed", message=text[:100])
                     continue

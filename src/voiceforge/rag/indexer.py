@@ -246,10 +246,7 @@ class KnowledgeIndexer:
         if suffix not in _PARSERS:
             raise ValueError(f"Unsupported format: {suffix}. Use one of {sorted(_SUPPORTED_EXTENSIONS)}")
         parser = _PARSERS[suffix]
-        try:
-            sections = parser(path)
-        except ImportError:
-            raise
+        sections = parser(path)
         added, updated, deleted = self._add_texts(str(path), sections)
         log.info(
             "indexer.add_file",
