@@ -22,7 +22,7 @@
 # Backlog (обновляется вручную и агентом)
 
 ## В работе
-- [ ] CalDAV: опрос по calendar-integration.md (keyring caldav_*)
+- [x] CalDAV: опрос по calendar-integration.md (keyring caldav_*) — voiceforge calendar poll
 
 ## Далее (приоритет по порядку)
 - [ ] Сборка AppImage в toolbox

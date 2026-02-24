@@ -2,7 +2,7 @@
 
 Канбан и приоритеты ведутся в **[GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1)**. Этот файл — краткое зеркало для тех, кто смотрит только в репо.
 
-**Текущий фокус (In Progress):** [#26 CalDAV — реализация опроса](https://github.com/iurii-izman/voiceforge/issues/26)
+**Текущий фокус (In Progress):** [#27 AppImage](https://github.com/iurii-izman/voiceforge/issues/27) или [#28 EN runbook](https://github.com/iurii-izman/voiceforge/issues/28)
 
 ## Todo
 
@@ -12,6 +12,8 @@
 | [#28](https://github.com/iurii-izman/voiceforge/issues/28) | Runbook на EN: dependabot-review или telegram-bot-setup |
 | [#29](https://github.com/iurii-izman/voiceforge/issues/29) | RAG ODT/RTF — тесты при добавлении |
 | [#30](https://github.com/iurii-izman/voiceforge/issues/30) | Dependabot — закрыть 1 moderate вручную |
+
+**Done (недавно):** [#26 CalDAV — опрос](https://github.com/iurii-izman/voiceforge/issues/26) (voiceforge calendar poll, keyring caldav_*).
 
 При выполнении задачи: коммит в формате Conventional Commits с `Closes #N` (см. [git-github-practices.md](git-github-practices.md)); на доске перевести карточку в Done (агент может через `gh project item-edit`).
 

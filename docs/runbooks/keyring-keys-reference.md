@@ -16,6 +16,9 @@
 | `webhook_telegram` | Telegram webhook |
 | `b24webhook` | Bitrix24 webhook |
 | `MCPcode` | Прочие сервисы |
+| `caldav_url` | CalDAV calendar URL (e.g. https://nextcloud.example.com/remote.php/dav) |
+| `caldav_username` | CalDAV login |
+| `caldav_password` | CalDAV password or token |
 
 Проверка доступа (без вывода значений):
 ```bash

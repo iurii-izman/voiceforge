@@ -458,3 +458,19 @@ def test_cli_history_output_md_smoke(monkeypatch, tmp_path) -> None:
     assert "# Сессия" in md_text or "Сессия" in md_text
     assert "## Транскрипт" in md_text or "Транскрипт" in md_text
     assert "## Анализ" in md_text or "Анализ" in md_text
+
+
+def test_calendar_poll_missing_keyring(monkeypatch) -> None:
+    """Calendar poll without CalDAV keys in keyring returns error (roadmap 17)."""
+    from voiceforge.core import secrets as secrets_mod
+
+    orig = secrets_mod.get_api_key
+    monkeypatch.setattr(
+        secrets_mod,
+        "get_api_key",
+        lambda name: None if name in ("caldav_url", "caldav_username", "caldav_password") else orig(name),
+    )
+
+    result = runner.invoke(main_mod.app, ["calendar", "poll", "--minutes", "5"])
+    assert result.exit_code == 1, result.stdout + result.stderr
+    assert "Missing keyring" in result.stderr or "caldav" in result.stderr.lower()

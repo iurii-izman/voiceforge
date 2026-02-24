@@ -45,6 +45,8 @@ log = structlog.get_logger()
 app = typer.Typer(help="VoiceForge — local-first AI assistant (alpha0.1 core)")
 action_items_app = typer.Typer(help=t("cli.action_items_help"))
 app.add_typer(action_items_app, name="action-items")
+calendar_app = typer.Typer(help="CalDAV calendar poll (keyring: caldav_url, caldav_username, caldav_password)")
+app.add_typer(calendar_app, name="calendar")
 
 _INDEX_EXTENSIONS = (
     ".pdf",
@@ -1048,6 +1050,32 @@ def web_serve(
     from voiceforge.web.server import run_server
 
     run_server(host=host, port=port)
+
+
+@calendar_app.command("poll")
+def calendar_poll(
+    minutes: int = typer.Option(5, "--minutes", "-m", help="События, начавшиеся за последние N минут"),
+    output: str = typer.Option("text", "--output", help=_HELP_OUTPUT_TEXT_JSON),
+) -> None:
+    """Poll CalDAV for events that started in the last N minutes."""
+    from voiceforge.calendar import poll_events_started_in_last
+
+    events, err = poll_events_started_in_last(minutes=minutes)
+    if err is not None:
+        if output == "json":
+            typer.echo(json.dumps(_cli_error_payload("CALDAV_POLL_FAILED", err), ensure_ascii=False))
+        else:
+            typer.echo(t("calendar.poll_error", msg=err), err=True)
+        raise SystemExit(1)
+    if output == "json":
+        typer.echo(json.dumps(_cli_success_payload({"events": events, "minutes": minutes}), ensure_ascii=False))
+        return
+    if not events:
+        typer.echo(t("calendar.poll_no_events", minutes=minutes))
+        return
+    typer.echo(t("calendar.poll_events", minutes=minutes))
+    for ev in events:
+        typer.echo(t("calendar.poll_line", summary=ev.get("summary", ""), start_iso=ev.get("start_iso", "")))
 
 
 def main() -> None:

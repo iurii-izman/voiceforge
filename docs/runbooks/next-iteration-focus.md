@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** Всё доделано и зафинализировано: Project + issues #26–30 с лейблами, git-github-practices (runbook и копия правила в репо), backlog, DOCS-INDEX. Следующий шаг: взять задачу с доски — **#26 CalDAV** (In Progress) или #27 AppImage, #28 EN runbook и т.д. В новом чате: универсальный промпт из agent-context + «продолжить с @docs/runbooks/next-iteration-focus.md» или «взять issue #26».
+- **Сейчас:** Реализован CalDAV опрос (issue #26): `voiceforge calendar poll`, keyring `caldav_url` / `caldav_username` / `caldav_password`, опциональная зависимость `calendar`. Следующий шаг: взять задачу с доски — **#27 AppImage** (полная сборка в toolbox) или **#28 EN runbook** (dependabot-review / telegram-bot-setup).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-Финализация: добавлена копия правила [git-github-practices-rule.md](git-github-practices-rule.md) в репо (для .cursor/rules). next-iteration-focus приведён к итоговому состоянию. Тесты 44 passed. Коммит и пуш в конце сессии.
+Roadmap 17 (CalDAV): подкоманда `voiceforge calendar poll`, модуль `voiceforge.calendar.caldav_poll`, ключи в keyring-keys-reference.md, опция `uv sync --extra calendar`. Тесты 45 passed. Closes #26.
 
 ---
 

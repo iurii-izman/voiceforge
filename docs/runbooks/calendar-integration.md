@@ -34,6 +34,8 @@
 - Зафиксировать выбор решения (провайдер, способ опроса, автоматический старт или уведомление) в **ADR** перед реализацией.
 - Первый инкремент: опрос CalDAV по интервалу (настраиваемый URL и ключи в keyring), при «событие началось» — запись в runbook с настройкой одного провайдера (например Nextcloud или Radicale), затем интеграция с демоном (флаг или подкоманда `voiceforge calendar watch` / интеграция в daemon).
 
+**Реализовано (2026-02):** подкоманда `voiceforge calendar poll` — однократный опрос «события, начавшиеся за последние N минут»; ключи keyring: `caldav_url`, `caldav_username`, `caldav_password`. Зависимость: `uv sync --extra calendar`. Дальше: `calendar watch` (цикл опроса) и/или интеграция с демоном.
+
 ## См. также
 
 - [keyring-keys-reference.md](keyring-keys-reference.md) — имена ключей для новых учётных данных (caldav_url, caldav_password и т.д. при добавлении).
