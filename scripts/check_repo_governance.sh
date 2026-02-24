@@ -23,11 +23,13 @@ errors=0
 
 ok() {
   echo "[OK] $*"
+  return 0
 }
 
 fail() {
   echo "[FAIL] $*"
   errors=$((errors + 1))
+  return 1
 }
 
 contains_line() {

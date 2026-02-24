@@ -8,9 +8,9 @@ DESKTOP_DIR="$REPO_ROOT/desktop"
 errors=0
 warnings=0
 
-ok() { echo "[OK] $*"; }
-warn() { echo "[WARN] $*"; ((warnings++)) || true; }
-fail() { echo "[FAIL] $*"; ((errors++)) || true; }
+ok() { echo "[OK] $*"; return 0; }
+warn() { echo "[WARN] $*"; ((warnings++)) || true; return 0; }
+fail() { echo "[FAIL] $*"; ((errors++)) || true; return 1; }
 
 # Cargo / Rust
 if command -v cargo >/dev/null 2>&1; then

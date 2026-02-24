@@ -18,6 +18,7 @@ Options:
   --exclude <pattern>     Exclude file paths containing pattern from aggregate (repeatable)
   -h, --help              Show this help
 EOF
+  return 0
 }
 
 while [[ $# -gt 0 ]]; do
@@ -74,6 +75,10 @@ if ! git rev-parse --verify --quiet "${base_ref}" >/dev/null; then
       branch="${base_ref#origin/}"
       git fetch --no-tags --prune --depth=300 origin \
         "refs/heads/${branch}:refs/remotes/origin/${branch}" >/dev/null 2>&1 || true
+      ;;
+    *)
+      echo "Base ref format not supported for fetch: ${base_ref}" >&2
+      exit 1
       ;;
   esac
 fi

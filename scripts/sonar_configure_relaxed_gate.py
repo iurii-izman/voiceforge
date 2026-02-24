@@ -46,8 +46,8 @@ def main() -> None:
     req = urllib.request.Request(select_url, method="POST")
     req.add_header("Authorization", f"Bearer {token}")
     try:
-        with urllib.request.urlopen(req, timeout=15):
-            pass
+        with urllib.request.urlopen(req, timeout=15) as _resp:
+            _resp.read()  # consume response (S108: fill block)
         print(f"SonarCloud {PROJECT_KEY} → quality gate: {RELAXED_GATE_NAME} (id={gate_id})")
     except urllib.error.HTTPError as e:
         body = e.read().decode() if e.fp else ""
@@ -60,7 +60,6 @@ def main() -> None:
         else:
             print(f"Select failed: {e.code} {body}", file=sys.stderr)
         sys.exit(1)
-    return
 
 
 if __name__ == "__main__":

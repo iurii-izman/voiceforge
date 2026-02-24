@@ -17,7 +17,7 @@ Target: `main`. Для простоты включены только необх
 - **Включить:** `./scripts/ruleset_enforcement.sh require-pr` — применяется `.github/rulesets/main-protection.json` (добавляются `pull_request` и `required_status_checks`).
 - **Вернуть минимальный:** `./scripts/ruleset_enforcement.sh allow-direct-push` — снова только три правила выше.
 
-`scripts/apply_main_ruleset.sh` — применить/обновить полный ruleset из JSON.  
+`scripts/apply_main_ruleset.sh` — применить/обновить полный ruleset из JSON.
 `scripts/check_repo_governance.sh` — проверка полного набора (при require-pr); при минимальном наборе часть проверок не выполняется.
 
 ## Порядок на GitHub
@@ -62,5 +62,6 @@ Priority issue set (10-15):
 Текущий план SonarCloud не позволяет назначить проекту Quality Gate иной, чем **Sonar way (Default)** — менять gate нельзя.
 
 - Скан в CI включён (workflow `sonar.yml`, `sonar-project.properties`), отчёт доступен в [SonarCloud](https://sonarcloud.io) для просмотра.
+- **Список issues локально:** `uv run python scripts/sonar_fetch_issues.py` (токен из keyring `voiceforge/sonar_token`). Вывод: файл:строка [severity] правило | сообщение; опция `--json` — полный JSON.
 - **Используем Sonar только как справочную информацию**: не блокируем merge по чеку, не требуем зелёный gate перед релизом. На поздних этапах при необходимости можно снова ввести проверку (`check_sonar_status.sh --required` в release runbook).
 - Список ключей keyring (в т.ч. `sonar_token`): `docs/runbooks/keyring-keys-reference.md`.

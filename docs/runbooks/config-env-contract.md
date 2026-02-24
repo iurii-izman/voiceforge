@@ -19,7 +19,7 @@ Priority order:
 | `ring_seconds` | `VOICEFORGE_RING_SECONDS` | `300.0` | Ring buffer duration |
 | `ring_file_path` | `VOICEFORGE_RING_FILE_PATH` | auto (`XDG_RUNTIME_DIR`/`~/.cache`) | Ring PCM path |
 | `rag_db_path` | `VOICEFORGE_RAG_DB_PATH` | auto (`XDG_DATA_HOME`/`~/.local/share`) | RAG SQLite path |
-| `smart_trigger` | `VOICEFORGE_SMART_TRIGGER` | `false` | Auto-analyze mode |
+| `smart_trigger` | `VOICEFORGE_SMART_TRIGGER` | `false` | Auto-analyze mode. **Default policy (roadmap 15):** remains `false` until user feedback on false positives; when enabling by default, update default here and in config source, and note in release. |
 | `smart_trigger_template` | `VOICEFORGE_SMART_TRIGGER_TEMPLATE` | `null` | Optional template for smart-trigger analyze (e.g. `standup`, `one_on_one`). Only when `smart_trigger` is true. |
 | `monitor_source` | `VOICEFORGE_MONITOR_SOURCE` | `null` | PipeWire monitor source |
 | `aggressive_memory` | `VOICEFORGE_AGGRESSIVE_MEMORY` | `false` | Unload models after analyze |
@@ -43,6 +43,10 @@ Priority order:
 | `VOICEFORGE_SERVICE_FILE` | unset | Override systemd unit file source |
 | `VOICEFORGE_IPC_ENVELOPE` | `true` | IPC envelope mode in daemon/dbus (set to `false` for legacy plain-string clients) |
 | `OLLAMA_HOST` | `http://localhost:11434` | Local LLM endpoint |
+
+## D-Bus API (десктоп ↔ демон)
+
+Полный контракт методов и сигналов: **`desktop/DBUS.md`**. При изменении D-Bus интерфейса обновлять `desktop/DBUS.md` и при необходимости этот раздел (например, новые поля в GetSettings).
 
 ## D-Bus GetSettings (W4)
 

@@ -13,6 +13,7 @@ Options:
   --required            Exit non-zero if Sonar check is missing after timeout
   -h, --help            Show this help
 EOF
+  return 0
 }
 
 ref=""

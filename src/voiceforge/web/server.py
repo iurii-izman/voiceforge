@@ -4,9 +4,12 @@ from __future__ import annotations
 
 import contextlib
 import json
+import logging
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Any
+
+_log = logging.getLogger(__name__)
 
 
 def _html_index() -> str:
@@ -321,7 +324,7 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
                 self.wfile.write(md_text.encode("utf-8"))
                 return
             import os as _os
-            import subprocess
+            import subprocess  # nosec B404 -- pandoc for PDF export
             import tempfile
 
             with tempfile.NamedTemporaryFile(suffix=".md", delete=False) as tmp:
@@ -331,8 +334,10 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
             try:
                 with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as out_pdf:
                     out_pdf_path = out_pdf.name
-                assert out_pdf_path is not None
-                subprocess.run(
+                if out_pdf_path is None:
+                    self._send_error_json("Failed to create temp PDF file.", 500)
+                    return
+                subprocess.run(  # nosec B603 B607 -- pandoc from PATH, paths from our request
                     ["pandoc", tmp_md, "-o", out_pdf_path, "--pdf-engine=pdflatex"],
                     check=True,
                     capture_output=True,
@@ -454,8 +459,8 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
                     from voiceforge.core.contracts import extract_error_message
 
                     error_message = extract_error_message(display_text, legacy_prefix="Ошибка:")
-                except Exception:
-                    pass
+                except Exception as _e:
+                    _log.debug("extract_error_message failed", exc_info=_e)
                 if error_message:
                     self._send_json({"error": error_message, "display_text": display_text}, 200)
                     return
@@ -474,8 +479,8 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
                         template=analysis_for_log.get("template") or template,
                     )
                     log_db.close()
-                except Exception:
-                    pass
+                except Exception as _e:
+                    _log.debug("log_session/close failed", exc_info=_e)
                 self._send_json(
                     {
                         "session_id": session_id,

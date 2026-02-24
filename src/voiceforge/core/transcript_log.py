@@ -17,6 +17,7 @@ import structlog
 log = structlog.get_logger()
 
 DB_NAME = "transcripts.db"
+_SCHEMA_ERROR_NO_SUCH_TABLE = "no such table"
 SCHEMA_VERSION_TARGET = 5  # Block 11.7: run migrations 001..005 (005 = action_items table, ADR-0002)
 MIGRATION_HASHES = {
     "001_initial.sql": "59b9076a9a928c7d2b43e0b63b14e16cf0a4a2ec1a9f00a400aaf57efbc315f5",
@@ -239,7 +240,7 @@ def _insert_action_items(
                 (session_id, idx, desc, assignee, deadline),
             )
     except sqlite3.OperationalError as e:
-        if "action_items" in str(e).lower() or "no such table" in str(e).lower():
+        if "action_items" in str(e).lower() or _SCHEMA_ERROR_NO_SUCH_TABLE in str(e).lower():
             log.debug("action_items table not yet available", error=str(e))
         else:
             raise
@@ -554,7 +555,7 @@ class TranscriptLog:
                 for row in cursor.fetchall()
             ]
         except sqlite3.OperationalError as e:
-            if "no such table" in str(e).lower():
+            if _SCHEMA_ERROR_NO_SUCH_TABLE in str(e).lower():
                 return []
             raise
 
@@ -578,7 +579,7 @@ class TranscriptLog:
                 )
             conn.commit()
         except sqlite3.OperationalError as e:
-            if "no such table" in str(e).lower():
+            if _SCHEMA_ERROR_NO_SUCH_TABLE in str(e).lower():
                 log.debug("action_items table not available for status update")
                 return
             raise

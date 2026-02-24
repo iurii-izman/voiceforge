@@ -1,6 +1,6 @@
 """Audio capture via PipeWire (pw-record)."""
 
-import subprocess
+import subprocess  # nosec B404 -- pw-record for capture, args from config
 import threading
 from typing import BinaryIO
 

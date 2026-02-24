@@ -3,11 +3,9 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import numpy as np
-import pytest
 
 
 def test_daemon_get_settings_returns_json_with_expected_keys(tmp_path, monkeypatch) -> None:
@@ -103,8 +101,8 @@ def test_streaming_transcriber_class_exists() -> None:
 
 def test_streaming_transcriber_passes_language_to_transcribe() -> None:
     """StreamingTranscriber passes language hint to transcriber.transcribe (Roadmap #9/#7)."""
-    from voiceforge.stt.transcriber import Segment
     from voiceforge.stt.streaming import StreamingTranscriber
+    from voiceforge.stt.transcriber import Segment
 
     mock_transcriber = MagicMock()
     mock_transcriber.transcribe.return_value = [

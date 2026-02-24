@@ -11,6 +11,7 @@ sudo dnf install -y \
   gcc \
   nodejs \
   npm \
+  pkg-config \
   webkit2gtk4.1-devel \
   gtk3-devel \
   openssl-devel
@@ -51,25 +52,74 @@ cd desktop && cargo tauri build
 
 If the script reports all checks OK, `cargo tauri build` should succeed.
 
-## Полная последовательность в toolbox
+## Полная последовательность в toolbox (воспроизводимая сборка)
 
-На Fedora Atomic (или без webkit/gtk на хосте) сборка десктопа только внутри toolbox:
+На Fedora Atomic (или без webkit/gtk на хосте) сборка десктопа только внутри toolbox.
+
+**Однократная подготовка (в toolbox):**
+
+```bash
+toolbox enter
+cd /path/to/voiceforge
+./scripts/setup-desktop-toolbox.sh
+```
+
+Скрипт устанавливает: системные пакеты (gcc, nodejs, npm, pkg-config, webkit2gtk4.1-devel, gtk3-devel, openssl-devel), Rust (rustup), tauri-cli, зависимости в `desktop/` (npm install) и в конце запускает `check-desktop-deps.sh`.
+
+**Сборка:**
+
+```bash
+cd /path/to/voiceforge/desktop && npm run build && cargo tauri build
+```
+
+Артефакты: `desktop/src-tauri/target/release/bundle/`.
+
+**По шагам (если не используете один скрипт):**
 
 1. **Войти в toolbox:** `toolbox enter` (или `toolbox enter ИМЯ`).
-2. **Установить зависимости:** пакеты из раздела выше (dnf) или один скрипт:
-   ```bash
-   cd /path/to/voiceforge
-   ./scripts/setup-desktop-toolbox.sh
-   ```
-3. **Проверить окружение:** `./scripts/check-desktop-deps.sh` — все проверки должны быть [OK].
-4. **Собрать:** `cd desktop && npm run build && cargo tauri build`. Артефакты в `desktop/src-tauri/target/release/bundle/`.
+2. **Установить зависимости:** пакеты из раздела выше (dnf) или `./scripts/setup-desktop-toolbox.sh` из корня репо.
+3. **Проверить окружение:** `./scripts/check-desktop-deps.sh` — все проверки [OK].
+4. **Собрать:** `cd desktop && npm run build && cargo tauri build`.
 
 Без webkit2gtk-4.1 и gtk+-3.0 `check-desktop-deps` выдаст [FAIL]; в этом случае устанавливать пакеты в toolbox (шаг 2).
+
+## Частые ошибки сборки (Rust)
+
+- **`expected Result<MatchRule<'static>, zbus::Error>, found MatchRule<'_>`** в `desktop/src-tauri/src/dbus_signals.rs`: функции `rule_listen_state()` и `rule_analysis_done()` должны возвращать `Result` — обернуть возвращаемое значение в `Ok(...)` (`.build()` → `Ok(...build())`).
+- **`no method named emit found for struct AppHandle<R>`**: в том же файле нужен трейт `Emitter` — добавить `use tauri::Emitter;` (или `use tauri::{AppHandle, Emitter};`).
 
 ## Сборка релиза и упаковка
 
 - Релизный бинарник: `cd desktop && npm run build && cargo tauri build`. Артефакты в `desktop/src-tauri/target/release/bundle/` (формат зависит от платформы).
 - Flatpak / AppImage: Tauri 2 поддерживает оба; манифест Flatpak при необходимости добавляется в `desktop/flatpak/`. Для альфа2 достаточно бинарника из `cargo tauri build`.
+
+## Установка и запуск после сборки
+
+Перед запуском десктопа должен быть запущен демон (`uv run voiceforge daemon` в том же окружении — хосте или toolbox).
+
+**Запуск без установки (из каталога репо):**
+
+```bash
+desktop/src-tauri/target/release/voiceforge-desktop
+```
+
+Или из `desktop/`: `./src-tauri/target/release/voiceforge-desktop`.
+
+**Установка пакетом (Fedora/RHEL):**
+
+```bash
+sudo dnf install desktop/src-tauri/target/release/bundle/rpm/VoiceForge-0.2.0-alpha.1-1.x86_64.rpm
+```
+
+После установки приложение доступно в меню или по команде `voiceforge-desktop` (или «VoiceForge», в зависимости от .desktop).
+
+**Установка пакетом (Debian/Ubuntu):**
+
+```bash
+sudo dpkg -i desktop/src-tauri/target/release/bundle/deb/VoiceForge_0.2.0-alpha.1_amd64.deb
+```
+
+Версию в путях подставьте свою, если собирали другую.
 
 ## COSMIC
 

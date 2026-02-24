@@ -80,7 +80,7 @@ def _step2_diarization(
 
             auth_token = (_keyring.get_password("voiceforge", "huggingface") or "").strip()
         except Exception:
-            auth_token = ""
+            auth_token = ""  # nosec B105 -- fallback when keyring unavailable, not a password
         if not auth_token:
             return out
         from voiceforge.stt.diarizer import Diarizer

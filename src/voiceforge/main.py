@@ -6,7 +6,7 @@ import json
 import os
 import shutil
 import signal
-import subprocess
+import subprocess  # nosec B404 -- pandoc for PDF export, args from our paths
 import sys
 import threading
 import time
@@ -42,10 +42,15 @@ from voiceforge.i18n import t
 
 log = structlog.get_logger()
 app = typer.Typer(help="VoiceForge — local-first AI assistant (alpha0.1 core)")
-action_items_app = typer.Typer(help="Обновление статусов action items")
+action_items_app = typer.Typer(help=t("cli.action_items_help"))
 app.add_typer(action_items_app, name="action-items")
 
 _INDEX_EXTENSIONS = (".pdf", ".md", ".markdown", ".html", ".htm", ".docx", ".txt")
+_I18N_ERROR_LLM_FAILED = "error.llm_failed"
+_I18N_TEMPLATE_ACTIONS = "template.one_on_one.actions"
+_HELP_OUTPUT_TEXT_JSON = "Формат вывода: text | json"
+_HELP_OUTPUT_TEXT_JSON_MD = "Формат вывода: text | json | md (md только с --id)"
+_SERVICE_UNIT_NAME = "voiceforge.service"
 
 
 def _get_config() -> Settings:
@@ -61,7 +66,7 @@ def _cli_success_payload(data: dict[str, Any]) -> dict[str, Any]:
 
 
 def _extract_error_message(payload: str) -> str | None:
-    return extract_error_message(payload, legacy_prefix="Ошибка:")
+    return extract_error_message(payload, legacy_prefix=t("error.legacy_prefix"))
 
 
 def _speaker_for_interval(start: float, end: float, diar_segments: list[Any]) -> str:
@@ -86,53 +91,64 @@ def _format_template_result(template: str, llm_result: Any) -> tuple[list[str], 
     action_items_for_log: list[dict[str, Any]] = []
 
     if template == "standup":
-        lines.append("--- Сделано ---")
+        lines.append(f"--- {t('template.standup.done')} ---")
         for x in d.get("done", []):
             lines.append(f"  • {x}")
             answers_for_log.append(x)
-        lines.append("--- Планы ---")
+        lines.append(f"--- {t('template.standup.planned')} ---")
         for x in d.get("planned", []):
             lines.append(f"  • {x}")
             answers_for_log.append(x)
-        lines.append("--- Блокеры ---")
+        lines.append(f"--- {t('template.standup.blockers')} ---")
         for x in d.get("blockers", []):
             lines.append(f"  • {x}")
             answers_for_log.append(x)
     elif template == "sprint_review":
-        for label, key in [("Демо", "demos"), ("Метрики", "metrics"), ("Фидбэк", "feedback")]:
-            lines.append(f"--- {label} ---")
+        for label_key, key in [
+            ("template.sprint_review.demos", "demos"),
+            ("template.sprint_review.metrics", "metrics"),
+            ("template.sprint_review.feedback", "feedback"),
+        ]:
+            lines.append(f"--- {t(label_key)} ---")
             for x in d.get(key, []):
                 lines.append(f"  • {x}")
                 answers_for_log.append(x)
     elif template == "one_on_one":
         if d.get("mood"):
-            lines.append(f"--- Настроение ---\n  {d['mood']}")
+            lines.append(f"--- {t('template.one_on_one.mood')} ---\n  {d['mood']}")
             answers_for_log.append(d["mood"])
-        for label, key in [("Рост", "growth"), ("Блокеры", "blockers")]:
-            lines.append(f"--- {label} ---")
+        for label_key, key in [("template.one_on_one.growth", "growth"), ("template.one_on_one.blockers", "blockers")]:
+            lines.append(f"--- {t(label_key)} ---")
             for x in d.get(key, []):
                 lines.append(f"  • {x}")
                 answers_for_log.append(x)
-        lines.append("--- Действия ---")
+        lines.append(f"--- {t(_I18N_TEMPLATE_ACTIONS)} ---")
         for ai in d.get("action_items", []):
             desc = ai.get("description", "")
             who = (ai.get("assignee") or "").strip()
             lines.append(f"  • {desc}" + (f" ({who})" if who else ""))
             action_items_for_log.append(ai)
     elif template == "brainstorm":
-        for label, key in [("Идеи", "ideas"), ("Голосование", "voting"), ("Следующие шаги", "next_steps")]:
-            lines.append(f"--- {label} ---")
+        for label_key, key in [
+            ("template.brainstorm.ideas", "ideas"),
+            ("template.brainstorm.voting", "voting"),
+            ("template.brainstorm.next_steps", "next_steps"),
+        ]:
+            lines.append(f"--- {t(label_key)} ---")
             for x in d.get(key, []):
                 lines.append(f"  • {x}")
                 answers_for_log.append(x)
     elif template == "interview":
-        for label, key in [("Вопросы кандидату", "questions_asked"), ("Оценка", "assessment")]:
-            lines.append(f"--- {label} ---")
+        for label_key, key in [
+            ("template.interview.questions_asked", "questions_asked"),
+            ("template.interview.assessment", "assessment"),
+        ]:
+            lines.append(f"--- {t(label_key)} ---")
             for x in d.get(key, []):
                 lines.append(f"  • {x}")
                 answers_for_log.append(x)
         if d.get("decision"):
-            lines.append(f"--- Решение ---\n  {d['decision']}")
+            lines.append(f"--- {t('template.interview.decision')} ---\n  {d['decision']}")
             answers_for_log.append(d["decision"])
 
     analysis_for_log = {
@@ -196,7 +212,7 @@ def run_analyze_pipeline(
         return (t("error.install_llm_deps"), [], {})
     except Exception as e:
         log.warning("analyze.llm_failed", error=str(e))
-        return (t("error.llm_failed", e=str(e)), [], {})
+        return (t(_I18N_ERROR_LLM_FAILED, e=str(e)), [], {})
 
     if template and hasattr(llm_result, "model_dump"):
         lines, analysis_for_log = _format_template_result(template, llm_result)
@@ -265,7 +281,7 @@ def run_live_summary_pipeline(seconds: int) -> tuple[list[str], float]:
         return ([t("error.install_llm_deps")], 0.0)
     except Exception as e:
         log.warning("live_summary.llm_failed", error=str(e))
-        return ([t("error.llm_failed", e=str(e))], 0.0)
+        return ([t(_I18N_ERROR_LLM_FAILED, e=str(e))], 0.0)
 
     lines: list[str] = []
     if getattr(live_result, "key_points", None):
@@ -274,7 +290,7 @@ def run_live_summary_pipeline(seconds: int) -> tuple[list[str], float]:
             if k and k.strip():
                 lines.append(f"  • {k.strip()}")
     if getattr(live_result, "action_items", None):
-        lines.append("--- Действия ---")
+        lines.append(f"--- {t(_I18N_TEMPLATE_ACTIONS)} ---")
         for ai in live_result.action_items:
             desc = getattr(ai, "description", "") or ""
             if not desc.strip():
@@ -340,7 +356,8 @@ def _live_summary_listen_worker(stop_event: threading.Event, interval_sec: int) 
     """Block 10: periodically run live summary on ring buffer and print to stdout."""
     while not stop_event.wait(timeout=interval_sec):
         lines, cost = run_live_summary_pipeline(interval_sec)
-        if not lines or (len(lines) == 1 and (lines[0].startswith("Ошибка") or lines[0].startswith("Error"))):
+        err_prefix = t("error.legacy_prefix").rstrip(":")
+        if not lines or (len(lines) == 1 and lines[0].startswith(err_prefix)):
             continue
         sys.stdout.write("\n--- Live summary ---\n")
         for line in lines:
@@ -442,7 +459,7 @@ _TEMPLATE_CHOICES = ["standup", "sprint_review", "one_on_one", "brainstorm", "in
 @app.command()
 def analyze(
     seconds: int = typer.Option(30, help="Последние N секунд"),
-    output: str = typer.Option("text", "--output", help="Формат вывода: text | json"),
+    output: str = typer.Option("text", "--output", help=_HELP_OUTPUT_TEXT_JSON),
     template: str | None = typer.Option(
         None,
         "--template",
@@ -503,7 +520,11 @@ def analyze(
 
 def _action_item_status_path() -> Path:
     base = os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
-    return Path(base) / "voiceforge" / "action_item_status.json"
+    base_path = Path(base).resolve()
+    home = Path.home()
+    if not str(base_path).startswith(str(home)):
+        base_path = home / ".local" / "share"
+    return base_path / "voiceforge" / "action_item_status.json"
 
 
 def _load_action_item_status() -> dict[str, str]:
@@ -526,7 +547,7 @@ def _save_action_item_status(data: dict[str, str]) -> None:
 def action_items_update(
     from_session: int = typer.Option(..., "--from-session", help="ID сессии с action items"),
     next_session: int = typer.Option(..., "--next-session", help="ID сессии (встреча), по которой обновляем статусы"),
-    output: str = typer.Option("text", "--output", help="text | json"),
+    output: str = typer.Option("text", "--output", help=_HELP_OUTPUT_TEXT_JSON),
     save: bool = typer.Option(True, "--save/--no-save", help="Сохранить статусы в action_item_status.json"),
 ) -> None:
     """Обновить статусы action items из сессии --from-session по транскрипту встречи --next-session."""
@@ -571,7 +592,7 @@ def action_items_update(
             pii_mode=cfg.pii_mode,
         )
     except Exception as e:
-        typer.echo(t("error.llm_failed", e=str(e)), err=True)
+        typer.echo(t(_I18N_ERROR_LLM_FAILED, e=str(e)), err=True)
         raise SystemExit(1) from None
 
     updates = [(u.id, u.status) for u in response.updates]
@@ -584,8 +605,8 @@ def action_items_update(
             log_db2 = TranscriptLog()
             log_db2.update_action_item_statuses_in_db(from_session, updates)
             log_db2.close()
-        except Exception:
-            pass
+        except Exception as _e:
+            structlog.get_logger().debug("action_items DB update failed", exc_info=_e)
 
     if output == "json":
         typer.echo(
@@ -698,13 +719,13 @@ def _service_unit_path() -> Path:
         p = Path(env_path)
         if p.is_file():
             return p
-    repo_scripts = Path(__file__).resolve().parents[2] / "scripts" / "voiceforge.service"
+    repo_scripts = Path(__file__).resolve().parents[2] / "scripts" / _SERVICE_UNIT_NAME
     if repo_scripts.is_file():
         return repo_scripts
-    cwd_scripts = Path.cwd() / "scripts" / "voiceforge.service"
+    cwd_scripts = Path.cwd() / "scripts" / _SERVICE_UNIT_NAME
     if cwd_scripts.is_file():
         return cwd_scripts
-    raise FileNotFoundError("voiceforge.service not found")
+    raise FileNotFoundError(f"{_SERVICE_UNIT_NAME} not found")
 
 
 @app.command()
@@ -714,18 +735,18 @@ def install_service() -> None:
     xdg = os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config")
     user_dir = Path(xdg) / "systemd" / "user"
     user_dir.mkdir(parents=True, exist_ok=True)
-    unit_dst = user_dir / "voiceforge.service"
+    unit_dst = user_dir / _SERVICE_UNIT_NAME
     shutil.copy2(unit_src, unit_dst)
     typer.echo(t("install_service.copied", path=str(unit_dst)))
     subprocess.run(["systemctl", "--user", "daemon-reload"], check=True)  # nosec B603 B607
-    subprocess.run(["systemctl", "--user", "enable", "--now", "voiceforge.service"], check=True)  # nosec B603 B607
+    subprocess.run(["systemctl", "--user", "enable", "--now", _SERVICE_UNIT_NAME], check=True)  # nosec B603 B607
     typer.echo(t("install_service.enabled"))
 
 
 @app.command("uninstall-service")
 def uninstall_service() -> None:
     """Disable and stop systemd user service."""
-    subprocess.run(["systemctl", "--user", "disable", "--now", "voiceforge.service"], check=True)  # nosec B603 B607
+    subprocess.run(["systemctl", "--user", "disable", "--now", _SERVICE_UNIT_NAME], check=True)  # nosec B603 B607
     typer.echo(t("uninstall_service.done"))
 
 
@@ -734,7 +755,7 @@ def cost(
     days: int = typer.Option(30, "--days", help="За последние N дней (если не заданы --from/--to)"),
     from_date: str | None = typer.Option(None, "--from", help="Начало периода YYYY-MM-DD"),
     to_date: str | None = typer.Option(None, "--to", help="Конец периода YYYY-MM-DD"),
-    output: str = typer.Option("text", "--output", help="Формат вывода: text | json"),
+    output: str = typer.Option("text", "--output", help=_HELP_OUTPUT_TEXT_JSON),
 ) -> None:
     """Отчёт по затратам LLM (из БД метрик)."""
     from datetime import date
@@ -766,7 +787,9 @@ def cost(
     if by_model:
         typer.echo(t("cost.by_models"))
         for row in by_model:
-            typer.echo(t("cost.model_line", model=row.get("model", ""), cost=row.get("cost_usd") or 0, calls=row.get("calls") or 0))
+            typer.echo(
+                t("cost.model_line", model=row.get("model", ""), cost=row.get("cost_usd") or 0, calls=row.get("calls") or 0)
+            )
     by_day = data.get("by_day") or []
     if by_day:
         typer.echo(t("cost.by_days"))
@@ -779,9 +802,11 @@ def cost(
 
 @app.command()
 def status(
-    output: str = typer.Option("text", "--output", help="Формат вывода: text | json"),
+    output: str = typer.Option("text", "--output", help=_HELP_OUTPUT_TEXT_JSON),
     detailed: bool = typer.Option(False, "--detailed", help="Разбивка затрат по моделям/дням и % от бюджета"),
-    doctor: bool = typer.Option(False, "--doctor", help="Диагностика окружения (конфиг, keyring, RAG, ring, Ollama, RAM, импорты)"),
+    doctor: bool = typer.Option(
+        False, "--doctor", help="Диагностика окружения (конфиг, keyring, RAG, ring, Ollama, RAM, импорты)"
+    ),
 ) -> None:
     """Show RAM and cost snapshot."""
     if doctor:
@@ -848,7 +873,7 @@ def export_session(
     tmp_md = out_path.with_suffix(".md")
     tmp_md.write_text(md_text, encoding="utf-8")
     try:
-        subprocess.run(
+        subprocess.run(  # nosec B603 B607 -- pandoc from PATH, paths from our export
             ["pandoc", str(tmp_md), "-o", str(out_path), "--pdf-engine=pdflatex"],
             check=True,
             capture_output=True,
@@ -868,7 +893,7 @@ def export_session(
 def history(
     session_id: int | None = typer.Option(None, "--id", help="Показать детали сессии"),
     last_n: int = typer.Option(10, "--last", help="Сколько последних сессий показать"),
-    output: str = typer.Option("text", "--output", help="Формат вывода: text | json | md (md только с --id)"),
+    output: str = typer.Option("text", "--output", help=_HELP_OUTPUT_TEXT_JSON_MD),
     search: str | None = typer.Option(None, "--search", help="Поиск по тексту транскриптов (FTS5)"),
     date: str | None = typer.Option(None, "--date", help="Сессии за день YYYY-MM-DD"),
     from_date: str | None = typer.Option(None, "--from", help="Начало периода (с --to)"),
@@ -925,8 +950,7 @@ def history(
                             {
                                 "query": search,
                                 "hits": [
-                                    {"session_id": s, "start_sec": st, "end_sec": e, "snippet": sn}
-                                    for s, _tx, st, e, sn in hits
+                                    {"session_id": s, "start_sec": st, "end_sec": e, "snippet": sn} for s, _tx, st, e, sn in hits
                                 ],
                             }
                         ),
@@ -937,7 +961,7 @@ def history(
                 if not hits:
                     typer.echo(t("history.no_results"))
                     return
-                for sid, _text, start_sec, end_sec, snippet in hits:
+                for sid, _text, start_sec, _end_sec, snippet in hits:
                     typer.echo(f"session_id={sid} | {start_sec:.1f}s | {snippet}")
             return
         if date is not None or (from_date is not None and to_date is not None):

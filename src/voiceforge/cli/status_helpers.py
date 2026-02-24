@@ -6,6 +6,10 @@ import importlib
 from pathlib import Path
 from typing import Any
 
+_DOCTOR_KEYRING_FAIL = "doctor.keyring_fail"
+_DOCTOR_OLLAMA_FAIL = "doctor.ollama_fail"
+_DOCTOR_RAM_FAIL = "doctor.ram_fail"
+
 
 def get_status_text() -> str:
     """Return status string (RAM + cost + Ollama + PII) for CLI or D-Bus."""
@@ -113,19 +117,21 @@ def _doctor_checks() -> list[tuple[bool, str, str]]:
 
     try:
         import keyring
+        from keyring.errors import KeyringError
+
         found = []
         for name in ("anthropic", "openai", "huggingface"):
             try:
                 if keyring.get_password("voiceforge", name):
                     found.append(name)
-            except Exception:
+            except KeyringError:
                 pass
         if found:
             results.append((True, t("doctor.keyring_ok"), "doctor.keyring_ok"))
         else:
-            results.append((False, t("doctor.keyring_fail"), "doctor.keyring_fail"))
+            results.append((False, t(_DOCTOR_KEYRING_FAIL), _DOCTOR_KEYRING_FAIL))
     except Exception as e:
-        results.append((False, f"keyring: {e}", "doctor.keyring_fail"))
+        results.append((False, f"keyring: {e}", _DOCTOR_KEYRING_FAIL))
 
     rag_path = Path(cfg.get_rag_db_path())
     if rag_path.exists():
@@ -141,28 +147,36 @@ def _doctor_checks() -> list[tuple[bool, str, str]]:
 
     try:
         from voiceforge.llm.local_llm import is_available
+
         if is_available():
             results.append((True, t("doctor.ollama_ok"), "doctor.ollama_ok"))
         else:
-            results.append((True, t("doctor.ollama_fail"), "doctor.ollama_fail"))
+            results.append((True, t(_DOCTOR_OLLAMA_FAIL), _DOCTOR_OLLAMA_FAIL))
     except ImportError:
-        results.append((True, t("doctor.ollama_fail"), "doctor.ollama_fail"))
+        results.append((True, t(_DOCTOR_OLLAMA_FAIL), _DOCTOR_OLLAMA_FAIL))
 
     try:
         import psutil
+
         mem = psutil.virtual_memory()
         gb = mem.available / 1024**3
         if gb >= 2.0:
             results.append((True, t("doctor.ram_ok", gb=gb), "doctor.ram_ok"))
         else:
-            results.append((False, t("doctor.ram_fail", gb=gb), "doctor.ram_fail"))
+            results.append((False, t(_DOCTOR_RAM_FAIL, gb=gb), _DOCTOR_RAM_FAIL))
     except Exception:
-        results.append((False, "RAM check failed", "doctor.ram_fail"))
+        results.append((False, "RAM check failed", _DOCTOR_RAM_FAIL))
 
     for mod in ("litellm", "faster_whisper"):
         try:
             importlib.import_module(mod.replace("-", "_"))
-            results.append((True, t("doctor.llm_ok" if mod == "litellm" else "doctor.stt_ok"), "doctor.llm_ok" if mod == "litellm" else "doctor.stt_ok"))
+            results.append(
+                (
+                    True,
+                    t("doctor.llm_ok" if mod == "litellm" else "doctor.stt_ok"),
+                    "doctor.llm_ok" if mod == "litellm" else "doctor.stt_ok",
+                )
+            )
         except Exception:
             msg = t("doctor.llm_fail") if mod == "litellm" else t("doctor.stt_fail")
             results.append((False, msg, "doctor.llm_fail" if mod == "litellm" else "doctor.stt_fail"))

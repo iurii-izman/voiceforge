@@ -39,6 +39,7 @@ from voiceforge.rag.parsers import (
 
 log = structlog.get_logger()
 
+_INSERT_FTS_CHUNKS = "INSERT INTO fts_chunks(content, chunk_id) VALUES (?,?)"
 CHUNK_TOKENS = 400
 CHUNK_OVERLAP_RATIO = 0.10
 
@@ -179,10 +180,7 @@ class KnowledgeIndexer:
                 if chunk_id is None:
                     raise RuntimeError("Failed to get chunk id after insert")
                 _insert_vec(cursor, chunk_id, emb)
-                cursor.execute(
-                    "INSERT INTO fts_chunks(content, chunk_id) VALUES (?,?)",
-                    (n.content, chunk_id),
-                )
+                cursor.execute(_INSERT_FTS_CHUNKS, (n.content, chunk_id))
                 added += 1
             conn.commit()
             log.info(
@@ -210,7 +208,7 @@ class KnowledgeIndexer:
             cursor.execute("DELETE FROM vec_chunks WHERE rowid = ?", (_id,))
             _insert_vec(cursor, _id, emb)
             cursor.execute("DELETE FROM fts_chunks WHERE chunk_id = ?", (_id,))
-            cursor.execute("INSERT INTO fts_chunks(content, chunk_id) VALUES (?,?)", (n.content, _id))
+            cursor.execute(_INSERT_FTS_CHUNKS, (n.content, _id))
         updated_count = len(to_update)
 
         added = 0
@@ -226,10 +224,7 @@ class KnowledgeIndexer:
             if chunk_id is None:
                 raise RuntimeError("Failed to get chunk id after insert")
             _insert_vec(cursor, chunk_id, emb)
-            cursor.execute(
-                "INSERT INTO fts_chunks(content, chunk_id) VALUES (?,?)",
-                (n.content, chunk_id),
-            )
+            cursor.execute(_INSERT_FTS_CHUNKS, (n.content, chunk_id))
             added += 1
 
         conn.commit()
