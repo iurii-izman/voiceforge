@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** #27 AppImage закрыт; #32 eval — каркас готов (tests/eval/, ROUGE-L, 1 golden sample, make eval). Следующий шаг: **#32** — довести до 20+ golden samples и DeepEval/LLM-judge, или **#33 A2 Instructor retry**.
+- **Сейчас:** #33 A2 Instructor retry закрыт (complete_structured через instructor.from_litellm, max_retries=3). Следующий шаг: **#32** — довести eval до 20+ golden samples и DeepEval/LLM-judge, или **#34 A3** unit tests daemon/streaming/smart_trigger.
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-#27 AppImage закрыт; #32 eval — каркас: tests/eval/, ROUGE-L (rouge-score), golden_samples/ с sample_standup_01.json, make eval. Порог ROUGE-L 0.35; остаётся 20+ samples, DeepEval/LLM-judge.
+#33 Instructor retry закрыт: complete_structured через instructor.from_litellm(completion) и create_with_completion(max_retries=3); лог instructor_retries_exhausted; тест test_llm_retry.py.
 
 ---
 
@@ -36,8 +36,8 @@
 
 | # Issue | Phase | Задача | Заметка |
 |---------|-------|--------|---------|
-| [#32](https://github.com/iurii-izman/voiceforge/issues/32) | A · P0 | Eval harness (DeepEval/ROUGE-L) | Первый приоритет Phase A |
-| [#33](https://github.com/iurii-izman/voiceforge/issues/33) | A · P0 | Instructor retry loop | W5; router.py complete_structured |
+| [#32](https://github.com/iurii-izman/voiceforge/issues/32) | A · P0 | Eval harness (DeepEval/ROUGE-L) | 20+ samples, DeepEval/LLM-judge |
+| ~~#33~~ | A · P0 | Instructor retry | **Закрыт** — max_retries=3 в complete_structured |
 | [#34](https://github.com/iurii-izman/voiceforge/issues/34) | A | Unit tests daemon/streaming/smart_trigger | W3; daemon.py excluded from coverage |
 | [#35](https://github.com/iurii-izman/voiceforge/issues/35) | A | WAV integration tests | e2e pipeline test |
 | ~~#27~~ | A | AppImage | **Закрыт** — toolbox сборка, deb/rpm/AppImage |
@@ -55,7 +55,7 @@
 
 1. **Phase A — Stabilize (приоритет):**
    - #32 A1: eval harness — `tests/test_llm_eval.py` с DeepEval/ROUGE-L, порог ROUGE-L ≥ 0.35.
-   - #33 A2: Instructor retry — рефакторинг `complete_structured()` в `router.py`.
+   - ~~#33 A2 Instructor retry~~ — сделано (instructor.from_litellm, max_retries=3).
    - #34 A3: unit tests daemon/streaming/smart_trigger — снять исключение из coverage.
    - ~~#27 A5 AppImage~~ — сделано (toolbox: NO_STRIP, librsvg2-devel; см. desktop-build-deps.md).
 2. **Phase B — Hardening (после A):** observability (Prometheus), pyannote memory guard, budget enforcement.
