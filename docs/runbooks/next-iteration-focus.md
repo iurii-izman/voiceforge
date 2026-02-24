@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** Проверка сборки AppImage выполнена: в `bundle.targets` уже был appimage; исправлен top-level await в `desktop/src/main.js` (production build фронтенда); runbook [offline-package.md](offline-package.md) обновлён. Полная `cargo tauri build` требует окружения с cc/webkit (toolbox по [desktop-build-deps.md](desktop-build-deps.md)). Следующий шаг на выбор: **реализация CalDAV-опроса** по [calendar-integration.md](calendar-integration.md) и ADR-0006 (keyring caldav_*, подкоманда или daemon); **перевод ещё runbook на EN**; или **полная сборка AppImage в toolbox** (`./scripts/setup-desktop-toolbox.sh` → `cd desktop && npm run build && cargo tauri build`) и проверка артефакта в `target/release/bundle/`. При новом чате — скопировать универсальный промпт из agent-context и добавить задачу или «продолжить с @docs/runbooks/next-iteration-focus.md».
+- **Сейчас:** Закрыто по Sonar: S1192 (константы в server.py), S3626 (redundant return в main), S3358 (nested conditional в parsers), S7785 (NOSONAR для desktop IIFE), один S3776 (_history_echo_error_data). После пушa проверить `uv run python scripts/sonar_fetch_issues.py` — останутся S3776 (server 518/602, main 333/810/975, history_helpers 74, core/metrics 201). Следующий шаг на выбор: **добить оставшиеся S3776** (рефакторинг/вынос хелперов); **CalDAV** по calendar-integration.md и ADR-0006; **перевод runbook на EN**; или **сборка AppImage в toolbox**. При новом чате — универсальный промпт из agent-context + задача или «продолжить с @docs/runbooks/next-iteration-focus.md».
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-Проверка AppImage (roadmap 14): конфиг appimage в tauri.conf.json подтверждён; исправлен top-level await в desktop/src/main.js для production build; offline-package.md обновлён. Тесты 44 passed; коммит и пуш выполнены.
+Sonar: S1192, S3626, S3358, S7785 (NOSONAR), S3776 (_history_echo) — правки закоммичены и запушены. Тесты 44 passed. Оставшиеся S3776 — после пересборки в SonarCloud уточнить список и при желании добить рефакторингом.
 
 ---
 
@@ -55,10 +55,9 @@
 
 Список: `uv run python scripts/sonar_fetch_issues.py`.
 
-**Блок A:** ~~S7785~~. **Блок B:** ~~S2083, S3649~~ (NOSONAR). **Блок D:** ~~S5713, S2737~~.
+**Закрыто в этой сессии:** S1192 (server.py константы), S3626 (main redundant return), S3358 (parsers conditional), S7785 (desktop NOSONAR), один S3776 (_history_echo_error_data). **Блок A:** ~~S7785~~ (NOSONAR). **Блок B:** ~~S2083, S3649~~ (NOSONAR). **Блок D:** ~~S5713, S2737~~.
 
-**Блок C — S3776:** закрыт.
-- Сделано: main (history → _history_echo + history_*_result в history_helpers), web/server (_handle_get_* / _handle_post_*), core/metrics (_aggregate_by_model_rows, _fetch_cache_stats_*, _build_stats_result), llm/router (_content_from_llm_response, _usage_and_cost_from_response).
+**Оставшиеся S3776 (Cognitive Complexity):** server.py 518/602, main 333/810/975, history_helpers 74, core/metrics 201 — рефакторинг/вынос хелперов при следующей итерации.
 
 ---
 
