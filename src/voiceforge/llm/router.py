@@ -332,42 +332,40 @@ def complete_structured(
     response_model: type[TModel],
     model: str | None = None,
 ) -> tuple[TModel, float]:
-    """Call LLM with fallbacks; return (validated Pydantic model, cost_usd)."""
+    """Call LLM with fallbacks; return (validated Pydantic model, cost_usd).
+    Uses Instructor retry (max_retries=3) with validation context on parse errors (#33)."""
     from voiceforge.core.metrics import log_llm_call, log_response_cache
 
     log_response_cache(False)
     set_env_keys_from_keyring()
     try:
+        import instructor
         from litellm import completion
     except ImportError as e:
         raise ImportError("Install [llm] extras: uv sync --extra llm") from e
 
     model_id = model or DEFAULT_MODEL
     fallbacks = [m for m in FALLBACK_MODELS if m != model_id][:3]
-    raw = completion(
-        model=model_id,
-        messages=prompt,
-        fallbacks=fallbacks if fallbacks else None,
-        max_tokens=1024,
-        response_format=response_model,
-    )
-    content, raw_content = _content_from_llm_response(raw, model_id)
+    client = instructor.from_litellm(completion)
     try:
-        parsed = response_model.model_validate_json(content)
-        raw_used = raw
-    except Exception as parse_err:
-        log.warning("llm.invalid_json_retry", model=model_id, error=str(parse_err))
-        raw = completion(
-            model=model_id,
+        parsed, raw_used = client.create_with_completion(
             messages=prompt,
+            response_model=response_model,
+            max_retries=3,
+            model=model_id,
             fallbacks=fallbacks if fallbacks else None,
             max_tokens=1024,
-            response_format=response_model,
         )
-        content, raw_content = _content_from_llm_response(raw, model_id)
-        parsed = response_model.model_validate_json(content)
-        raw_used = raw
+    except Exception as e:
+        log.warning(
+            "llm.instructor_retries_exhausted",
+            model=model_id,
+            error=str(e),
+            response_model=response_model.__name__,
+        )
+        raise
 
+    _, raw_content = _content_from_llm_response(raw_used, model_id)
     model_fields = getattr(response_model, "model_fields", None)
     if isinstance(model_fields, dict) and all(not getattr(parsed, f, None) for f in model_fields) and not raw_content.strip():
         log.warning("llm.empty_structured_response", model=model_id)
