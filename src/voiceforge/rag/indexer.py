@@ -82,6 +82,26 @@ def _chunk_text(text: str, token_approx: int = CHUNK_TOKENS, overlap_ratio: floa
     return chunks
 
 
+def _sections_to_new_chunks(sections: list[str]) -> list[NewChunk]:
+    """Build NewChunk list from section texts (skips empty)."""
+    new_chunks: list[NewChunk] = []
+    for section_no, page_text in enumerate(sections, start=1):
+        if not (page_text or "").strip():
+            continue
+        for idx, content in enumerate(_chunk_text(page_text)):
+            if not content.strip():
+                continue
+            new_chunks.append(
+                NewChunk(
+                    page=section_no,
+                    chunk_index=idx,
+                    content=content,
+                    content_hash=content_hash(content),
+                )
+            )
+    return new_chunks
+
+
 def _add_texts_legacy_reindex(
     cursor: sqlite3.Cursor,
     conn: sqlite3.Connection,
@@ -184,22 +204,7 @@ class KnowledgeIndexer:
         embedder = self._get_embedder()
         cursor = conn.cursor()
         ts = datetime.now(UTC).isoformat()
-
-        new_chunks: list[NewChunk] = []
-        for section_no, page_text in enumerate(sections, start=1):
-            if not (page_text or "").strip():
-                continue
-            for idx, content in enumerate(_chunk_text(page_text)):
-                if not content.strip():
-                    continue
-                new_chunks.append(
-                    NewChunk(
-                        page=section_no,
-                        chunk_index=idx,
-                        content=content,
-                        content_hash=content_hash(content),
-                    )
-                )
+        new_chunks = _sections_to_new_chunks(sections)
 
         if not has_content_hash_column(cursor):
             return _add_texts_legacy_reindex(cursor, conn, source, new_chunks, embedder, ts, self.dup_threshold)

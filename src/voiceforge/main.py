@@ -83,74 +83,100 @@ def _speaker_for_interval(start: float, end: float, diar_segments: list[Any]) ->
     return best
 
 
+def _format_template_standup(d: dict) -> tuple[list[str], list[str], list[dict[str, Any]]]:
+    lines, answers = [], []
+    for key, label in [
+        ("done", "template.standup.done"),
+        ("planned", "template.standup.planned"),
+        ("blockers", "template.standup.blockers"),
+    ]:
+        lines.append(f"--- {t(label)} ---")
+        for x in d.get(key, []):
+            lines.append(f"  • {x}")
+            answers.append(x)
+    return (lines, answers, [])
+
+
+def _format_template_sprint_review(d: dict) -> tuple[list[str], list[str], list[dict[str, Any]]]:
+    lines, answers = [], []
+    for label_key, key in [
+        ("template.sprint_review.demos", "demos"),
+        ("template.sprint_review.metrics", "metrics"),
+        ("template.sprint_review.feedback", "feedback"),
+    ]:
+        lines.append(f"--- {t(label_key)} ---")
+        for x in d.get(key, []):
+            lines.append(f"  • {x}")
+            answers.append(x)
+    return (lines, answers, [])
+
+
+def _format_template_one_on_one(d: dict) -> tuple[list[str], list[str], list[dict[str, Any]]]:
+    lines, answers, action_items = [], [], []
+    if d.get("mood"):
+        lines.append(f"--- {t('template.one_on_one.mood')} ---\n  {d['mood']}")
+        answers.append(d["mood"])
+    for label_key, key in [("template.one_on_one.growth", "growth"), ("template.one_on_one.blockers", "blockers")]:
+        lines.append(f"--- {t(label_key)} ---")
+        for x in d.get(key, []):
+            lines.append(f"  • {x}")
+            answers.append(x)
+    lines.append(f"--- {t(_I18N_TEMPLATE_ACTIONS)} ---")
+    for ai in d.get("action_items", []):
+        desc = ai.get("description", "")
+        who = (ai.get("assignee") or "").strip()
+        lines.append(f"  • {desc}" + (f" ({who})" if who else ""))
+        action_items.append(ai)
+    return (lines, answers, action_items)
+
+
+def _format_template_brainstorm(d: dict) -> tuple[list[str], list[str], list[dict[str, Any]]]:
+    lines, answers = [], []
+    for label_key, key in [
+        ("template.brainstorm.ideas", "ideas"),
+        ("template.brainstorm.voting", "voting"),
+        ("template.brainstorm.next_steps", "next_steps"),
+    ]:
+        lines.append(f"--- {t(label_key)} ---")
+        for x in d.get(key, []):
+            lines.append(f"  • {x}")
+            answers.append(x)
+    return (lines, answers, [])
+
+
+def _format_template_interview(d: dict) -> tuple[list[str], list[str], list[dict[str, Any]]]:
+    lines, answers = [], []
+    for label_key, key in [
+        ("template.interview.questions_asked", "questions_asked"),
+        ("template.interview.assessment", "assessment"),
+    ]:
+        lines.append(f"--- {t(label_key)} ---")
+        for x in d.get(key, []):
+            lines.append(f"  • {x}")
+            answers.append(x)
+    if d.get("decision"):
+        lines.append(f"--- {t('template.interview.decision')} ---\n  {d['decision']}")
+        answers.append(d["decision"])
+    return (lines, answers, [])
+
+
+_TEMPLATE_FORMATTERS: dict[str, Any] = {
+    "standup": _format_template_standup,
+    "sprint_review": _format_template_sprint_review,
+    "one_on_one": _format_template_one_on_one,
+    "brainstorm": _format_template_brainstorm,
+    "interview": _format_template_interview,
+}
+
+
 def _format_template_result(template: str, llm_result: Any) -> tuple[list[str], dict[str, Any]]:
     """Format template LLM result to display lines and analysis_for_log (for log_session)."""
     d = llm_result.model_dump(mode="json") if hasattr(llm_result, "model_dump") else {}
-    lines: list[str] = []
-    answers_for_log: list[str] = []
-    action_items_for_log: list[dict[str, Any]] = []
-
-    if template == "standup":
-        lines.append(f"--- {t('template.standup.done')} ---")
-        for x in d.get("done", []):
-            lines.append(f"  • {x}")
-            answers_for_log.append(x)
-        lines.append(f"--- {t('template.standup.planned')} ---")
-        for x in d.get("planned", []):
-            lines.append(f"  • {x}")
-            answers_for_log.append(x)
-        lines.append(f"--- {t('template.standup.blockers')} ---")
-        for x in d.get("blockers", []):
-            lines.append(f"  • {x}")
-            answers_for_log.append(x)
-    elif template == "sprint_review":
-        for label_key, key in [
-            ("template.sprint_review.demos", "demos"),
-            ("template.sprint_review.metrics", "metrics"),
-            ("template.sprint_review.feedback", "feedback"),
-        ]:
-            lines.append(f"--- {t(label_key)} ---")
-            for x in d.get(key, []):
-                lines.append(f"  • {x}")
-                answers_for_log.append(x)
-    elif template == "one_on_one":
-        if d.get("mood"):
-            lines.append(f"--- {t('template.one_on_one.mood')} ---\n  {d['mood']}")
-            answers_for_log.append(d["mood"])
-        for label_key, key in [("template.one_on_one.growth", "growth"), ("template.one_on_one.blockers", "blockers")]:
-            lines.append(f"--- {t(label_key)} ---")
-            for x in d.get(key, []):
-                lines.append(f"  • {x}")
-                answers_for_log.append(x)
-        lines.append(f"--- {t(_I18N_TEMPLATE_ACTIONS)} ---")
-        for ai in d.get("action_items", []):
-            desc = ai.get("description", "")
-            who = (ai.get("assignee") or "").strip()
-            lines.append(f"  • {desc}" + (f" ({who})" if who else ""))
-            action_items_for_log.append(ai)
-    elif template == "brainstorm":
-        for label_key, key in [
-            ("template.brainstorm.ideas", "ideas"),
-            ("template.brainstorm.voting", "voting"),
-            ("template.brainstorm.next_steps", "next_steps"),
-        ]:
-            lines.append(f"--- {t(label_key)} ---")
-            for x in d.get(key, []):
-                lines.append(f"  • {x}")
-                answers_for_log.append(x)
-    elif template == "interview":
-        for label_key, key in [
-            ("template.interview.questions_asked", "questions_asked"),
-            ("template.interview.assessment", "assessment"),
-        ]:
-            lines.append(f"--- {t(label_key)} ---")
-            for x in d.get(key, []):
-                lines.append(f"  • {x}")
-                answers_for_log.append(x)
-        if d.get("decision"):
-            lines.append(f"--- {t('template.interview.decision')} ---\n  {d['decision']}")
-            answers_for_log.append(d["decision"])
-
+    formatter = _TEMPLATE_FORMATTERS.get(template)
+    if formatter is None:
+        lines, answers_for_log, action_items_for_log = [], [], []
+    else:
+        lines, answers_for_log, action_items_for_log = formatter(d)
     analysis_for_log = {
         "template": template,
         "questions": [],
@@ -159,6 +185,36 @@ def _format_template_result(template: str, llm_result: Any) -> tuple[list[str], 
         "action_items": action_items_for_log,
     }
     return (lines, analysis_for_log)
+
+
+def _format_meeting_analysis_lines(llm_result: Any) -> list[str]:
+    """Format default MeetingAnalysis to display lines."""
+    lines = ["--- Вопросы ---"]
+    for q in llm_result.questions:
+        lines.append(f"  • {q}")
+    lines.append("--- Ответы/выводы ---")
+    for a in llm_result.answers:
+        lines.append(f"  • {a}")
+    lines.append("--- Рекомендации ---")
+    for r in llm_result.recommendations:
+        lines.append(f"  • {r}")
+    lines.append("--- Действия ---")
+    for ai in llm_result.action_items:
+        who = (ai.assignee or "").strip()
+        lines.append(f"  • {ai.description} ({who})" if who and who.upper() != "<UNKNOWN>" else f"  • {ai.description}")
+    return lines
+
+
+def _build_analysis_for_log_default(llm_result: Any, cfg: Any, cost_usd: float) -> dict[str, Any]:
+    """Build analysis_for_log dict for default MeetingAnalysis."""
+    return {
+        "model": cfg.default_llm,
+        "questions": llm_result.questions,
+        "answers": llm_result.answers,
+        "recommendations": llm_result.recommendations,
+        "action_items": [ai.model_dump(mode="json") for ai in llm_result.action_items],
+        "cost_usd": cost_usd,
+    }
 
 
 def run_analyze_pipeline(
@@ -220,32 +276,8 @@ def run_analyze_pipeline(
         analysis_for_log["cost_usd"] = cost_usd
         return ("\n".join(lines), segments_for_log, analysis_for_log)
 
-    # Default: MeetingAnalysis
-    lines = ["--- Вопросы ---"]
-    for q in llm_result.questions:
-        lines.append(f"  • {q}")
-    lines.append("--- Ответы/выводы ---")
-    for a in llm_result.answers:
-        lines.append(f"  • {a}")
-    lines.append("--- Рекомендации ---")
-    for r in llm_result.recommendations:
-        lines.append(f"  • {r}")
-    lines.append("--- Действия ---")
-    for ai in llm_result.action_items:
-        who = (ai.assignee or "").strip()
-        if who and who.upper() != "<UNKNOWN>":
-            lines.append(f"  • {ai.description} ({who})")
-        else:
-            lines.append(f"  • {ai.description}")
-
-    analysis_for_log = {
-        "model": cfg.default_llm,
-        "questions": llm_result.questions,
-        "answers": llm_result.answers,
-        "recommendations": llm_result.recommendations,
-        "action_items": [ai.model_dump(mode="json") for ai in llm_result.action_items],
-        "cost_usd": cost_usd,
-    }
+    lines = _format_meeting_analysis_lines(llm_result)
+    analysis_for_log = _build_analysis_for_log_default(llm_result, cfg, cost_usd)
     return ("\n".join(lines), segments_for_log, analysis_for_log)
 
 
@@ -283,6 +315,12 @@ def run_live_summary_pipeline(seconds: int) -> tuple[list[str], float]:
         log.warning("live_summary.llm_failed", error=str(e))
         return ([t(_I18N_ERROR_LLM_FAILED, e=str(e))], 0.0)
 
+    lines = _format_live_summary_lines(live_result)
+    return (lines, cost_usd)
+
+
+def _format_live_summary_lines(live_result: Any) -> list[str]:
+    """Format live summary result to display lines."""
     lines: list[str] = []
     if getattr(live_result, "key_points", None):
         lines.append("--- Ключевые моменты ---")
@@ -296,13 +334,10 @@ def run_live_summary_pipeline(seconds: int) -> tuple[list[str], float]:
             if not desc.strip():
                 continue
             who = (getattr(ai, "assignee", None) or "").strip()
-            if who and who.upper() != "<UNKNOWN>":
-                lines.append(f"  • {desc} ({who})")
-            else:
-                lines.append(f"  • {desc}")
+            lines.append(f"  • {desc} ({who})" if who and who.upper() != "<UNKNOWN>" else f"  • {desc}")
     if not lines:
         lines.append("(ничего существенного)")
-    return (lines, cost_usd)
+    return lines
 
 
 def _streaming_listen_worker(
@@ -543,26 +578,10 @@ def _save_action_item_status(data: dict[str, str]) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2))  # NOSONAR S2083: path under home
 
 
-@action_items_app.command("update")
-def action_items_update(
-    from_session: int = typer.Option(..., "--from-session", help="ID сессии с action items"),
-    next_session: int = typer.Option(..., "--next-session", help="ID сессии (встреча), по которой обновляем статусы"),
-    output: str = typer.Option("text", "--output", help=_HELP_OUTPUT_TEXT_JSON),
-    save: bool = typer.Option(True, "--save/--no-save", help="Сохранить статусы в action_item_status.json"),
-) -> None:
-    """Обновить статусы action items из сессии --from-session по транскрипту встречи --next-session."""
-    try:
-        from voiceforge.core.transcript_log import TranscriptLog
-        from voiceforge.llm.router import update_action_item_statuses
-    except ImportError as e:
-        typer.echo(t("error.generic", msg=str(e)), err=True)
-        raise SystemExit(1) from None
-
-    log_db = TranscriptLog()
+def _action_items_update_validate(log_db: Any, from_session: int, next_session: int) -> tuple[Any, Any, Any, str]:
+    """Validate and return (detail_from, detail_next, action_items, transcript_next). Raises SystemExit on error."""
     detail_from = log_db.get_session_detail(from_session)
     detail_next = log_db.get_session_detail(next_session)
-    log_db.close()
-
     if detail_from is None:
         typer.echo(t("history.session_not_found", session_id=from_session), err=True)
         raise SystemExit(1)
@@ -582,6 +601,29 @@ def action_items_update(
     if not transcript_next:
         typer.echo(t("action_items.no_segments", session_id=next_session), err=True)
         raise SystemExit(1)
+    return (detail_from, detail_next, action_items, transcript_next)
+
+
+@action_items_app.command("update")
+def action_items_update(
+    from_session: int = typer.Option(..., "--from-session", help="ID сессии с action items"),
+    next_session: int = typer.Option(..., "--next-session", help="ID сессии (встреча), по которой обновляем статусы"),
+    output: str = typer.Option("text", "--output", help=_HELP_OUTPUT_TEXT_JSON),
+    save: bool = typer.Option(True, "--save/--no-save", help="Сохранить статусы в action_item_status.json"),
+) -> None:
+    """Обновить статусы action items из сессии --from-session по транскрипту встречи --next-session."""
+    try:
+        from voiceforge.core.transcript_log import TranscriptLog
+        from voiceforge.llm.router import update_action_item_statuses
+    except ImportError as e:
+        typer.echo(t("error.generic", msg=str(e)), err=True)
+        raise SystemExit(1) from None
+
+    log_db = TranscriptLog()
+    try:
+        _, _, action_items, transcript_next = _action_items_update_validate(log_db, from_session, next_session)
+    finally:
+        log_db.close()
 
     cfg = _get_config()
     try:
@@ -629,6 +671,22 @@ def action_items_update(
             typer.echo(t("action_items.saved_to", path=str(_action_item_status_path())))
 
 
+def _index_directory(indexer: Any, p: Path) -> tuple[int, set[str]]:
+    """Index all supported files under directory p. Return (total chunks added, indexed paths)."""
+    total = 0
+    indexed_paths: set[str] = set()
+    for ext in _INDEX_EXTENSIONS:
+        for f in sorted(p.glob(f"**/*{ext}")):
+            if not f.is_file():
+                continue
+            try:
+                total += indexer.add_file(f)
+                indexed_paths.add(str(f.resolve()))
+            except Exception as e:
+                typer.echo(t("index.skip_file", path=str(f), e=str(e)), err=True)
+    return (total, indexed_paths)
+
+
 @app.command()
 def index(
     path: str = typer.Argument(help="Путь к файлу или папке (PDF, MD, HTML, DOCX, TXT)"),
@@ -658,17 +716,7 @@ def index(
             typer.echo(t("index.chunks_added", n=added))
             return
         if p.is_dir():
-            total = 0
-            indexed_paths: set[str] = set()
-            for ext in _INDEX_EXTENSIONS:
-                for f in sorted(p.glob(f"**/*{ext}")):
-                    if not f.is_file():
-                        continue
-                    try:
-                        total += indexer.add_file(f)
-                        indexed_paths.add(str(f.resolve()))
-                    except Exception as e:
-                        typer.echo(t("index.skip_file", path=str(f), e=str(e)), err=True)
+            total, indexed_paths = _index_directory(indexer, p)
             pruned = indexer.prune_sources_not_in(indexed_paths, only_under_prefix=str(p.resolve()))
             if pruned:
                 typer.echo(t("index.chunks_pruned", n=pruned))
@@ -714,17 +762,14 @@ def daemon() -> None:
 
 
 def _service_unit_path() -> Path:
-    env_path = os.environ.get("VOICEFORGE_SERVICE_FILE")
-    if env_path:
-        p = Path(env_path)
-        if p.is_file():
-            return p
-    repo_scripts = Path(__file__).resolve().parents[2] / "scripts" / _SERVICE_UNIT_NAME
-    if repo_scripts.is_file():
-        return repo_scripts
-    cwd_scripts = Path.cwd() / "scripts" / _SERVICE_UNIT_NAME
-    if cwd_scripts.is_file():
-        return cwd_scripts
+    candidates: list[Path] = []
+    if os.environ.get("VOICEFORGE_SERVICE_FILE"):
+        candidates.append(Path(os.environ["VOICEFORGE_SERVICE_FILE"]))
+    candidates.append(Path(__file__).resolve().parents[2] / "scripts" / _SERVICE_UNIT_NAME)
+    candidates.append(Path.cwd() / "scripts" / _SERVICE_UNIT_NAME)
+    for c in candidates:
+        if c.is_file():
+            return c
     raise FileNotFoundError(f"{_SERVICE_UNIT_NAME} not found")
 
 

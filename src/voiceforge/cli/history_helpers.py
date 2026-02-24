@@ -93,6 +93,16 @@ def _format_analysis_block(analysis: object) -> list[str]:
     return lines
 
 
+def _format_transcript_segment_lines(segments: list[object]) -> list[str]:
+    """Format transcript segment lines for Markdown."""
+    out: list[str] = []
+    for s in segments:
+        speaker = getattr(s, "speaker", "")
+        prefix = f"**{speaker}** " if speaker else ""
+        out.append(f"- {getattr(s, 'start_sec', 0.0):.1f}–{getattr(s, 'end_sec', 0.0):.1f}s {prefix}{getattr(s, 'text', '')}")
+    return out
+
+
 def build_session_markdown(
     session_id: int,
     segments: list[object],
@@ -110,10 +120,7 @@ def build_session_markdown(
         lines.append("")
     lines.append("## Транскрипт")
     lines.append("")
-    for s in segments:
-        speaker = getattr(s, "speaker", "")
-        prefix = f"**{speaker}** " if speaker else ""
-        lines.append(f"- {getattr(s, 'start_sec', 0.0):.1f}–{getattr(s, 'end_sec', 0.0):.1f}s {prefix}{getattr(s, 'text', '')}")
+    lines.extend(_format_transcript_segment_lines(segments))
     if analysis:
         lines.extend(["", "## Анализ", ""])
         lines.extend(_format_analysis_block(analysis))
