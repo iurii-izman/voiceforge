@@ -13,6 +13,6 @@
 | [#29](https://github.com/iurii-izman/voiceforge/issues/29) | RAG ODT/RTF — тесты при добавлении |
 | [#30](https://github.com/iurii-izman/voiceforge/issues/30) | Dependabot — закрыть 1 moderate вручную |
 
-При выполнении задачи: коммит с `Closes #N`, на доске перевести карточку в Done (агент может через `gh project item-edit`).
+При выполнении задачи: коммит в формате Conventional Commits с `Closes #N` (см. [git-github-practices.md](git-github-practices.md)); на доске перевести карточку в Done (агент может через `gh project item-edit`).
 
 См. также [next-iteration-focus.md](next-iteration-focus.md) и [planning-and-tools.md](planning-and-tools.md).

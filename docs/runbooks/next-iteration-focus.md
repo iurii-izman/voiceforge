@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-GitHub Project создан ([VoiceForge Board](https://github.com/users/iurii-izman/projects/1)), привязан к репо. Issues #26–30 созданы и добавлены на доску; #26 (CalDAV) в In Progress. Добавлен [backlog.md](backlog.md) как зеркало. Тесты, коммит и пуш — в конце сессии.
+Финализация Git/GitHub: добавлены правила [git-github-practices.md](git-github-practices.md) и `.cursor/rules/git-github-practices.mdc` (Conventional Commits, теги, Closes #N, labels, Project). Issues #26–30 с лейблами (roadmap, docs, feat, chore). Handoff-rule обновлён под conventional commits. Тесты, коммит и пуш — в конце сессии.
 
 ---
 
