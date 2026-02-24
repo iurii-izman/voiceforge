@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** #27 AppImage закрыт (cargo tauri build в toolbox с NO_STRIP, librsvg2-devel; deb/rpm/AppImage в bundle/). Следующий шаг: **#32 A1 eval harness** — добавить DeepEval/ROUGE-L тест-жгут для LLM-выходов (Phase A, P0).
+- **Сейчас:** #27 AppImage закрыт; #32 eval — каркас готов (tests/eval/, ROUGE-L, 1 golden sample, make eval). Следующий шаг: **#32** — довести до 20+ golden samples и DeepEval/LLM-judge, или **#33 A2 Instructor retry**.
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-#27 AppImage закрыт: сборка в toolbox с NO_STRIP=true, APPIMAGE_EXTRACT_AND_RUN=1 и librsvg2-devel; артефакты deb, rpm, AppImage в desktop/src-tauri/target/release/bundle/. Обновлены setup-desktop-toolbox.sh, desktop-build-deps.md/en, offline-package.md.
+#27 AppImage закрыт; #32 eval — каркас: tests/eval/, ROUGE-L (rouge-score), golden_samples/ с sample_standup_01.json, make eval. Порог ROUGE-L 0.35; остаётся 20+ samples, DeepEval/LLM-judge.
 
 ---
 
