@@ -1,6 +1,6 @@
 [project]
 name = "voiceforge"
-version = "0.1.0a1"
+version = "0.2.0a1"
 description = "Local-first AI assistant for audio meetings: STT, diarization, RAG, LLM analysis"
 readme = "README.md"
 license = "MIT"

@@ -6,6 +6,10 @@ The format is based on Keep a Changelog and this project follows SemVer pre-rele
 
 ## [Unreleased]
 
+_No changes yet._
+
+## [0.2.0-alpha.1] - 2026-02-24
+
 ### Added
 
 - **Десктопный UI (Tauri, Roadmap #13):** приложение в `desktop/` — Tauri 2 + D-Bus-клиент к демону `com.voiceforge.App`. Экраны: Главная (статус демона, старт/стоп записи, анализ с секундами и шаблоном, стриминг), Сессии (список, детали, экспорт Markdown/PDF через CLI), Затраты (GetAnalytics 7d/30d), Настройки (только чтение). Архитектура: ADR-0004; зависимости и проверка окружения: `docs/runbooks/desktop-build-deps.md`, `scripts/check-desktop-deps.sh`. Контракт D-Bus: `desktop/DBUS.md`.
@@ -44,5 +48,6 @@ The format is based on Keep a Changelog and this project follows SemVer pre-rele
 
 - Baseline alpha0.1 core CLI (9 commands), quality gates, and release/tag baseline.
 
-[Unreleased]: https://github.com/iurii-izman/voiceforge/compare/v0.1.0-alpha.1...HEAD
+[Unreleased]: https://github.com/iurii-izman/voiceforge/compare/v0.2.0-alpha.1...HEAD
+[0.2.0-alpha.1]: https://github.com/iurii-izman/voiceforge/compare/v0.1.0-alpha.1...v0.2.0-alpha.1
 [0.1.0-alpha.1]: https://github.com/iurii-izman/voiceforge/releases/tag/v0.1.0-alpha.1

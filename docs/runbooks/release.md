@@ -34,6 +34,13 @@ uv build --wheel
 git tag -a v0.1.0-alpha.1 -m "voiceforge alpha0.1"
 ```
 
+Для альфа2 (тег после коммита с версией 0.2.0a1 и обновлённым CHANGELOG):
+
+```bash
+git tag -a v0.2.0-alpha.1 -m "VoiceForge alpha2: desktop Tauri, D-Bus, streaming CLI"
+git push origin v0.2.0-alpha.1
+```
+
 Expected outputs:
 
 1. `verify_pr.sh: ALL CHECKS PASSED`
