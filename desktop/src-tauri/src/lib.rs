@@ -1,6 +1,7 @@
 //! VoiceForge desktop: Tauri + D-Bus client for com.voiceforge.App
 
 mod commands;
+mod dbus_signals;
 
 pub const DBUS_NAME: &str = "com.voiceforge.App";
 pub const DBUS_PATH: &str = "/com/voiceforge/App";
@@ -29,6 +30,10 @@ pub async fn call_method0(conn: &zbus::Connection, method: &str) -> Result<Strin
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
+        .setup(|app| {
+            dbus_signals::spawn_signal_listener(app.handle().clone());
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             commands::ping,
             commands::get_settings,

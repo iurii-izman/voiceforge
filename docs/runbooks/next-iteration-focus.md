@@ -4,7 +4,7 @@
 
 **Обновлено:** 2026-02-24
 
-**Последняя итерация:** подготовка релиза Alpha2 (блок F): версия в pyproject.toml → 0.2.0a1, CHANGELOG [0.2.0-alpha.1] с полным списком изменений, release.md — команды для тега v0.2.0-alpha.1. Тесты проходят (39). Сборка десктопа — в toolbox (`./scripts/check-desktop-deps.sh` → `cd desktop && npm run build && cargo tauri build`). После пушa коммита — создать тег и пуш тега по release.md.
+**Последняя итерация:** Блок A — в `check-desktop-deps.sh` добавлена проверка node/npm. Блок B — подписка на D-Bus-сигналы в десктопе: модуль `desktop/src-tauri/src/dbus_signals.rs` (ListenStateChanged, AnalysisDone), события `listen-state-changed` и `analysis-done` во фронте; UI обновляется по сигналам без опроса. desktop/DBUS.md обновлён.
 
 ---
 
@@ -21,7 +21,7 @@
 1. **Релиз Alpha2 (Блок F):** версия и CHANGELOG готовы; осталось — создать тег `v0.2.0-alpha.1` и `git push origin v0.2.0-alpha.1` (см. release.md). Сборка десктопа в toolbox — по желанию перед тегом.
 2. **Сборка десктопа в toolbox:** `./scripts/check-desktop-deps.sh` → `cd desktop && npm run build && cargo tauri build`; иконка при необходимости.
 3. **Согласовать версию pyannote:** в коде оставлена 4.0.4; наблюдать. При проблемах (OOM и т.д.) — зафиксировать в доке или откатить зависимость.
-4. **Подписка на D-Bus-сигналы** в десктопе (ListenStateChanged, AnalysisDone) — опционально; Flatpak и E2E — по желанию после стабильной сборки.
+4. **Подписка на D-Bus-сигналы** в десктопе реализована (ListenStateChanged, AnalysisDone); Flatpak и E2E — по желанию после стабильной сборки.
 5. **Контракт D-Bus:** при изменении методов/сигналов обновлять desktop/DBUS.md и config-env-contract.md.
 
 ---

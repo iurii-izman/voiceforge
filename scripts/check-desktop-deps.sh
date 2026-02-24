@@ -32,6 +32,18 @@ else
   warn "cargo tauri not installed (run: cargo install tauri-cli)"
 fi
 
+# Node.js / npm (for desktop: npm run build before cargo tauri build)
+if command -v node >/dev/null 2>&1; then
+  ok "node: $(node --version 2>/dev/null || echo '?')"
+else
+  fail "node not found (Fedora: dnf install nodejs)"
+fi
+if command -v npm >/dev/null 2>&1; then
+  ok "npm: $(npm --version 2>/dev/null || echo '?')"
+else
+  fail "npm not found (Fedora: dnf install npm)"
+fi
+
 # Fedora: pkg-config and dev headers for WebKit/GTK
 if command -v pkg-config >/dev/null 2>&1; then
   ok "pkg-config: $(pkg-config --version)"

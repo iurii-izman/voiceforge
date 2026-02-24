@@ -1,4 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 
 let daemonOk = false;
 let listenState = false;
@@ -66,25 +67,30 @@ function switchTab(tabId) {
   if (tabId === "settings") loadSettings();
 }
 
+function applyListenState(isListening) {
+  listenState = isListening;
+  const btn = document.getElementById("listen-toggle");
+  const label = document.getElementById("listen-label");
+  btn.textContent = listenState ? "Стоп записи" : "Старт записи";
+  label.textContent = listenState ? "Запись идёт" : "";
+  const streamingCard = document.getElementById("streaming-card");
+  if (listenState) {
+    streamingCard.style.display = "block";
+    if (!streamingInterval) streamingInterval = setInterval(pollStreaming, 1500);
+  } else {
+    streamingCard.style.display = "none";
+    if (streamingInterval) {
+      clearInterval(streamingInterval);
+      streamingInterval = null;
+    }
+  }
+}
+
 async function updateListenState() {
   if (!daemonOk) return;
   try {
-    listenState = await invoke("is_listening");
-    const btn = document.getElementById("listen-toggle");
-    const label = document.getElementById("listen-label");
-    btn.textContent = listenState ? "Стоп записи" : "Старт записи";
-    label.textContent = listenState ? "Запись идёт" : "";
-    const streamingCard = document.getElementById("streaming-card");
-    if (listenState) {
-      streamingCard.style.display = "block";
-      if (!streamingInterval) streamingInterval = setInterval(pollStreaming, 1500);
-    } else {
-      streamingCard.style.display = "none";
-      if (streamingInterval) {
-        clearInterval(streamingInterval);
-        streamingInterval = null;
-      }
-    }
+    const isListening = await invoke("is_listening");
+    applyListenState(isListening);
   } catch (_) {}
 }
 
@@ -127,6 +133,17 @@ document.getElementById("listen-toggle").addEventListener("click", async () => {
     document.getElementById("listen-label").textContent = "Ошибка: " + (e?.message || e);
   }
   btn.disabled = false;
+});
+
+listen("listen-state-changed", (e) => {
+  if (e.payload?.is_listening !== undefined) applyListenState(!!e.payload.is_listening);
+});
+listen("analysis-done", (e) => {
+  const status = e.payload?.status;
+  const statusEl = document.getElementById("analyze-status");
+  if (statusEl) statusEl.textContent = status === "ok" ? "Готово." : status === "error" ? "Ошибка." : String(status ?? "");
+  document.getElementById("analyze-btn").disabled = false;
+  if (daemonOk) loadSessions();
 });
 
 document.getElementById("analyze-btn").addEventListener("click", async () => {

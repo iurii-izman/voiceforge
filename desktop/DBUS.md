@@ -29,7 +29,7 @@
 - **AnalysisDone**(status: str) — завершение анализа, status = "ok" | "error".
 - **TranscriptChunk**(text, speaker, timestamp_ms, is_final) — стриминг STT (опционально).
 
-Десктоп может опрашивать IsListening и GetStreamingTranscript по таймеру вместо подписки на сигналы; подписка на сигналы — для следующих итераций.
+Десктоп подписывается на сигналы **ListenStateChanged** и **AnalysisDone** (модуль `dbus_signals`) и обновляет UI по событиям; опрос IsListening/GetStreamingTranscript по таймеру используется при инициализации и после действий пользователя.
 
 ## Экспорт
 
