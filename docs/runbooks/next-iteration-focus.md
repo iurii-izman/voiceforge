@@ -4,11 +4,11 @@
 
 **Обновлено:** 2026-02-24
 
-**Последняя итерация:** Сверка roadmap 1–8 по коду — все пункты закрыты (без доработки кода). Обновлён фокус: приоритет следующий блок 9–12 (стриминг/live summary уже в коде; PII/Web UI) или стабилизация/доки.
+**Последняя итерация:** Добавлены e2e smoke для roadmap 9–10 (listen --stream, listen --live-summary). Roadmap 1–12 закрыты по коду; выделены следующие 10 шагов по реализации (roadmap 13–20 + стабилизация).
 
 ---
 
-## Roadmap 1–8: статус (сверка по коду)
+## Roadmap 1–12: статус (сверка по коду)
 
 | # | Направление | Статус |
 |---|-------------|--------|
@@ -18,10 +18,29 @@
 | 4 | Выбор модели Ollama в конфиге | ✓ `ollama_model` в config, router, config-env-contract |
 | 5 | Документация «Первая встреча за 5 минут» | ✓ `docs/first-meeting-5min.md` |
 | 6 | Отчёты по затратам (cost report) | ✓ `cost --days/--from/--to`, GetAnalytics, API |
-| 7 | Явный язык для STT | ✓ `language` в config, `language_hint` в Whisper (main, daemon, pipeline) |
-| 8 | Расширенные e2e-тесты | ✓ export, analyze --template, action-items update, history --output md в test_cli_e2e_smoke.py |
+| 7 | Явный язык для STT | ✓ `language` в config, `language_hint` в Whisper |
+| 8 | Расширенные e2e-тесты | ✓ export, analyze --template, action-items, history --output md |
+| 9 | Стриминговый STT в CLI (listen) | ✓ `--stream`/`streaming_stt`, e2e test_cli_listen_stream_smoke |
+| 10 | Live summary во время listen | ✓ `--live-summary`, e2e test_cli_listen_live_summary_smoke |
+| 11 | Управление PII (вкл/выкл, только email) | ✓ `pii_mode` OFF/ON/EMAIL_ONLY в config и status |
+| 12 | Простой локальный Web UI | ✓ web/server.py: статус, сессии, затраты, action-items, экспорт |
 
 Дублировать реализацию не нужно.
+
+---
+
+## Следующие 10 шагов по реализации проекта
+
+1. **Стабилизация сборки десктопа (roadmap 13)** — зафиксировать последовательность в toolbox в `desktop-build-deps.md`, при необходимости скрипт `setup-desktop-toolbox.sh` и `check-desktop-deps.sh`; убедиться, что сборка воспроизводима.
+2. **Экспорт сессии из десктопа** — при необходимости добавить метод D-Bus ExportSession (или вызов CLI из Tauri) и кнопку экспорта в UI десктопа; пока достаточно CLI `voiceforge export`.
+3. **Офлайн-пакет (roadmap 14)** — исследование и черновик: Flatpak или AppImage для Linux; описать в runbook зависимости и этапы сборки.
+4. **Согласовать версию pyannote** — зафиксировать в `desktop-build-deps.md` или отдельном runbook: текущая 4.0.4; при OOM на 8 ГБ — откат на 3.3.2 и шаги отката.
+5. **Контракт D-Bus** — при любом изменении методов/сигналов обновлять `desktop/DBUS.md` и `docs/runbooks/config-env-contract.md`; при необходимости — снапшот тестов контракта.
+6. **Smart trigger по умолчанию (roadmap 15)** — опционально: рассмотреть включение `smart_trigger` по умолчанию в конфиге после сбора отзывов; при включении — обновить доки и default в config.
+7. **Бот Telegram/Slack (roadmap 16)** — приоритет по желанию: ADR + черновик архитектуры (webhook, команды, интеграция с демоном/CLI).
+8. **Интеграция с календарём (roadmap 17)** — исследование: CalDAV/Google Calendar, триггер «встреча началась» для listen/analyze; описать в runbook или ADR.
+9. **RAG: новые форматы (roadmap 18)** — постепенно: поддержка ODT/RTF в индексаторе; при добавлении — тесты и обновление доков.
+10. **Стабилизация и документация** — обновить `installation-guide.md` и `first-meeting-5min.md` при изменении CLI/конфига; рассмотреть перевод ключевых runbook на английский; при необходимости — prompt caching (roadmap 19), macOS/WSL2 (roadmap 20).
 
 ---
 
@@ -35,12 +54,7 @@
 
 ## Рекомендательные приоритетные задачи (что делать дальше)
 
-1. **Roadmap 9–10:** стриминг STT и live summary уже в коде (`--stream`/`streaming_stt`, `--live-summary`); при необходимости — доработка UX или тесты.
-2. **Roadmap 11–12:** PII (уже есть pii_mode), простой Web UI (уже есть в web/server.py) — приоритет по желанию.
-3. **Сборка десктопа в toolbox:** см. `desktop-build-deps.md` (полная последовательность).
-4. **Согласовать версию pyannote:** 4.0.4 в коде; при OOM — зафиксировать в доке или откатить на 3.3.2.
-5. **Контракт D-Bus:** при изменении методов/сигналов обновлять desktop/DBUS.md и config-env-contract.md.
-6. **Flatpak / e2e десктопа:** по желанию после стабильной сборки.
+См. блок **«Следующие 10 шагов по реализации проекта»** выше. Ближайшие по приоритету: шаги 1–4 (сборка десктопа, экспорт из десктопа, офлайн-пакет, pyannote); затем 5–6 (контракт D-Bus, smart trigger); 7–10 — по мере необходимости.
 
 ---
 
@@ -55,4 +69,4 @@
 
 ## Общий совет
 
-Roadmap 1–8 закрыты по коду и тестам. Следующий логичный блок — 9–12 (улучшение стриминг/live summary, PII, Web UI) или фокус на стабилизацию и документацию (installation-guide, first-meeting-5min уже есть). Десктоп — основной UI через D-Bus; один вход для установки: [installation-guide.md](installation-guide.md).
+Roadmap 1–12 закрыты по коду и тестам (e2e для 9–10 добавлены). Дальше — «Следующие 10 шагов» (roadmap 13–20 + стабилизация). Десктоп — основной UI через D-Bus; один вход для установки: [installation-guide.md](installation-guide.md).

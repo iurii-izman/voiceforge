@@ -89,6 +89,52 @@ def test_cli_pipeline_listen_analyze_history(monkeypatch, tmp_path) -> None:
     assert detail_payload["data"]["segments"]
 
 
+def test_cli_listen_stream_smoke(monkeypatch, tmp_path) -> None:
+    """E2E (roadmap 9): listen --stream starts streaming STT path; workers mocked, no real STT."""
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
+    monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "runtime"))
+
+    fake_capture_module = types.ModuleType("voiceforge.audio.capture")
+    fake_capture_module.AudioCapture = _FakeAudioCapture
+    monkeypatch.setitem(sys.modules, "voiceforge.audio.capture", fake_capture_module)
+
+    ticks = iter([0.0, 2.0])
+    monkeypatch.setattr(main_mod.time, "monotonic", lambda: next(ticks, 2.0))
+    monkeypatch.setattr(main_mod.time, "sleep", lambda _seconds: None)
+
+    def noop_streaming_worker(_capture, _cfg, _stop_event) -> None:
+        return None
+
+    monkeypatch.setattr(main_mod, "_streaming_listen_worker", noop_streaming_worker)
+
+    result = runner.invoke(main_mod.app, ["listen", "--duration", "1", "--stream"])
+    assert result.exit_code == 0, result.stdout + result.stderr
+    assert "Streaming STT" in result.stderr or "Стриминг STT" in result.stderr
+
+
+def test_cli_listen_live_summary_smoke(monkeypatch, tmp_path) -> None:
+    """E2E (roadmap 10): listen --live-summary starts live-summary worker; worker mocked, no real LLM."""
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
+    monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "runtime"))
+
+    fake_capture_module = types.ModuleType("voiceforge.audio.capture")
+    fake_capture_module.AudioCapture = _FakeAudioCapture
+    monkeypatch.setitem(sys.modules, "voiceforge.audio.capture", fake_capture_module)
+
+    ticks = iter([0.0, 2.0])
+    monkeypatch.setattr(main_mod.time, "monotonic", lambda: next(ticks, 2.0))
+    monkeypatch.setattr(main_mod.time, "sleep", lambda _seconds: None)
+
+    def noop_live_summary_worker(_stop_event, _interval_sec) -> None:
+        return None
+
+    monkeypatch.setattr(main_mod, "_live_summary_listen_worker", noop_live_summary_worker)
+
+    result = runner.invoke(main_mod.app, ["listen", "--duration", "1", "--live-summary"])
+    assert result.exit_code == 0, result.stdout + result.stderr
+    assert "Live summary" in result.stderr or "live summary" in result.stderr.lower()
+
+
 def test_cli_service_install_uninstall_smoke(monkeypatch, tmp_path) -> None:
     service_src = tmp_path / "voiceforge.service"
     service_src.write_text("[Unit]\nDescription=voiceforge test service\n")
