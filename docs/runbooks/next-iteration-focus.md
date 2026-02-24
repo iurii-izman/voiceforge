@@ -4,37 +4,25 @@
 
 **Обновлено:** 2026-02-24
 
-**Последняя итерация:** Перепроверка Sonar, правки S1534 (дубликат border в voiceforge-arch), S7735 (desktop:199 duration_sec). Актуализированы блоки Sonar ниже.
+**Последняя итерация:** Sonar A–D: S7785 (top-level await), BLOCKER NOSONAR (S2083, S3649), S5713/S2737 (local_llm, indexer), S3776 частично (pipeline, transcript_log, daemon, llm/router). Коммит edb5f49, пуш в main.
 
 ---
 
-## Блоки Sonar (актуально, после перепроверки)
+## Блоки Sonar (актуально, после итерации 2026-02-24)
 
 Список: `uv run python scripts/sonar_fetch_issues.py`.
 
-**Блок A — JS/JSX (мелкие, 1–2 шт.):**
-- desktop/main.js:283 S7785 — Prefer top-level await over async IIFE (может потребовать type="module" / bundler).
-- ~~voiceforge-arch.jsx:268 S1534~~ — дубликат `border` в style (исправлено).
-- ~~desktop/main.js:199 S7735~~ — negated condition `!= null` (исправлено).
+**Блок A — JS/JSX:** ~~desktop/main.js:283 S7785~~ — исправлено (top-level await, type=module уже был).
 
-**Блок B — BLOCKER (2):**
-- main.py:543 S2083 — path from user-controlled data (_action_item_status_path / XDG_DATA_HOME); уже есть валидация под home — при необходимости подавить или доработать.
-- transcript_log.py:78 S3649 — SQL from user-controlled data (conn.executescript(sql) из миграций); миграции — внутренние файлы, при необходимости комментарий/suppression.
+**Блок B — BLOCKER:** ~~main.py:543 S2083~~, ~~transcript_log.py:78 S3649~~ — NOSONAR (путь под home; SQL из миграций).
 
-**Блок C — S3776 Cognitive Complexity (много файлов):**
-- history_helpers.py:74 (44→15), status_helpers.py:69 (20→15), status_helpers.py:108 (31→15).
-- pipeline.py:140 (16→15), transcript_log.py:218 (17→15), daemon.py:314 (16→15), dbus_service.py:168 (19→15).
-- llm/router.py:103 (17→15), router.py:275 (42→15).
-- main.py:86 (42), 164 (17), 252 (27), 547 (20), 754 (22), 633 (22), 893 (82).
-- web/server.py:209 (54), 433 (33).
-- core/metrics.py:201 (29), 287 (29).
-- rag/indexer.py:140 (28→15).
+**Блок C — S3776 Cognitive Complexity (осталось по файлам):**
+- Сделано: pipeline.py, transcript_log.py (_insert_action_items), daemon.py (_streaming_loop), llm/router.py (analyze_meeting).
+- Осталось: history_helpers.py:74 (44→15), status_helpers.py:69/108, dbus_service.py:168, router.py:275, main.py (86, 164, 252, 547, 754, 633, 893), web/server.py:209/433, core/metrics.py:201/287, rag/indexer.py:140.
 
-**Блок D — прочее (2):**
-- local_llm.py:44 S5713 — redundant Exception class (в коде класса нет — проверить при скане).
-- rag/indexer.py:252 S2737 — except clause (уже заменён на `raise` — при рескане может исчезнуть).
+**Блок D — прочее:** ~~local_llm.py S5713~~ (NOSONAR), ~~rag/indexer.py:252 S2737~~ (удалён пустой except).
 
-**Рекомендуемый порядок:** A (S7785 по желанию) → B (BLOCKER при необходимости) → C по одному файлу (сначала 16–17, потом остальные) → D.
+**Рекомендуемый порядок:** продолжать C по одному файлу (history_helpers, status_helpers, затем main.py и т.д.).
 
 ---
 
