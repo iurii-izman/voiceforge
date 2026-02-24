@@ -51,6 +51,21 @@ cd desktop && cargo tauri build
 
 If the script reports all checks OK, `cargo tauri build` should succeed.
 
+## Полная последовательность в toolbox
+
+На Fedora Atomic (или без webkit/gtk на хосте) сборка десктопа только внутри toolbox:
+
+1. **Войти в toolbox:** `toolbox enter` (или `toolbox enter ИМЯ`).
+2. **Установить зависимости:** пакеты из раздела выше (dnf) или один скрипт:
+   ```bash
+   cd /path/to/voiceforge
+   ./scripts/setup-desktop-toolbox.sh
+   ```
+3. **Проверить окружение:** `./scripts/check-desktop-deps.sh` — все проверки должны быть [OK].
+4. **Собрать:** `cd desktop && npm run build && cargo tauri build`. Артефакты в `desktop/src-tauri/target/release/bundle/`.
+
+Без webkit2gtk-4.1 и gtk+-3.0 `check-desktop-deps` выдаст [FAIL]; в этом случае устанавливать пакеты в toolbox (шаг 2).
+
 ## Сборка релиза и упаковка
 
 - Релизный бинарник: `cd desktop && npm run build && cargo tauri build`. Артефакты в `desktop/src-tauri/target/release/bundle/` (формат зависит от платформы).
