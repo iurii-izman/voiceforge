@@ -2,7 +2,7 @@
 
 **Назначение:** один источник правды по тому, какой документ за что отвечает и актуален ли он. При изменении кода/фич обновлять соответствующий док и при необходимости этот индекс.
 
-**Обновлено:** 2026-02-24 (автопилот: EN runbooks, calendar-integration, rag-formats, offline-package checklist)
+**Обновлено:** 2026-02-24 (аудит планов: history/closed-plans-and-roadmap.md, next-iteration-focus только открытые задачи, planning-and-tools.md)
 
 ---
 
@@ -11,7 +11,8 @@
 | Тема | Документ | Статус |
 |------|----------|--------|
 | Контекст агента, правила, конец сессии | [runbooks/agent-context.md](runbooks/agent-context.md) | Актуален |
-| Следующий шаг / фокус итерации | [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md) | Обновляет агент |
+| Следующий шаг / фокус итерации | [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md) | Обновляет агент; только открытые задачи и план |
+| История: что сделано (аудит по коду) | [history/closed-plans-and-roadmap.md](history/closed-plans-and-roadmap.md) | Справочно |
 | Правило автопилота (копия для .cursor/rules/) | [runbooks/agent-session-handoff-rule.md](runbooks/agent-session-handoff-rule.md) | Актуален |
 | Приоритет фич (roadmap 1–20) | [roadmap-priority.md](roadmap-priority.md) | Актуален |
 | Конфиг, env, keyring-имена | [runbooks/config-env-contract.md](runbooks/config-env-contract.md), [runbooks/keyring-keys-reference.md](runbooks/keyring-keys-reference.md) | Актуален |
@@ -26,6 +27,12 @@
 ---
 
 ## Полный список по каталогам
+
+### docs/history/
+
+| Файл | Роль | Статус |
+|------|------|--------|
+| closed-plans-and-roadmap.md | Что сделано по roadmap и планам (аудит по коду) | Справочно |
 
 ### docs/ (корень)
 
@@ -71,6 +78,7 @@
 | test-operations.md | Flaky, CI, карантин | Актуален |
 | sonar-pr-cleanup.md | Очистка PR/Sonar | Актуален |
 | offline-package.md | Flatpak/AppImage, чеклист next steps | Черновик |
+| planning-and-tools.md | Планирование: Markdown-backlog vs GitHub Projects в связке с агентом | Актуален |
 | calendar-integration.md | Интеграция с календарём (roadmap 17), исследование | Актуален |
 | rag-formats.md | RAG: форматы индексатора, план ODT/RTF (roadmap 18) | Актуален |
 
