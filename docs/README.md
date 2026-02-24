@@ -36,6 +36,7 @@
 
 - **Контекст и агент:** agent-context, next-iteration-focus, cursor-agent-setup, voiceforge-cursor-tz (ТЗ и промпты для Cursor)
 - **Конфиг и среда:** config-env-contract, keyring-keys-reference, bootstrap, desktop-build-deps
+- **Установка и запуск:** [runbooks/installation-guide.md](runbooks/installation-guide.md) — где запускать, ребилд, демон, обновление
 - **Релизы:** alpha2-checklist, release, rollback-alpha-release
 - **Остальное:** quickstart, dependencies, repo-governance, security, test-operations, web-api, alpha0.1-dod
 
@@ -45,6 +46,7 @@
 
 - Сборка в toolbox: [runbooks/desktop-build-deps.md](runbooks/desktop-build-deps.md); скрипт `./scripts/setup-desktop-toolbox.sh`, затем `cd desktop && npm run tauri build`
 - Перед запуском десктопа обязательно: **voiceforge daemon**
+- Полный гайд установки и запуска (хост/toolbox, ребилд, демон, обновление): [runbooks/installation-guide.md](runbooks/installation-guide.md)
 - План реализации: [desktop-tauri-implementation-plan.md](desktop-tauri-implementation-plan.md)
 
 ---

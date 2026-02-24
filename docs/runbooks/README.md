@@ -23,6 +23,7 @@
 | [config-env-contract.md](config-env-contract.md) | VOICEFORGE_*, Settings, D-Bus GetSettings, keyring. |
 | [keyring-keys-reference.md](keyring-keys-reference.md) | Полный список имён ключей в keyring (anthropic, openai, sonar_token, …). |
 | [bootstrap.md](bootstrap.md) | Установка: bootstrap.sh, uv sync, doctor, опционально сервис. |
+| [installation-guide.md](installation-guide.md) | Полный гайд: где запускать (хост/toolbox), когда ребилдить, демон, обновление. |
 | [desktop-build-deps.md](desktop-build-deps.md) | Зависимости для сборки Tauri в toolbox (Fedora). |
 
 ---
