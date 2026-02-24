@@ -165,4 +165,8 @@ def parse_rtf(path: str | Path) -> list[str]:
     except Exception:
         text_content = rtf_to_text(raw.decode("cp1252", errors="replace"))
     segments = [p.strip() for p in re.split(r"\n\s*\n", text_content) if p.strip()]
-    return segments if segments else ([text_content.strip()] if text_content.strip() else [])
+    if segments:
+        return segments
+    if text_content.strip():
+        return [text_content.strip()]
+    return []

@@ -13,6 +13,8 @@ from typing import Any
 _log = logging.getLogger(__name__)
 
 _TELEGRAM_API = "https://api.telegram.org"
+_CONTENT_TYPE_JSON = "application/json; charset=utf-8"
+_ERR_INVALID_JSON = "invalid JSON"
 
 
 def _telegram_send_message(token: str, chat_id: int | str, text: str) -> None:
@@ -20,7 +22,7 @@ def _telegram_send_message(token: str, chat_id: int | str, text: str) -> None:
     url = f"{_TELEGRAM_API}/bot{token}/sendMessage"
     payload = json.dumps({"chat_id": chat_id, "text": text}).encode("utf-8")
     req = urllib.request.Request(url, data=payload, method="POST")
-    req.add_header("Content-Type", "application/json; charset=utf-8")
+    req.add_header("Content-Type", _CONTENT_TYPE_JSON)
     try:
         with urllib.request.urlopen(req, timeout=10) as r:
             if r.status >= 400:
@@ -202,7 +204,7 @@ def _html_index() -> str:
 class _VoiceForgeHandler(BaseHTTPRequestHandler):
     def _send_json(self, obj: Any, status: int = 200) -> None:
         self.send_response(status)
-        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Type", _CONTENT_TYPE_JSON)
         self.end_headers()
         self.wfile.write(json.dumps(obj, ensure_ascii=False).encode("utf-8"))
 
@@ -522,14 +524,14 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
         token = get_api_key("webhook_telegram")
         if not token:
             self.send_response(503)
-            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Type", _CONTENT_TYPE_JSON)
             self.end_headers()
             self.wfile.write(b'{"ok":false,"error":"webhook_telegram not in keyring"}')
             return
         try:
             data = json.loads(body.decode("utf-8") if body else "{}")
         except json.JSONDecodeError:
-            self._send_error_json("invalid JSON", 400)
+            self._send_error_json(_ERR_INVALID_JSON, 400)
             return
         message = (data or {}).get("message") or {}
         chat = message.get("chat") or {}
@@ -595,7 +597,7 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
             reply = "Use /start, /status, /sessions, /cost [days]"
         _telegram_send_message(token, chat_id, reply)
         self.send_response(200)
-        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Type", _CONTENT_TYPE_JSON)
         self.end_headers()
         self.wfile.write(b'{"ok":true}')
 
@@ -612,7 +614,7 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
             try:
                 data = json.loads(body) if body.strip() else {}
             except json.JSONDecodeError:
-                self._send_error_json("invalid JSON", 400)
+                self._send_error_json(_ERR_INVALID_JSON, 400)
                 return
             self._handle_post_analyze(data)
             return
@@ -622,7 +624,7 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
             try:
                 data = json.loads(body) if body.strip() else {}
             except json.JSONDecodeError:
-                self._send_error_json("invalid JSON", 400)
+                self._send_error_json(_ERR_INVALID_JSON, 400)
                 return
             self._handle_action_items_update(data)
             return

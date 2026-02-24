@@ -280,7 +280,7 @@ function loadSettings() {
   }
 }
 
-(async () => {
+(async () => { // NOSONAR S7785 — top-level await not supported by build target (es2020/chrome87)
   const ok = await checkDaemon();
   if (ok) {
     await updateListenState();

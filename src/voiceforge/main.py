@@ -945,14 +945,19 @@ def export_session(
         raise SystemExit(1) from e
 
 
+def _history_echo_error_data(data: Any) -> None:
+    """Emit error message for history_helpers error kind (reduces S3776 complexity)."""
+    if isinstance(data, tuple):
+        key, kwargs = data
+        typer.echo(t(key, **kwargs), err=True)
+    else:
+        typer.echo(t(data) if isinstance(data, str) and data.startswith("history.") else data, err=True)
+
+
 def _history_echo(kind: str, data: Any, exit_on_error: bool = True) -> None:
     """Emit history command output from (kind, data) returned by history_helpers."""
     if kind == "error":
-        if isinstance(data, tuple):
-            key, kwargs = data
-            typer.echo(t(key, **kwargs), err=True)
-        else:
-            typer.echo(t(data) if isinstance(data, str) and data.startswith("history.") else data, err=True)
+        _history_echo_error_data(data)
         if exit_on_error:
             raise SystemExit(1)
         return
@@ -968,7 +973,6 @@ def _history_echo(kind: str, data: Any, exit_on_error: bool = True) -> None:
         return
     if kind == "md":
         typer.echo(data)
-        return
 
 
 @app.command()
