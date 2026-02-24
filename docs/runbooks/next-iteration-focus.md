@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** Автопилот выполнен: EN runbooks (installation-guide-en, first-meeting-5min-en), runbooks calendar-integration.md и rag-formats.md, чеклист в offline-package.md, обновлён DOCS-INDEX. Следующий шаг на выбор: **реализация ODT/RTF в RAG** по [rag-formats.md](rag-formats.md); **календарь** — выбор провайдера и ADR по [calendar-integration.md](calendar-integration.md); перевод ещё 1–2 runbook на EN; или добавить appimage в bundle.targets по offline-package.md. При новом чате — скопировать универсальный промпт из agent-context и добавить задачу или «продолжить с @docs/runbooks/next-iteration-focus.md».
+- **Сейчас:** Автопилот-2 выполнен: RAG ODT/RTF (parsers, indexer, main, тесты), appimage в bundle.targets, ADR-0006 календарь (CalDAV первый), EN runbooks quickstart-en и bootstrap-en, DOCS-INDEX обновлён. Следующий шаг на выбор: **реализация CalDAV-опроса** по [calendar-integration.md](calendar-integration.md) и ADR-0006 (keyring caldav_*, подкоманда или интеграция в daemon); перевод ещё runbook на EN; или сборка AppImage по [offline-package.md](offline-package.md) (проверка `cargo tauri build` с appimage). При новом чате — скопировать универсальный промпт из agent-context и добавить задачу или «продолжить с @docs/runbooks/next-iteration-focus.md».
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
