@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** Проведён полный технический аудит (docs/PROJECT_AUDIT_AND_ROADMAP.md, 767 строк). GitHub Project populated: 27 задач в 4 фазах (A Stabilize / B Hardening / C Scale / D Productize), issues #32–53. Следующий шаг: **#32 A1 eval harness** — добавить DeepEval/ROUGE-L тест-жгут для LLM-выходов (Phase A, P0) или продолжить **#27 AppImage** (In Progress).
+- **Сейчас:** #27 AppImage закрыт (cargo tauri build в toolbox с NO_STRIP, librsvg2-devel; deb/rpm/AppImage в bundle/). Следующий шаг: **#32 A1 eval harness** — добавить DeepEval/ROUGE-L тест-жгут для LLM-выходов (Phase A, P0).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-Технический аудит проекта: создан docs/PROJECT_AUDIT_AND_ROADMAP.md (C4, матрица зрелости 1-5, 20 слабых мест, 20-шаговый roadmap). GitHub Project наполнен: 22 новых issue (#32–53) по фазам A–D, операционные QW1–QW3, 5 существующих (#26–#30) обновлены единым schema меток/milestone/полей. Доска: 2 Done, 1 In Progress (#27 AppImage), 24 Todo.
+#27 AppImage закрыт: сборка в toolbox с NO_STRIP=true, APPIMAGE_EXTRACT_AND_RUN=1 и librsvg2-devel; артефакты deb, rpm, AppImage в desktop/src-tauri/target/release/bundle/. Обновлены setup-desktop-toolbox.sh, desktop-build-deps.md/en, offline-package.md.
 
 ---
 
@@ -40,7 +40,7 @@
 | [#33](https://github.com/iurii-izman/voiceforge/issues/33) | A · P0 | Instructor retry loop | W5; router.py complete_structured |
 | [#34](https://github.com/iurii-izman/voiceforge/issues/34) | A | Unit tests daemon/streaming/smart_trigger | W3; daemon.py excluded from coverage |
 | [#35](https://github.com/iurii-izman/voiceforge/issues/35) | A | WAV integration tests | e2e pipeline test |
-| [#27](https://github.com/iurii-izman/voiceforge/issues/27) | A | AppImage (In Progress) | offline-package.md; toolbox сборка |
+| ~~#27~~ | A | AppImage | **Закрыт** — toolbox сборка, deb/rpm/AppImage |
 | [#36](https://github.com/iurii-izman/voiceforge/issues/36) | B · P0 | Observability (metrics/tracing) | Prometheus/OpenTelemetry |
 | [#37](https://github.com/iurii-izman/voiceforge/issues/37) | B · P0 | pyannote memory guard | OOM risk ≤8GB |
 | [#38–40](https://github.com/iurii-izman/voiceforge/issues/38) | B | Budget enforcement, IPC envelope, CI cache | Phase B hardening |
@@ -57,7 +57,7 @@
    - #32 A1: eval harness — `tests/test_llm_eval.py` с DeepEval/ROUGE-L, порог ROUGE-L ≥ 0.35.
    - #33 A2: Instructor retry — рефакторинг `complete_structured()` в `router.py`.
    - #34 A3: unit tests daemon/streaming/smart_trigger — снять исключение из coverage.
-   - #27 A5: AppImage — `cargo tauri build` в toolbox, артефакт в `target/release/bundle/`.
+   - ~~#27 A5 AppImage~~ — сделано (toolbox: NO_STRIP, librsvg2-devel; см. desktop-build-deps.md).
 2. **Phase B — Hardening (после A):** observability (Prometheus), pyannote memory guard, budget enforcement.
 3. **Документация:** при изменении CLI/конфига обновлять installation-guide, first-meeting-5min; обновлять DOCS-INDEX при новых доках.
 

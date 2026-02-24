@@ -2,7 +2,7 @@
 
 Канбан и приоритеты ведутся в **[GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1)**. Этот файл — краткое зеркало для тех, кто смотрит только в репо.
 
-**Текущий фокус (In Progress):** [#27 AppImage](https://github.com/iurii-izman/voiceforge/issues/27)
+**Текущий фокус (In Progress):** [#32 A1 Eval harness](https://github.com/iurii-izman/voiceforge/issues/32) (Phase A P0)
 
 ## Phase A · Stabilize (Todo)
 
@@ -12,7 +12,7 @@
 | [#33](https://github.com/iurii-izman/voiceforge/issues/33) | A2 Instructor retry loop в complete_structured() (P0) | S |
 | [#34](https://github.com/iurii-izman/voiceforge/issues/34) | A3 Unit tests: daemon, streaming, smart_trigger | M |
 | [#35](https://github.com/iurii-izman/voiceforge/issues/35) | A4 WAV integration tests (STT→Analysis pipeline) | M |
-| [#27](https://github.com/iurii-izman/voiceforge/issues/27) | A5 AppImage — полная сборка в toolbox (In Progress) | L |
+| ~~#27~~ | A5 AppImage — полная сборка в toolbox (**Done**) | L |
 
 ## Phase B · Hardening (Todo)
 
