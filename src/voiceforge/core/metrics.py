@@ -198,6 +198,22 @@ def log_llm_call(
         conn.close()
 
 
+def _unpack_llm_row(
+    row: tuple, cache_cols: bool, log_key: str
+) -> tuple[str, int, int, float, float | None, int, int, int] | None:
+    """Unpack one GROUP BY model row; return None on error (S3776)."""
+    try:
+        if cache_cols:
+            model, inp, out, cost, avg_lat, cnt, cache_read, cache_cre = row
+        else:
+            model, inp, out, cost, avg_lat, cnt = row
+            cache_read = cache_cre = 0
+        return (model, inp, out, cost, avg_lat, cnt, cache_read, cache_cre)
+    except (ValueError, TypeError) as e:
+        log.warning("metrics.%s_unpack_failed", log_key, error=str(e))
+        return None
+
+
 def _aggregate_by_model_rows(
     rows: list, cache_cols: bool, log_key: str = "get_stats_row"
 ) -> tuple[list[dict], float, int, list[float]]:
@@ -207,15 +223,10 @@ def _aggregate_by_model_rows(
     total_calls = 0
     latencies: list[float] = []
     for row in rows:
-        try:
-            if cache_cols:
-                model, inp, out, cost, avg_lat, cnt, cache_read, cache_cre = row
-            else:
-                model, inp, out, cost, avg_lat, cnt = row
-                cache_read = cache_cre = 0
-        except (ValueError, TypeError) as e:
-            log.warning("metrics.%s_unpack_failed", log_key, error=str(e))
+        unpacked = _unpack_llm_row(row, cache_cols, log_key)
+        if unpacked is None:
             continue
+        model, inp, out, cost, avg_lat, cnt, cache_read, cache_cre = unpacked
         total_cost += cost or 0
         total_calls += cnt or 0
         if avg_lat is not None:

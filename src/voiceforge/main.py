@@ -330,14 +330,20 @@ def run_live_summary_pipeline(seconds: int) -> tuple[list[str], float]:
     return (lines, cost_usd)
 
 
-def _format_live_summary_lines(live_result: Any) -> list[str]:
-    """Format live summary result to display lines."""
+def _format_live_key_points(live_result: Any) -> list[str]:
+    """Format key_points section (S3776)."""
     lines: list[str] = []
     if getattr(live_result, "key_points", None):
         lines.append("--- Ключевые моменты ---")
         for k in live_result.key_points:
             if k and k.strip():
                 lines.append(f"  • {k.strip()}")
+    return lines
+
+
+def _format_live_action_items(live_result: Any) -> list[str]:
+    """Format action_items section (S3776)."""
+    lines: list[str] = []
     if getattr(live_result, "action_items", None):
         lines.append(f"--- {t(_I18N_TEMPLATE_ACTIONS)} ---")
         for ai in live_result.action_items:
@@ -346,8 +352,14 @@ def _format_live_summary_lines(live_result: Any) -> list[str]:
                 continue
             who = (getattr(ai, "assignee", None) or "").strip()
             lines.append(f"  • {desc} ({who})" if who and who.upper() != "<UNKNOWN>" else f"  • {desc}")
+    return lines
+
+
+def _format_live_summary_lines(live_result: Any) -> list[str]:
+    """Format live summary result to display lines."""
+    lines = _format_live_key_points(live_result) + _format_live_action_items(live_result)
     if not lines:
-        lines.append("(ничего существенного)")
+        lines = ["(ничего существенного)"]
     return lines
 
 
@@ -806,6 +818,25 @@ def uninstall_service() -> None:
     typer.echo(t("uninstall_service.done"))
 
 
+def _cost_echo_text(data: dict) -> None:
+    """Emit cost report as text (S3776)."""
+    total = data.get("total_cost_usd") or 0
+    calls = data.get("total_calls") or 0
+    typer.echo(t("cost.summary", total=total, calls=calls))
+    by_model = data.get("by_model") or []
+    if by_model:
+        typer.echo(t("cost.by_models"))
+        for row in by_model:
+            typer.echo(
+                t("cost.model_line", model=row.get("model", ""), cost=row.get("cost_usd") or 0, calls=row.get("calls") or 0)
+            )
+    by_day = data.get("by_day") or []
+    if by_day:
+        typer.echo(t("cost.by_days"))
+        for row in by_day[-10:]:
+            typer.echo(t("cost.day_line", date=row.get("date", ""), cost=row.get("cost_usd") or 0, calls=row.get("calls") or 0))
+
+
 @app.command()
 def cost(
     days: int = typer.Option(30, "--days", help="За последние N дней (если не заданы --from/--to)"),
@@ -831,29 +862,10 @@ def cost(
         data = get_stats_range(fd, td)
     else:
         data = get_stats(days=days)
-
     if output == "json":
         typer.echo(json.dumps(_cli_success_payload(data), ensure_ascii=False))
         return
-    # Текстовый вывод: итог + по дням
-    total = data.get("total_cost_usd") or 0
-    calls = data.get("total_calls") or 0
-    typer.echo(t("cost.summary", total=total, calls=calls))
-    by_model = data.get("by_model") or []
-    if by_model:
-        typer.echo(t("cost.by_models"))
-        for row in by_model:
-            typer.echo(
-                t("cost.model_line", model=row.get("model", ""), cost=row.get("cost_usd") or 0, calls=row.get("calls") or 0)
-            )
-    by_day = data.get("by_day") or []
-    if by_day:
-        typer.echo(t("cost.by_days"))
-        for row in by_day[-10:]:  # последние 10 дней
-            d = row.get("date", "")
-            c = row.get("cost_usd") or 0
-            n = row.get("calls") or 0
-            typer.echo(t("cost.day_line", date=d, cost=c, calls=n))
+    _cost_echo_text(data)
 
 
 @app.command()
@@ -954,6 +966,14 @@ def _history_echo_error_data(data: Any) -> None:
         typer.echo(t(data) if isinstance(data, str) and data.startswith("history.") else data, err=True)
 
 
+def _history_echo_session_not_found(data: Any, output: str) -> None:
+    """Emit session not found error for history --id (S3776)."""
+    if output == "json":
+        typer.echo(json.dumps(_cli_error_payload("SESSION_NOT_FOUND", data), ensure_ascii=False))
+    else:
+        typer.echo(data, err=True)
+
+
 def _history_echo(kind: str, data: Any, exit_on_error: bool = True) -> None:
     """Emit history command output from (kind, data) returned by history_helpers."""
     if kind == "error":
@@ -1010,10 +1030,7 @@ def history(
         if session_id is not None:
             kind, data = history_session_detail_result(log_db, session_id, output)
             if kind == "error":
-                if output == "json":
-                    typer.echo(json.dumps(_cli_error_payload("SESSION_NOT_FOUND", data), ensure_ascii=False))
-                else:
-                    typer.echo(data, err=True)
+                _history_echo_session_not_found(data, output)
                 raise SystemExit(1)
             _history_echo(kind, data, exit_on_error=False)
             return

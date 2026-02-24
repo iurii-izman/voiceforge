@@ -17,6 +17,63 @@ _CONTENT_TYPE_JSON = "application/json; charset=utf-8"
 _ERR_INVALID_JSON = "invalid JSON"
 
 
+def _telegram_webhook_reply(text: str) -> str:
+    """Compute bot reply for given command text (S3776: extracted from _handle_telegram_webhook)."""
+    if text == "/start":
+        return "VoiceForge bot. Commands: /start /status /sessions /cost [days]"
+    if text == "/status":
+        try:
+            from voiceforge.cli.status_helpers import get_status_data
+
+            d = get_status_data()
+            ram = d.get("ram") or {}
+            return (
+                f"RAM: {ram.get('used_gb', 0)}/{ram.get('total_gb', 0)} GB | "
+                f"Today: ${d.get('cost_today_usd', 0):.4f} | "
+                f"Ollama: {'yes' if d.get('ollama_available') else 'no'}"
+            )
+        except Exception as e:
+            _log.debug("telegram status failed", exc_info=e)
+            return f"Status error: {e!s}"
+    if text == "/sessions":
+        try:
+            from voiceforge.cli.history_helpers import build_sessions_payload
+            from voiceforge.core.transcript_log import TranscriptLog
+
+            log_db = TranscriptLog()
+            try:
+                sessions = log_db.get_sessions(last_n=10)
+                payload = build_sessions_payload(sessions)
+            finally:
+                log_db.close()
+            lines = []
+            for s in payload.get("sessions") or []:
+                sid = s.get("id")
+                started = (s.get("started_at") or "")[:19]
+                dur = s.get("duration_sec", 0)
+                lines.append(f"#{sid} {started} {dur:.0f}s")
+            return "\n".join(lines) if lines else "No sessions"
+        except Exception as e:
+            _log.debug("telegram sessions failed", exc_info=e)
+            return f"Sessions error: {e!s}"
+    if text.startswith("/cost"):
+        try:
+            days = 7
+            parts = text.split()
+            if len(parts) >= 2 and parts[1].isdigit():
+                days = max(1, min(365, int(parts[1])))
+            from voiceforge.core.metrics import get_stats
+
+            data = get_stats(days=days)
+            total = data.get("total_cost_usd") or 0
+            calls = data.get("total_calls") or 0
+            return f"Cost last {days} days: ${total:.4f} ({calls} calls)"
+        except Exception as e:
+            _log.debug("telegram cost failed", exc_info=e)
+            return f"Cost error: {e!s}"
+    return "Use /start, /status, /sessions, /cost [days]"
+
+
 def _telegram_send_message(token: str, chat_id: int | str, text: str) -> None:
     """Send Telegram sendMessage. ADR-0005."""
     url = f"{_TELEGRAM_API}/bot{token}/sendMessage"
@@ -541,65 +598,22 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.end_headers()
             return
-        if text == "/start":
-            reply = "VoiceForge bot. Commands: /start /status /sessions /cost [days]"
-        elif text == "/status":
-            try:
-                from voiceforge.cli.status_helpers import get_status_data
-
-                d = get_status_data()
-                ram = d.get("ram") or {}
-                reply = (
-                    f"RAM: {ram.get('used_gb', 0)}/{ram.get('total_gb', 0)} GB | "
-                    f"Today: ${d.get('cost_today_usd', 0):.4f} | "
-                    f"Ollama: {'yes' if d.get('ollama_available') else 'no'}"
-                )
-            except Exception as e:
-                _log.debug("telegram status failed", exc_info=e)
-                reply = f"Status error: {e!s}"
-        elif text == "/sessions":
-            try:
-                from voiceforge.cli.history_helpers import build_sessions_payload
-                from voiceforge.core.transcript_log import TranscriptLog
-
-                log_db = TranscriptLog()
-                try:
-                    sessions = log_db.get_sessions(last_n=10)
-                    payload = build_sessions_payload(sessions)
-                finally:
-                    log_db.close()
-                lines = []
-                for s in payload.get("sessions") or []:
-                    sid = s.get("id")
-                    started = (s.get("started_at") or "")[:19]
-                    dur = s.get("duration_sec", 0)
-                    lines.append(f"#{sid} {started} {dur:.0f}s")
-                reply = "\n".join(lines) if lines else "No sessions"
-            except Exception as e:
-                _log.debug("telegram sessions failed", exc_info=e)
-                reply = f"Sessions error: {e!s}"
-        elif text.startswith("/cost"):
-            try:
-                days = 7
-                parts = text.split()
-                if len(parts) >= 2 and parts[1].isdigit():
-                    days = max(1, min(365, int(parts[1])))
-                from voiceforge.core.metrics import get_stats
-
-                data = get_stats(days=days)
-                total = data.get("total_cost_usd") or 0
-                calls = data.get("total_calls") or 0
-                reply = f"Cost last {days} days: ${total:.4f} ({calls} calls)"
-            except Exception as e:
-                _log.debug("telegram cost failed", exc_info=e)
-                reply = f"Cost error: {e!s}"
-        else:
-            reply = "Use /start, /status, /sessions, /cost [days]"
+        reply = _telegram_webhook_reply(text)
         _telegram_send_message(token, chat_id, reply)
         self.send_response(200)
         self.send_header("Content-Type", _CONTENT_TYPE_JSON)
         self.end_headers()
         self.wfile.write(b'{"ok":true}')
+
+    def _read_post_json(self) -> dict | None:
+        """Read POST body and parse as JSON; send 400 and return None on error (S3776)."""
+        content_length = int(self.headers.get("Content-Length") or 0)
+        body = self.rfile.read(content_length).decode("utf-8") if content_length else "{}"
+        try:
+            return json.loads(body) if body.strip() else {}
+        except json.JSONDecodeError:
+            self._send_error_json(_ERR_INVALID_JSON, 400)
+            return None
 
     def do_POST(self) -> None:
         path, _ = self._parse_path()
@@ -609,24 +623,14 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
             self._handle_telegram_webhook(body)
             return
         if path == "/api/analyze":
-            content_length = int(self.headers.get("Content-Length") or 0)
-            body = self.rfile.read(content_length).decode("utf-8") if content_length else "{}"
-            try:
-                data = json.loads(body) if body.strip() else {}
-            except json.JSONDecodeError:
-                self._send_error_json(_ERR_INVALID_JSON, 400)
-                return
-            self._handle_post_analyze(data)
+            data = self._read_post_json()
+            if data is not None:
+                self._handle_post_analyze(data)
             return
         if path == "/api/action-items/update":
-            content_length = int(self.headers.get("Content-Length") or 0)
-            body = self.rfile.read(content_length).decode("utf-8") if content_length else "{}"
-            try:
-                data = json.loads(body) if body.strip() else {}
-            except json.JSONDecodeError:
-                self._send_error_json(_ERR_INVALID_JSON, 400)
-                return
-            self._handle_action_items_update(data)
+            data = self._read_post_json()
+            if data is not None:
+                self._handle_action_items_update(data)
             return
         self.send_error(404, "Not found")
 

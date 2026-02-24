@@ -71,15 +71,21 @@ def sessions_list_lines(sessions: list[object]) -> list[str]:
     return render_sessions_table_lines(sessions)
 
 
-def _format_analysis_block(analysis: object) -> list[str]:
-    """Format '## Анализ' section lines."""
-    lines = [f"- **Модель:** {getattr(analysis, 'model', '')}"]
+def _format_analysis_attrs(analysis: object) -> list[str]:
+    """Format questions/answers/recommendations lines (S3776)."""
+    lines: list[str] = []
     for attr, label in [("questions", "Вопросы"), ("answers", "Ответы/выводы"), ("recommendations", "Рекомендации")]:
         items = getattr(analysis, attr, [])
         if items:
             lines.append(f"- **{label}:**")
             for x in items:
                 lines.append(f"  - {x}")
+    return lines
+
+
+def _format_analysis_action_items(analysis: object) -> list[str]:
+    """Format action items and cost line (S3776)."""
+    lines: list[str] = []
     action_items = getattr(analysis, "action_items", [])
     if action_items:
         lines.append("- **Действия:**")
@@ -90,6 +96,14 @@ def _format_analysis_block(analysis: object) -> list[str]:
     cost = getattr(analysis, "cost_usd", None)
     if cost is not None:
         lines.append(f"- **Стоимость:** ${cost:.4f}")
+    return lines
+
+
+def _format_analysis_block(analysis: object) -> list[str]:
+    """Format '## Анализ' section lines."""
+    lines = [f"- **Модель:** {getattr(analysis, 'model', '')}"]
+    lines.extend(_format_analysis_attrs(analysis))
+    lines.extend(_format_analysis_action_items(analysis))
     return lines
 
 
