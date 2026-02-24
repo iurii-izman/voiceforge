@@ -50,6 +50,7 @@
 | installation-guide.md | Гайд установки и запуска (toolbox, демон, ребилд) | Актуален |
 | installation-guide-en.md | Installation and run guide (EN) | Актуален |
 | desktop-build-deps.md | Зависимости сборки Tauri, pyannote при OOM | Актуален |
+| desktop-build-deps-en.md | Desktop build dependencies (EN) | Актуален |
 | first-meeting-5min — в docs/ | — | См. docs/first-meeting-5min.md |
 | quickstart.md | Краткий сценарий; полная версия — first-meeting-5min | Актуален |
 | quickstart-en.md | Quick start (EN) | Актуален |
