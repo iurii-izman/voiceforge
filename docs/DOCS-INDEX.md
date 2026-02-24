@@ -2,7 +2,7 @@
 
 **Назначение:** один источник правды по тому, какой документ за что отвечает и актуален ли он. При изменении кода/фич обновлять соответствующий док и при необходимости этот индекс.
 
-**Обновлено:** 2026-02-24 (EN runbooks: dependabot-review-en, telegram-bot-setup-en)
+**Обновлено:** 2026-02-24 (PROJECT_AUDIT_AND_ROADMAP; GitHub Project #32–53 Phase A–D)
 
 ---
 
@@ -15,6 +15,7 @@
 | История: что сделано (аудит по коду) | [history/closed-plans-and-roadmap.md](history/closed-plans-and-roadmap.md) | Справочно |
 | Правило автопилота (копия для .cursor/rules/) | [runbooks/agent-session-handoff-rule.md](runbooks/agent-session-handoff-rule.md) | Актуален |
 | Приоритет фич (roadmap 1–20) | [roadmap-priority.md](roadmap-priority.md) | Актуален |
+| Технический аудит + roadmap Phase A–D | [PROJECT_AUDIT_AND_ROADMAP.md](PROJECT_AUDIT_AND_ROADMAP.md) | Актуален |
 | Конфиг, env, keyring-имена | [runbooks/config-env-contract.md](runbooks/config-env-contract.md), [runbooks/keyring-keys-reference.md](runbooks/keyring-keys-reference.md) | Актуален |
 | Установка и запуск (хост/toolbox, демон) | [runbooks/installation-guide.md](runbooks/installation-guide.md) | Актуален |
 | Первая встреча за 5 минут | [first-meeting-5min.md](first-meeting-5min.md) | Актуален |
@@ -45,6 +46,7 @@
 | roadmap-priority.md | Приоритет внедрения фич 1–20 | Актуален |
 | development-plan-post-audit-2026.md | План развития по аудиту; сверка — claude-proposal-alignment | Справочно (многое закрыто) |
 | desktop-tauri-implementation-plan.md | План реализации десктопа | Справочно (реализовано) |
+| PROJECT_AUDIT_AND_ROADMAP.md | Полный технический аудит: C4, матрица зрелости, 20 слабых мест, 20-шаговый roadmap Phase A–D, план AI-качества, реестр рисков | Актуален |
 
 ### docs/runbooks/
 

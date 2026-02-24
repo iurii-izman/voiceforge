@@ -1,7 +1,7 @@
 //! Subscribe to D-Bus signals from com.voiceforge.App and emit Tauri events.
 
 use futures_util::StreamExt;
-use tauri::AppHandle;
+use tauri::{AppHandle, Emitter};
 use zbus::message::Type;
 use zbus::{MatchRule, MessageStream};
 
@@ -11,23 +11,23 @@ const EVENT_LISTEN_STATE: &str = "listen-state-changed";
 const EVENT_ANALYSIS_DONE: &str = "analysis-done";
 
 fn rule_listen_state() -> Result<MatchRule<'static>, zbus::Error> {
-    MatchRule::builder()
+    Ok(MatchRule::builder()
         .msg_type(Type::Signal)
         .sender(DBUS_NAME)?
         .path(DBUS_PATH)?
         .interface(DBUS_INTERFACE)?
         .member("ListenStateChanged")?
-        .build()
+        .build())
 }
 
 fn rule_analysis_done() -> Result<MatchRule<'static>, zbus::Error> {
-    MatchRule::builder()
+    Ok(MatchRule::builder()
         .msg_type(Type::Signal)
         .sender(DBUS_NAME)?
         .path(DBUS_PATH)?
         .interface(DBUS_INTERFACE)?
         .member("AnalysisDone")?
-        .build()
+        .build())
 }
 
 pub fn spawn_signal_listener(app: AppHandle) {

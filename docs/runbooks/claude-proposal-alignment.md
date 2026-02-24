@@ -61,12 +61,12 @@
 | W2 | sample_rate 44.1→16 kHz ресэмплинг | ✓ В streaming.py и pipeline есть ресэмплинг / проверка |
 | W3 | RAG transcript[:200] → 1000 | ✓ RAG_QUERY_MAX_CHARS = 1000 в pipeline.py |
 | W4 | privacy_mode в GetSettings | ✓ В контракте: privacy_mode как alias pii_mode |
-| W5 | Instructor retry при невалидном JSON | Проверить наличие retry в router |
-| W6 | i18n в main.py | Частично (есть t(key) в ряде мест) |
+| W5 | Instructor retry при невалидном JSON | ✓ В router.py один retry при parse error (invalid JSON) |
+| W6 | i18n в main.py | ✓ Ошибки, лейблы шаблонов, action_items help через t(key); ru/en.json |
 | W7 | Envelope по умолчанию | ✓ _uses_ipc_envelope() default=True в dbus_service |
 | W8 | Валидация Settings | ✓ field_validator для budget_limit_usd, sample_rate, и др. в config.py |
 | W9 | cost_usd source of truth | ✓ Описано в config-env-contract.md (metrics.db vs transcripts.db) |
-| W10 | Coverage рисковых модулей | Остаётся задачей (тесты с моками) |
+| W10 | Coverage рисковых модулей | ✓ tests/test_daemon_streaming_smart_trigger_model_manager.py с моками |
 
 ---
 

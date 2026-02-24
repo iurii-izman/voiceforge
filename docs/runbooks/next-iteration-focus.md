@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** Добавлены EN runbooks (issue #28): dependabot-review-en.md, telegram-bot-setup-en.md; DOCS-INDEX обновлён. Следующий шаг: **#27 AppImage** (полная сборка в toolbox по offline-package.md) или следующая задача с доски.
+- **Сейчас:** Проведён полный технический аудит (docs/PROJECT_AUDIT_AND_ROADMAP.md, 767 строк). GitHub Project populated: 27 задач в 4 фазах (A Stabilize / B Hardening / C Scale / D Productize), issues #32–53. Следующий шаг: **#32 A1 eval harness** — добавить DeepEval/ROUGE-L тест-жгут для LLM-выходов (Phase A, P0) или продолжить **#27 AppImage** (In Progress).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-Issue #28 (EN runbook): dependabot-review-en.md, telegram-bot-setup-en.md, обновлён DOCS-INDEX. Тесты 45 passed. Closes #28.
+Технический аудит проекта: создан docs/PROJECT_AUDIT_AND_ROADMAP.md (C4, матрица зрелости 1-5, 20 слабых мест, 20-шаговый roadmap). GitHub Project наполнен: 22 новых issue (#32–53) по фазам A–D, операционные QW1–QW3, 5 существующих (#26–#30) обновлены единым schema меток/milestone/полей. Доска: 2 Done, 1 In Progress (#27 AppImage), 24 Todo.
 
 ---
 
@@ -32,24 +32,34 @@ Issue #28 (EN runbook): dependabot-review-en.md, telegram-bot-setup-en.md, об�
 
 ## Не сделано / открытые задачи
 
-| Приоритет | Задача | Заметка |
-|-----------|--------|--------|
-| Roadmap 14 | Офлайн-пакет (Flatpak/AppImage) | Черновик offline-package.md; appimage в bundle.targets; полная сборка в toolbox не проверена. |
-| Roadmap 16 | Бот Telegram/Slack | Telegram: ADR-0005, webhook, /start /status — сделано; Slack/расширение — по желанию. |
-| Roadmap 17 | Интеграция с календарём | CalDAV: исследование в calendar-integration.md, ADR-0006; кода нет. |
-| Roadmap 18 | RAG: ODT/RTF | Парсеры и индекс — по rag-formats.md; при добавлении — тесты. |
-| Roadmap 19–20 | Prompt caching, macOS/WSL2 | По необходимости. |
-| Операционно | Dependabot 1 moderate | Закрыть вручную в GitHub (dismiss Accept risk) — dependabot-review.md. |
-| Операционно | Перевод runbook на EN | Частично (quickstart, bootstrap, installation-guide, first-meeting-5min, desktop-build-deps); остальные по желанию. |
+Полная доска: **[GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1)** (27 задач, Phase A–D).
+
+| # Issue | Phase | Задача | Заметка |
+|---------|-------|--------|---------|
+| [#32](https://github.com/iurii-izman/voiceforge/issues/32) | A · P0 | Eval harness (DeepEval/ROUGE-L) | Первый приоритет Phase A |
+| [#33](https://github.com/iurii-izman/voiceforge/issues/33) | A · P0 | Instructor retry loop | W5; router.py complete_structured |
+| [#34](https://github.com/iurii-izman/voiceforge/issues/34) | A | Unit tests daemon/streaming/smart_trigger | W3; daemon.py excluded from coverage |
+| [#35](https://github.com/iurii-izman/voiceforge/issues/35) | A | WAV integration tests | e2e pipeline test |
+| [#27](https://github.com/iurii-izman/voiceforge/issues/27) | A | AppImage (In Progress) | offline-package.md; toolbox сборка |
+| [#36](https://github.com/iurii-izman/voiceforge/issues/36) | B · P0 | Observability (metrics/tracing) | Prometheus/OpenTelemetry |
+| [#37](https://github.com/iurii-izman/voiceforge/issues/37) | B · P0 | pyannote memory guard | OOM risk ≤8GB |
+| [#38–40](https://github.com/iurii-izman/voiceforge/issues/38) | B | Budget enforcement, IPC envelope, CI cache | Phase B hardening |
+| [#41–45](https://github.com/iurii-izman/voiceforge/issues/41) | C | Prompt mgmt, RAG, retention, caching, healthcheck | Phase C scale |
+| [#46–50](https://github.com/iurii-izman/voiceforge/issues/46) | D | Desktop signals, Telegram, Calendar, Flatpak, macOS | Phase D productize |
+| [#29](https://github.com/iurii-izman/voiceforge/issues/29) | Ops | RAG ODT/RTF тесты | При добавлении парсеров |
+| [#30](https://github.com/iurii-izman/voiceforge/issues/30) | Ops | Dependabot 1 moderate | dependabot-review.md |
 
 ---
 
 ## Следующие шаги (план)
 
-1. **Выбрать направление:** CalDAV (roadmap 17), ещё EN-runbook, сборка AppImage в toolbox, или RAG ODT/RTF.
-2. **CalDAV:** реализация опроса по calendar-integration.md и ADR-0006 (keyring caldav_*, подкоманда или daemon).
-3. **AppImage:** полная сборка в toolbox (`./scripts/setup-desktop-toolbox.sh` → `cargo tauri build`), проверка артефакта в `target/release/bundle/`.
-4. **Стабилизация:** при изменении CLI/конфига обновлять installation-guide, first-meeting-5min; обновлять DOCS-INDEX при новых доках.
+1. **Phase A — Stabilize (приоритет):**
+   - #32 A1: eval harness — `tests/test_llm_eval.py` с DeepEval/ROUGE-L, порог ROUGE-L ≥ 0.35.
+   - #33 A2: Instructor retry — рефакторинг `complete_structured()` в `router.py`.
+   - #34 A3: unit tests daemon/streaming/smart_trigger — снять исключение из coverage.
+   - #27 A5: AppImage — `cargo tauri build` в toolbox, артефакт в `target/release/bundle/`.
+2. **Phase B — Hardening (после A):** observability (Prometheus), pyannote memory guard, budget enforcement.
+3. **Документация:** при изменении CLI/конфига обновлять installation-guide, first-meeting-5min; обновлять DOCS-INDEX при новых доках.
 
 ---
 
