@@ -1,10 +1,24 @@
 # Фокус следующей итерации
 
-Файл обновляется **агентом после каждой большой итерации** (см. `agent-context.md`). Новый чат может подтянуть контекст через `@docs/runbooks/next-iteration-focus.md`.
+Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
 **Обновлено:** 2026-02-24
 
-**Последняя итерация:** S3776 добит: main (history → _history_echo + history_*_result в history_helpers), web/server (do_GET/do_POST → _handle_get_* / _handle_post_*), core/metrics (_aggregate_by_model_rows, _fetch_cache_stats_*, _build_stats_result), llm/router (_content_from_llm_response, _usage_and_cost_from_response). Блок 2: installation-guide и first-meeting-5min — добавлен doctor; Dependabot (1 moderate) — проверить вручную в GitHub.
+---
+
+## Следующий шаг (для копирования в новый чат)
+
+Один конкретный шаг, который выполняет следующий чат (или пользователь вставляет в промпт).
+
+- **Сейчас:** Модерация документации и автопилот передачи контекста внедрены (DOCS-INDEX, agent-session-handoff, обновлён agent-context). Дальше: по желанию — перевод 1–2 runbook на EN; или следующий продуктовый шаг (календарь roadmap 17, RAG ODT/RTF roadmap 18, офлайн-пакет roadmap 14). При новом чате — взять задачу из этого блока или указать свою.
+
+*(Агент в конце сессии перезаписывает этот блок одним предложением/задачей для следующего чата.)*
+
+---
+
+## Последняя итерация (кратко)
+
+S3776 закрыт; блоки A/B/C (стабилизация, Telegram ADR-0005, webhook /start /status /sessions /cost); dependabot-review (CVE-2025-69872 — без фикса, dismiss вручную). Документация: DOCS-INDEX, agent-session-handoff, универсальный промпт с keyring и концом сессии.
 
 ---
 
@@ -94,7 +108,10 @@
 
 ## Рекомендательные приоритетные задачи (что делать дальше)
 
-См. **«План на следующие 4 блока»** выше — там приоритет: Sonar S3776 (добить) → стабилизация и документация → качество и консистентность → следующий продуктовый шаг (бот/календарь/RAG/офлайн-пакет). Плюс блок **«Блоки Sonar (актуально)»** и **«Следующие 10 шагов»** для деталей.
+- Перевод 1–2 runbook на английский (installation-guide, first-meeting-5min) — по желанию.
+- Roadmap 17 (календарь), 18 (RAG ODT/RTF), 14 (офлайн-пакет) — выбор следующего продуктового шага.
+- Dependabot: при желании закрыть алерт CVE-2025-69872 вручную (dismiss Accept risk) — см. dependabot-review.md.
+- Индекс документации: при добавлении/изменении доков обновлять `docs/DOCS-INDEX.md`.
 
 ---
 
