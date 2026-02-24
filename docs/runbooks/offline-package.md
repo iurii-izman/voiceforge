@@ -36,6 +36,15 @@
 - Для альфа2 достаточно **бинарника из `cargo tauri build`** (deb/rpm или артефакты в `target/release/bundle/`); установка по `desktop-build-deps.md` и `installation-guide.md`.
 - **Flatpak/AppImage** — после стабилизации ядра и десктопа: сначала выбрать один формат (например AppImage для простого раздачи одного файла или Flatpak для Flathub), затем описать полную последовательность в этом runbook и при необходимости скрипты в `scripts/`.
 
+## Next steps / чеклист
+
+Конкретные следующие шаги для реализации (код в этой сессии не меняется — только документирование):
+
+1. **AppImage:** в `desktop/src-tauri/tauri.conf.json` в `bundle.targets` добавить `"appimage"`. Пример: `"targets": ["deb", "rpm", "appimage"]`. После этого сборка: `cd desktop && npm run build && cargo tauri build` (или отдельная цель для appimage по документации Tauri 2).
+2. **Flatpak:** создать каталог `desktop/flatpak/` и манифест приложения (описание, SDK, зависимости webkit2gtk/gtk3). Сборка: `flatpak-builder build desktop/flatpak/manifest.yml`; локальный запуск: `flatpak-builder --run build desktop/flatpak/manifest.yml com.voiceforge.app`.
+3. **Воспроизводимость и glibc:** для совместимости со старыми дистрибутивами собирать AppImage в Docker (образ на базе Ubuntu 20.04/22.04) или в GitHub Actions.
+4. При внедрении — обновить этот runbook и при необходимости добавить скрипты в `scripts/`.
+
 ## Ссылки
 
 - [Tauri 2 — AppImage](https://v2.tauri.app/distribute/appimage)

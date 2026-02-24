@@ -2,7 +2,7 @@
 
 **Назначение:** один источник правды по тому, какой документ за что отвечает и актуален ли он. При изменении кода/фич обновлять соответствующий док и при необходимости этот индекс.
 
-**Обновлено:** 2026-02-24
+**Обновлено:** 2026-02-24 (автопилот: EN runbooks, calendar-integration, rag-formats, offline-package checklist)
 
 ---
 
@@ -34,6 +34,7 @@
 | README.md | Вход в документацию, ссылки по смыслу | Актуален |
 | DOCS-INDEX.md | Этот индекс; модерация актуальности | Актуален |
 | first-meeting-5min.md | Сценарий первой встречи за 5 минут | Актуален |
+| first-meeting-5min-en.md | First meeting in 5 minutes (EN) | Актуален |
 | roadmap-priority.md | Приоритет внедрения фич 1–20 | Актуален |
 | development-plan-post-audit-2026.md | План развития по аудиту; сверка — claude-proposal-alignment | Справочно (многое закрыто) |
 | desktop-tauri-implementation-plan.md | План реализации десктопа | Справочно (реализовано) |
@@ -47,6 +48,7 @@
 | config-env-contract.md | VOICEFORGE_*, Settings, D-Bus, keyring | Актуален |
 | keyring-keys-reference.md | Список имён ключей в keyring | Актуален |
 | installation-guide.md | Гайд установки и запуска (toolbox, демон, ребилд) | Актуален |
+| installation-guide-en.md | Installation and run guide (EN) | Актуален |
 | desktop-build-deps.md | Зависимости сборки Tauri, pyannote при OOM | Актуален |
 | first-meeting-5min — в docs/ | — | См. docs/first-meeting-5min.md |
 | quickstart.md | Краткий сценарий; полная версия — first-meeting-5min | Актуален |
@@ -65,7 +67,9 @@
 | web-api.md | Web UI API | Актуален |
 | test-operations.md | Flaky, CI, карантин | Актуален |
 | sonar-pr-cleanup.md | Очистка PR/Sonar | Актуален |
-| offline-package.md | Черновик Flatpak/AppImage | Черновик |
+| offline-package.md | Flatpak/AppImage, чеклист next steps | Черновик |
+| calendar-integration.md | Интеграция с календарём (roadmap 17), исследование | Актуален |
+| rag-formats.md | RAG: форматы индексатора, план ODT/RTF (roadmap 18) | Актуален |
 
 ### docs/adr/
 
