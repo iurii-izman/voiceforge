@@ -5,7 +5,7 @@
 ## Зависимости и предпосылки
 
 - **Сборка десктопа** уже воспроизводима в toolbox (см. `desktop-build-deps.md`): `./scripts/setup-desktop-toolbox.sh` → `cd desktop && npm run build && cargo tauri build`.
-- Текущий `bundle.targets` в `desktop/src-tauri/tauri.conf.json`: `["deb", "rpm"]`. Для Flatpak/AppImage потребуется добавить цели или отдельные шаги сборки.
+- Текущий `bundle.targets` в `desktop/src-tauri/tauri.conf.json`: `["deb", "rpm", "appimage"]`.
 - **CLI и демон** VoiceForge — отдельно: пользователь устанавливает их по `installation-guide.md` (uv/pip); офлайн-пакет в альфа2 — только **десктопное приложение** (UI), которое общается с демоном по D-Bus.
 
 ## AppImage
@@ -40,7 +40,7 @@
 
 Конкретные следующие шаги для реализации (код в этой сессии не меняется — только документирование):
 
-1. **AppImage:** в `desktop/src-tauri/tauri.conf.json` в `bundle.targets` уже есть `"appimage"` (вместе с deb, rpm). Сборка: `cd desktop && npm run build && cargo tauri build` (в окружении с cc/webkit — см. `desktop-build-deps.md`, toolbox). Проверка 2026-02-24: конфиг корректен; в текущей сессии исправлен top-level await в `desktop/src/main.js` для успешного production build фронтенда.
+1. **AppImage:** в `desktop/src-tauri/tauri.conf.json` в `bundle.targets` уже есть `"appimage"`. Сборка в toolbox: установить `librsvg2-devel`, затем `export NO_STRIP=true APPIMAGE_EXTRACT_AND_RUN=1` и `cd desktop && npm run build && cargo tauri build` (см. `desktop-build-deps.md`, раздел «AppImage в toolbox»). Артефакт: `desktop/src-tauri/target/release/bundle/appimage/VoiceForge_*_amd64.AppImage`. Проверка 2026-02-24: сборка успешна (deb, rpm, AppImage).
 2. **Flatpak:** создать каталог `desktop/flatpak/` и манифест приложения (описание, SDK, зависимости webkit2gtk/gtk3). Сборка: `flatpak-builder build desktop/flatpak/manifest.yml`; локальный запуск: `flatpak-builder --run build desktop/flatpak/manifest.yml com.voiceforge.app`.
 3. **Воспроизводимость и glibc:** для совместимости со старыми дистрибутивами собирать AppImage в Docker (образ на базе Ubuntu 20.04/22.04) или в GitHub Actions.
 4. При внедрении — обновить этот runbook и при необходимости добавить скрипты в `scripts/`.

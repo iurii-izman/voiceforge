@@ -19,7 +19,8 @@ if command -v dnf >/dev/null 2>&1; then
     webkit2gtk4.1-devel \
     gtk3-devel \
     openssl-devel \
-    pkg-config
+    pkg-config \
+    librsvg2-devel
 else
   echo "[WARN] dnf not found; skip system packages (install manually on Fedora)"
 fi

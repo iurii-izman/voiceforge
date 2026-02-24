@@ -14,8 +14,11 @@ sudo dnf install -y \
   pkg-config \
   webkit2gtk4.1-devel \
   gtk3-devel \
-  openssl-devel
+  openssl-devel \
+  librsvg2-devel
 ```
+
+`librsvg2-devel` is required for AppImage bundling (linuxdeploy gtk plugin).
 
 Либо один скрипт из корня репо (внутри toolbox): `./scripts/setup-desktop-toolbox.sh`
 
@@ -90,8 +93,20 @@ cd /path/to/voiceforge/desktop && npm run build && cargo tauri build
 
 ## Сборка релиза и упаковка
 
-- Релизный бинарник: `cd desktop && npm run build && cargo tauri build`. Артефакты в `desktop/src-tauri/target/release/bundle/` (формат зависит от платформы).
+- Релизный бинарник: `cd desktop && npm run build && cargo tauri build`. Артефакты в `desktop/src-tauri/target/release/bundle/` (deb, rpm, appimage).
 - Flatpak / AppImage: Tauri 2 поддерживает оба; манифест Flatpak при необходимости добавляется в `desktop/flatpak/`. Для альфа2 достаточно бинарника из `cargo tauri build`.
+
+### AppImage в toolbox (Fedora)
+
+На Fedora/rolling distros для успешной сборки AppImage нужны переменные окружения (из‑за linuxdeploy и секций `.relr.dyn`):
+
+```bash
+export NO_STRIP=true
+export APPIMAGE_EXTRACT_AND_RUN=1
+cd desktop && npm run build && cargo tauri build
+```
+
+Убедитесь, что установлен `librsvg2-devel` (см. системные пакеты выше). Артефакт: `desktop/src-tauri/target/release/bundle/appimage/VoiceForge_*_amd64.AppImage`.
 
 ## Установка и запуск после сборки
 

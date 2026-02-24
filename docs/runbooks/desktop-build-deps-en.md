@@ -14,8 +14,11 @@ sudo dnf install -y \
   pkg-config \
   webkit2gtk4.1-devel \
   gtk3-devel \
-  openssl-devel
+  openssl-devel \
+  librsvg2-devel
 ```
+
+`librsvg2-devel` is required for AppImage bundling (linuxdeploy gtk plugin).
 
 Or run the script from the repo root (inside toolbox): `./scripts/setup-desktop-toolbox.sh`
 
@@ -90,8 +93,20 @@ Without webkit2gtk-4.1 and gtk+-3.0, `check-desktop-deps` will report [FAIL]; in
 
 ## Release build and packaging
 
-- Release binary: `cd desktop && npm run build && cargo tauri build`. Artifacts in `desktop/src-tauri/target/release/bundle/` (format depends on platform).
+- Release binary: `cd desktop && npm run build && cargo tauri build`. Artifacts in `desktop/src-tauri/target/release/bundle/` (deb, rpm, appimage).
 - Flatpak / AppImage: Tauri 2 supports both; Flatpak manifest can be added under `desktop/flatpak/` if needed. For alpha2, the binary from `cargo tauri build` is sufficient.
+
+### AppImage in toolbox (Fedora)
+
+On Fedora/rolling distros, AppImage bundling requires these environment variables (linuxdeploy and `.relr.dyn` sections):
+
+```bash
+export NO_STRIP=true
+export APPIMAGE_EXTRACT_AND_RUN=1
+cd desktop && npm run build && cargo tauri build
+```
+
+Ensure `librsvg2-devel` is installed (see system packages above). Artifact: `desktop/src-tauri/target/release/bundle/appimage/VoiceForge_*_amd64.AppImage`.
 
 ## Install and run after build
 
