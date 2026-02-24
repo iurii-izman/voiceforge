@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** Автопилот-2 выполнен: RAG ODT/RTF (parsers, indexer, main, тесты), appimage в bundle.targets, ADR-0006 календарь (CalDAV первый), EN runbooks quickstart-en и bootstrap-en, DOCS-INDEX обновлён. Следующий шаг на выбор: **реализация CalDAV-опроса** по [calendar-integration.md](calendar-integration.md) и ADR-0006 (keyring caldav_*, подкоманда или интеграция в daemon); перевод ещё runbook на EN; или сборка AppImage по [offline-package.md](offline-package.md) (проверка `cargo tauri build` с appimage). При новом чате — скопировать универсальный промпт из agent-context и добавить задачу или «продолжить с @docs/runbooks/next-iteration-focus.md».
+- **Сейчас:** Проверка сборки AppImage выполнена: в `bundle.targets` уже был appimage; исправлен top-level await в `desktop/src/main.js` (production build фронтенда); runbook [offline-package.md](offline-package.md) обновлён. Полная `cargo tauri build` требует окружения с cc/webkit (toolbox по [desktop-build-deps.md](desktop-build-deps.md)). Следующий шаг на выбор: **реализация CalDAV-опроса** по [calendar-integration.md](calendar-integration.md) и ADR-0006 (keyring caldav_*, подкоманда или daemon); **перевод ещё runbook на EN**; или **полная сборка AppImage в toolbox** (`./scripts/setup-desktop-toolbox.sh` → `cd desktop && npm run build && cargo tauri build`) и проверка артефакта в `target/release/bundle/`. При новом чате — скопировать универсальный промпт из agent-context и добавить задачу или «продолжить с @docs/runbooks/next-iteration-focus.md».
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-S3776 закрыт; блоки A/B/C (стабилизация, Telegram ADR-0005, webhook /start /status /sessions /cost); dependabot-review (CVE-2025-69872 — без фикса, dismiss вручную). Документация: DOCS-INDEX, agent-session-handoff, универсальный промпт с keyring и концом сессии.
+Проверка AppImage (roadmap 14): конфиг appimage в tauri.conf.json подтверждён; исправлен top-level await в desktop/src/main.js для production build; offline-package.md обновлён. Тесты 44 passed; коммит и пуш выполнены.
 
 ---
 
