@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-Перевод runbook на EN: добавлен desktop-build-deps-en.md, DOCS-INDEX обновлён. Тесты 44 passed; коммит и пуш выполнены.
+Аудит документов и планов: создан [history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md) (сделано по коду), next-iteration-focus сокращён до открытых задач и плана, добавлен [planning-and-tools.md](planning-and-tools.md) (Markdown-backlog vs GitHub Projects). Тесты 44 passed; коммит и пуш выполнены.
 
 ---
 
