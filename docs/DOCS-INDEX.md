@@ -2,7 +2,7 @@
 
 **Назначение:** один источник правды по тому, какой документ за что отвечает и актуален ли он. При изменении кода/фич обновлять соответствующий док и при необходимости этот индекс.
 
-**Обновлено:** 2026-02-24 (аудит планов: history/closed-plans-and-roadmap.md, next-iteration-focus только открытые задачи, planning-and-tools.md)
+**Обновлено:** 2026-02-24 (EN runbooks: dependabot-review-en, telegram-bot-setup-en)
 
 ---
 
@@ -66,7 +66,9 @@
 | dependencies.md | Политика зависимостей, uv.lock, CVE-исключения | Актуален |
 | security.md | Секреты, pip-audit, CVE-2025-69872 | Актуален |
 | dependabot-review.md | Как закрывать Dependabot алерты | Актуален |
+| dependabot-review-en.md | Dependabot: reviewing and closing alerts (EN) | Актуален |
 | telegram-bot-setup.md | Включение Telegram-бота (keyring, webhook, туннель) | Актуален |
+| telegram-bot-setup-en.md | Telegram bot setup (EN) | Актуален |
 | pyannote-version.md | Версия pyannote, откат при OOM | Актуален |
 | cursor-agent-setup.md | Настройка Cursor (My Secrets / keyring) | Актуален |
 | voiceforge-cursor-tz.md | Расширенное ТЗ для Cursor, чеклисты | Актуален |

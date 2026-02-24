@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** Реализован CalDAV опрос (issue #26): `voiceforge calendar poll`, keyring `caldav_url` / `caldav_username` / `caldav_password`, опциональная зависимость `calendar`. Следующий шаг: взять задачу с доски — **#27 AppImage** (полная сборка в toolbox) или **#28 EN runbook** (dependabot-review / telegram-bot-setup).
+- **Сейчас:** Добавлены EN runbooks (issue #28): dependabot-review-en.md, telegram-bot-setup-en.md; DOCS-INDEX обновлён. Следующий шаг: **#27 AppImage** (полная сборка в toolbox по offline-package.md) или следующая задача с доски.
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-Roadmap 17 (CalDAV): подкоманда `voiceforge calendar poll`, модуль `voiceforge.calendar.caldav_poll`, ключи в keyring-keys-reference.md, опция `uv sync --extra calendar`. Тесты 45 passed. Closes #26.
+Issue #28 (EN runbook): dependabot-review-en.md, telegram-bot-setup-en.md, обновлён DOCS-INDEX. Тесты 45 passed. Closes #28.
 
 ---
 
