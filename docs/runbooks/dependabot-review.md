@@ -12,4 +12,4 @@
 
 ## Текущий статус
 
-- На 2026-02-24: 1 moderate (см. ссылку в выводе `git push` или Security → Dependabot). Рекомендуется проверить и принять/отложить вручную.
+- **CVE-2025-69872 (diskcache):** фиксирующей версии нет (transitive dependency, тянется через litellm). В CI уже используется `pip-audit --ignore-vuln CVE-2025-69872` (см. [security.md](security.md)). Рекомендуется **отложить алерт вручную**: Dependabot → Alert → Dismiss → «Accept risk», комментарий: «No fix version yet. See docs/runbooks/security.md. Revisit when upstream fixes.» После появления фикса в upstream — снять ignore в security.md и обновить зависимость.
