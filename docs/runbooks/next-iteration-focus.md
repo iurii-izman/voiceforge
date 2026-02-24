@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** Аудит документов и планов: сделанное вынесено в [history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md), здесь только открытые задачи и план; добавлен [planning-and-tools.md](planning-and-tools.md) (варианты ведения плана: Markdown-backlog vs GitHub Projects). Следующий шаг на выбор: **CalDAV**, **runbook на EN**, **AppImage в toolbox** или другая задача из раздела «Не сделано» ниже. При новом чате — универсальный промпт из agent-context + задача или «продолжить с @docs/runbooks/next-iteration-focus.md».
+- **Сейчас:** GitHub Project создан: [VoiceForge Board](https://github.com/users/iurii-izman/projects/1). Issues #26–30 добавлены (CalDAV, AppImage, EN runbook, RAG, Dependabot); #26 в статусе In Progress. Следующий шаг: взять задачу из проекта (например **#26 CalDAV** или #27 AppImage) или «продолжить с @docs/runbooks/next-iteration-focus.md». При новом чате — универсальный промпт из agent-context + задача/issue.
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-Аудит документов и планов: создан [history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md) (сделано по коду), next-iteration-focus сокращён до открытых задач и плана, добавлен [planning-and-tools.md](planning-and-tools.md) (Markdown-backlog vs GitHub Projects). Тесты 44 passed; коммит и пуш выполнены.
+GitHub Project создан ([VoiceForge Board](https://github.com/users/iurii-izman/projects/1)), привязан к репо. Issues #26–30 созданы и добавлены на доску; #26 (CalDAV) в In Progress. Добавлен [backlog.md](backlog.md) как зеркало. Тесты, коммит и пуш — в конце сессии.
 
 ---
 
