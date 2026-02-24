@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** Модерация доков и автопилот завершены (DOCS-INDEX, agent-session-handoff-rule, agent-context, next-iteration-focus). Дальше на выбор: перевод 1–2 runbook на EN; следующий продуктовый шаг (календарь roadmap 17, RAG ODT/RTF roadmap 18, офлайн-пакет roadmap 14); или новая фича по roadmap. При новом чате — скопировать универсальный промпт из agent-context и добавить задачу или «продолжить с @docs/runbooks/next-iteration-focus.md».
+- **Сейчас:** Автопилот выполнен: EN runbooks (installation-guide-en, first-meeting-5min-en), runbooks calendar-integration.md и rag-formats.md, чеклист в offline-package.md, обновлён DOCS-INDEX. Следующий шаг на выбор: **реализация ODT/RTF в RAG** по [rag-formats.md](rag-formats.md); **календарь** — выбор провайдера и ADR по [calendar-integration.md](calendar-integration.md); перевод ещё 1–2 runbook на EN; или добавить appimage в bundle.targets по offline-package.md. При новом чате — скопировать универсальный промпт из agent-context и добавить задачу или «продолжить с @docs/runbooks/next-iteration-focus.md».
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
