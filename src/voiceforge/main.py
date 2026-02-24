@@ -46,7 +46,17 @@ app = typer.Typer(help="VoiceForge — local-first AI assistant (alpha0.1 core)"
 action_items_app = typer.Typer(help=t("cli.action_items_help"))
 app.add_typer(action_items_app, name="action-items")
 
-_INDEX_EXTENSIONS = (".pdf", ".md", ".markdown", ".html", ".htm", ".docx", ".txt")
+_INDEX_EXTENSIONS = (
+    ".pdf",
+    ".md",
+    ".markdown",
+    ".html",
+    ".htm",
+    ".docx",
+    ".txt",
+    ".odt",
+    ".rtf",
+)
 _I18N_ERROR_LLM_FAILED = "error.llm_failed"
 _I18N_TEMPLATE_ACTIONS = "template.one_on_one.actions"
 _HELP_OUTPUT_TEXT_JSON = "Формат вывода: text | json"
@@ -690,7 +700,7 @@ def _index_directory(indexer: Any, p: Path) -> tuple[int, set[str]]:
 
 @app.command()
 def index(
-    path: str = typer.Argument(help="Путь к файлу или папке (PDF, MD, HTML, DOCX, TXT)"),
+    path: str = typer.Argument(help="Путь к файлу или папке (PDF, MD, HTML, DOCX, TXT, ODT, RTF)"),
     db: str | None = typer.Option(None, "--db", help="Путь к RAG-БД"),
 ) -> None:
     """Index knowledge files into SQLite-vec + FTS5 database."""

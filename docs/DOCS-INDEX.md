@@ -18,7 +18,7 @@
 | Установка и запуск (хост/toolbox, демон) | [runbooks/installation-guide.md](runbooks/installation-guide.md) | Актуален |
 | Первая встреча за 5 минут | [first-meeting-5min.md](first-meeting-5min.md) | Актуален |
 | Сборка десктопа (Tauri) | [runbooks/desktop-build-deps.md](runbooks/desktop-build-deps.md) | Актуален |
-| Архитектурные решения | [adr/README.md](adr/README.md) + файлы 0001–0005 | Актуален (0005 — Telegram) |
+| Архитектурные решения | [adr/README.md](adr/README.md) + файлы 0001–0006 | Актуален (0005 Telegram, 0006 календарь) |
 | Зависимости, uv, CVE-исключения | [runbooks/dependencies.md](runbooks/dependencies.md), [runbooks/security.md](runbooks/security.md) | Актуален |
 | Dependabot (как закрывать алерты) | [runbooks/dependabot-review.md](runbooks/dependabot-review.md) | Актуален |
 | Telegram-бот | [runbooks/telegram-bot-setup.md](runbooks/telegram-bot-setup.md), [adr/0005-telegram-bot.md](adr/0005-telegram-bot.md) | Актуален |
@@ -52,7 +52,9 @@
 | desktop-build-deps.md | Зависимости сборки Tauri, pyannote при OOM | Актуален |
 | first-meeting-5min — в docs/ | — | См. docs/first-meeting-5min.md |
 | quickstart.md | Краткий сценарий; полная версия — first-meeting-5min | Актуален |
+| quickstart-en.md | Quick start (EN) | Актуален |
 | bootstrap.md | bootstrap.sh, uv sync, doctor | Актуален |
+| bootstrap-en.md | Bootstrap runbook (EN) | Актуален |
 | dependencies.md | Политика зависимостей, uv.lock, CVE-исключения | Актуален |
 | security.md | Секреты, pip-audit, CVE-2025-69872 | Актуален |
 | dependabot-review.md | Как закрывать Dependabot алерты | Актуален |
@@ -75,12 +77,13 @@
 
 | Файл | Роль | Статус |
 |------|------|--------|
-| README.md | Список ADR 0001–0005 | Актуален |
+| README.md | Список ADR 0001–0006 | Актуален |
 | 0001-core-scope-0.1.md | Заморозка 9 CLI-команд; новые — через ADR | Актуален |
 | 0002-action-items-table.md | Таблица action_items, history --action-items | Актуален |
 | 0003-version-reset-0.1-alpha1.md | Сброс версии | Актуален |
 | 0004-desktop-tauri-dbus.md | Десктоп: Tauri, D-Bus, демон | Актуален |
 | 0005-telegram-bot.md | Telegram-бот через voiceforge web, key webhook_telegram | Актуален |
+| 0006-calendar-integration.md | Календарь (roadmap 17): CalDAV, keyring | Актуален |
 | 0002-archive-first-cleanup.md | Superseded (исторический) | Архив |
 
 ### docs/architecture/

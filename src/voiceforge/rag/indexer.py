@@ -33,7 +33,9 @@ from voiceforge.rag.parsers import (
     parse_docx,
     parse_html,
     parse_markdown,
+    parse_odt,
     parse_pdf,
+    parse_rtf,
     parse_txt,
 )
 
@@ -44,7 +46,17 @@ CHUNK_TOKENS = 400
 CHUNK_OVERLAP_RATIO = 0.10
 
 # Block 5.4: extensions and parser dispatch
-_SUPPORTED_EXTENSIONS = {".pdf", ".md", ".markdown", ".html", ".htm", ".docx", ".txt"}
+_SUPPORTED_EXTENSIONS = {
+    ".pdf",
+    ".md",
+    ".markdown",
+    ".html",
+    ".htm",
+    ".docx",
+    ".txt",
+    ".odt",
+    ".rtf",
+}
 _PARSERS = {
     ".pdf": parse_pdf,
     ".md": parse_markdown,
@@ -53,6 +65,8 @@ _PARSERS = {
     ".htm": parse_html,
     ".docx": parse_docx,
     ".txt": parse_txt,
+    ".odt": parse_odt,
+    ".rtf": parse_rtf,
 }
 
 

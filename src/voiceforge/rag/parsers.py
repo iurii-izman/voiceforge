@@ -120,3 +120,49 @@ def parse_docx(path: str | Path) -> list[str]:
     doc = Document(str(path))
     segments = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
     return segments if segments else []
+
+
+def parse_odt(path: str | Path) -> list[str]:
+    """Extract text from ODT (OpenDocument Text). Requires odfpy (optional in [rag])."""
+    path = Path(path)
+    if not path.is_file():
+        raise FileNotFoundError(str(path))
+    try:
+        from odf import teletype, text
+        from odf.opendocument import load
+    except ImportError:
+        raise ImportError("Install [rag] with odfpy: uv sync --extra rag") from None
+    doc = load(str(path))
+    segments: list[str] = []
+    for el in doc.getElementsByType(text.P):
+        t = teletype.extractText(el).strip()
+        if t:
+            segments.append(t)
+    for el in doc.getElementsByType(text.H):
+        t = teletype.extractText(el).strip()
+        if t:
+            segments.append(t)
+    if not segments:
+        for el in doc.getElementsByType(text.Span):
+            t = teletype.extractText(el).strip()
+            if t:
+                segments.append(t)
+    return segments if segments else []
+
+
+def parse_rtf(path: str | Path) -> list[str]:
+    """Extract plain text from RTF. Requires striprtf (optional in [rag])."""
+    path = Path(path)
+    if not path.is_file():
+        raise FileNotFoundError(str(path))
+    try:
+        from striprtf.striprtf import rtf_to_text
+    except ImportError:
+        raise ImportError("Install [rag] with striprtf: uv sync --extra rag") from None
+    raw = path.read_bytes()
+    try:
+        text_content = rtf_to_text(raw.decode("utf-8", errors="replace"))
+    except Exception:
+        text_content = rtf_to_text(raw.decode("cp1252", errors="replace"))
+    segments = [p.strip() for p in re.split(r"\n\s*\n", text_content) if p.strip()]
+    return segments if segments else ([text_content.strip()] if text_content.strip() else [])

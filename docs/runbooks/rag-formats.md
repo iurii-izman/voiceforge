@@ -16,15 +16,16 @@
 | `.html`, `.htm` | `parse_html` | HTML |
 | `.docx` | `parse_docx` | Word (Office Open XML) |
 | `.txt` | `parse_txt` | Plain text |
+| `.odt` | `parse_odt` | OpenDocument Text (odfpy) |
+| `.rtf` | `parse_rtf` | Rich Text Format (striprtf) |
 
 Файлы с другими расширениями при `voiceforge index <path>` пропускаются (сообщение «unsupported format» или «skip»).
 
-## План: ODT и RTF
+## ODT и RTF (реализовано)
 
-- **ODT (OpenDocument Text):** формат LibreOffice/OpenOffice. Вариант реализации — библиотека `odfpy` (чтение ODT, извлечение текста). Добавить в `voiceforge.rag.parsers` функцию `parse_odt`, зарегистрировать в `indexer.py` расширение `.odt` и парсер; при добавлении — тест на примере ODT-файла и обновление этого runbook.
-- **RTF (Rich Text Format):** распространённый обменный формат. Вариант реализации — библиотека `striprtf` (или аналог) для извлечения текста. Добавить `parse_rtf` в parsers, расширение `.rtf` в indexer; при добавлении — тесты и обновление runbook.
-
-Порядок внедрения — по желанию (ODT часто нужнее для офисных сценариев). Реализацию выполнять отдельной итерацией: зависимости в `pyproject.toml`, парсеры, регистрация в indexer, тесты, обновление данного документа.
+- **ODT:** в `voiceforge.rag.parsers` добавлена `parse_odt` (библиотека `odfpy`), расширение `.odt` зарегистрировано в indexer и main. Тесты: `tests/test_rag_parsers.py::test_parse_odt_extracts_text`.
+- **RTF:** добавлена `parse_rtf` (библиотека `striprtf`), расширение `.rtf` зарегистрировано. Тесты: `tests/test_rag_parsers.py::test_parse_rtf_extracts_text`.
+- Зависимости: `odfpy`, `striprtf` в `[project.optional-dependencies].rag` в `pyproject.toml`.
 
 ## Правила при добавлении форматов
 

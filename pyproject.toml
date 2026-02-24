@@ -43,6 +43,8 @@ rag = [
     "huggingface-hub>=0.20",
     "watchdog>=4.0",
     "python-docx>=1.0",
+    "odfpy>=1.0",
+    "striprtf>=0.0.27",
 ]
 llm = [
     "litellm>=1.50,<2",

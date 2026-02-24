@@ -2281,6 +2281,15 @@ wheels = [
 ]
 
 [[package]]
+name = "odfpy"
+version = "1.4.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "defusedxml" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/97/73/8ade73f6749177003f7ce3304f524774adda96e6aaab30ea79fd8fda7934/odfpy-1.4.1.tar.gz", hash = "sha256:db766a6e59c5103212f3cc92ec8dd50a0f3a02790233ed0b52148b70d3c438ec", size = 717045, upload-time = "2020-01-18T16:55:48.852Z" }
+
+[[package]]
 name = "onnxruntime"
 version = "1.24.1"
 source = { registry = "https://pypi.org/simple" }
@@ -3792,6 +3801,15 @@ wheels = [
 ]
 
 [[package]]
+name = "striprtf"
+version = "0.0.29"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/f3/86/7154b7c625a3ff704581dab70c05389e1de90233b7a751f79f712c2ca0e9/striprtf-0.0.29.tar.gz", hash = "sha256:5a822d075e17417934ed3add6fc79b5fc8fb544fe4370b2f894cdd28f0ddd78e", size = 7533, upload-time = "2025-03-27T22:55:56.874Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/08/3e/1418afacc4aae04690cff282078f22620c89a99490499878ececc3021654/striprtf-0.0.29-py3-none-any.whl", hash = "sha256:0fc6a41999d015358d19627776b616424dd501ad698105c81d76734d1e14d91b", size = 7879, upload-time = "2025-03-27T22:55:55.977Z" },
+]
+
+[[package]]
 name = "structlog"
 version = "25.5.0"
 source = { registry = "https://pypi.org/simple" }
@@ -4249,11 +4267,13 @@ all = [
     { name = "huggingface-hub" },
     { name = "instructor" },
     { name = "litellm" },
+    { name = "odfpy" },
     { name = "onnxruntime" },
     { name = "pydantic" },
     { name = "pymupdf" },
     { name = "python-docx" },
     { name = "sqlite-vec" },
+    { name = "striprtf" },
     { name = "tokenizers" },
     { name = "watchdog" },
 ]
@@ -4267,10 +4287,12 @@ pii = [
 ]
 rag = [
     { name = "huggingface-hub" },
+    { name = "odfpy" },
     { name = "onnxruntime" },
     { name = "pymupdf" },
     { name = "python-docx" },
     { name = "sqlite-vec" },
+    { name = "striprtf" },
     { name = "tokenizers" },
     { name = "watchdog" },
 ]
@@ -4299,6 +4321,7 @@ requires-dist = [
     { name = "litellm", marker = "extra == 'llm'", specifier = ">=1.50,<2" },
     { name = "matplotlib", specifier = ">=3.8" },
     { name = "numpy", specifier = ">=1.26,<3" },
+    { name = "odfpy", marker = "extra == 'rag'", specifier = ">=1.0" },
     { name = "onnxruntime", marker = "extra == 'rag'", specifier = ">=1.18,<2" },
     { name = "psutil", specifier = ">=5.9" },
     { name = "pyannote-audio", specifier = "==4.0.4" },
@@ -4308,6 +4331,7 @@ requires-dist = [
     { name = "python-docx", marker = "extra == 'rag'", specifier = ">=1.0" },
     { name = "pyyaml", specifier = ">=6.0" },
     { name = "sqlite-vec", marker = "extra == 'rag'", specifier = ">=0.1.0" },
+    { name = "striprtf", marker = "extra == 'rag'", specifier = ">=0.0.27" },
     { name = "structlog", specifier = ">=24.0" },
     { name = "tokenizers", marker = "extra == 'rag'", specifier = ">=0.19" },
     { name = "typer", specifier = ">=0.12" },
