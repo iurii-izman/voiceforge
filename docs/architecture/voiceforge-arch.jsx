@@ -250,7 +250,10 @@ export default function App() {
                 return (
                   <div key={node.id}>
                     <div
+                      role="button"
+                      tabIndex={0}
                       onClick={() => setActive(isOpen ? null : node.id)}
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setActive(isOpen ? null : node.id); } }}
                       style={{
                         display: "grid",
                         gridTemplateColumns: "40px 120px 1fr 80px 100px",
@@ -292,8 +295,8 @@ export default function App() {
                         gap: "0 32px",
                       }}>
                         <div>
-                          {node.details.map((d, j) => (
-                            <div key={j} style={{ fontSize: 11, color: "#64748b", marginBottom: 5, display: "flex", gap: 8, alignItems: "flex-start" }}>
+                          {node.details.map((d) => (
+                            <div key={d} style={{ fontSize: 11, color: "#64748b", marginBottom: 5, display: "flex", gap: 8, alignItems: "flex-start" }}>
                               <span style={{ color: st.color, flexShrink: 0, marginTop: 1 }}>›</span>
                               <span>{d}</span>
                             </div>
@@ -329,8 +332,8 @@ export default function App() {
                   "Ключи только keyring → gnome-keyring (не .env в git)",
                   "Сборка в toolbox/distrobox (не на хосте Atomic)",
                   "uv (не pip, не poetry); max 300 строк/файл",
-                ].map((c, i) => (
-                  <div key={i} style={{ fontSize: 11, color: "#475569", display: "flex", gap: 8 }}>
+                ].map((c) => (
+                  <div key={c} style={{ fontSize: 11, color: "#475569", display: "flex", gap: 8 }}>
                     <span style={{ color: "#ef4444" }}>✕</span>{c}
                   </div>
                 ))}
@@ -352,7 +355,10 @@ export default function App() {
                 return (
                   <div
                     key={layer.id}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => setActive(isOpen ? null : layer.id)}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setActive(isOpen ? null : layer.id); } }}
                     style={{
                       background: "#0a0f1c",
                       border: `1px solid ${isOpen ? st.color + "60" : "#1e293b"}`,
@@ -374,8 +380,8 @@ export default function App() {
                     {isOpen && (
                       <>
                         <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 12 }}>
-                          {layer.commands.map((c, i) => (
-                            <div key={i} style={{ fontSize: 11, color: "#94a3b8", display: "flex", gap: 8 }}>
+                          {layer.commands.map((c) => (
+                            <div key={c} style={{ fontSize: 11, color: "#94a3b8", display: "flex", gap: 8 }}>
                               <span style={{ color: st.color }}>›</span>{c}
                             </div>
                           ))}
@@ -500,6 +506,7 @@ export default function App() {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
               {ROADMAP.map(r => {
                 const st = STATUS[r.status];
+                const sym = r.status === "done" ? "✓" : r.status === "alpha2" ? "→" : "○";
                 return (
                   <div key={r.n} style={{
                     display: "flex", alignItems: "center", gap: 12,
@@ -513,7 +520,7 @@ export default function App() {
                       fontSize: 10, color: st.color, background: st.bg,
                       border: `1px solid ${st.color}25`, padding: "2px 7px", borderRadius: 3,
                     }}>
-                      {r.status === "done" ? "✓" : r.status === "alpha2" ? "→" : "○"} {st.label}
+                      {sym} {st.label}
                     </span>
                   </div>
                 );
@@ -533,8 +540,8 @@ export default function App() {
                   "Версия 0.2.0a1 в pyproject.toml + tauri.conf.json",
                   "E2E тесты: export, analyze --template, action-items",
                   "alpha2-checklist.md → все пункты зелёные",
-                ].map((t, i) => (
-                  <div key={i} style={{ fontSize: 11, color: "#94a3b8", display: "flex", gap: 8 }}>
+                ].map((t) => (
+                  <div key={t} style={{ fontSize: 11, color: "#94a3b8", display: "flex", gap: 8 }}>
                     <span style={{ color: "#f59e0b" }}>→</span>{t}
                   </div>
                 ))}

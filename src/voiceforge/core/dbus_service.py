@@ -13,7 +13,7 @@ import contextlib
 import json
 import os
 from collections.abc import Callable
-from typing import Annotated
+from typing import Annotated, TypedDict
 
 import structlog
 from dbus_fast.aio import MessageBus
@@ -118,6 +118,19 @@ class VoiceForgeAppInterface(ServiceInterface):
         return self._status()
 
 
+class _DaemonOptionalCallbacks(TypedDict, total=False):
+    get_sessions_fn: Callable[[int], str]
+    get_session_detail_fn: Callable[[int], str]
+    get_settings_fn: Callable[[], str]
+    get_indexed_paths_fn: Callable[[], str]
+    get_streaming_transcript_fn: Callable[[], str]
+    swap_model_fn: Callable[[str, str], str]
+    ping_fn: Callable[[], str]
+    get_analytics_fn: Callable[[str], str]
+    get_api_version_fn: Callable[[], str]
+    get_capabilities_fn: Callable[[], str]
+
+
 class DaemonVoiceForgeInterface(ServiceInterface):
     """D-Bus daemon: Analyze, Status, Listen, GetSessions, GetSessionDetail, GetSettings, GetIndexedPaths."""
 
@@ -128,33 +141,25 @@ class DaemonVoiceForgeInterface(ServiceInterface):
         listen_start_fn: Callable[[], None],
         listen_stop_fn: Callable[[], None],
         is_listening_fn: Callable[[], bool],
-        get_sessions_fn: Callable[[int], str] | None = None,
-        get_session_detail_fn: Callable[[int], str] | None = None,
-        get_settings_fn: Callable[[], str] | None = None,
-        get_indexed_paths_fn: Callable[[], str] | None = None,
-        get_streaming_transcript_fn: Callable[[], str] | None = None,
-        swap_model_fn: Callable[[str, str], str] | None = None,
-        ping_fn: Callable[[], str] | None = None,
-        get_analytics_fn: Callable[[str], str] | None = None,
-        get_api_version_fn: Callable[[], str] | None = None,
-        get_capabilities_fn: Callable[[], str] | None = None,
+        optional: _DaemonOptionalCallbacks | None = None,
     ) -> None:
         super().__init__(INTERFACE_NAME)
+        o = optional or {}
         self._analyze = analyze_fn
         self._status = status_fn
         self._listen_start = listen_start_fn
         self._listen_stop = listen_stop_fn
         self._is_listening = is_listening_fn
-        self._get_sessions = get_sessions_fn
-        self._get_session_detail = get_session_detail_fn
-        self._get_settings = get_settings_fn
-        self._get_indexed_paths = get_indexed_paths_fn
-        self._get_streaming_transcript = get_streaming_transcript_fn
-        self._swap_model = swap_model_fn
-        self._ping = ping_fn
-        self._get_analytics = get_analytics_fn
-        self._get_api_version = get_api_version_fn
-        self._get_capabilities = get_capabilities_fn
+        self._get_sessions = o.get("get_sessions_fn")
+        self._get_session_detail = o.get("get_session_detail_fn")
+        self._get_settings = o.get("get_settings_fn")
+        self._get_indexed_paths = o.get("get_indexed_paths_fn")
+        self._get_streaming_transcript = o.get("get_streaming_transcript_fn")
+        self._swap_model = o.get("swap_model_fn")
+        self._ping = o.get("ping_fn")
+        self._get_analytics = o.get("get_analytics_fn")
+        self._get_api_version = o.get("get_api_version_fn")
+        self._get_capabilities = o.get("get_capabilities_fn")
         self._analyze_sem = asyncio.Semaphore(1)
 
     ANALYZE_MAX_SECONDS = 3600

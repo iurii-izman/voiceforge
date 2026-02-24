@@ -12,15 +12,17 @@ def _iface() -> DaemonVoiceForgeInterface:
         listen_start_fn=lambda: None,
         listen_stop_fn=lambda: None,
         is_listening_fn=lambda: False,
-        get_sessions_fn=lambda last_n: "[]",
-        get_session_detail_fn=lambda session_id: "{}",
-        get_settings_fn=lambda: "{}",
-        get_indexed_paths_fn=lambda: "[]",
-        get_streaming_transcript_fn=lambda: '{"partial":"","finals":[]}',
-        swap_model_fn=lambda model_type, model_name: "ok",
-        ping_fn=lambda: "pong",
-        get_analytics_fn=lambda last: "{}",
-        get_api_version_fn=lambda: "1.0",
+        optional={
+            "get_sessions_fn": lambda last_n: "[]",
+            "get_session_detail_fn": lambda session_id: "{}",
+            "get_settings_fn": lambda: "{}",
+            "get_indexed_paths_fn": lambda: "[]",
+            "get_streaming_transcript_fn": lambda: '{"partial":"","finals":[]}',
+            "swap_model_fn": lambda model_type, model_name: "ok",
+            "ping_fn": lambda: "pong",
+            "get_analytics_fn": lambda last: "{}",
+            "get_api_version_fn": lambda: "1.0",
+        },
     )
 
 
