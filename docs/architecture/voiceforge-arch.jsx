@@ -254,7 +254,6 @@ export default function App() {
                       onClick={() => setActive(isOpen ? null : node.id)}
                       style={{
                         display: "grid",
-                        border: "none",
                         margin: 0,
                         padding: "12px 18px",
                         font: "inherit",

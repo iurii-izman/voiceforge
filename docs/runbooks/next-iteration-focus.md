@@ -4,7 +4,37 @@
 
 **Обновлено:** 2026-02-24
 
-**Последняя итерация:** Sonar поблочно: desktop main.js (S3358 nested ternary → if/else, S7735 negated → positive daemonOk), voiceforge-arch.jsx (S6819 role=button → \<button type="button">, S3358 ROADMAP sym → if/else). Коммит+пуш выполнен. Дальше: S3776 (cognitive complexity), S7785 (top-level await), BLOCKER S2083/S3649, или шаги 7–10 (бот, календарь, RAG). Список: `uv run python scripts/sonar_fetch_issues.py`.
+**Последняя итерация:** Перепроверка Sonar, правки S1534 (дубликат border в voiceforge-arch), S7735 (desktop:199 duration_sec). Актуализированы блоки Sonar ниже.
+
+---
+
+## Блоки Sonar (актуально, после перепроверки)
+
+Список: `uv run python scripts/sonar_fetch_issues.py`.
+
+**Блок A — JS/JSX (мелкие, 1–2 шт.):**
+- desktop/main.js:283 S7785 — Prefer top-level await over async IIFE (может потребовать type="module" / bundler).
+- ~~voiceforge-arch.jsx:268 S1534~~ — дубликат `border` в style (исправлено).
+- ~~desktop/main.js:199 S7735~~ — negated condition `!= null` (исправлено).
+
+**Блок B — BLOCKER (2):**
+- main.py:543 S2083 — path from user-controlled data (_action_item_status_path / XDG_DATA_HOME); уже есть валидация под home — при необходимости подавить или доработать.
+- transcript_log.py:78 S3649 — SQL from user-controlled data (conn.executescript(sql) из миграций); миграции — внутренние файлы, при необходимости комментарий/suppression.
+
+**Блок C — S3776 Cognitive Complexity (много файлов):**
+- history_helpers.py:74 (44→15), status_helpers.py:69 (20→15), status_helpers.py:108 (31→15).
+- pipeline.py:140 (16→15), transcript_log.py:218 (17→15), daemon.py:314 (16→15), dbus_service.py:168 (19→15).
+- llm/router.py:103 (17→15), router.py:275 (42→15).
+- main.py:86 (42), 164 (17), 252 (27), 547 (20), 754 (22), 633 (22), 893 (82).
+- web/server.py:209 (54), 433 (33).
+- core/metrics.py:201 (29), 287 (29).
+- rag/indexer.py:140 (28→15).
+
+**Блок D — прочее (2):**
+- local_llm.py:44 S5713 — redundant Exception class (в коде класса нет — проверить при скане).
+- rag/indexer.py:252 S2737 — except clause (уже заменён на `raise` — при рескане может исчезнуть).
+
+**Рекомендуемый порядок:** A (S7785 по желанию) → B (BLOCKER при необходимости) → C по одному файлу (сначала 16–17, потом остальные) → D.
 
 ---
 
@@ -54,7 +84,7 @@
 
 ## Рекомендательные приоритетные задачи (что делать дальше)
 
-См. блок **«Следующие 10 шагов по реализации проекта»** выше. Шаги 1–6 выполнены. Дополнительно: продолжать стабилизацию Sonar — следующий блок (desktop JS, тесты S1244, или рефакторинг S3776); список issues: `uv run python scripts/sonar_fetch_issues.py`. Ближайшие по приоритету: шаги 7–10 (бот, календарь, RAG, стабилизация) — по мере необходимости.
+См. блок **«Следующие 10 шагов по реализации проекта»** и **«Блоки Sonar (актуально)»** выше. Шаги 1–6 выполнены. Ближайшие по Sonar: блок A (S7785), блок B (BLOCKER при необходимости), блок C (S3776 по файлам). По roadmap: шаги 7–10 (бот, календарь, RAG, стабилизация) — по мере необходимости.
 
 ---
 

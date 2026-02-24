@@ -196,7 +196,7 @@ function loadSessions() {
       sessions.forEach((s) => {
         const id = s.id ?? s.session_id ?? "—";
         const start = s.started_at ?? s.created_at ?? "—";
-        const dur = s.duration_sec != null ? s.duration_sec + " с" : "—";
+        const dur = s.duration_sec == null ? "—" : s.duration_sec + " с";
         html += `<tr data-id="${id}"><td>${id}</td><td>${start}</td><td>${dur}</td></tr>`;
       });
       html += "</tbody></table>";
