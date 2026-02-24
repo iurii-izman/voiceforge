@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** Закрыто по Sonar: S1192 (константы в server.py), S3626 (redundant return в main), S3358 (nested conditional в parsers), S7785 (NOSONAR для desktop IIFE), один S3776 (_history_echo_error_data). После пушa проверить `uv run python scripts/sonar_fetch_issues.py` — останутся S3776 (server 518/602, main 333/810/975, history_helpers 74, core/metrics 201). Следующий шаг на выбор: **добить оставшиеся S3776** (рефакторинг/вынос хелперов); **CalDAV** по calendar-integration.md и ADR-0006; **перевод runbook на EN**; или **сборка AppImage в toolbox**. При новом чате — универсальный промпт из agent-context + задача или «продолжить с @docs/runbooks/next-iteration-focus.md».
+- **Сейчас:** Все оставшиеся S3776 закрыты рефакторингом: server (_telegram_webhook_reply, _read_post_json), main (_format_live_key_points/_format_live_action_items, _cost_echo_text, _history_echo_session_not_found), history_helpers (_format_analysis_attrs/_format_analysis_action_items), core/metrics (_unpack_llm_row). После пушa проверить `uv run python scripts/sonar_fetch_issues.py`. Следующий шаг на выбор: **CalDAV** по calendar-integration.md и ADR-0006; **перевод runbook на EN**; **сборка AppImage в toolbox**; или другая задача из roadmap. При новом чате — универсальный промпт из agent-context + задача или «продолжить с @docs/runbooks/next-iteration-focus.md».
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-Sonar: S1192, S3626, S3358, S7785 (NOSONAR), S3776 (_history_echo) — правки закоммичены и запушены. Тесты 44 passed. Оставшиеся S3776 — после пересборки в SonarCloud уточнить список и при желании добить рефакторингом.
+Sonar S3776 автопилот: все 7 оставшихся когнитивных сложностей закрыты выносом хелперов (server, main, history_helpers, core/metrics). Тесты 44 passed; коммит и пуш выполнены.
 
 ---
 
@@ -55,9 +55,7 @@ Sonar: S1192, S3626, S3358, S7785 (NOSONAR), S3776 (_history_echo) — прав�
 
 Список: `uv run python scripts/sonar_fetch_issues.py`.
 
-**Закрыто в этой сессии:** S1192 (server.py константы), S3626 (main redundant return), S3358 (parsers conditional), S7785 (desktop NOSONAR), один S3776 (_history_echo_error_data). **Блок A:** ~~S7785~~ (NOSONAR). **Блок B:** ~~S2083, S3649~~ (NOSONAR). **Блок D:** ~~S5713, S2737~~.
-
-**Оставшиеся S3776 (Cognitive Complexity):** server.py 518/602, main 333/810/975, history_helpers 74, core/metrics 201 — рефакторинг/вынос хелперов при следующей итерации.
+**Закрыто:** S1192, S3626, S3358, S7785 (NOSONAR), все S3776 (server _telegram_webhook_reply, _read_post_json; main live summary/cost/history; history_helpers _format_analysis_*; core/metrics _unpack_llm_row). После пушa проверить Sonar: `uv run python scripts/sonar_fetch_issues.py`.
 
 ---
 
