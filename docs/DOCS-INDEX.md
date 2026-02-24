@@ -73,6 +73,7 @@
 | claude-proposal-alignment.md | Сверка предложений с кодом (что реализовано) | Справочно |
 | repo-governance.md | main, PR, SonarCloud, security baseline | Актуален |
 | git-github-practices.md | Conventional Commits, теги, issues, labels, GitHub Project | Актуален |
+| git-github-practices-rule.md | Копия правила для .cursor/rules (git-github-practices.mdc) | Актуален |
 | release.md, rollback-alpha-release.md | Релизы и откат | Актуален |
 | alpha2-checklist.md, alpha0.1-dod.md | Чеклисты релизов / DoD | Справочно |
 | web-api.md | Web UI API | Актуален |

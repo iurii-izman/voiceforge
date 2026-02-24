@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** GitHub Project создан: [VoiceForge Board](https://github.com/users/iurii-izman/projects/1). Issues #26–30 добавлены (CalDAV, AppImage, EN runbook, RAG, Dependabot); #26 в статусе In Progress. Следующий шаг: взять задачу из проекта (например **#26 CalDAV** или #27 AppImage) или «продолжить с @docs/runbooks/next-iteration-focus.md». При новом чате — универсальный промпт из agent-context + задача/issue.
+- **Сейчас:** Всё доделано и зафинализировано: Project + issues #26–30 с лейблами, git-github-practices (runbook и копия правила в репо), backlog, DOCS-INDEX. Следующий шаг: взять задачу с доски — **#26 CalDAV** (In Progress) или #27 AppImage, #28 EN runbook и т.д. В новом чате: универсальный промпт из agent-context + «продолжить с @docs/runbooks/next-iteration-focus.md» или «взять issue #26».
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-Финализация Git/GitHub: добавлены правила [git-github-practices.md](git-github-practices.md) и `.cursor/rules/git-github-practices.mdc` (Conventional Commits, теги, Closes #N, labels, Project). Issues #26–30 с лейблами (roadmap, docs, feat, chore). Handoff-rule обновлён под conventional commits. Тесты, коммит и пуш — в конце сессии.
+Финализация: добавлена копия правила [git-github-practices-rule.md](git-github-practices-rule.md) в репо (для .cursor/rules). next-iteration-focus приведён к итоговому состоянию. Тесты 44 passed. Коммит и пуш в конце сессии.
 
 ---
 
