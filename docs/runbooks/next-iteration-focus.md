@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** Все оставшиеся S3776 закрыты рефакторингом: server (_telegram_webhook_reply, _read_post_json), main (_format_live_key_points/_format_live_action_items, _cost_echo_text, _history_echo_session_not_found), history_helpers (_format_analysis_attrs/_format_analysis_action_items), core/metrics (_unpack_llm_row). После пушa проверить `uv run python scripts/sonar_fetch_issues.py`. Следующий шаг на выбор: **CalDAV** по calendar-integration.md и ADR-0006; **перевод runbook на EN**; **сборка AppImage в toolbox**; или другая задача из roadmap. При новом чате — универсальный промпт из agent-context + задача или «продолжить с @docs/runbooks/next-iteration-focus.md».
+- **Сейчас:** Добавлен runbook [desktop-build-deps-en.md](desktop-build-deps-en.md), DOCS-INDEX обновлён. Следующий шаг на выбор: **CalDAV** по calendar-integration.md и ADR-0006; **ещё runbook на EN** (например dependabot-review, telegram-bot-setup); **сборка AppImage в toolbox**; или другая задача из roadmap. При новом чате — универсальный промпт из agent-context + задача или «продолжить с @docs/runbooks/next-iteration-focus.md».
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-Sonar S3776 автопилот: все 7 оставшихся когнитивных сложностей закрыты выносом хелперов (server, main, history_helpers, core/metrics). Тесты 44 passed; коммит и пуш выполнены.
+Перевод runbook на EN: добавлен desktop-build-deps-en.md, DOCS-INDEX обновлён. Тесты 44 passed; коммит и пуш выполнены.
 
 ---
 
