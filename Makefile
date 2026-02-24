@@ -1,4 +1,4 @@
-.PHONY: bootstrap verify smoke release-check cli-contract db-migrations e2e-smoke doctor toolchain security governance governance-check new-code-coverage milestone sonar-status
+.PHONY: bootstrap verify smoke release-check cli-contract db-migrations e2e-smoke eval doctor toolchain security governance governance-check new-code-coverage milestone sonar-status
 
 bootstrap:
 	./scripts/bootstrap.sh
@@ -22,6 +22,9 @@ db-migrations:
 
 e2e-smoke:
 	uv run pytest tests/test_cli_e2e_smoke.py -q
+
+eval:
+	uv run pytest tests/eval/ -q --tb=line
 
 doctor:
 	./scripts/doctor.sh

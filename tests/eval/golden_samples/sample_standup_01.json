@@ -1,0 +1,9 @@
+{
+  "transcript": "Standup. Yesterday I finished the API for export. Today I'll add tests. Blocker: waiting for design on the login screen.",
+  "template": "standup",
+  "reference": {
+    "done": ["Finished the API for export"],
+    "planned": ["Add tests"],
+    "blockers": ["Waiting for design on the login screen"]
+  }
+}
