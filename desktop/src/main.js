@@ -101,7 +101,8 @@ async function pollStreaming() {
   try {
     const raw = await invoke("get_streaming_transcript");
     const env = parseEnvelope(raw);
-    const data = env?.data?.streaming_transcript ?? (env?.streaming_transcript !== undefined ? env : null);
+    const hasStreaming = env?.streaming_transcript != null;
+    const data = env?.data?.streaming_transcript ?? (hasStreaming ? env : null);
     const text = data?.partial || "";
     const finals = data?.finals || [];
     const full = finals.map((f) => (typeof f === "string" ? f : f?.text || "")).join(" ") + (text ? " " + text : "");
@@ -146,7 +147,10 @@ listen("analysis-done", (e) => {
   const status = e.payload?.status;
   const statusEl = document.getElementById("analyze-status");
   if (statusEl) {
-    const msg = status === "ok" ? "Готово." : status === "error" ? "Ошибка." : String(status ?? "");
+    let msg;
+    if (status === "ok") msg = "Готово.";
+    else if (status === "error") msg = "Ошибка.";
+    else msg = String(status ?? "");
     statusEl.textContent = msg;
   }
   document.getElementById("analyze-btn").disabled = false;
@@ -179,10 +183,7 @@ function loadSessions() {
   const container = document.getElementById("sessions-list");
   const detailBlock = document.getElementById("session-detail");
   detailBlock.style.display = "none";
-  if (!daemonOk) {
-    container.innerHTML = "<p class=\"muted\">Запустите демон.</p>";
-    return;
-  }
+  if (daemonOk) {
   invoke("get_sessions", { limit: 50 })
     .then((raw) => {
       const env = parseEnvelope(raw);
@@ -207,6 +208,9 @@ function loadSessions() {
     .catch((e) => {
       container.innerHTML = "<p class=\"muted\">Ошибка: " + (e?.message || e) + "</p>";
     });
+  } else {
+    container.innerHTML = "<p class=\"muted\">Запустите демон.</p>";
+  }
 }
 
 function showSessionDetail(id) {
@@ -243,10 +247,7 @@ document.getElementById("costs-30d").addEventListener("click", () => loadAnalyti
 
 function loadAnalytics(period) {
   const container = document.getElementById("analytics-content");
-  if (!daemonOk) {
-    container.innerHTML = "<p class=\"muted\">Запустите демон.</p>";
-    return;
-  }
+  if (daemonOk) {
   container.innerHTML = "<p class=\"muted\">Загрузка…</p>";
   invoke("get_analytics", { period })
     .then((raw) => {
@@ -257,14 +258,14 @@ function loadAnalytics(period) {
     .catch((e) => {
       container.innerHTML = "<p class=\"muted\">Ошибка: " + (e?.message || e) + "</p>";
     });
+  } else {
+    container.innerHTML = "<p class=\"muted\">Запустите демон.</p>";
+  }
 }
 
 function loadSettings() {
   const container = document.getElementById("settings-content");
-  if (!daemonOk) {
-    container.textContent = "Запустите демон.";
-    return;
-  }
+  if (daemonOk) {
   invoke("get_settings")
     .then((raw) => {
       const env = parseEnvelope(raw);
@@ -274,6 +275,9 @@ function loadSettings() {
     .catch((e) => {
       container.textContent = "Ошибка: " + (e?.message || e);
     });
+  } else {
+    container.textContent = "Запустите демон.";
+  }
 }
 
 (async () => {

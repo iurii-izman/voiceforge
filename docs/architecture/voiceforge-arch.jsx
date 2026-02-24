@@ -249,17 +249,21 @@ export default function App() {
                 const isOpen = active === node.id;
                 return (
                   <div key={node.id}>
-                    <div
-                      role="button"
-                      tabIndex={0}
+                    <button
+                      type="button"
                       onClick={() => setActive(isOpen ? null : node.id)}
-                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setActive(isOpen ? null : node.id); } }}
                       style={{
                         display: "grid",
+                        border: "none",
+                        margin: 0,
+                        padding: "12px 18px",
+                        font: "inherit",
+                        textAlign: "left",
+                        width: "100%",
+                        boxSizing: "border-box",
                         gridTemplateColumns: "40px 120px 1fr 80px 100px",
                         alignItems: "center",
                         gap: 16,
-                        padding: "12px 18px",
                         background: isOpen ? "#0d1a2d" : "#0a0f1c",
                         border: `1px solid ${isOpen ? st.color + "50" : "#1e293b"}`,
                         borderRadius: 6,
@@ -282,7 +286,7 @@ export default function App() {
                       }}>
                         {st.label}
                       </span>
-                    </div>
+                    </button>
                     {isOpen && (
                       <div style={{
                         background: "#080d19",
@@ -353,12 +357,10 @@ export default function App() {
                 const st = STATUS[layer.status];
                 const isOpen = active === layer.id;
                 return (
-                  <div
+                  <button
                     key={layer.id}
-                    role="button"
-                    tabIndex={0}
+                    type="button"
                     onClick={() => setActive(isOpen ? null : layer.id)}
-                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setActive(isOpen ? null : layer.id); } }}
                     style={{
                       background: "#0a0f1c",
                       border: `1px solid ${isOpen ? st.color + "60" : "#1e293b"}`,
@@ -366,6 +368,11 @@ export default function App() {
                       padding: "16px 20px",
                       cursor: "pointer",
                       transition: "all 0.15s",
+                      textAlign: "left",
+                      font: "inherit",
+                      margin: 0,
+                      width: "100%",
+                      boxSizing: "border-box",
                     }}
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: isOpen ? 12 : 0 }}>
@@ -396,7 +403,7 @@ export default function App() {
                         {layer.commands.length} endpoint{layer.commands.length > 1 ? "s" : ""} · нажми →
                       </div>
                     )}
-                  </div>
+                  </button>
                 );
               })}
             </div>
@@ -506,7 +513,10 @@ export default function App() {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
               {ROADMAP.map(r => {
                 const st = STATUS[r.status];
-                const sym = r.status === "done" ? "✓" : r.status === "alpha2" ? "→" : "○";
+                let sym;
+                if (r.status === "done") sym = "✓";
+                else if (r.status === "alpha2") sym = "→";
+                else sym = "○";
                 return (
                   <div key={r.n} style={{
                     display: "flex", alignItems: "center", gap: 12,
