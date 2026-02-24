@@ -4,7 +4,7 @@
 
 **Обновлено:** 2026-02-24
 
-**Последняя итерация:** Шаг 6: политика smart_trigger по умолчанию зафиксирована в `config-env-contract.md` (default `false` до сбора отзывов; при включении — обновить config и контракт). Ранее выполнены шаги 1–5: (1) стабилизация сборки десктопа в `desktop-build-deps.md` (pkg-config, воспроизводимая последовательность); (2) экспорт из десктопа уже реализован через CLI (Tauri `export_session`); (3) runbook `offline-package.md` (Flatpak/AppImage); (4) runbook `pyannote-version.md` (4.0.4, откат 3.3.2 при OOM); (5) контракт D-Bus — в `config-env-contract.md` добавлена ссылка на `desktop/DBUS.md`.
+**Последняя итерация:** Sonar поблочно: desktop main.js (S3358 nested ternary → if/else, S7735 negated → positive daemonOk), voiceforge-arch.jsx (S6819 role=button → \<button type="button">, S3358 ROADMAP sym → if/else). Коммит+пуш выполнен. Дальше: S3776 (cognitive complexity), S7785 (top-level await), BLOCKER S2083/S3649, или шаги 7–10 (бот, календарь, RAG). Список: `uv run python scripts/sonar_fetch_issues.py`.
 
 ---
 
@@ -54,7 +54,7 @@
 
 ## Рекомендательные приоритетные задачи (что делать дальше)
 
-См. блок **«Следующие 10 шагов по реализации проекта»** выше. Шаги 1–6 выполнены. Ближайшие по приоритету: шаги 7–10 (бот, календарь, RAG, стабилизация) — по мере необходимости.
+См. блок **«Следующие 10 шагов по реализации проекта»** выше. Шаги 1–6 выполнены. Дополнительно: продолжать стабилизацию Sonar — следующий блок (desktop JS, тесты S1244, или рефакторинг S3776); список issues: `uv run python scripts/sonar_fetch_issues.py`. Ближайшие по приоритету: шаги 7–10 (бот, календарь, RAG, стабилизация) — по мере необходимости.
 
 ---
 
