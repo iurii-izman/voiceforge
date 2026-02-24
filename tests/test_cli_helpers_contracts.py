@@ -5,6 +5,8 @@ import sys
 import types
 from types import SimpleNamespace
 
+import pytest
+
 from voiceforge.cli import history_helpers as hh
 from voiceforge.cli import status_helpers as sh
 from voiceforge.core import contracts
@@ -61,7 +63,7 @@ def test_status_helpers_text_and_data(monkeypatch) -> None:
 
     data = sh.get_status_data()
     assert data["ram"] == {"used_gb": 8.0, "total_gb": 16.0, "percent": 50.0}
-    assert data["cost_today_usd"] == 1.234568
+    assert data["cost_today_usd"] == pytest.approx(1.234568)
     assert data["pii_mode"] in ("OFF", "ON", "EMAIL_ONLY")
     assert data["ollama_available"] is True
 

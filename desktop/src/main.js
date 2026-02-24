@@ -50,7 +50,7 @@ async function checkDaemon() {
     setDaemonOk();
     return true;
   } catch (e) {
-    setDaemonOff("Запустите демон: voiceforge daemon");
+    setDaemonOff("Запустите демон: voiceforge daemon. " + (e?.message || ""));
     return false;
   }
 }
@@ -91,7 +91,9 @@ async function updateListenState() {
   try {
     const isListening = await invoke("is_listening");
     applyListenState(isListening);
-  } catch (_) {}
+  } catch (e) {
+    if (e != null) console.debug("updateListenState", e);
+  }
 }
 
 async function pollStreaming() {
@@ -99,12 +101,14 @@ async function pollStreaming() {
   try {
     const raw = await invoke("get_streaming_transcript");
     const env = parseEnvelope(raw);
-    const data = env?.data?.streaming_transcript ?? (typeof env?.streaming_transcript !== "undefined" ? env : null);
+    const data = env?.data?.streaming_transcript ?? (env?.streaming_transcript !== undefined ? env : null);
     const text = data?.partial || "";
     const finals = data?.finals || [];
     const full = finals.map((f) => (typeof f === "string" ? f : f?.text || "")).join(" ") + (text ? " " + text : "");
     document.getElementById("streaming-text").textContent = full || "—";
-  } catch (_) {}
+  } catch (e) {
+    if (e != null) console.debug("pollStreaming", e);
+  }
 }
 
 document.getElementById("retry").addEventListener("click", async () => {
@@ -141,13 +145,16 @@ listen("listen-state-changed", (e) => {
 listen("analysis-done", (e) => {
   const status = e.payload?.status;
   const statusEl = document.getElementById("analyze-status");
-  if (statusEl) statusEl.textContent = status === "ok" ? "Готово." : status === "error" ? "Ошибка." : String(status ?? "");
+  if (statusEl) {
+    const msg = status === "ok" ? "Готово." : status === "error" ? "Ошибка." : String(status ?? "");
+    statusEl.textContent = msg;
+  }
   document.getElementById("analyze-btn").disabled = false;
   if (daemonOk) loadSessions();
 });
 
 document.getElementById("analyze-btn").addEventListener("click", async () => {
-  const seconds = parseInt(document.getElementById("analyze-seconds").value, 10) || 30;
+  const seconds = Number.parseInt(document.getElementById("analyze-seconds").value, 10) || 30;
   const template = document.getElementById("analyze-template").value || null;
   const statusEl = document.getElementById("analyze-status");
   const btn = document.getElementById("analyze-btn");
@@ -163,7 +170,7 @@ document.getElementById("analyze-btn").addEventListener("click", async () => {
       statusEl.textContent = errorMessage(env);
     }
   } catch (e) {
-    statusEl.textContent = "Ошибка: " + (e?.message || e);
+    statusEl.textContent = "Ошибка: " + (e?.message ?? String(e ?? ""));
   }
   btn.disabled = false;
 });
@@ -194,7 +201,7 @@ function loadSessions() {
       html += "</tbody></table>";
       container.innerHTML = html;
       container.querySelectorAll("tr[data-id]").forEach((row) => {
-        row.addEventListener("click", () => showSessionDetail(parseInt(row.dataset.id, 10)));
+        row.addEventListener("click", () => showSessionDetail(Number.parseInt(row.dataset.id, 10)));
       });
     })
     .catch((e) => {

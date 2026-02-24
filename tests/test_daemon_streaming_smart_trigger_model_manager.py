@@ -6,6 +6,7 @@ import json
 from unittest.mock import MagicMock, patch
 
 import numpy as np
+import pytest
 
 
 def test_daemon_get_settings_returns_json_with_expected_keys(tmp_path, monkeypatch) -> None:
@@ -47,7 +48,7 @@ def test_daemon_get_analytics_returns_dict(tmp_path, monkeypatch) -> None:
             out = daemon.get_analytics("7d")
     data = json.loads(out)
     assert "total_cost_usd" in data
-    assert data["total_cost_usd"] == 0.5
+    assert data["total_cost_usd"] == pytest.approx(0.5)
 
 
 def test_smart_trigger_check_returns_false_when_file_missing() -> None:

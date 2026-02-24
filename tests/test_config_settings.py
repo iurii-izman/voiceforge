@@ -11,7 +11,7 @@ def test_settings_defaults_load() -> None:
 
     cfg = Settings()
     assert cfg.ollama_model == "phi3:mini"
-    assert cfg.ring_seconds == 300.0
+    assert cfg.ring_seconds == pytest.approx(300.0)
     assert cfg.pyannote_restart_hours == 2
     assert cfg.live_summary_interval_sec == 90
 
