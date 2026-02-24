@@ -40,7 +40,7 @@
 
 Конкретные следующие шаги для реализации (код в этой сессии не меняется — только документирование):
 
-1. **AppImage:** в `desktop/src-tauri/tauri.conf.json` в `bundle.targets` добавить `"appimage"`. Пример: `"targets": ["deb", "rpm", "appimage"]`. После этого сборка: `cd desktop && npm run build && cargo tauri build` (или отдельная цель для appimage по документации Tauri 2).
+1. **AppImage:** в `desktop/src-tauri/tauri.conf.json` в `bundle.targets` уже есть `"appimage"` (вместе с deb, rpm). Сборка: `cd desktop && npm run build && cargo tauri build` (в окружении с cc/webkit — см. `desktop-build-deps.md`, toolbox). Проверка 2026-02-24: конфиг корректен; в текущей сессии исправлен top-level await в `desktop/src/main.js` для успешного production build фронтенда.
 2. **Flatpak:** создать каталог `desktop/flatpak/` и манифест приложения (описание, SDK, зависимости webkit2gtk/gtk3). Сборка: `flatpak-builder build desktop/flatpak/manifest.yml`; локальный запуск: `flatpak-builder --run build desktop/flatpak/manifest.yml com.voiceforge.app`.
 3. **Воспроизводимость и glibc:** для совместимости со старыми дистрибутивами собирать AppImage в Docker (образ на базе Ubuntu 20.04/22.04) или в GitHub Actions.
 4. При внедрении — обновить этот runbook и при необходимости добавить скрипты в `scripts/`.
