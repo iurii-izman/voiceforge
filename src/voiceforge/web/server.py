@@ -206,157 +206,173 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
             return path.rstrip("/"), {k: v[0] if v else "" for k, v in params.items()}
         return path.rstrip("/") or "/", {}
 
+    def _handle_get_index(self) -> None:
+        self._send_html(_html_index())
+
+    def _handle_get_status(self) -> None:
+        try:
+            from voiceforge.cli.status_helpers import get_status_data
+
+            self._send_json(get_status_data())
+        except Exception as e:
+            self._send_error_json(str(e), 500)
+
+    def _handle_get_sessions(self) -> None:
+        try:
+            from voiceforge.cli.history_helpers import build_sessions_payload
+            from voiceforge.core.transcript_log import TranscriptLog
+
+            log_db = TranscriptLog()
+            try:
+                sessions = log_db.get_sessions(last_n=50)
+                self._send_json(build_sessions_payload(sessions))
+            finally:
+                log_db.close()
+        except Exception as e:
+            self._send_error_json(str(e), 500)
+
+    def _handle_get_session_by_id(self, sid: str) -> None:
+        try:
+            from voiceforge.cli.history_helpers import build_session_detail_payload
+            from voiceforge.core.transcript_log import TranscriptLog
+
+            log_db = TranscriptLog()
+            try:
+                detail = log_db.get_session_detail(int(sid))
+                if detail is None:
+                    self._send_error_json("session not found", 404)
+                    return
+                segments, analysis = detail
+                payload = build_session_detail_payload(int(sid), segments, analysis)
+                self._send_json(payload)
+            finally:
+                log_db.close()
+        except Exception as e:
+            self._send_error_json(str(e), 500)
+
+    def _handle_get_cost(self, params: dict[str, str]) -> None:
+        days_str = (params.get("days") or "30").strip()
+        from_str = params.get("from", "").strip()
+        to_str = params.get("to", "").strip()
+        try:
+            from datetime import date
+
+            from voiceforge.core.metrics import get_stats, get_stats_range
+
+            if from_str and to_str:
+                fd = date.fromisoformat(from_str)
+                td = date.fromisoformat(to_str)
+                if fd > td:
+                    self._send_error_json("from must be <= to", 400)
+                    return
+                data = get_stats_range(fd, td)
+            else:
+                days = max(1, min(365, int(days_str) if days_str.isdigit() else 30))
+                data = get_stats(days=days)
+            self._send_json(
+                {
+                    "total_cost_usd": data.get("total_cost_usd", 0),
+                    "total_calls": data.get("total_calls", 0),
+                    "by_day": data.get("by_day", []),
+                }
+            )
+        except ValueError as e:
+            self._send_error_json("invalid date: " + str(e), 400)
+        except Exception as e:
+            self._send_error_json(str(e), 500)
+
+    def _handle_get_export(self, params: dict[str, str]) -> None:
+        sid_str = params.get("id", "").strip()
+        fmt = (params.get("format", "md") or "md").lower()
+        if not sid_str.isdigit():
+            self._send_error_json("id required and must be numeric", 400)
+            return
+        if fmt not in ("md", "pdf"):
+            self._send_error_json("format must be md or pdf", 400)
+            return
+        session_id = int(sid_str)
+        try:
+            from voiceforge.cli.history_helpers import build_session_markdown, session_not_found_message
+            from voiceforge.core.transcript_log import TranscriptLog
+
+            log_db = TranscriptLog()
+            try:
+                detail = log_db.get_session_detail(session_id)
+                if detail is None:
+                    self._send_error_json(session_not_found_message(session_id), 404)
+                    return
+                segments, analysis = detail
+                md_text = build_session_markdown(session_id, segments, analysis)
+            finally:
+                log_db.close()
+        except Exception as e:
+            self._send_error_json(str(e), 500)
+            return
+        if fmt == "md":
+            self.send_response(200)
+            self.send_header("Content-Type", "text/markdown; charset=utf-8")
+            self.send_header("Content-Disposition", f'attachment; filename="session_{session_id}.md"')
+            self.end_headers()
+            self.wfile.write(md_text.encode("utf-8"))
+            return
+        import os as _os
+        import subprocess  # nosec B404 -- pandoc for PDF export
+        import tempfile
+
+        with tempfile.NamedTemporaryFile(suffix=".md", delete=False) as tmp:
+            tmp.write(md_text.encode("utf-8"))
+            tmp_md = tmp.name
+        out_pdf_path: str | None = None
+        try:
+            with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as out_pdf:
+                out_pdf_path = out_pdf.name
+            if out_pdf_path is None:
+                self._send_error_json("Failed to create temp PDF file.", 500)
+                return
+            subprocess.run(  # nosec B603 B607 -- pandoc from PATH, paths from our request
+                ["pandoc", tmp_md, "-o", out_pdf_path, "--pdf-engine=pdflatex"],
+                check=True,
+                capture_output=True,
+            )
+            self.send_response(200)
+            self.send_header("Content-Type", "application/pdf")
+            self.send_header("Content-Disposition", f'attachment; filename="session_{session_id}.pdf"')
+            self.end_headers()
+            with open(out_pdf_path, "rb") as f:
+                self.wfile.write(f.read())
+        except FileNotFoundError:
+            self._send_error_json("Для PDF установите pandoc и pdflatex.", 501)
+        except subprocess.CalledProcessError:
+            self._send_error_json("Ошибка pandoc при создании PDF.", 500)
+        finally:
+            for p in (tmp_md, out_pdf_path):
+                if p:
+                    with contextlib.suppress(OSError):
+                        _os.unlink(p)
+
     def do_GET(self) -> None:
-        path, _ = self._parse_path()
+        path, params = self._parse_path()
         if path == "/" or path == "/index.html":
-            self._send_html(_html_index())
+            self._handle_get_index()
             return
         if path == "/api/status":
-            try:
-                from voiceforge.cli.status_helpers import get_status_data
-
-                self._send_json(get_status_data())
-            except Exception as e:
-                self._send_error_json(str(e), 500)
+            self._handle_get_status()
             return
         if path == "/api/sessions":
-            try:
-                from voiceforge.cli.history_helpers import build_sessions_payload
-                from voiceforge.core.transcript_log import TranscriptLog
-
-                log_db = TranscriptLog()
-                try:
-                    sessions = log_db.get_sessions(last_n=50)
-                    self._send_json(build_sessions_payload(sessions))
-                finally:
-                    log_db.close()
-            except Exception as e:
-                self._send_error_json(str(e), 500)
+            self._handle_get_sessions()
             return
         if path.startswith("/api/sessions/"):
             sid = path.split("/")[-1]
             if not sid.isdigit():
                 self._send_error_json("invalid session id", 400)
                 return
-            try:
-                from voiceforge.cli.history_helpers import build_session_detail_payload
-                from voiceforge.core.transcript_log import TranscriptLog
-
-                log_db = TranscriptLog()
-                try:
-                    detail = log_db.get_session_detail(int(sid))
-                    if detail is None:
-                        self._send_error_json("session not found", 404)
-                        return
-                    segments, analysis = detail
-                    payload = build_session_detail_payload(int(sid), segments, analysis)
-                    self._send_json(payload)
-                finally:
-                    log_db.close()
-            except Exception as e:
-                self._send_error_json(str(e), 500)
+            self._handle_get_session_by_id(sid)
             return
         if path == "/api/cost":
-            params = self._parse_path()[1]
-            days_str = (params.get("days") or "30").strip()
-            from_str = params.get("from", "").strip()
-            to_str = params.get("to", "").strip()
-            try:
-                from datetime import date
-
-                from voiceforge.core.metrics import get_stats, get_stats_range
-
-                if from_str and to_str:
-                    fd = date.fromisoformat(from_str)
-                    td = date.fromisoformat(to_str)
-                    if fd > td:
-                        self._send_error_json("from must be <= to", 400)
-                        return
-                    data = get_stats_range(fd, td)
-                else:
-                    days = max(1, min(365, int(days_str) if days_str.isdigit() else 30))
-                    data = get_stats(days=days)
-                self._send_json(
-                    {
-                        "total_cost_usd": data.get("total_cost_usd", 0),
-                        "total_calls": data.get("total_calls", 0),
-                        "by_day": data.get("by_day", []),
-                    }
-                )
-            except ValueError as e:
-                self._send_error_json("invalid date: " + str(e), 400)
-            except Exception as e:
-                self._send_error_json(str(e), 500)
+            self._handle_get_cost(params)
             return
         if path == "/api/export":
-            params = self._parse_path()[1]
-            sid_str = params.get("id", "").strip()
-            fmt = (params.get("format", "md") or "md").lower()
-            if not sid_str.isdigit():
-                self._send_error_json("id required and must be numeric", 400)
-                return
-            if fmt not in ("md", "pdf"):
-                self._send_error_json("format must be md or pdf", 400)
-                return
-            session_id = int(sid_str)
-            try:
-                from voiceforge.cli.history_helpers import build_session_markdown, session_not_found_message
-                from voiceforge.core.transcript_log import TranscriptLog
-
-                log_db = TranscriptLog()
-                try:
-                    detail = log_db.get_session_detail(session_id)
-                    if detail is None:
-                        self._send_error_json(session_not_found_message(session_id), 404)
-                        return
-                    segments, analysis = detail
-                    md_text = build_session_markdown(session_id, segments, analysis)
-                finally:
-                    log_db.close()
-            except Exception as e:
-                self._send_error_json(str(e), 500)
-                return
-            if fmt == "md":
-                self.send_response(200)
-                self.send_header("Content-Type", "text/markdown; charset=utf-8")
-                self.send_header("Content-Disposition", f'attachment; filename="session_{session_id}.md"')
-                self.end_headers()
-                self.wfile.write(md_text.encode("utf-8"))
-                return
-            import os as _os
-            import subprocess  # nosec B404 -- pandoc for PDF export
-            import tempfile
-
-            with tempfile.NamedTemporaryFile(suffix=".md", delete=False) as tmp:
-                tmp.write(md_text.encode("utf-8"))
-                tmp_md = tmp.name
-            out_pdf_path: str | None = None
-            try:
-                with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as out_pdf:
-                    out_pdf_path = out_pdf.name
-                if out_pdf_path is None:
-                    self._send_error_json("Failed to create temp PDF file.", 500)
-                    return
-                subprocess.run(  # nosec B603 B607 -- pandoc from PATH, paths from our request
-                    ["pandoc", tmp_md, "-o", out_pdf_path, "--pdf-engine=pdflatex"],
-                    check=True,
-                    capture_output=True,
-                )
-                self.send_response(200)
-                self.send_header("Content-Type", "application/pdf")
-                self.send_header("Content-Disposition", f'attachment; filename="session_{session_id}.pdf"')
-                self.end_headers()
-                with open(out_pdf_path, "rb") as f:
-                    self.wfile.write(f.read())
-            except FileNotFoundError:
-                self._send_error_json("Для PDF установите pandoc и pdflatex.", 501)
-            except subprocess.CalledProcessError:
-                self._send_error_json("Ошибка pandoc при создании PDF.", 500)
-            finally:
-                for p in (tmp_md, out_pdf_path):
-                    if p:
-                        with contextlib.suppress(OSError):
-                            _os.unlink(p)
+            self._handle_get_export(params)
             return
         self.send_error(404, "Not found")
 
@@ -430,6 +446,58 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
             }
         )
 
+    def _handle_post_analyze(self, data: dict[str, Any]) -> None:
+        seconds = int(data.get("seconds", 30))
+        if seconds < 1 or seconds > 600:
+            self._send_error_json("seconds must be 1..600", 400)
+            return
+        template = (data.get("template") or "").strip() or None
+        _VALID_TEMPLATES = ("standup", "sprint_review", "one_on_one", "brainstorm", "interview")
+        if template is not None and template not in _VALID_TEMPLATES:
+            self._send_error_json(f"template must be one of: {', '.join(_VALID_TEMPLATES)}", 400)
+            return
+        try:
+            from voiceforge.core.transcript_log import TranscriptLog
+            from voiceforge.main import run_analyze_pipeline
+
+            display_text, segments_for_log, analysis_for_log = run_analyze_pipeline(seconds, template=template)
+            error_message = None
+            try:
+                from voiceforge.core.contracts import extract_error_message
+
+                error_message = extract_error_message(display_text, legacy_prefix="Ошибка:")
+            except Exception as _e:
+                _log.debug("extract_error_message failed", exc_info=_e)
+            if error_message:
+                self._send_json({"error": error_message, "display_text": display_text}, 200)
+                return
+            session_id = None
+            try:
+                log_db = TranscriptLog()
+                session_id = log_db.log_session(
+                    segments=segments_for_log,
+                    duration_sec=seconds,
+                    model=analysis_for_log.get("model", ""),
+                    questions=analysis_for_log.get("questions"),
+                    answers=analysis_for_log.get("answers"),
+                    recommendations=analysis_for_log.get("recommendations"),
+                    action_items=analysis_for_log.get("action_items"),
+                    cost_usd=analysis_for_log.get("cost_usd", 0.0),
+                    template=analysis_for_log.get("template") or template,
+                )
+                log_db.close()
+            except Exception as _e:
+                _log.debug("log_session/close failed", exc_info=_e)
+            self._send_json(
+                {
+                    "session_id": session_id,
+                    "display_text": display_text,
+                    "analysis": analysis_for_log,
+                }
+            )
+        except Exception as e:
+            self._send_error_json(str(e), 500)
+
     def do_POST(self) -> None:
         path, _ = self._parse_path()
         if path == "/api/analyze":
@@ -440,56 +508,7 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
             except json.JSONDecodeError:
                 self._send_error_json("invalid JSON", 400)
                 return
-            seconds = int(data.get("seconds", 30))
-            if seconds < 1 or seconds > 600:
-                self._send_error_json("seconds must be 1..600", 400)
-                return
-            template = (data.get("template") or "").strip() or None
-            _VALID_TEMPLATES = ("standup", "sprint_review", "one_on_one", "brainstorm", "interview")
-            if template is not None and template not in _VALID_TEMPLATES:
-                self._send_error_json(f"template must be one of: {', '.join(_VALID_TEMPLATES)}", 400)
-                return
-            try:
-                from voiceforge.core.transcript_log import TranscriptLog
-                from voiceforge.main import run_analyze_pipeline
-
-                display_text, segments_for_log, analysis_for_log = run_analyze_pipeline(seconds, template=template)
-                error_message = None
-                try:
-                    from voiceforge.core.contracts import extract_error_message
-
-                    error_message = extract_error_message(display_text, legacy_prefix="Ошибка:")
-                except Exception as _e:
-                    _log.debug("extract_error_message failed", exc_info=_e)
-                if error_message:
-                    self._send_json({"error": error_message, "display_text": display_text}, 200)
-                    return
-                session_id = None
-                try:
-                    log_db = TranscriptLog()
-                    session_id = log_db.log_session(
-                        segments=segments_for_log,
-                        duration_sec=seconds,
-                        model=analysis_for_log.get("model", ""),
-                        questions=analysis_for_log.get("questions"),
-                        answers=analysis_for_log.get("answers"),
-                        recommendations=analysis_for_log.get("recommendations"),
-                        action_items=analysis_for_log.get("action_items"),
-                        cost_usd=analysis_for_log.get("cost_usd", 0.0),
-                        template=analysis_for_log.get("template") or template,
-                    )
-                    log_db.close()
-                except Exception as _e:
-                    _log.debug("log_session/close failed", exc_info=_e)
-                self._send_json(
-                    {
-                        "session_id": session_id,
-                        "display_text": display_text,
-                        "analysis": analysis_for_log,
-                    }
-                )
-            except Exception as e:
-                self._send_error_json(str(e), 500)
+            self._handle_post_analyze(data)
             return
         if path == "/api/action-items/update":
             content_length = int(self.headers.get("Content-Length") or 0)

@@ -198,6 +198,95 @@ def log_llm_call(
         conn.close()
 
 
+def _aggregate_by_model_rows(
+    rows: list, cache_cols: bool, log_key: str = "get_stats_row"
+) -> tuple[list[dict], float, int, list[float]]:
+    """Build by_model list and aggregates from GROUP BY model query rows."""
+    by_model: list[dict] = []
+    total_cost = 0.0
+    total_calls = 0
+    latencies: list[float] = []
+    for row in rows:
+        try:
+            if cache_cols:
+                model, inp, out, cost, avg_lat, cnt, cache_read, cache_cre = row
+            else:
+                model, inp, out, cost, avg_lat, cnt = row
+                cache_read = cache_cre = 0
+        except (ValueError, TypeError) as e:
+            log.warning("metrics.%s_unpack_failed", log_key, error=str(e))
+            continue
+        total_cost += cost or 0
+        total_calls += cnt or 0
+        if avg_lat is not None:
+            latencies.append(avg_lat)
+        entry = {
+            "model": model or "",
+            "input_tokens": inp or 0,
+            "output_tokens": out or 0,
+            "cost_usd": cost or 0,
+            "avg_latency_ms": avg_lat,
+            "calls": cnt or 0,
+        }
+        if cache_cols:
+            entry["cache_read_input_tokens"] = cache_read or 0
+            entry["cache_creation_input_tokens"] = cache_cre or 0
+        by_model.append(entry)
+    return by_model, total_cost, total_calls, latencies
+
+
+def _fetch_cache_stats_since(cursor: sqlite3.Cursor, since: str) -> tuple[int, int]:
+    try:
+        cursor.execute(
+            "SELECT SUM(hit), COUNT(*) FROM response_cache_log WHERE timestamp >= ?",
+            (since,),
+        )
+        row = cursor.fetchone()
+        if row and row[1]:
+            hits = row[0] or 0
+            return (hits, (row[1] or 0) - hits)
+    except sqlite3.OperationalError:
+        pass
+    return 0, 0
+
+
+def _fetch_cache_stats_range(cursor: sqlite3.Cursor, from_ts: str, to_ts: str) -> tuple[int, int]:
+    try:
+        cursor.execute(
+            "SELECT SUM(hit), COUNT(*) FROM response_cache_log WHERE date(timestamp) >= ? AND date(timestamp) <= ?",
+            (from_ts, to_ts),
+        )
+        row = cursor.fetchone()
+        if row and row[1]:
+            hits = row[0] or 0
+            return (hits, (row[1] or 0) - hits)
+    except sqlite3.OperationalError:
+        pass
+    return 0, 0
+
+
+def _build_stats_result(
+    by_model: list[dict],
+    by_day: list[dict],
+    total_cost: float,
+    total_calls: int,
+    latencies: list[float],
+    cache_hits: int,
+    cache_misses: int,
+) -> dict:
+    total_cache = cache_hits + cache_misses
+    return {
+        "by_model": by_model,
+        "by_day": by_day,
+        "total_cost_usd": total_cost,
+        "total_calls": total_calls,
+        "avg_latency_ms": sum(latencies) / len(latencies) if latencies else None,
+        "response_cache_hits": cache_hits,
+        "response_cache_misses": cache_misses,
+        "response_cache_hit_rate": cache_hits / total_cache if total_cache else None,
+    }
+
+
 def get_stats(days: int = 30) -> dict:
     """Return aggregates for the last N days: by model, avg latency, total cost."""
     conn = _get_conn()
@@ -221,65 +310,15 @@ def get_stats(days: int = 30) -> dict:
                 (since,),
             )
             cache_cols = False
-        by_model: list[dict] = []
-        total_cost = 0.0
-        total_calls = 0
-        latencies: list[float] = []
-        for row in cursor.fetchall():
-            try:
-                if cache_cols:
-                    model, inp, out, cost, avg_lat, cnt, cache_read, cache_cre = row
-                else:
-                    model, inp, out, cost, avg_lat, cnt = row
-                    cache_read = cache_cre = 0
-            except (ValueError, TypeError) as e:
-                log.warning("metrics.get_stats_row_unpack_failed", error=str(e))
-                continue
-            total_cost += cost or 0
-            total_calls += cnt or 0
-            if avg_lat is not None:
-                latencies.append(avg_lat)
-            entry = {
-                "model": model or "",
-                "input_tokens": inp or 0,
-                "output_tokens": out or 0,
-                "cost_usd": cost or 0,
-                "avg_latency_ms": avg_lat,
-                "calls": cnt or 0,
-            }
-            if cache_cols:
-                entry["cache_read_input_tokens"] = cache_read or 0
-                entry["cache_creation_input_tokens"] = cache_cre or 0
-            by_model.append(entry)
+        by_model, total_cost, total_calls, latencies = _aggregate_by_model_rows(cursor.fetchall(), cache_cols, "get_stats_row")
         cursor.execute(
             "SELECT date(timestamp) as d, SUM(cost_usd), COUNT(*) FROM llm_calls "
             "WHERE timestamp >= ? AND success = 1 GROUP BY d ORDER BY d",
             (since,),
         )
         by_day = [{"date": r[0], "cost_usd": r[1] or 0, "calls": r[2] or 0} for r in cursor.fetchall()]
-        cache_hits = cache_misses = 0
-        try:
-            cursor.execute(
-                "SELECT SUM(hit), COUNT(*) FROM response_cache_log WHERE timestamp >= ?",
-                (since,),
-            )
-            row = cursor.fetchone()
-            if row and row[1]:
-                cache_hits = row[0] or 0
-                cache_misses = (row[1] or 0) - cache_hits
-        except sqlite3.OperationalError:
-            pass
-        total_cache = cache_hits + cache_misses
-        return {
-            "by_model": by_model,
-            "by_day": by_day,
-            "total_cost_usd": total_cost,
-            "total_calls": total_calls,
-            "avg_latency_ms": sum(latencies) / len(latencies) if latencies else None,
-            "response_cache_hits": cache_hits,
-            "response_cache_misses": cache_misses,
-            "response_cache_hit_rate": cache_hits / total_cache if total_cache else None,
-        }
+        cache_hits, cache_misses = _fetch_cache_stats_since(cursor, since)
+        return _build_stats_result(by_model, by_day, total_cost, total_calls, latencies, cache_hits, cache_misses)
     finally:
         conn.close()
 
@@ -308,64 +347,16 @@ def get_stats_range(from_date: date, to_date: date) -> dict:
                 (from_ts, to_ts),
             )
             cache_cols = False
-        by_model = []
-        total_cost = 0.0
-        total_calls = 0
-        latencies: list[float] = []
-        for row in cursor.fetchall():
-            try:
-                if cache_cols:
-                    model, inp, out, cost, avg_lat, cnt, cache_read, cache_cre = row
-                else:
-                    model, inp, out, cost, avg_lat, cnt = row
-                    cache_read = cache_cre = 0
-            except (ValueError, TypeError) as e:
-                log.warning("metrics.get_stats_range_row_unpack_failed", error=str(e))
-                continue
-            total_cost += cost or 0
-            total_calls += cnt or 0
-            if avg_lat is not None:
-                latencies.append(avg_lat)
-            entry = {
-                "model": model or "",
-                "input_tokens": inp or 0,
-                "output_tokens": out or 0,
-                "cost_usd": cost or 0,
-                "avg_latency_ms": avg_lat,
-                "calls": cnt or 0,
-            }
-            if cache_cols:
-                entry["cache_read_input_tokens"] = cache_read or 0
-                entry["cache_creation_input_tokens"] = cache_cre or 0
-            by_model.append(entry)
+        by_model, total_cost, total_calls, latencies = _aggregate_by_model_rows(
+            cursor.fetchall(), cache_cols, "get_stats_range_row"
+        )
         cursor.execute(
             "SELECT date(timestamp) as d, SUM(cost_usd), COUNT(*) FROM llm_calls "
             "WHERE date(timestamp) >= ? AND date(timestamp) <= ? AND success = 1 GROUP BY d ORDER BY d",
             (from_ts, to_ts),
         )
         by_day = [{"date": r[0], "cost_usd": r[1] or 0, "calls": r[2] or 0} for r in cursor.fetchall()]
-        cache_hits = cache_misses = 0
-        try:
-            cursor.execute(
-                "SELECT SUM(hit), COUNT(*) FROM response_cache_log WHERE date(timestamp) >= ? AND date(timestamp) <= ?",
-                (from_ts, to_ts),
-            )
-            row = cursor.fetchone()
-            if row and row[1]:
-                cache_hits = row[0] or 0
-                cache_misses = (row[1] or 0) - cache_hits
-        except sqlite3.OperationalError:
-            pass
-        total_cache = cache_hits + cache_misses
-        return {
-            "by_model": by_model,
-            "by_day": by_day,
-            "total_cost_usd": total_cost,
-            "total_calls": total_calls,
-            "avg_latency_ms": sum(latencies) / len(latencies) if latencies else None,
-            "response_cache_hits": cache_hits,
-            "response_cache_misses": cache_misses,
-            "response_cache_hit_rate": cache_hits / total_cache if total_cache else None,
-        }
+        cache_hits, cache_misses = _fetch_cache_stats_range(cursor, from_ts, to_ts)
+        return _build_stats_result(by_model, by_day, total_cost, total_calls, latencies, cache_hits, cache_misses)
     finally:
         conn.close()

@@ -290,6 +290,43 @@ def _analysis_prompt(
     ]
 
 
+def _content_from_llm_response(raw: Any, model_id: str) -> tuple[str, str]:
+    """Extract content and raw_content from completion response. Raises if no choices."""
+    choices = getattr(raw, "choices", None) or []
+    if not choices:
+        raise RuntimeError("LLM returned empty choices")
+    first = choices[0]
+    message = getattr(first, "message", None)
+    raw_content = (getattr(message, "content", None) or "") if message is not None else ""
+    if not raw_content.strip():
+        log.warning("llm.empty_response", model=model_id)
+    return (raw_content or "{}", raw_content)
+
+
+def _usage_and_cost_from_response(raw: Any, model_id: str) -> tuple[int, int, int, int, float]:
+    """Extract input_tokens, output_tokens, cache_read, cache_creation, cost_usd from response."""
+    u = getattr(raw, "usage", None)
+    inp = (getattr(u, "input_tokens", None) or getattr(u, "prompt_tokens", None) or 0) if u else 0
+    out = (getattr(u, "output_tokens", None) or getattr(u, "completion_tokens", None) or 0) if u else 0
+    cache_read = 0
+    cache_creation = 0
+    if u:
+        details = getattr(u, "prompt_tokens_details", None)
+        if details is not None:
+            cache_read = int(getattr(details, "cached_tokens", 0) or 0)
+        cache_creation = int(getattr(u, "cache_creation_input_tokens", 0) or 0)
+    try:
+        from litellm import completion_cost
+
+        cost = float(completion_cost(completion_response=raw, model=model_id) or 0)
+    except Exception as e:
+        log.warning("llm.cost_calculation_failed", error=str(e), model=model_id)
+        cost = 0.0
+        if hasattr(raw, "_hidden_params") and isinstance(raw._hidden_params, dict):
+            cost = float(raw._hidden_params.get("response_cost") or 0)
+    return (inp, out, cache_read, cache_creation, cost)
+
+
 def complete_structured(
     prompt: list[dict[str, Any]],
     response_model: type[TModel],
@@ -298,12 +335,10 @@ def complete_structured(
     """Call LLM with fallbacks; return (validated Pydantic model, cost_usd)."""
     from voiceforge.core.metrics import log_llm_call, log_response_cache
 
-    query = (prompt[-1].get("content") or "") if prompt else ""
     log_response_cache(False)
-
     set_env_keys_from_keyring()
     try:
-        from litellm import completion, completion_cost
+        from litellm import completion
     except ImportError as e:
         raise ImportError("Install [llm] extras: uv sync --extra llm") from e
 
@@ -316,17 +351,10 @@ def complete_structured(
         max_tokens=1024,
         response_format=response_model,
     )
-    choices = getattr(raw, "choices", None) or []
-    if not choices:
-        raise RuntimeError("LLM returned empty choices")
-    first = choices[0]
-    message = getattr(first, "message", None)
-    raw_content = (getattr(message, "content", None) or "") if message is not None else ""
-    if not raw_content.strip():
-        log.warning("llm.empty_response", model=model_id)
-    content = raw_content or "{}"
+    content, raw_content = _content_from_llm_response(raw, model_id)
     try:
         parsed = response_model.model_validate_json(content)
+        raw_used = raw
     except Exception as parse_err:
         log.warning("llm.invalid_json_retry", model=model_id, error=str(parse_err))
         raw = completion(
@@ -336,51 +364,16 @@ def complete_structured(
             max_tokens=1024,
             response_format=response_model,
         )
-        choices = getattr(raw, "choices", None) or []
-        if not choices:
-            raise RuntimeError("LLM retry returned empty choices") from parse_err
-        first = choices[0]
-        message = getattr(first, "message", None)
-        raw_content = (getattr(message, "content", None) or "") if message else ""
-        content = raw_content or "{}"
+        content, raw_content = _content_from_llm_response(raw, model_id)
         parsed = response_model.model_validate_json(content)
-    # Detect all-empty structured response (LLM returned nothing useful)
+        raw_used = raw
+
     model_fields = getattr(response_model, "model_fields", None)
-    if isinstance(model_fields, dict):
-        all_empty = all(not getattr(parsed, field_name, None) for field_name in model_fields)
-        if all_empty and not raw_content.strip():
-            log.warning("llm.empty_structured_response", model=model_id)
-    u = getattr(raw, "usage", None)
-    inp = (getattr(u, "input_tokens", None) or getattr(u, "prompt_tokens", None) or 0) if u else 0
-    out = (getattr(u, "output_tokens", None) or getattr(u, "completion_tokens", None) or 0) if u else 0
-    cache_read = 0
-    cache_creation = 0
-    if u:
-        details = getattr(u, "prompt_tokens_details", None)
-        if details is not None:
-            cache_read = int(getattr(details, "cached_tokens", 0) or 0)
-        cache_creation = int(getattr(u, "cache_creation_input_tokens", 0) or 0)
-    try:
-        cost = float(completion_cost(completion_response=raw, model=model_id) or 0)
-    except Exception as e:
-        log.warning("llm.cost_calculation_failed", error=str(e), model=model_id)
-        cost = 0.0
-        if hasattr(raw, "_hidden_params") and isinstance(raw._hidden_params, dict):
-            cost = float(raw._hidden_params.get("response_cost") or 0)
+    if isinstance(model_fields, dict) and all(not getattr(parsed, f, None) for f in model_fields) and not raw_content.strip():
+        log.warning("llm.empty_structured_response", model=model_id)
+
+    inp, out, cache_read, cache_creation, cost = _usage_and_cost_from_response(raw_used, model_id)
     if cache_read > 0 or cache_creation > 0:
-        log.info(
-            "llm.cache",
-            model=model_id,
-            cache_read_input_tokens=cache_read,
-            cache_creation_input_tokens=cache_creation,
-        )
-    log_llm_call(
-        model_id,
-        inp,
-        out,
-        cost,
-        cache_read_input_tokens=cache_read,
-        cache_creation_input_tokens=cache_creation,
-    )
-    _ = query
+        log.info("llm.cache", model=model_id, cache_read_input_tokens=cache_read, cache_creation_input_tokens=cache_creation)
+    log_llm_call(model_id, inp, out, cost, cache_read_input_tokens=cache_read, cache_creation_input_tokens=cache_creation)
     return (parsed, cost)

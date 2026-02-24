@@ -17,11 +17,12 @@ import structlog
 import typer
 
 from voiceforge.cli.history_helpers import (
-    build_session_detail_payload,
     build_session_markdown,
-    build_sessions_payload,
-    render_session_detail_lines,
-    render_sessions_table_lines,
+    history_action_items_result,
+    history_date_range_result,
+    history_list_result,
+    history_search_result,
+    history_session_detail_result,
     session_not_found_message,
 )
 from voiceforge.cli.status_helpers import (
@@ -934,6 +935,32 @@ def export_session(
         raise SystemExit(1) from e
 
 
+def _history_echo(kind: str, data: Any, exit_on_error: bool = True) -> None:
+    """Emit history command output from (kind, data) returned by history_helpers."""
+    if kind == "error":
+        if isinstance(data, tuple):
+            key, kwargs = data
+            typer.echo(t(key, **kwargs), err=True)
+        else:
+            typer.echo(t(data) if isinstance(data, str) and data.startswith("history.") else data, err=True)
+        if exit_on_error:
+            raise SystemExit(1)
+        return
+    if kind == "message":
+        typer.echo(t(data))
+        return
+    if kind == "json":
+        typer.echo(json.dumps(_cli_success_payload(data), ensure_ascii=False))
+        return
+    if kind == "lines":
+        for line in data:
+            typer.echo(line)
+        return
+    if kind == "md":
+        typer.echo(data)
+        return
+
+
 @app.command()
 def history(
     session_id: int | None = typer.Option(None, "--id", help="Показать детали сессии"),
@@ -946,134 +973,37 @@ def history(
     action_items: bool = typer.Option(False, "--action-items", help="Список action items по сессиям (cross-session)"),
 ) -> None:
     """Show recent sessions or one detailed session."""
-    from datetime import date as date_type
-
     from voiceforge.core.transcript_log import TranscriptLog
 
+    if output == "md" and session_id is None:
+        typer.echo(t("history.md_requires_id"), err=True)
+        raise SystemExit(1)
     log_db = TranscriptLog()
     try:
-        if output == "md" and session_id is None:
-            typer.echo(t("history.md_requires_id"), err=True)
-            raise SystemExit(1)
         if action_items:
-            items = log_db.get_action_items(limit=100)
-            if output == "json":
-                typer.echo(
-                    json.dumps(
-                        _cli_success_payload(
-                            {
-                                "action_items": [
-                                    {
-                                        "session_id": r.session_id,
-                                        "idx": r.idx_in_analysis,
-                                        "description": r.description,
-                                        "assignee": r.assignee,
-                                        "deadline": r.deadline,
-                                        "status": r.status,
-                                    }
-                                    for r in items
-                                ]
-                            }
-                        ),
-                        ensure_ascii=False,
-                    )
-                )
-            else:
-                if not items:
-                    typer.echo(t("history.no_action_items"))
-                else:
-                    for r in items:
-                        assign = f" ({r.assignee})" if r.assignee else ""
-                        typer.echo(f"  [{r.session_id}] #{r.idx_in_analysis} {r.status}: {r.description}{assign}")
+            _history_echo(*history_action_items_result(log_db, output))
             return
         if search is not None:
-            hits = log_db.search_transcripts(search.strip(), limit=30)
-            if output == "json":
-                typer.echo(
-                    json.dumps(
-                        _cli_success_payload(
-                            {
-                                "query": search,
-                                "hits": [
-                                    {"session_id": s, "start_sec": st, "end_sec": e, "snippet": sn} for s, _tx, st, e, sn in hits
-                                ],
-                            }
-                        ),
-                        ensure_ascii=False,
-                    )
-                )
-            else:
-                if not hits:
-                    typer.echo(t("history.no_results"))
-                    return
-                for sid, _text, start_sec, _end_sec, snippet in hits:
-                    typer.echo(f"session_id={sid} | {start_sec:.1f}s | {snippet}")
+            _history_echo(*history_search_result(log_db, search, output))
             return
         if date is not None or (from_date is not None and to_date is not None):
-            try:
-                if date is not None:
-                    if from_date or to_date:
-                        typer.echo(t("history.date_or_range"), err=True)
-                        raise SystemExit(1)
-                    day = date_type.fromisoformat(date)
-                    sessions = log_db.get_sessions_for_date(day)
-                else:
-                    fd = date_type.fromisoformat(from_date)
-                    td = date_type.fromisoformat(to_date)
-                    if fd > td:
-                        typer.echo(t("history.from_after_to"), err=True)
-                        raise SystemExit(1)
-                    sessions = log_db.get_sessions_in_range(fd, td)
-            except ValueError as e:
-                typer.echo(t("history.date_invalid", err=str(e)), err=True)
-                raise SystemExit(1) from e
-            if output == "json":
-                typer.echo(json.dumps(_cli_success_payload(build_sessions_payload(sessions)), ensure_ascii=False))
+            kind, data = history_date_range_result(log_db, date, from_date, to_date, output)
+            if kind == "error":
+                _history_echo(kind, data)
             else:
-                if not sessions:
-                    typer.echo(t("history.no_sessions_period"))
-                else:
-                    for line in render_sessions_table_lines(sessions):
-                        typer.echo(line)
+                _history_echo(kind, data, exit_on_error=False)
             return
         if session_id is not None:
-            detail = log_db.get_session_detail(session_id)
-            if detail is None:
-                message = session_not_found_message(session_id)
+            kind, data = history_session_detail_result(log_db, session_id, output)
+            if kind == "error":
                 if output == "json":
-                    typer.echo(json.dumps(_cli_error_payload("SESSION_NOT_FOUND", message), ensure_ascii=False))
+                    typer.echo(json.dumps(_cli_error_payload("SESSION_NOT_FOUND", data), ensure_ascii=False))
                 else:
-                    typer.echo(message, err=True)
+                    typer.echo(data, err=True)
                 raise SystemExit(1)
-            segments, analysis = detail
-            if output == "json":
-                typer.echo(
-                    json.dumps(
-                        _cli_success_payload(build_session_detail_payload(session_id, segments, analysis)), ensure_ascii=False
-                    )
-                )
-                return
-            if output == "md":
-                meta = log_db.get_session_meta(session_id)
-                started_at = meta[0] if meta else None
-                typer.echo(build_session_markdown(session_id, segments, analysis, started_at=started_at))
-                return
-            for line in render_session_detail_lines(session_id, segments, analysis):
-                typer.echo(line)
+            _history_echo(kind, data, exit_on_error=False)
             return
-
-        sessions = log_db.get_sessions(last_n=last_n)
-        if not sessions:
-            if output == "json":
-                typer.echo(json.dumps(_cli_success_payload({"sessions": []}), ensure_ascii=False))
-            else:
-                typer.echo(t("history.no_sessions"))
-        else:
-            if output == "json":
-                typer.echo(json.dumps(_cli_success_payload(build_sessions_payload(sessions)), ensure_ascii=False))
-            else:
-                for line in render_sessions_table_lines(sessions):
-                    typer.echo(line)
+        _history_echo(*history_list_result(log_db, last_n, output))
     finally:
         log_db.close()
 

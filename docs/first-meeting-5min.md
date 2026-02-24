@@ -6,7 +6,7 @@
 
 ```bash
 ./scripts/bootstrap.sh
-uv run voiceforge status
+uv run voiceforge status   # или voiceforge doctor — полная диагностика окружения
 ```
 
 Ключи API хранятся в **keyring** (сервис `voiceforge`):

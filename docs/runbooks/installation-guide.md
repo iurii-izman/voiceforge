@@ -87,6 +87,7 @@ sudo dnf install -y pipewire-utils
 
 ```bash
 ./scripts/check-desktop-deps.sh
+uv run voiceforge status   # или voiceforge doctor — диагностика конфига, keyring, RAG, Ollama
 ```
 
 Если все проверки [OK] — можно собирать десктоп и запускать CLI/демон **только из этого контейнера**. На хосте больше ничего для VoiceForge ставить не нужно.
@@ -130,8 +131,8 @@ sudo dnf install -y pipewire-utils
   cd desktop && npm run tauri build
   ```
   Эквивалент: `cd desktop && npm run build && cargo tauri build`.
-- **Где запускать приложение:** собранный бинарник лежит в `desktop/src-tauri/target/release/bundle/` (поддиректория зависит от формата: deb, appimage и т.д.). Запускать можно **на хосте** или в том же toolbox — нужна одна и та же D-Bus сессия, что и у демона (см. ниже).
-- **Удобный запуск:** добавить в PATH путь к бинарнику или создать ярлык на исполняемый файл из `bundle/`.
+- **Где запускать приложение:** собранный бинарник — `desktop/src-tauri/target/release/voiceforge-desktop`; пакеты (.rpm, .deb) — в `desktop/src-tauri/target/release/bundle/rpm/` и `bundle/deb/`. Запускать можно **на хосте** или в том же toolbox — нужна одна и та же D-Bus сессия, что и у демона (см. ниже).
+- **Запуск без установки:** `./desktop/src-tauri/target/release/voiceforge-desktop` (из корня репо). Или установить пакет: Fedora — `sudo dnf install desktop/src-tauri/target/release/bundle/rpm/VoiceForge-*.rpm`; Debian/Ubuntu — `sudo dpkg -i desktop/.../bundle/deb/VoiceForge_*.deb`. Подробнее: [desktop-build-deps.md](desktop-build-deps.md) (раздел «Установка и запуск после сборки»).
 
 ---
 
@@ -183,3 +184,4 @@ sudo dnf install -y pipewire-utils
 - [quickstart.md](quickstart.md) — быстрые шаги по первой встрече
 - [desktop-build-deps.md](desktop-build-deps.md) — зависимости и проверка окружения для сборки десктопа
 - [config-env-contract.md](config-env-contract.md) — переменные и keyring
+- [pyannote-version.md](pyannote-version.md) — при OOM или падениях диаризации (откат на 3.3.2)

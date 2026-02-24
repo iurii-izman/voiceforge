@@ -4,7 +4,22 @@
 
 **Обновлено:** 2026-02-24
 
-**Последняя итерация:** S3776 — history_helpers (_format_transcript_segment_lines), indexer (_sections_to_new_chunks), main (run_analyze_pipeline, run_live_summary, action_items_update, index, _service_unit_path, _format_template_result). Коммит daf3293, пуш в main.
+**Последняя итерация:** S3776 добит: main (history → _history_echo + history_*_result в history_helpers), web/server (do_GET/do_POST → _handle_get_* / _handle_post_*), core/metrics (_aggregate_by_model_rows, _fetch_cache_stats_*, _build_stats_result), llm/router (_content_from_llm_response, _usage_and_cost_from_response). Блок 2: installation-guide и first-meeting-5min — добавлен doctor; Dependabot (1 moderate) — проверить вручную в GitHub.
+
+---
+
+## План на следующие 4 блока (недоделанное + критичное)
+
+Составлен по анализу next-iteration-focus, roadmap-priority, development-plan и кода.
+
+| Блок | Название | Содержание | Критичность |
+|------|----------|------------|-------------|
+| **1** | **Sonar S3776 — добить** | ~~Оставшиеся 4 места~~ — сделано: main (history), web/server (do_GET/do_POST), core/metrics, llm/router. | Закрыто. |
+| **2** | **Стабилизация и документация** | installation-guide и first-meeting-5min обновлены (doctor); Dependabot (1 moderate) — проверить вручную в GitHub; при необходимости — перевод ключевых runbook на английский. | Частично: доки обновлены. |
+| **3** | **Качество и консистентность** | installation-guide → pyannote-version; desktop-build-deps → pyannote при OOM. При необходимости — дописать e2e/дымовые; D-Bus без доп. работ. | Частично: перекрёстные ссылки добавлены. |
+| **4** | **Следующий продуктовый шаг** | Один из пунктов roadmap 16–18 или стабилизация 14: **Бот (Telegram/Slack)** — ADR + черновик архитектуры; **Календарь** — исследование CalDAV/триггер «встреча началась»; **RAG (ODT/RTF)** — поддержка в индексаторе; **Офлайн-пакет** — продвинуть offline-package.md (Flatpak/AppImage). Выбор по приоритету команды. | По желанию: расширение сценариев. |
+
+**Порядок выполнения:** 1 → 2 → 3 → 4 (либо 2 раньше 1, если важнее доки и безопасность).
 
 ---
 
@@ -14,9 +29,8 @@
 
 **Блок A:** ~~S7785~~. **Блок B:** ~~S2083, S3649~~ (NOSONAR). **Блок D:** ~~S5713, S2737~~.
 
-**Блок C — S3776 (осталось):**
-- Сделано: pipeline, transcript_log, daemon, llm/router, status_helpers, dbus_service, history_helpers, rag/indexer; main (164 run_analyze_pipeline, 252 run_live_summary, 547 action_items_update, 633 index, 754 _service_unit_path, 86 _format_template_result).
-- Осталось: main.py:893 (cli 82), web/server.py:209/433, core/metrics.py:201/287, llm/router.py:293.
+**Блок C — S3776:** закрыт.
+- Сделано: main (history → _history_echo + history_*_result в history_helpers), web/server (_handle_get_* / _handle_post_*), core/metrics (_aggregate_by_model_rows, _fetch_cache_stats_*, _build_stats_result), llm/router (_content_from_llm_response, _usage_and_cost_from_response).
 
 ---
 
@@ -66,7 +80,7 @@
 
 ## Рекомендательные приоритетные задачи (что делать дальше)
 
-См. блок **«Следующие 10 шагов по реализации проекта»** и **«Блоки Sonar (актуально)»** выше. Шаги 1–6 выполнены. Ближайшие по Sonar: блок A (S7785), блок B (BLOCKER при необходимости), блок C (S3776 по файлам). По roadmap: шаги 7–10 (бот, календарь, RAG, стабилизация) — по мере необходимости.
+См. **«План на следующие 4 блока»** выше — там приоритет: Sonar S3776 (добить) → стабилизация и документация → качество и консистентность → следующий продуктовый шаг (бот/календарь/RAG/офлайн-пакет). Плюс блок **«Блоки Sonar (актуально)»** и **«Следующие 10 шагов»** для деталей.
 
 ---
 

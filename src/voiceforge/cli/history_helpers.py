@@ -140,3 +140,107 @@ def render_sessions_table_lines(sessions: list[object]) -> list[str]:
             f"  {getattr(s, 'id', 0):<3} {started}  {getattr(s, 'duration_sec', 0.0):>6.1f}s  {getattr(s, 'segments_count', 0)}"
         )
     return lines
+
+
+# --- History command result builders (return (kind, data) for main.history to echo) ---
+
+
+def history_action_items_result(log_db: Any, output: str) -> tuple[str, Any]:
+    """Return ("json", payload) | ("lines", list[str]) | ("message", i18n_key)."""
+    items = log_db.get_action_items(limit=100)
+    if output == "json":
+        payload = {
+            "action_items": [
+                {
+                    "session_id": r.session_id,
+                    "idx": r.idx_in_analysis,
+                    "description": r.description,
+                    "assignee": r.assignee,
+                    "deadline": r.deadline,
+                    "status": r.status,
+                }
+                for r in items
+            ]
+        }
+        return ("json", payload)
+    if not items:
+        return ("message", "history.no_action_items")
+    lines = []
+    for r in items:
+        assign = f" ({r.assignee})" if r.assignee else ""
+        lines.append(f"  [{r.session_id}] #{r.idx_in_analysis} {r.status}: {r.description}{assign}")
+    return ("lines", lines)
+
+
+def history_search_result(log_db: Any, search: str, output: str) -> tuple[str, Any]:
+    """Return ("json", payload) | ("lines", list[str]) | ("message", i18n_key)."""
+    hits = log_db.search_transcripts(search.strip(), limit=30)
+    if output == "json":
+        payload = {
+            "query": search,
+            "hits": [{"session_id": s, "start_sec": st, "end_sec": e, "snippet": sn} for s, _tx, st, e, sn in hits],
+        }
+        return ("json", payload)
+    if not hits:
+        return ("message", "history.no_results")
+    lines = [f"session_id={sid} | {start_sec:.1f}s | {snippet}" for sid, _text, start_sec, _end_sec, snippet in hits]
+    return ("lines", lines)
+
+
+def history_date_range_result(
+    log_db: Any,
+    date_str: str | None,
+    from_str: str | None,
+    to_str: str | None,
+    output: str,
+) -> tuple[str, Any]:
+    """Return ("json", payload) | ("lines", list) | ("message", i18n_key) | ("error", i18n_key)."""
+    from datetime import date as date_type
+
+    if date_str is not None:
+        if from_str or to_str:
+            return ("error", "history.date_or_range")
+        try:
+            day = date_type.fromisoformat(date_str)
+        except ValueError as e:
+            return ("error", ("history.date_invalid", {"err": str(e)}))
+        sessions = log_db.get_sessions_for_date(day)
+    else:
+        try:
+            fd = date_type.fromisoformat(from_str or "")
+            td = date_type.fromisoformat(to_str or "")
+        except ValueError as e:
+            return ("error", ("history.date_invalid", {"err": str(e)}))
+        if fd > td:
+            return ("error", "history.from_after_to")
+        sessions = log_db.get_sessions_in_range(fd, td)
+    if output == "json":
+        return ("json", build_sessions_payload(sessions))
+    if not sessions:
+        return ("message", "history.no_sessions_period")
+    return ("lines", render_sessions_table_lines(sessions))
+
+
+def history_session_detail_result(log_db: Any, session_id: int, output: str) -> tuple[str, Any]:
+    """Return ("json", payload) | ("lines", list) | ("md", str) | ("error", msg_or_key)."""
+    detail = log_db.get_session_detail(session_id)
+    if detail is None:
+        return ("error", session_not_found_message(session_id))
+    segments, analysis = detail
+    if output == "json":
+        return ("json", build_session_detail_payload(session_id, segments, analysis))
+    if output == "md":
+        meta = log_db.get_session_meta(session_id)
+        started_at = meta[0] if meta else None
+        return ("md", build_session_markdown(session_id, segments, analysis, started_at=started_at))
+    return ("lines", render_session_detail_lines(session_id, segments, analysis))
+
+
+def history_list_result(log_db: Any, last_n: int, output: str) -> tuple[str, Any]:
+    """Return ("json", payload) | ("lines", list) | ("message", i18n_key)."""
+    sessions = log_db.get_sessions(last_n=last_n)
+    if output == "json":
+        return ("json", build_sessions_payload(sessions) if sessions else empty_sessions_payload())
+    if not sessions:
+        return ("message", "history.no_sessions")
+    return ("lines", render_sessions_table_lines(sessions))
