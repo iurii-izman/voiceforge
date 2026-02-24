@@ -4,7 +4,7 @@
 
 **Обновлено:** 2026-02-24
 
-**Последняя итерация:** Перепроверка Sonar: NOSONAR на нужных строках (S2083, S5713); S3776 — daemon (_streaming_language_hint), status_helpers (_format_stats_block, _doctor_check_*), dbus_service (_analyze_result_is_error, _analyze_ipc_return), history_helpers (_format_analysis_block), rag/indexer (_add_texts_legacy_reindex). Коммит 14eb4e1, пуш в main.
+**Последняя итерация:** S3776 — history_helpers (_format_transcript_segment_lines), indexer (_sections_to_new_chunks), main (run_analyze_pipeline, run_live_summary, action_items_update, index, _service_unit_path, _format_template_result). Коммит daf3293, пуш в main.
 
 ---
 
@@ -15,8 +15,8 @@
 **Блок A:** ~~S7785~~. **Блок B:** ~~S2083, S3649~~ (NOSONAR). **Блок D:** ~~S5713, S2737~~.
 
 **Блок C — S3776 (осталось):**
-- Сделано: pipeline, transcript_log, daemon, llm/router, status_helpers, dbus_service, history_helpers, rag/indexer.
-- Осталось: main.py (86, 164, 252, 547, 754, 633, 893), web/server.py:209/433, core/metrics.py:201/287, llm/router.py:293 (complete_structured/run_structured).
+- Сделано: pipeline, transcript_log, daemon, llm/router, status_helpers, dbus_service, history_helpers, rag/indexer; main (164 run_analyze_pipeline, 252 run_live_summary, 547 action_items_update, 633 index, 754 _service_unit_path, 86 _format_template_result).
+- Осталось: main.py:893 (cli 82), web/server.py:209/433, core/metrics.py:201/287, llm/router.py:293.
 
 ---
 
