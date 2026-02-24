@@ -4,25 +4,19 @@
 
 **Обновлено:** 2026-02-24
 
-**Последняя итерация:** Sonar A–D: S7785 (top-level await), BLOCKER NOSONAR (S2083, S3649), S5713/S2737 (local_llm, indexer), S3776 частично (pipeline, transcript_log, daemon, llm/router). Коммит edb5f49, пуш в main.
+**Последняя итерация:** Перепроверка Sonar: NOSONAR на нужных строках (S2083, S5713); S3776 — daemon (_streaming_language_hint), status_helpers (_format_stats_block, _doctor_check_*), dbus_service (_analyze_result_is_error, _analyze_ipc_return), history_helpers (_format_analysis_block), rag/indexer (_add_texts_legacy_reindex). Коммит 14eb4e1, пуш в main.
 
 ---
 
-## Блоки Sonar (актуально, после итерации 2026-02-24)
+## Блоки Sonar (актуально)
 
 Список: `uv run python scripts/sonar_fetch_issues.py`.
 
-**Блок A — JS/JSX:** ~~desktop/main.js:283 S7785~~ — исправлено (top-level await, type=module уже был).
+**Блок A:** ~~S7785~~. **Блок B:** ~~S2083, S3649~~ (NOSONAR). **Блок D:** ~~S5713, S2737~~.
 
-**Блок B — BLOCKER:** ~~main.py:543 S2083~~, ~~transcript_log.py:78 S3649~~ — NOSONAR (путь под home; SQL из миграций).
-
-**Блок C — S3776 Cognitive Complexity (осталось по файлам):**
-- Сделано: pipeline.py, transcript_log.py (_insert_action_items), daemon.py (_streaming_loop), llm/router.py (analyze_meeting).
-- Осталось: history_helpers.py:74 (44→15), status_helpers.py:69/108, dbus_service.py:168, router.py:275, main.py (86, 164, 252, 547, 754, 633, 893), web/server.py:209/433, core/metrics.py:201/287, rag/indexer.py:140.
-
-**Блок D — прочее:** ~~local_llm.py S5713~~ (NOSONAR), ~~rag/indexer.py:252 S2737~~ (удалён пустой except).
-
-**Рекомендуемый порядок:** продолжать C по одному файлу (history_helpers, status_helpers, затем main.py и т.д.).
+**Блок C — S3776 (осталось):**
+- Сделано: pipeline, transcript_log, daemon, llm/router, status_helpers, dbus_service, history_helpers, rag/indexer.
+- Осталось: main.py (86, 164, 252, 547, 754, 633, 893), web/server.py:209/433, core/metrics.py:201/287, llm/router.py:293 (complete_structured/run_structured).
 
 ---
 
