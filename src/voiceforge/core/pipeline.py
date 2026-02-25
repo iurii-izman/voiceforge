@@ -134,15 +134,17 @@ def _step2_diarization(
 
 
 def _step2_rag(transcript: str, rag_db_path: str) -> str:
-    """RAG search. Runs in thread."""
+    """RAG search. Runs in thread. C2 (#42): keyword extraction from full transcript for query."""
     t0 = time.monotonic()
     context = ""
     try:
         if Path(rag_db_path).is_file():
+            from voiceforge.rag.query_keywords import extract_keywords
             from voiceforge.rag.searcher import HybridSearcher
 
+            query = extract_keywords(transcript) or transcript[:RAG_QUERY_MAX_CHARS] or "meeting"
             searcher = HybridSearcher(rag_db_path)
-            results = searcher.search(transcript[:RAG_QUERY_MAX_CHARS] or "meeting", top_k=3)
+            results = searcher.search(query, top_k=3)
             context = "\n".join(r.content[:300] for r in results)
             searcher.close()
     except ImportError:

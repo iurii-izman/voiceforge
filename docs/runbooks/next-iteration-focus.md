@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** Phase C #41 (C1 · Prompt management) реализован: промпты в `llm/prompts/*.txt` + `version`, загрузчик `prompt_loader.py`, router использует файлы с fallback на константы, `status` выводит `prompt_version` при наличии. Следующий шаг: **C2 (#42)** — RAG query: keyword extraction вместо prefix truncation или roadmap 4 (Ollama в конфиге).
+- **Сейчас:** C2 (#42) реализован: RAG query через keyword extraction (rag/query_keywords.py), pipeline._step2_rag использует extract_keywords с fallback на prefix; тесты test_rag_query_keywords. Roadmap 4 (Ollama в конфиге) уже в коде (config.ollama_model). Следующий шаг: **C3 (#43)** — Data retention policy + auto-cleanup или roadmap 5 (доки «Первая встреча за 5 минут»).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-Phase C #41 (C1 · Prompt management): добавлены `llm/prompts/` (analysis, live_summary, status_update, template_*), `prompt_loader.py` (get_prompt_version, load_prompt, load_template_prompts), router переведён на загрузку из файлов с fallback; в status добавлен вывод prompt_version. Closes #41.
+C2 (#42) RAG query: добавлен rag/query_keywords.py (extract_keywords из полной стенограммы, stdlib), pipeline._step2_rag переведён на query = extract_keywords(transcript) or prefix; тесты test_rag_query_keywords (ключевые слова из конца в запросе). Closes #42.
 
 ---
 
