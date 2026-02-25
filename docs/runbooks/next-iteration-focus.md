@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** C1 (#41) закрыт: тесты prompt_loader (unit + snapshot по хэшам), runbook prompt-management.md, DOCS-INDEX. Следующий шаг: **C2 (#42)** RAG query context расширение или доработка документации (first-meeting-5min, roadmap 5).
+- **Сейчас:** C2 (#42) extension сделан: multi-query RAG (extract_keyword_queries из сегментов стенограммы, merge по chunk_id, top 5), тесты. Следующий шаг: **C3 (#43)** Data retention policy или доработка документации (first-meeting-5min, roadmap 5).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-C1 (#41) Prompt management: тесты test_prompt_loader.py (загрузка, snapshot по хэшам), runbook prompt-management.md, запись в DOCS-INDEX. Closes #41.
+C2 (#42) RAG query context расширение: extract_keyword_queries() в query_keywords.py (первая/вторая половина стенограммы), pipeline._step2_rag — несколько запросов, объединение по chunk_id (max score), до 5 чанков в контексте; тесты для extract_keyword_queries. Refs #42.
 
 ---
 
