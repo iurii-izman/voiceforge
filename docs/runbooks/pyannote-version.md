@@ -6,9 +6,18 @@
 
 - **4.0.4** — зафиксирована в `pyproject.toml` (alpha2).
 
-## При OOM на машинах с 8 ГБ RAM
+## Memory guard (#37)
 
-На части машин с 8 ГБ оперативной памяти pyannote 4.x может приводить к Out of Memory при загрузке модели или диаризации. В этом случае допустим **откат на 3.3.2**.
+На системах с ≤8 ГБ RAM диаризация может приводить к OOM. В пайплайне включён **memory guard**:
+
+- **Проверка до запуска:** если `psutil.virtual_memory().available < 2 ГБ`, диаризация **пропускается** с предупреждением в structlog (`pipeline.diarization.skipped_low_memory`). Анализ продолжается без спикеров (diar_segments = []).
+- **При OOM во время диаризации:** перехват `MemoryError` и CUDA `RuntimeError` с текстом "out of memory" → логирование `pipeline.diarization.oom` и возврат пустого списка (graceful degradation).
+
+Константа порога: `voiceforge.core.pipeline.MIN_AVAILABLE_FOR_DIARIZATION_BYTES` (2 ГБ). Тесты: `tests/test_pipeline_memory_guard.py`.
+
+## При OOM на машинах с 8 ГБ RAM (откат версии)
+
+На части машин с 8 ГБ оперативной памяти pyannote 4.x может приводить к Out of Memory при загрузке модели или диаризации. Сначала срабатывает memory guard (см. выше); при необходимости допустим **откат на 3.3.2**.
 
 **Шаги отката:**
 

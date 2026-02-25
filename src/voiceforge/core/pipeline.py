@@ -9,9 +9,13 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+import psutil
 import structlog
 
 log = structlog.get_logger()
+
+# #37: skip diarization when available RAM < 2GB to avoid OOM on ≤8GB systems
+MIN_AVAILABLE_FOR_DIARIZATION_BYTES = 2 * 1024**3
 
 TARGET_SAMPLE_RATE = 16000  # faster-whisper expects 16 kHz
 RAG_QUERY_MAX_CHARS = 1000  # W3: max transcript prefix for RAG search (was 200)
@@ -78,10 +82,20 @@ def _step2_diarization(
     sample_rate: int,
     pyannote_restart_hours: int,
 ) -> list[Any]:
-    """Diarization (pyannote). Runs in thread."""
+    """Diarization (pyannote). Runs in thread. Skips if available RAM < 2GB (#37)."""
     t0 = time.monotonic()
     out: list[Any] = []
     try:
+        vm = psutil.virtual_memory()
+        if vm.available < MIN_AVAILABLE_FOR_DIARIZATION_BYTES:
+            log.warning(
+                "pipeline.diarization.skipped_low_memory",
+                available_mb=round(vm.available / 1024**2, 1),
+                threshold_mb=MIN_AVAILABLE_FOR_DIARIZATION_BYTES // (1024**2),
+            )
+            duration_sec = time.monotonic() - t0
+            log.info("pipeline.step2_diarization", count=0, duration_sec=round(duration_sec, 2))
+            return out
         try:
             import keyring as _keyring
 
@@ -93,7 +107,17 @@ def _step2_diarization(
         from voiceforge.stt.diarizer import Diarizer
 
         diarizer = Diarizer(auth_token=auth_token, restart_hours=pyannote_restart_hours)
-        out = diarizer.diarize(audio_f, sample_rate=sample_rate)
+        try:
+            out = diarizer.diarize(audio_f, sample_rate=sample_rate)
+        except MemoryError as e:
+            log.warning("pipeline.diarization.oom", error=str(e))
+            out = []
+        except RuntimeError as e:
+            if "out of memory" in str(e).lower():
+                log.warning("pipeline.diarization.oom", error=str(e))
+                out = []
+            else:
+                raise
     except ImportError:
         pass
     except Exception as e:
