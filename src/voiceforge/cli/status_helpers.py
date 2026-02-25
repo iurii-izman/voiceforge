@@ -54,7 +54,14 @@ def get_status_data() -> dict[str, Any]:
     except ImportError:
         ollama_available = False
     cfg = Settings()
-    return {
+    prompt_version = None
+    try:
+        from voiceforge.llm.prompt_loader import get_prompt_version
+
+        prompt_version = get_prompt_version()
+    except Exception:
+        pass
+    out: dict[str, Any] = {
         "ram": {
             "used_gb": round(mem.used / 1024**3, 2),
             "total_gb": round(mem.total / 1024**3, 2),
@@ -64,6 +71,9 @@ def get_status_data() -> dict[str, Any]:
         "pii_mode": getattr(cfg, "pii_mode", "ON"),
         "ollama_available": ollama_available,
     }
+    if prompt_version is not None:
+        out["prompt_version"] = prompt_version
+    return out
 
 
 def _format_stats_block(data: dict, budget_limit_usd: float, label: str) -> list[str]:

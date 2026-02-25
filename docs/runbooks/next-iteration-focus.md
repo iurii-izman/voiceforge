@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** Roadmap 3 (экспорт сессии Markdown/PDF) проверен по коду — реализован полностью: CLI `export --id/--format md|pdf`, `build_session_markdown`, PDF через pandoc (pdflatex), Web `/api/export?id=&format=md|pdf`, e2e test в test_cli_e2e_smoke. Следующий шаг: **roadmap 4** — выбор модели Ollama в конфиге или следующий пункт Phase C по доске (#41–45).
+- **Сейчас:** Phase C #41 (C1 · Prompt management) реализован: промпты в `llm/prompts/*.txt` + `version`, загрузчик `prompt_loader.py`, router использует файлы с fallback на константы, `status` выводит `prompt_version` при наличии. Следующий шаг: **C2 (#42)** — RAG query: keyword extraction вместо prefix truncation или roadmap 4 (Ollama в конфиге).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-Roadmap 3 — экспорт сессии (Markdown/PDF): сверка с кодом показала полную реализацию (main.py export_session, build_session_markdown, pandoc для PDF, web/server _handle_get_export, тест export --format md). Изменений не вносилось; обновлён только next-iteration-focus.
+Phase C #41 (C1 · Prompt management): добавлены `llm/prompts/` (analysis, live_summary, status_update, template_*), `prompt_loader.py` (get_prompt_version, load_prompt, load_template_prompts), router переведён на загрузку из файлов с fallback; в status добавлен вывод prompt_version. Closes #41.
 
 ---
 

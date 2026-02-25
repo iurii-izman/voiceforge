@@ -11,6 +11,7 @@ from pydantic import BaseModel
 from voiceforge.core.contracts import BudgetExceeded
 from voiceforge.core.secrets import set_env_keys_from_keyring
 from voiceforge.llm.pii_filter import redact
+from voiceforge.llm.prompt_loader import load_prompt, load_template_prompts
 
 log = structlog.get_logger()
 TModel = TypeVar("TModel", bound=BaseModel)
@@ -25,8 +26,8 @@ MODEL_GEMINI_FLASH = "gemini/gemini-2.0-flash"
 DEFAULT_MODEL = MODEL_CLAUDE_HAIKU
 FALLBACK_MODELS = [MODEL_GPT4O_MINI, MODEL_GEMINI_FLASH, MODEL_CLAUDE_SONNET]
 
-# System prompt for meeting analysis (~500 tokens). Cached for Claude (ephemeral) ~90% discount.
-SYSTEM_PROMPT = """You are a meeting analyst. Your task is to analyze transcripts of meetings or
+# Fallback prompts (used when prompts/ files are missing). C1 (#41): prefer prompt_loader.
+_SYSTEM_PROMPT_FALLBACK = """You are a meeting analyst. Your task is to analyze transcripts of meetings or
 calls and produce structured output.
 
 ## Output structure
@@ -45,8 +46,7 @@ calls and produce structured output.
 - Output only valid JSON matching the schema (questions, answers, recommendations,
   next_directions, action_items)."""
 
-# Block 1: Meeting templates — system prompts per template (schemas in llm/schemas.py)
-TEMPLATE_PROMPTS = {
+_TEMPLATE_PROMPTS_FALLBACK = {
     "standup": """You are a standup meeting analyst. Extract from the transcript:
 - done: what was done since last standup
 - planned: what is planned next
@@ -76,6 +76,16 @@ Write in the same language as the transcript. Be concise. Output only valid JSON
 }
 
 
+def _system_prompt() -> str:
+    """System prompt for meeting analysis (from prompts/analysis.txt or fallback)."""
+    return load_prompt("analysis") or _SYSTEM_PROMPT_FALLBACK
+
+
+def _template_prompts() -> dict[str, str]:
+    """Template prompts (from prompts/template_*.txt or fallback)."""
+    return load_template_prompts() or _TEMPLATE_PROMPTS_FALLBACK
+
+
 def _is_claude_model(model_id: str) -> bool:
     """True if model is Anthropic Claude (prompt caching supported)."""
     return "anthropic/" in model_id and "claude" in model_id.lower()
@@ -91,12 +101,13 @@ def _template_schema(template: str):
         StandupOutput,
     )
 
+    prompts = _template_prompts()
     schemas = {
-        "standup": (StandupOutput, TEMPLATE_PROMPTS["standup"]),
-        "sprint_review": (SprintReviewOutput, TEMPLATE_PROMPTS["sprint_review"]),
-        "one_on_one": (OneOnOneOutput, TEMPLATE_PROMPTS["one_on_one"]),
-        "brainstorm": (BrainstormOutput, TEMPLATE_PROMPTS["brainstorm"]),
-        "interview": (InterviewOutput, TEMPLATE_PROMPTS["interview"]),
+        "standup": (StandupOutput, prompts["standup"]),
+        "sprint_review": (SprintReviewOutput, prompts["sprint_review"]),
+        "one_on_one": (OneOnOneOutput, prompts["one_on_one"]),
+        "brainstorm": (BrainstormOutput, prompts["brainstorm"]),
+        "interview": (InterviewOutput, prompts["interview"]),
     }
     return schemas.get(template, (None, None))
 
@@ -186,12 +197,14 @@ def analyze_meeting(
     return (result, cost)
 
 
-# Block 10: Live summary during listen — short key points + action items
-LIVE_SUMMARY_SYSTEM = """You are a meeting analyst. Given a transcript fragment, produce a SHORT live summary:
+def _live_summary_system() -> str:
+    """Live summary system prompt (from prompts/live_summary.txt or fallback)."""
+    fallback = """You are a meeting analyst. Given a transcript fragment, produce a SHORT live summary:
 - key_points: 3–5 bullet points (main topics, decisions, outcomes).
 - action_items: only concrete action items with description; assignee and deadline if clearly stated.
 
 Write in the same language as the transcript. Be very concise. Output only valid JSON matching the schema (key_points, action_items)."""
+    return load_prompt("live_summary") or fallback
 
 
 def analyze_live_summary(
@@ -208,8 +221,9 @@ def analyze_live_summary(
     model_id = model or DEFAULT_MODEL
     text_for_llm = transcript_pre_redacted if transcript_pre_redacted is not None else redact(transcript, mode=pii_mode)
     user_content = f"Context (RAG):\n{context}\n\nTranscript:\n{text_for_llm}"
+    live_sys = _live_summary_system()
     prompt = [
-        {"role": "system", "content": LIVE_SUMMARY_SYSTEM},
+        {"role": "system", "content": live_sys},
         {"role": "user", "content": user_content},
     ]
     if _is_claude_model(model_id):
@@ -217,7 +231,7 @@ def analyze_live_summary(
             {
                 "role": "system",
                 "content": [  # type: ignore[dict-item]
-                    {"type": "text", "text": LIVE_SUMMARY_SYSTEM, "cache_control": {"type": "ephemeral"}},
+                    {"type": "text", "text": live_sys, "cache_control": {"type": "ephemeral"}},
                 ],
             },
             {"role": "user", "content": user_content},
@@ -226,11 +240,14 @@ def analyze_live_summary(
     return (result, cost)
 
 
-STATUS_UPDATE_SYSTEM = """You are an assistant that updates action item statuses. You are given:
+def _status_update_system() -> str:
+    """Status update system prompt (from prompts/status_update.txt or fallback)."""
+    fallback = """You are an assistant that updates action item statuses. You are given:
 1. A list of action items from a previous meeting (each with index 0, 1, 2, ...).
 2. The transcript of the FOLLOW-UP meeting.
 
 Your task: determine which action items were mentioned in the follow-up as DONE or CANCELLED. Output only the list of (id, status) for items that were clearly stated as done or cancelled. Use the same language as the transcript for any reasoning; output only valid JSON matching the schema (updates: list of {id, status})."""
+    return load_prompt("status_update") or fallback
 
 
 def update_action_item_statuses(
@@ -256,7 +273,7 @@ def update_action_item_statuses(
         "Action items from previous meeting:\n" + "\n".join(lines) + "\n\nTranscript of follow-up meeting:\n" + transcript_for_llm
     )
     prompt = [
-        {"role": "system", "content": STATUS_UPDATE_SYSTEM},
+        {"role": "system", "content": _status_update_system()},
         {"role": "user", "content": user_content},
     ]
     result, cost = complete_structured(prompt, response_model=StatusUpdateResponse, model=model_id)
@@ -274,7 +291,7 @@ def _analysis_prompt(
     """Build messages for completion. For Claude: system content with cache_control (ephemeral)."""
     text_for_llm = transcript_pre_redacted if transcript_pre_redacted is not None else redact(transcript, mode=pii_mode)
     user_content = f"Context (RAG):\n{context}\n\nTranscript:\n{text_for_llm}"
-    system_text = system_prompt_override if system_prompt_override is not None else SYSTEM_PROMPT
+    system_text = system_prompt_override if system_prompt_override is not None else _system_prompt()
     if _is_claude_model(model_id):
         return [
             {
