@@ -1,4 +1,4 @@
-"""Eval harness for LLM outputs: ROUGE-L on golden samples (issue #32)."""
+"""Eval harness for LLM outputs: ROUGE-L on golden samples, optional LLM-judge (issue #32)."""
 
 from __future__ import annotations
 
@@ -6,7 +6,10 @@ import json
 from pathlib import Path
 
 import pytest
+from pydantic import BaseModel, Field
 from rouge_score import rouge_scorer
+
+from voiceforge.core.secrets import get_api_key
 
 GOLDEN_DIR = Path(__file__).resolve().parent / "golden_samples"
 ROUGE_L_THRESHOLD = 0.35  # Issue #32: accept ≥ 0.35 in next-iteration-focus; issue AC says ≥ 0.4
@@ -111,3 +114,41 @@ def test_golden_rouge_l_threshold(path: Path) -> None:
     ref_text = _structured_to_text(reference)
     score = _rouge_l(ref_text, ref_text)
     assert score >= ROUGE_L_THRESHOLD, f"{path.name}: ROUGE-L self {score} < {ROUGE_L_THRESHOLD}"
+
+
+# --- LLM-judge: optional test, runs only when API key is present (issue #32) ---
+
+
+class _JudgeOutput(BaseModel):
+    """LLM judge score 1–5 and reason (for eval only)."""
+
+    score: int = Field(ge=1, le=5, description="1=unrelated, 5=perfect match")
+    reason: str = Field(description="Brief reason for the score")
+
+
+def test_llm_judge_one_golden_sample() -> None:
+    """Run real LLM on one golden sample, then LLM-judge candidate vs reference. Skip without key."""
+    if not get_api_key("anthropic"):
+        pytest.skip("No anthropic key in keyring (LLM-judge requires API)")
+    from voiceforge.llm.router import analyze_meeting, complete_structured
+
+    path = GOLDEN_DIR / "sample_standup_01.json"
+    if not path.exists():
+        pytest.skip("sample_standup_01.json not found")
+    transcript, template, reference = _load_golden(path)
+    assert template
+    ref_text = _structured_to_text(reference)
+    result, _cost = analyze_meeting(transcript, template=template)
+    candidate_dict = result.model_dump() if hasattr(result, "model_dump") else result
+    cand_text = _structured_to_text(candidate_dict)
+    judge_system = (
+        "You are an eval judge. Given reference (expected) and candidate (actual) meeting output as flat text, "
+        "score 1–5 how well the candidate matches the reference. 5=perfect, 1=unrelated. Output score and brief reason."
+    )
+    judge_user = f"Reference:\n{ref_text}\n\nCandidate:\n{cand_text}"
+    prompt = [
+        {"role": "system", "content": judge_system},
+        {"role": "user", "content": judge_user},
+    ]
+    judge, _ = complete_structured(prompt, response_model=_JudgeOutput, model="anthropic/claude-haiku-4-5")
+    assert judge.score >= 3, f"LLM-judge score {judge.score}: {judge.reason}"

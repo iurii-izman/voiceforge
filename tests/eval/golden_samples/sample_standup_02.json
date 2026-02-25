@@ -1,0 +1,1 @@
+{"transcript":"Daily standup. Done: merged the auth PR and fixed the login bug. Plan: start on the dashboard API and write docs. No blockers.","template":"standup","reference":{"done":["Merged the auth PR","Fixed the login bug"],"planned":["Start on the dashboard API","Write docs"],"blockers":[]}}

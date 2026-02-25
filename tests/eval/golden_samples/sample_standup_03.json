@@ -1,0 +1,1 @@
+{"transcript":"Standup. Yesterday I did the database migration and deployed to staging. Today I will run load tests and review the frontend PR. Blocker: waiting for AWS access.","template":"standup","reference":{"done":["Database migration","Deployed to staging"],"planned":["Run load tests","Review the frontend PR"],"blockers":["Waiting for AWS access"]}}

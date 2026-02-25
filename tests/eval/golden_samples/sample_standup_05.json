@@ -1,0 +1,1 @@
+{"transcript":"Standup. Finished the RAG indexing pipeline and the export command. Today: add unit tests for the daemon. Blocker: design review for the new API is delayed.","template":"standup","reference":{"done":["RAG indexing pipeline","Export command"],"planned":["Add unit tests for the daemon"],"blockers":["Design review for the new API is delayed"]}}
