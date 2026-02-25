@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** D4 Flatpak (#49) выполнен (манифест, скрипт, CI, runbook). Следующий шаг: Phase D #50 macOS или Phase C (#41–45); или фича из docs/roadmap-priority.md.
+- **Сейчас:** #29 и #30 закрыты (RAG ODT/RTF тесты, скрипт Dependabot dismiss + runbook). Следующий шаг: Phase D #50 macOS или Phase C (#41–45); или фича из docs/roadmap-priority.md. Опционально: отложить Dependabot alert #2 вручную в GitHub UI (Security → Dependabot → Dismiss «Accept risk») или запустить `uv run python scripts/dependabot_dismiss_moderate.py` при наличии `github_token` с правом `security_events`.
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-D4 (#49) Flatpak: манифест `desktop/flatpak/com.voiceforge.app.yaml` (id com.voiceforge.app, runtime GNOME 46, sandbox: wayland, pulseaudio, talk-name com.voiceforge.App and org.freedesktop.secrets); скрипт `scripts/build-flatpak.sh` для локальной сборки из .deb; runbook в offline-package.md; CI job flatpak в release.yml (needs: build, собирает .deb и Flatpak, загружает .flatpak в релиз).
+#29 (Roadmap 18 RAG ODT/RTF): добавлены тесты в `tests/test_rag_parsers.py` — `test_parse_rtf/odt_missing_file_raises`, `test_parse_rtf_empty_content_returns_segments`. #30 (Dependabot moderate): скрипт `scripts/dependabot_dismiss_moderate.py` (keyring `github_token`), обновлён `dependabot-review.md`. Закрытие алерта в UI или через скрипт (токен с scope `security_events`).
 
 ---
 
@@ -50,8 +50,8 @@ D4 (#49) Flatpak: манифест `desktop/flatpak/com.voiceforge.app.yaml` (id
 | ~~#48~~ | D | Calendar — auto-context в analyze | **Закрыт** — get_next_meeting_context, calendar_context_enabled, pipeline inject |
 | ~~#49~~ | D | Flatpak packaging | **Закрыт** — manifest, build-flatpak.sh, CI, runbook |
 | [#46–50](https://github.com/iurii-izman/voiceforge/issues/46) | D | Desktop signals, Telegram, Flatpak, macOS | Phase D productize |
-| [#29](https://github.com/iurii-izman/voiceforge/issues/29) | Ops | RAG ODT/RTF тесты | При добавлении парсеров |
-| [#30](https://github.com/iurii-izman/voiceforge/issues/30) | Ops | Dependabot 1 moderate | dependabot-review.md |
+| ~~#29~~ | Ops | RAG ODT/RTF тесты | **Закрыт** — тесты в test_rag_parsers.py |
+| ~~#30~~ | Ops | Dependabot 1 moderate | **Закрыт** — скрипт + runbook; алерт #2 — dismiss в UI или скрипт |
 
 ---
 
