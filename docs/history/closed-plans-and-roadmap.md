@@ -67,6 +67,6 @@
 ## Что здесь не перечислено
 
 - **Roadmap 13:** десктоп (Tauri) — реализован.
-- **Roadmap 14–19:** частично (Telegram бот — ADR-0005, webhook, runbook); календарь, RAG ODT/RTF, AppImage/Flatpak полный цикл, prompt caching — открытые или в плане.
+- **Roadmap 14–20:** частично (Telegram бот — ADR-0005, webhook, runbook); календарь, RAG ODT/RTF, AppImage/Flatpak полный цикл, prompt caching, macOS/WSL2 — открытые или в плане.
 
 Текущий список **не сделанного** и следующих шагов — в [next-iteration-focus.md](../runbooks/next-iteration-focus.md).

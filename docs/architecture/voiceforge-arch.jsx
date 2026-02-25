@@ -561,7 +561,7 @@ export default function App() {
             <div style={{ marginTop: 12, padding: "14px 20px", background: "#0a0f1c", border: "1px solid rgba(99,102,241,0.2)", borderRadius: 6 }}>
               <div style={{ fontSize: 10, color: "#6366f1", marginBottom: 10, fontWeight: 700, letterSpacing: 1 }}>ПОСЛЕ ALPHA2</div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                {["Live summary (listen --live-summary)", "Smart trigger template", "ExportSession → D-Bus (убрать CLI subprocess)", "System tray с Старт/Стоп", "Notification при AnalysisDone", "Telegram bot", "Интеграция с календарём"].map(t => (
+                {["Live summary (listen --live-summary)", "Smart trigger template", "ExportSession → D-Bus (убрать CLI subprocess)", "System tray с Старт/Стоп", "Notification при AnalysisDone", "macOS / WSL2 (после Linux-ядра)", "Telegram bot", "Интеграция с календарём"].map(t => (
                   <span key={t} style={{ fontSize: 10, color: "#6366f1", background: "rgba(99,102,241,0.07)", border: "1px solid rgba(99,102,241,0.2)", padding: "3px 10px", borderRadius: 3 }}>
                     {t}
                   </span>

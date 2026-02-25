@@ -41,7 +41,7 @@
 | 12 | Простой локальный Web UI |
 | 13 | Десктопный UI (Tauri) |
 | 14 | Офлайн-пакет (Flatpak/AppImage) |
-| 15–19 | Smart trigger, бот, календарь, RAG-форматы, prompt caching |
+| 15–20 | Smart trigger, бот, календарь, RAG-форматы, prompt caching, macOS/WSL2 |
 
 Блоки: 1–4 быстрые победы; 5–7 доки/отчёты/STT; 8 e2e; 9–10 стриминг и live summary; 11–12 настройки и Web UI; 13–14 десктоп и упаковка; 15–20 опционально.
 
