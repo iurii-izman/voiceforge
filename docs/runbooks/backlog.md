@@ -42,7 +42,6 @@
 | [#47](https://github.com/iurii-izman/voiceforge/issues/47) | D2 Telegram bot расширение | M |
 | [#48](https://github.com/iurii-izman/voiceforge/issues/48) | D3 Calendar integration (CalDAV) | L |
 | [#49](https://github.com/iurii-izman/voiceforge/issues/49) | D4 Flatpak packaging | L |
-| [#50](https://github.com/iurii-izman/voiceforge/issues/50) | D5 macOS / WSL2 support | L |
 
 ## Operational (Todo)
 

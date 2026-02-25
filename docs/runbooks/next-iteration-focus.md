@@ -47,7 +47,7 @@ C5 (#45) Healthcheck: GET /health в web server (200 + JSON status ok); тест
 | ~~#39~~ | B | IPC envelope | **Закрыт** |
 | ~~#40~~ | B | CI cache | **Закрыт** — enable-cache в setup-uv |
 | [#41–45](https://github.com/iurii-izman/voiceforge/issues/41) | C | Prompt mgmt, RAG, retention, caching, healthcheck | Phase C scale |
-| [#46–50](https://github.com/iurii-izman/voiceforge/issues/46) | D | Desktop signals, Telegram, Calendar, Flatpak, macOS | Phase D productize |
+| [#46–49](https://github.com/iurii-izman/voiceforge/issues/46) | D | Desktop signals, Telegram, Calendar, Flatpak | Phase D productize |
 | [#29](https://github.com/iurii-izman/voiceforge/issues/29) | Ops | RAG ODT/RTF тесты | При добавлении парсеров |
 | [#30](https://github.com/iurii-izman/voiceforge/issues/30) | Ops | Dependabot 1 moderate | dependabot-review.md |
 

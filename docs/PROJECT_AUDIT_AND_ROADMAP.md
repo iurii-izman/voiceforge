@@ -54,7 +54,7 @@
 - Контроль затрат на LLM (по моделям/дням)
 - CalDAV интеграция (poll)
 
-**Non-goals (явно):** macOS/Windows поддержка (пока), cloud deployment, multi-tenant.
+**Non-goals (явно):** macOS/Windows не в планах, cloud deployment, multi-tenant.
 
 ### 2.2 Architecture map (C4)
 
@@ -597,16 +597,6 @@ src/voiceforge/
 - **Deliverables:** Flatpak manifest, CI build, Flathub submission
 - **Acceptance:** Flatpak installs and runs; PipeWire + D-Bus + keyring work in sandbox
 - **KPI:** Install count, bug reports
-
-#### Step 20: macOS / WSL2 support exploration
-- **Цель:** Расширение платформ
-- **Scope:** Исследование: CoreAudio (macOS) / PulseAudio (WSL2) вместо PipeWire; D-Bus alternatives
-- **Dependencies:** Phase A-C полностью
-- **Effort:** L | Риск: High
-- **Owner:** Backend/DevOps
-- **Deliverables:** ADR для multi-platform; prototype audio capture на macOS
-- **Acceptance:** STT pipeline работает на macOS с тестовым WAV
-- **KPI:** Platform test matrix pass rate
 
 ---
 
