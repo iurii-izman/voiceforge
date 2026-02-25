@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** #37 pyannote memory guard закрыт (pipeline: skip diarization при available < 2GB, OOM fallback, tests/test_pipeline_memory_guard.py, pyannote-version.md). Следующий шаг: **#38** budget enforcement или следующая задача по roadmap-priority.
+- **Сейчас:** #38 budget enforcement закрыт (pre-call daily limit в router, BudgetExceeded, daily_budget_limit_usd в config, graceful CLI). Следующий шаг: **#39** IPC envelope или следующая задача по roadmap-priority.
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-#37 pyannote memory guard: pipeline.py — psutil.virtual_memory().available < 2GB → skip diarization с warning; try/except MemoryError и RuntimeError("out of memory") → return []; tests/test_pipeline_memory_guard.py (low-memory skip + OOM fallback); docs/runbooks/pyannote-version.md обновлён. Коммит и пуш выполнены (Closes #37).
+#38 budget enforcement: core/contracts BudgetExceeded; config daily_budget_limit_usd (default budget_limit_usd/30); llm/router pre-call check get_cost_today() >= daily_budget_limit_usd + alert при >80%; main.py catch BudgetExceeded в analyze/live_summary/action-items; i18n error.budget_exceeded; тесты test_llm_retry + test_config_settings; config-env-contract. Коммит и пуш (Closes #38).
 
 ---
 
@@ -43,7 +43,8 @@
 | ~~#27~~ | A | AppImage | **Закрыт** — toolbox сборка, deb/rpm/AppImage |
 | ~~#36~~ | B · P0 | Observability (metrics/tracing) | **Закрыт** — prometheus_client, /metrics, Grafana, alerts |
 | ~~#37~~ | B · P0 | pyannote memory guard | **Закрыт** — skip diarization <2GB, OOM fallback |
-| [#38–40](https://github.com/iurii-izman/voiceforge/issues/38) | B | Budget enforcement, IPC envelope, CI cache | Phase B hardening |
+| ~~#38~~ | B | Budget enforcement | **Закрыт** — pre-call daily limit, BudgetExceeded, alert 80% |
+| [#39–40](https://github.com/iurii-izman/voiceforge/issues/39) | B | IPC envelope, CI cache | Phase B hardening |
 | [#41–45](https://github.com/iurii-izman/voiceforge/issues/41) | C | Prompt mgmt, RAG, retention, caching, healthcheck | Phase C scale |
 | [#46–50](https://github.com/iurii-izman/voiceforge/issues/46) | D | Desktop signals, Telegram, Calendar, Flatpak, macOS | Phase D productize |
 | [#29](https://github.com/iurii-izman/voiceforge/issues/29) | Ops | RAG ODT/RTF тесты | При добавлении парсеров |
@@ -59,7 +60,7 @@
    - ~~#34 A3 unit tests daemon/streaming/smart_trigger~~ — сделано (тесты добавлены; omit оставлен).
    - ~~#27 A5 AppImage~~ — сделано (toolbox: NO_STRIP, librsvg2-devel; см. desktop-build-deps.md).
    - ~~#35 A4 WAV integration tests~~ — сделано (tests/fixtures/, test_stt_integration.py, make test-integration, CI stt-integration).
-2. **Phase B — Hardening (после A):** ~~observability (Prometheus)~~ — сделано (#36); ~~pyannote memory guard~~ — сделано (#37); budget enforcement (#38).
+2. **Phase B — Hardening (после A):** ~~observability (Prometheus)~~ — сделано (#36); ~~pyannote memory guard~~ — сделано (#37); ~~budget enforcement~~ — сделано (#38); IPC envelope (#39).
 3. **Документация:** при изменении CLI/конфига обновлять installation-guide, first-meeting-5min; обновлять DOCS-INDEX при новых доках.
 
 ---
