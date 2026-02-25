@@ -426,6 +426,15 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
                     with contextlib.suppress(OSError):
                         _os.unlink(p)
 
+    def _handle_get_health(self) -> None:
+        """Healthcheck endpoint for readiness/liveness. C5 (#45)."""
+        body = json.dumps({"status": "ok"}).encode("utf-8")
+        self.send_response(200)
+        self.send_header("Content-Type", _CONTENT_TYPE_JSON)
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
     def _handle_get_metrics(self) -> None:
         """Serve Prometheus metrics. Issue #36."""
         try:
@@ -466,6 +475,9 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
             return
         if path == "/api/export":
             self._handle_get_export(params)
+            return
+        if path == "/health":
+            self._handle_get_health()
             return
         if path == "/metrics":
             self._handle_get_metrics()

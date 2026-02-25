@@ -42,6 +42,10 @@ def test_web_index_and_status(monkeypatch, tmp_path) -> None:
             body = r.read().decode("utf-8")
             data = __import__("json").loads(body)
             assert "total_cost_usd" in data or "by_day" in data
+        with urllib.request.urlopen(f"http://127.0.0.1:{port}/health", timeout=2) as r:
+            assert r.status == 200
+            data = __import__("json").loads(r.read().decode("utf-8"))
+            assert data.get("status") == "ok"
     finally:
         server.shutdown()
 
