@@ -25,6 +25,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           version: ${{ env.UV_VERSION }}
+          enable-cache: true
       - run: uv sync --extra all
       - run: ./scripts/check_toolchain.sh
       - run: uv run ruff check src tests scripts
@@ -51,6 +52,7 @@ jobs:
         with:
           python-version: "3.12"
           version: ${{ env.UV_VERSION }}
+          enable-cache: true
       - run: uv sync --extra all
       - run: ./scripts/check_cli_contract.sh
 
@@ -65,6 +67,7 @@ jobs:
         with:
           python-version: "3.12"
           version: ${{ env.UV_VERSION }}
+          enable-cache: true
       - run: uv sync --extra all
       - run: uv run pytest tests/test_db_migrations.py -q
 
@@ -79,6 +82,7 @@ jobs:
         with:
           python-version: "3.12"
           version: ${{ env.UV_VERSION }}
+          enable-cache: true
       - run: uv sync --extra all
       - run: uv run pytest tests/test_cli_e2e_smoke.py -q
 
@@ -93,6 +97,7 @@ jobs:
         with:
           python-version: "3.12"
           version: ${{ env.UV_VERSION }}
+          enable-cache: true
       - run: uv sync --extra all
       - run: uv run pytest tests/test_stt_integration.py -v -m integration
 
@@ -107,6 +112,7 @@ jobs:
         with:
           python-version: "3.12"
           version: ${{ env.UV_VERSION }}
+          enable-cache: true
       - run: uv sync --extra all
       - run: uv run pip-audit --desc --ignore-vuln CVE-2025-69872
       - run: uv run bandit -r src -ll -q --configfile .bandit.yaml

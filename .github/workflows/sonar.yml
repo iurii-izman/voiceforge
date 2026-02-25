@@ -23,6 +23,7 @@ jobs:
         with:
           python-version: "3.12"
           version: ${{ env.UV_VERSION }}
+          enable-cache: true
       - run: uv sync --extra all
       - run: uv run pytest tests --cov=src/voiceforge --cov-report=xml --cov-fail-under=0 -q
       - name: SonarCloud Scan
