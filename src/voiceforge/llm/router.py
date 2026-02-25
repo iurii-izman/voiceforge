@@ -352,11 +352,24 @@ def complete_structured(
 ) -> tuple[TModel, float]:
     """Call LLM with fallbacks; return (validated Pydantic model, cost_usd).
     Uses Instructor retry (max_retries=3) with validation context on parse errors (#33).
-    Pre-call budget check: reject if daily cost >= daily_budget_limit_usd (#38)."""
+    Pre-call budget check: reject if daily cost >= daily_budget_limit_usd (#38).
+    Response cache: content-hash key, TTL from config (#44)."""
     from voiceforge.core.config import Settings
     from voiceforge.core.metrics import get_cost_today, log_llm_call, log_response_cache
+    from voiceforge.llm.cache import cache_key
+    from voiceforge.llm.cache import get as cache_get
+    from voiceforge.llm.cache import set as cache_set
 
     cfg = Settings()
+    ttl = int(getattr(cfg, "response_cache_ttl_seconds", 0) or 0)
+    model_id = model or DEFAULT_MODEL
+    if ttl > 0:
+        key = cache_key(prompt, model_id, response_model.__name__)
+        cached = cache_get(key, response_model, ttl)
+        if cached is not None:
+            parsed, cost = cached
+            log_response_cache(True)
+            return (parsed, cost)
     cost_today = get_cost_today()
     daily_limit = cfg.daily_budget_limit_usd or 0.0
     if daily_limit > 0 and cost_today >= daily_limit:
@@ -380,7 +393,6 @@ def complete_structured(
     except ImportError as e:
         raise ImportError("Install [llm] extras: uv sync --extra llm") from e
 
-    model_id = model or DEFAULT_MODEL
     fallbacks = [m for m in FALLBACK_MODELS if m != model_id][:3]
     client = instructor.from_litellm(completion)
     try:
@@ -416,6 +428,8 @@ def complete_structured(
     if cache_read > 0 or cache_creation > 0:
         log.info("llm.cache", model=model_id, cache_read_input_tokens=cache_read, cache_creation_input_tokens=cache_creation)
     log_llm_call(model_id, inp, out, cost, cache_read_input_tokens=cache_read, cache_creation_input_tokens=cache_creation)
+    if ttl > 0:
+        cache_set(key, model_id, response_model.__name__, parsed, cost, ttl)
     try:
         from voiceforge.core.observability import record_llm_call
 

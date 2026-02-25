@@ -137,6 +137,10 @@ class Settings(BaseSettings):
         default=90,
         description="Data retention: sessions with started_at before (today - retention_days) are purged at daemon start. 0 = disable auto-cleanup (#43).",
     )
+    response_cache_ttl_seconds: int = Field(
+        default=86400,
+        description="LLM response cache TTL in seconds (content-hash key). 0 = disable (#44).",
+    )
 
     @field_validator("model_size")
     @classmethod
@@ -227,6 +231,13 @@ class Settings(BaseSettings):
     def _retention_days_non_negative(cls, v: int) -> int:
         if v < 0:
             raise ValueError("retention_days must be >= 0")
+        return v
+
+    @field_validator("response_cache_ttl_seconds")
+    @classmethod
+    def _response_cache_ttl_non_negative(cls, v: int) -> int:
+        if v < 0:
+            raise ValueError("response_cache_ttl_seconds must be >= 0")
         return v
 
     @classmethod
