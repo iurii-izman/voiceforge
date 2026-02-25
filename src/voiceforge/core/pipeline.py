@@ -134,18 +134,27 @@ def _step2_diarization(
 
 
 def _step2_rag(transcript: str, rag_db_path: str) -> str:
-    """RAG search. Runs in thread. C2 (#42): keyword extraction from full transcript for query."""
+    """RAG search. Runs in thread. C2 (#42): multi-query from transcript segments, merge and dedupe."""
     t0 = time.monotonic()
     context = ""
     try:
         if Path(rag_db_path).is_file():
-            from voiceforge.rag.query_keywords import extract_keywords
+            from voiceforge.rag.query_keywords import extract_keyword_queries
             from voiceforge.rag.searcher import HybridSearcher
 
-            query = extract_keywords(transcript) or transcript[:RAG_QUERY_MAX_CHARS] or "meeting"
+            queries = extract_keyword_queries(transcript)
+            if not queries:
+                queries = [transcript[:RAG_QUERY_MAX_CHARS] or "meeting"]
             searcher = HybridSearcher(rag_db_path)
-            results = searcher.search(query, top_k=3)
-            context = "\n".join(r.content[:300] for r in results)
+            by_id: dict[int, Any] = {}  # chunk_id -> SearchResult (keep higher score)
+            for q in queries:
+                if not (q and q.strip()):
+                    continue
+                for r in searcher.search(q, top_k=3):
+                    if r.chunk_id not in by_id or r.score > by_id[r.chunk_id].score:
+                        by_id[r.chunk_id] = r
+            merged = sorted(by_id.values(), key=lambda x: -x.score)[:5]
+            context = "\n".join(r.content[:300] for r in merged)
             searcher.close()
     except ImportError:
         pass

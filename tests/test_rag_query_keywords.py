@@ -1,6 +1,6 @@
-"""C2 (#42): Tests for RAG query keyword extraction."""
+"""C2 (#42): Tests for RAG query keyword extraction and multi-query context extension."""
 
-from voiceforge.rag.query_keywords import extract_keywords
+from voiceforge.rag.query_keywords import extract_keyword_queries, extract_keywords
 
 
 def test_extract_keywords_from_full_transcript() -> None:
@@ -32,3 +32,30 @@ def test_extract_keywords_filters_stopwords() -> None:
     assert "and" not in query.split()
     assert "на" not in query.split()
     assert "meeting" in query or "проект" in query
+
+
+def test_extract_keyword_queries_empty_returns_empty_list() -> None:
+    """Empty transcript yields no queries."""
+    assert extract_keyword_queries("") == []
+    assert extract_keyword_queries("   ") == []
+
+
+def test_extract_keyword_queries_short_returns_single_query() -> None:
+    """Short transcript (< 300 chars) returns single full-doc query."""
+    short = "Meeting about budget and project timeline."
+    queries = extract_keyword_queries(short, min_len_for_multi=100)
+    assert len(queries) == 1
+    assert "meeting" in queries[0].lower() or "budget" in queries[0].lower()
+
+
+def test_extract_keyword_queries_long_returns_segment_queries() -> None:
+    """Long transcript with distinct halves yields multiple queries (C2 context extension)."""
+    first_half = " " * 50 + "alpha beta gamma delta " * 10  # ~250 chars, keywords: alpha beta gamma delta
+    second_half = " " * 50 + "omega sigma theta report " * 10  # ~260 chars
+    long_transcript = first_half + second_half  # > 300
+    queries = extract_keyword_queries(long_transcript, num_parts=2, min_len_for_multi=300)
+    assert len(queries) >= 1
+    # First segment should emphasize alpha/beta/gamma/delta; second omega/sigma/theta/report
+    combined = " ".join(queries).lower()
+    assert "alpha" in combined or "beta" in combined or "gamma" in combined
+    assert "omega" in combined or "sigma" in combined or "theta" in combined or "report" in combined

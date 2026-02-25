@@ -106,6 +106,8 @@ _STOP = frozenset(
 
 _MIN_WORD_LEN = 2
 _DEFAULT_TOP_N = 12
+# Min transcript length to use multi-segment queries (first half + second half)
+_MULTI_QUERY_MIN_LEN = 300
 
 
 def extract_keywords(transcript: str, top_n: int = _DEFAULT_TOP_N) -> str:
@@ -121,3 +123,36 @@ def extract_keywords(transcript: str, top_n: int = _DEFAULT_TOP_N) -> str:
             counts[w] += 1
     top = [t[0] for t in counts.most_common(top_n)]
     return " ".join(top).strip()
+
+
+def extract_keyword_queries(
+    transcript: str,
+    num_parts: int = 2,
+    top_n: int = _DEFAULT_TOP_N,
+    min_len_for_multi: int = _MULTI_QUERY_MIN_LEN,
+) -> list[str]:
+    """C2 (#42) extension: multiple queries from transcript segments for better RAG recall.
+    Splits transcript into num_parts by position, extracts keywords from each; returns
+    list of non-empty query strings. If transcript is short, returns single full-doc query."""
+    if not (transcript and transcript.strip()):
+        return []
+    if len(transcript) < min_len_for_multi or num_parts <= 1:
+        q = extract_keywords(transcript, top_n=top_n)
+        return [q] if q else []
+    part_len = len(transcript) // num_parts
+    queries: list[str] = []
+    seen: set[str] = set()
+    for i in range(num_parts):
+        start = i * part_len
+        end = len(transcript) if i == num_parts - 1 else (i + 1) * part_len
+        part = transcript[start:end].strip()
+        if not part:
+            continue
+        q = extract_keywords(part, top_n=top_n)
+        if q and q not in seen:
+            seen.add(q)
+            queries.append(q)
+    if not queries:
+        q = extract_keywords(transcript, top_n=top_n)
+        return [q] if q else []
+    return queries
