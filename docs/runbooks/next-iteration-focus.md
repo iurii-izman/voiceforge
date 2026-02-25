@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** Roadmap 2 (обновление статусов action items по следующей встрече) проверен по коду — реализован полностью: CLI `action-items update --from-session/--next-session`, LLM `update_action_item_statuses`, схемы StatusUpdateResponse, БД `update_action_item_statuses_in_db`, Web `/api/action-items/update`, action_item_status.json, e2e test_cli_action_items_update_smoke. Следующий шаг: **roadmap 3** — экспорт сессии (Markdown/PDF) или следующий пункт Phase C по доске (#41–45).
+- **Сейчас:** Roadmap 3 (экспорт сессии Markdown/PDF) проверен по коду — реализован полностью: CLI `export --id/--format md|pdf`, `build_session_markdown`, PDF через pandoc (pdflatex), Web `/api/export?id=&format=md|pdf`, e2e test в test_cli_e2e_smoke. Следующий шаг: **roadmap 4** — выбор модели Ollama в конфиге или следующий пункт Phase C по доске (#41–45).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-Roadmap 2 — обновление статусов action items по следующей встрече: сверка с кодом показала полную реализацию (main.py action_items_app update, router.py update_action_item_statuses + STATUS_UPDATE_SYSTEM, transcript_log update_action_item_statuses_in_db, web/server _handle_action_items_update, тесты). Изменений не вносилось; обновлён только next-iteration-focus.
+Roadmap 3 — экспорт сессии (Markdown/PDF): сверка с кодом показала полную реализацию (main.py export_session, build_session_markdown, pandoc для PDF, web/server _handle_get_export, тест export --format md). Изменений не вносилось; обновлён только next-iteration-focus.
 
 ---
 
