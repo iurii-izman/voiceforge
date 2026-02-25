@@ -36,6 +36,8 @@
 
 **Реализовано (2026-02):** подкоманда `voiceforge calendar poll` — однократный опрос «события, начавшиеся за последние N минут»; ключи keyring: `caldav_url`, `caldav_username`, `caldav_password`. Зависимость: `uv sync --extra calendar`. Дальше: `calendar watch` (цикл опроса) и/или интеграция с демоном.
 
+**D3 (#48):** контекст следующего события календаря в анализ. При `calendar_context_enabled: true` в конфиге (или `VOICEFORGE_CALENDAR_CONTEXT_ENABLED=true`) пайплайн `analyze` подставляет в контекст LLM строку вида «Next meeting: Название — start_iso — end_iso» (следующее событие в ближайшие 24 ч). Данные берутся из CalDAV (те же ключи keyring). Опция по умолчанию выключена.
+
 ## См. также
 
 - [keyring-keys-reference.md](keyring-keys-reference.md) — имена ключей для новых учётных данных (caldav_url, caldav_password и т.д. при добавлении).

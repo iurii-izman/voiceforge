@@ -15,6 +15,7 @@ def test_settings_defaults_load() -> None:
     assert cfg.pyannote_restart_hours == 2
     assert cfg.live_summary_interval_sec == 90
     assert cfg.daily_budget_limit_usd == pytest.approx(75.0 / 30.0)
+    assert cfg.calendar_context_enabled is False
 
 
 def test_settings_ollama_model_empty_raises() -> None:

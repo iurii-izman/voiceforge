@@ -34,6 +34,7 @@ Priority order:
 | `pii_mode` | `VOICEFORGE_PII_MODE` | `ON` | PII redaction before LLM: `OFF` (none), `ON` (full regex+GLiNER), `EMAIL_ONLY` (email only) |
 | `retention_days` | `VOICEFORGE_RETENTION_DAYS` | `90` | Data retention: sessions with started_at before (today − retention_days) are purged at daemon start; `0` = disable auto-cleanup (#43) |
 | `response_cache_ttl_seconds` | `VOICEFORGE_RESPONSE_CACHE_TTL_SECONDS` | `86400` | LLM response cache TTL (seconds); `0` = disable (#44) |
+| `calendar_context_enabled` | `VOICEFORGE_CALENDAR_CONTEXT_ENABLED` | `false` | D3 (#48): inject next CalDAV event into analyze context (keyring: caldav_*) |
 
 **Validation:** Settings validates `model_size` (allowed: tiny, base, small, medium, large-v2, large-v3, large), `sample_rate` (1..192000), `default_llm` (non-empty), `budget_limit_usd` (≥ 0), `daily_budget_limit_usd` (≥ 0 when set), `pipeline_step2_timeout_sec` (positive), `analyze_timeout_sec` (positive), `ollama_model` (non-empty), `ring_seconds` (positive), `pyannote_restart_hours` (≥ 1), `live_summary_interval_sec` (≥ 1), `retention_days` (≥ 0), `response_cache_ttl_seconds` (≥ 0). Invalid values raise at load.
 

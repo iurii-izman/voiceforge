@@ -291,6 +291,21 @@ class AnalysisPipeline:
         step2_duration = time.monotonic() - step2_start
         log.info("pipeline.step2_total", duration_sec=round(step2_duration, 2))
 
+        # D3 (#48): optional calendar context for analyze
+        if getattr(self._cfg, "calendar_context_enabled", False):
+            try:
+                from voiceforge.calendar.caldav_poll import get_next_meeting_context
+
+                cal_ctx, _ = get_next_meeting_context(hours_ahead=24)
+                if cal_ctx:
+                    context = (
+                        (context + "\n\nCalendar (next meeting): " + cal_ctx).strip()
+                        if context
+                        else ("Calendar (next meeting): " + cal_ctx)
+                    )
+            except Exception as e:
+                log.warning("pipeline.calendar_context_failed", error=str(e))
+
         return (
             PipelineResult(
                 segments=segments,

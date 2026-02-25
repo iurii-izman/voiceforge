@@ -141,6 +141,10 @@ class Settings(BaseSettings):
         default=86400,
         description="LLM response cache TTL in seconds (content-hash key). 0 = disable (#44).",
     )
+    calendar_context_enabled: bool = Field(
+        default=False,
+        description="D3 (#48): inject next CalDAV event into analyze context (keyring: caldav_*).",
+    )
 
     @field_validator("model_size")
     @classmethod

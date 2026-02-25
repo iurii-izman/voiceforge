@@ -96,3 +96,72 @@ def poll_events_started_in_last(minutes: int = 5) -> tuple[list[dict[str, Any]],
         return [], str(e)
 
     return out, None
+
+
+def get_next_meeting_context(hours_ahead: int = 24) -> tuple[str, str | None]:
+    """Get the next calendar event (from now) as a string for LLM context.
+
+    Reads caldav_* from keyring. Returns (context_string, error).
+    context_string is e.g. "Next meeting: Standup, 2025-02-25T10:00:00+00:00–10:15" or "".
+    """
+    url = get_api_key(_CALDAV_URL)
+    username = get_api_key(_CALDAV_USERNAME)
+    password = get_api_key(_CALDAV_PASSWORD)
+    if not url or not username or not password:
+        return "", None  # no keyring: skip calendar, no error
+
+    try:
+        import caldav
+    except ImportError:
+        return "", None  # no calendar extra: skip
+
+    now = datetime.now(UTC)
+    end_range = now + timedelta(hours=hours_ahead)
+    candidates: list[tuple[datetime, dict[str, Any]]] = []
+
+    try:
+        client = caldav.DAVClient(url=url, username=username, password=password)
+        principal = client.principal()
+        calendars = principal.calendars()
+        if not calendars:
+            return "", None
+        for cal in calendars:
+            try:
+                events = cal.date_search(start=now, end=end_range, compfilter="VEVENT")
+            except Exception as e:
+                log.warning("caldav.date_search_failed", calendar=getattr(cal, "name", ""), error=str(e))
+                continue
+            cal_name = getattr(cal, "name", None) or ""
+            for ev in events:
+                comp = getattr(ev, "icalendar_component", None)
+                if not comp:
+                    continue
+                dtstart = comp.get("DTSTART")
+                dtend = comp.get("DTEND")
+                start_dt = _dt_to_aware(dtstart)
+                if start_dt is None:
+                    continue
+                summary = str(comp.get("SUMMARY", "") or "").strip() or "(no title)"
+                end_dt = _dt_to_aware(dtend)
+                candidates.append(
+                    (
+                        start_dt,
+                        {
+                            "summary": summary,
+                            "start_iso": start_dt.isoformat(),
+                            "end_iso": end_dt.isoformat() if end_dt else "",
+                            "calendar_name": cal_name,
+                        },
+                    )
+                )
+        if not candidates:
+            return "", None
+        candidates.sort(key=lambda x: x[0])
+        first = candidates[0][1]
+        parts = [f"Next meeting: {first['summary']}", first["start_iso"]]
+        if first.get("end_iso"):
+            parts.append(first["end_iso"])
+        return " — ".join(parts), None
+    except Exception as e:
+        log.warning("caldav.next_meeting_failed", error=str(e))
+        return "", str(e)
