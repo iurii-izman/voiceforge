@@ -94,7 +94,7 @@ cd /path/to/voiceforge/desktop && npm run build && cargo tauri build
 ## Сборка релиза и упаковка
 
 - Релизный бинарник: `cd desktop && npm run build && cargo tauri build`. Артефакты в `desktop/src-tauri/target/release/bundle/` (deb, rpm, appimage).
-- Flatpak / AppImage: Tauri 2 поддерживает оба; манифест Flatpak при необходимости добавляется в `desktop/flatpak/`. Для альфа2 достаточно бинарника из `cargo tauri build`.
+- **Flatpak:** манифест `desktop/flatpak/com.voiceforge.app.yaml`. Локальная сборка из .deb: `./scripts/build-flatpak.sh` (см. `offline-package.md`). Требуются flatpak-builder и runtime org.gnome.Platform//46.
 
 ### AppImage в toolbox (Fedora)
 

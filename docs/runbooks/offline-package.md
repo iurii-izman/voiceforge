@@ -24,12 +24,53 @@
 - **Плюсы:** распространение через Flathub, изоляция, единый runtime.
 - **Ограничения:** нужен манифест, runtime (например GNOME), публикация на Flathub — отдельный процесс.
 - **Tauri 2:** поддерживается через манифест (см. [Tauri 2 Flatpak](https://v2.tauri.app/distribute/flatpak/)).
-- **Этапы (черновик):**
-  1. Установить flatpak и flatpak-builder; установить runtime (например `org.gnome.Platform//46`).
-  2. Создать манифест в `desktop/flatpak/` (если директории нет — создать): описание приложения, SDK, зависимостей (webkit2gtk, gtk3 и т.д.).
-  3. Сборка: `flatpak-builder build manifest.yml` (или аналог для Tauri 2).
-  4. Локальный запуск: `flatpak-builder --run build manifest.yml com.voiceforge.app`.
-  5. Публикация на Flathub — по правилам Flathub (ревизия манифеста, проверки).
+- **Манифест:** `desktop/flatpak/com.voiceforge.app.yaml` (id: `com.voiceforge.app`). Sandbox: Wayland/X11, DRI, PulseAudio, D-Bus `com.voiceforge.App`, Secret Service `org.freedesktop.secrets`.
+
+### Требования
+
+- Flatpak и flatpak-builder: `sudo dnf install flatpak flatpak-builder` (в toolbox или на хосте).
+- Runtime: `flatpak install flathub org.gnome.Platform//46 org.gnome.Sdk//46`.
+
+### Сборка и тест (локально / в toolbox)
+
+**Вариант A — из готового .deb (релизный URL):**
+В манифесте указан URL на GitHub Releases и sha256. Перед первой публикацией на Flathub замените `PLACEHOLDER_REPLACE_WITH_ACTUAL_SHA256` на реальный sha256 пакета после загрузки .deb в релиз.
+
+```bash
+cd /path/to/voiceforge
+flatpak-builder --user --force-clean build desktop/flatpak/com.voiceforge.app.yaml
+flatpak-builder --run build desktop/flatpak/com.voiceforge.app.yaml com.voiceforge.app
+```
+
+**Вариант B — из локально собранного .deb:**
+Сначала соберите десктоп (см. `desktop-build-deps.md`), затем подставьте в манифест локальный путь и sha256 или используйте скрипт:
+
+```bash
+cd /path/to/voiceforge
+# 1) Собрать .deb (если ещё не собран)
+cd desktop && npm run build && cargo tauri build && cd ..
+DEB=$(echo desktop/src-tauri/target/release/bundle/deb/VoiceForge_*_amd64.deb)
+# 2) Подставить в манифест url: file://$PWD/... и sha256 от $DEB, затем:
+flatpak-builder --user --force-clean build desktop/flatpak/com.voiceforge.app.yaml
+flatpak-builder --run build desktop/flatpak/com.voiceforge.app.yaml com.voiceforge.app
+```
+
+Удобно использовать скрипт `scripts/build-flatpak.sh` (если есть): он собирает .deb при необходимости и запускает flatpak-builder с подставленным file:// и sha256.
+
+### Установка (опционально)
+
+```bash
+flatpak-builder --user --install --force-clean build desktop/flatpak/com.voiceforge.app.yaml
+flatpak run com.voiceforge.app
+```
+
+Перед запуском приложения должен быть запущен демон VoiceForge (`uv run voiceforge daemon`) на сессии — Flatpak-приложение подключается к нему по D-Bus.
+
+### Flathub submission
+
+- Заменить в манифесте `PLACEHOLDER_REPLACE_WITH_ACTUAL_SHA256` на sha256 загруженного .deb.
+- По желанию добавить AppStream metainfo (appdata) для карточки на Flathub.
+- Следовать [Flathub submission guidelines](https://docs.flathub.org/docs/for-app-authors/).
 
 ## Рекомендация для альфа2
 
@@ -38,12 +79,9 @@
 
 ## Next steps / чеклист
 
-Конкретные следующие шаги для реализации (код в этой сессии не меняется — только документирование):
-
-1. **AppImage:** в `desktop/src-tauri/tauri.conf.json` в `bundle.targets` уже есть `"appimage"`. Сборка в toolbox: установить `librsvg2-devel`, затем `export NO_STRIP=true APPIMAGE_EXTRACT_AND_RUN=1` и `cd desktop && npm run build && cargo tauri build` (см. `desktop-build-deps.md`, раздел «AppImage в toolbox»). Артефакт: `desktop/src-tauri/target/release/bundle/appimage/VoiceForge_*_amd64.AppImage`. Проверка 2026-02-24: сборка успешна (deb, rpm, AppImage).
-2. **Flatpak:** создать каталог `desktop/flatpak/` и манифест приложения (описание, SDK, зависимости webkit2gtk/gtk3). Сборка: `flatpak-builder build desktop/flatpak/manifest.yml`; локальный запуск: `flatpak-builder --run build desktop/flatpak/manifest.yml com.voiceforge.app`.
+1. **AppImage:** в `desktop/src-tauri/tauri.conf.json` в `bundle.targets` уже есть `"appimage"`. Сборка в toolbox: установить `librsvg2-devel`, затем `export NO_STRIP=true APPIMAGE_EXTRACT_AND_RUN=1` и `cd desktop && npm run build && cargo tauri build` (см. `desktop-build-deps.md`). Артефакт: `desktop/src-tauri/target/release/bundle/appimage/VoiceForge_*_amd64.AppImage`.
+2. **Flatpak:** манифест `desktop/flatpak/com.voiceforge.app.yaml`, скрипт `scripts/build-flatpak.sh`; CI: job в `.github/workflows/release.yml`. Локальная сборка: `./scripts/build-flatpak.sh` (см. раздел «Flatpak» выше).
 3. **Воспроизводимость и glibc:** для совместимости со старыми дистрибутивами собирать AppImage в Docker (образ на базе Ubuntu 20.04/22.04) или в GitHub Actions.
-4. При внедрении — обновить этот runbook и при необходимости добавить скрипты в `scripts/`.
 
 ## Ссылки
 

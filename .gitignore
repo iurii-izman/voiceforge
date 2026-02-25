@@ -36,6 +36,7 @@ htmlcov/
 app/dist/
 app/build/
 app/src-tauri/target/
+desktop/flatpak/*.local.yaml
 
 # Runtime temp fixtures (keep local only)
 tmp_config/

@@ -1,0 +1,37 @@
+# Flatpak manifest for VoiceForge desktop (Tauri 2).
+# Build: see docs/runbooks/offline-package.md and docs/runbooks/desktop-build-deps.md.
+# Flathub: submission prepared; sandbox: D-Bus (com.voiceforge.App), secrets, PipeWire/Pulse.
+
+app-id: com.voiceforge.app
+runtime: org.gnome.Platform
+runtime-version: '46'
+sdk: org.gnome.Sdk
+command: voiceforge-desktop
+
+finish-args:
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --device=dri
+  - --socket=pulseaudio
+  - --talk-name=com.voiceforge.App
+  - --talk-name=org.freedesktop.secrets
+  # Optional: PipeWire portal for audio capture (if needed beyond pulse socket)
+  # - --filesystem=xdg-run/pipewire
+
+modules:
+  - name: voiceforge-desktop
+    buildsystem: simple
+    sources:
+      - type: file
+        url: https://github.com/iurii-izman/voiceforge/releases/download/v0.2.0-alpha.1/VoiceForge_0.2.0-alpha.1_amd64.deb
+        sha256: PLACEHOLDER_REPLACE_WITH_ACTUAL_SHA256
+        only-arches:
+          - x86_64
+    build-commands:
+      - ar -x *.deb
+      - tar -xf data.tar.*
+      - install -Dm755 usr/bin/voiceforge-desktop /app/bin/voiceforge-desktop
+      - install -Dm644 usr/share/applications/com.voiceforge.app.desktop /app/share/applications/com.voiceforge.app.desktop
+      - mkdir -p /app/share/icons
+      - cp -r usr/share/icons/* /app/share/icons/ 2>/dev/null || true

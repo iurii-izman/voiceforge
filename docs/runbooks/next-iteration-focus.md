@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** D3 Calendar (#48) закрыт — контекст следующего события CalDAV инжектируется в analyze при `calendar_context_enabled: true`. Следующий шаг: Phase D #49 Flatpak или #50 macOS; или Phase C (#41–45); или фича из docs/roadmap-priority.md.
+- **Сейчас:** D4 Flatpak (#49) выполнен (манифест, скрипт, CI, runbook). Следующий шаг: Phase D #50 macOS или Phase C (#41–45); или фича из docs/roadmap-priority.md.
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-D3 (#48) Calendar: caldav_poll.get_next_meeting_context(hours_ahead); Settings calendar_context_enabled; pipeline инжектирует контекст следующего события в RAG context для analyze. Документация calendar-integration.md, config-env-contract; тесты test_calendar.py (mock CalDAV).
+D4 (#49) Flatpak: манифест `desktop/flatpak/com.voiceforge.app.yaml` (id com.voiceforge.app, runtime GNOME 46, sandbox: wayland, pulseaudio, talk-name com.voiceforge.App and org.freedesktop.secrets); скрипт `scripts/build-flatpak.sh` для локальной сборки из .deb; runbook в offline-package.md; CI job flatpak в release.yml (needs: build, собирает .deb и Flatpak, загружает .flatpak в релиз).
 
 ---
 
@@ -48,6 +48,7 @@ D3 (#48) Calendar: caldav_poll.get_next_meeting_context(hours_ahead); Settings c
 | ~~#40~~ | B | CI cache | **Закрыт** — enable-cache в setup-uv |
 | [#41–45](https://github.com/iurii-izman/voiceforge/issues/41) | C | Prompt mgmt, RAG, retention, caching, healthcheck | Phase C scale |
 | ~~#48~~ | D | Calendar — auto-context в analyze | **Закрыт** — get_next_meeting_context, calendar_context_enabled, pipeline inject |
+| ~~#49~~ | D | Flatpak packaging | **Закрыт** — manifest, build-flatpak.sh, CI, runbook |
 | [#46–50](https://github.com/iurii-izman/voiceforge/issues/46) | D | Desktop signals, Telegram, Flatpak, macOS | Phase D productize |
 | [#29](https://github.com/iurii-izman/voiceforge/issues/29) | Ops | RAG ODT/RTF тесты | При добавлении парсеров |
 | [#30](https://github.com/iurii-izman/voiceforge/issues/30) | Ops | Dependabot 1 moderate | dependabot-review.md |
