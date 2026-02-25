@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** #34 A3 unit tests daemon/streaming/smart_trigger закрыт (добавлены тесты; omit оставлен — снятие дало бы ~37% coverage). Следующий шаг: **#35** WAV e2e integration tests.
+- **Сейчас:** #35 WAV e2e integration tests закрыт (4 теста, fixtures, Makefile test-integration, CI job stt-integration). Следующий шаг: **#36** Observability (metrics/tracing) или по roadmap-priority.
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-#34 A3 unit tests daemon/streaming/smart_trigger закрыт: тесты для get_streaming_transcript, get_api_version, get_capabilities, get_sessions/get_session_detail/get_indexed_paths/get_analytics (exception paths), SmartTrigger (VAD mocked), StreamingTranscriber (feed+flush). Coverage omit оставлен (fail_under 80%).
+#35 WAV e2e integration tests закрыт: tests/fixtures/ (silence_5s.wav, clean_5s.wav, clean_30s.wav), tests/test_stt_integration.py (4 теста: silence → (тишина), segment fields), scripts/gen_stt_fixtures.py, Makefile test-integration, CI: quality -m "not integration", job stt-integration. Пуш не выполнен: для обновления .github/workflows нужен scope workflow — выполнить `git push` вручную.
 
 ---
 
@@ -39,7 +39,7 @@
 | ~~#32~~ | A · P0 | Eval harness (ROUGE-L + LLM-judge) | **Закрыт** — 21 samples, test_llm_judge_one_golden_sample |
 | ~~#33~~ | A · P0 | Instructor retry | **Закрыт** — max_retries=3 в complete_structured |
 | ~~#34~~ | A | Unit tests daemon/streaming/smart_trigger | **Закрыт** — тесты добавлены; omit оставлен (80% gate) |
-| [#35](https://github.com/iurii-izman/voiceforge/issues/35) | A | WAV integration tests | e2e pipeline test |
+| ~~#35~~ | A | WAV integration tests | **Закрыт** — 4 WAV-теста, fixtures, CI stt-integration |
 | ~~#27~~ | A | AppImage | **Закрыт** — toolbox сборка, deb/rpm/AppImage |
 | [#36](https://github.com/iurii-izman/voiceforge/issues/36) | B · P0 | Observability (metrics/tracing) | Prometheus/OpenTelemetry |
 | [#37](https://github.com/iurii-izman/voiceforge/issues/37) | B · P0 | pyannote memory guard | OOM risk ≤8GB |
@@ -58,6 +58,7 @@
    - ~~#33 A2 Instructor retry~~ — сделано (instructor.from_litellm, max_retries=3).
    - ~~#34 A3 unit tests daemon/streaming/smart_trigger~~ — сделано (тесты добавлены; omit оставлен).
    - ~~#27 A5 AppImage~~ — сделано (toolbox: NO_STRIP, librsvg2-devel; см. desktop-build-deps.md).
+   - ~~#35 A4 WAV integration tests~~ — сделано (tests/fixtures/, test_stt_integration.py, make test-integration, CI stt-integration).
 2. **Phase B — Hardening (после A):** observability (Prometheus), pyannote memory guard, budget enforcement.
 3. **Документация:** при изменении CLI/конфига обновлять installation-guide, first-meeting-5min; обновлять DOCS-INDEX при новых доках.
 
