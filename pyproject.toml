@@ -26,6 +26,7 @@ dependencies = [
     "prometheus_client>=0.21",
     "psutil>=5.9",
     "numpy>=1.26,<3",
+    "scipy>=1.11",
     "faster-whisper>=1.1.0,<2.0",
     "dbus-fast>=2.0",
     "pyannote.audio==4.0.4",

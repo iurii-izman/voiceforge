@@ -4509,6 +4509,7 @@ dependencies = [
     { name = "pyannote-audio" },
     { name = "pydantic-settings" },
     { name = "pyyaml" },
+    { name = "scipy" },
     { name = "structlog" },
     { name = "typer" },
 ]
@@ -4589,6 +4590,7 @@ requires-dist = [
     { name = "pymupdf", marker = "extra == 'rag'", specifier = ">=1.24" },
     { name = "python-docx", marker = "extra == 'rag'", specifier = ">=1.0" },
     { name = "pyyaml", specifier = ">=6.0" },
+    { name = "scipy", specifier = ">=1.11" },
     { name = "sqlite-vec", marker = "extra == 'rag'", specifier = ">=0.1.0" },
     { name = "striprtf", marker = "extra == 'rag'", specifier = ">=0.0.27" },
     { name = "structlog", specifier = ">=24.0" },

@@ -12,6 +12,8 @@ import numpy as np
 import psutil
 import structlog
 
+from voiceforge.i18n import t
+
 log = structlog.get_logger()
 
 # #37: skip diarization when available RAM < 2GB to avoid OOM on ≤8GB systems
@@ -65,7 +67,7 @@ def _step1_stt(
     else:
         transcriber = Transcriber(model_size=model_size)
     segments = transcriber.transcribe(audio, sample_rate=sample_rate, language=language_hint)
-    transcript = " ".join(s.text for s in segments if s.text).strip() or "(тишина)"
+    transcript = " ".join(s.text for s in segments if s.text).strip() or t("pipeline.silence")
     duration_sec = time.monotonic() - t0
     log.info("pipeline.step1_stt", segments=len(segments), duration_sec=round(duration_sec, 2))
     try:
@@ -203,14 +205,14 @@ class AnalysisPipeline:
         """Run steps 1–2. Returns (PipelineResult, None) or (None, error_str)."""
         ring_path = self._cfg.get_ring_file_path()
         if not Path(ring_path).is_file():
-            return (None, "Ошибка: сначала запустите voiceforge listen.")
+            return (None, t("pipeline.run_listen_first"))
         raw = Path(ring_path).read_bytes()
         want = int(seconds * self._cfg.sample_rate * 2)
         if len(raw) > want:
             raw = raw[-want:]
         raw = raw[: len(raw) - (len(raw) % 2)]
         if len(raw) < self._cfg.sample_rate * 2:
-            return (None, "Ошибка: недостаточно аудио в буфере.")
+            return (None, t("pipeline.insufficient_audio"))
         audio = np.frombuffer(raw, dtype=np.int16)
         effective_rate = self._cfg.sample_rate
         if effective_rate != TARGET_SAMPLE_RATE:
@@ -234,7 +236,7 @@ class AnalysisPipeline:
                 record_pipeline_error("stt")
             except ImportError:
                 pass
-            return (None, "Ошибка: установите зависимости (uv sync).")
+            return (None, t("error.install_deps"))
         except Exception as e:
             log.warning("pipeline.step1_failed", error=str(e))
             try:
@@ -243,7 +245,7 @@ class AnalysisPipeline:
                 record_pipeline_error("stt")
             except ImportError:
                 pass
-            return (None, f"Ошибка STT: {e}")
+            return (None, t("error.stt_failed", e=str(e)))
 
         audio_f = audio.astype(np.float32) / 32768.0
         diar_segments: list[Any] = []
