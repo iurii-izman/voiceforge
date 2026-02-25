@@ -240,8 +240,8 @@ def run_analyze_pipeline(
     try:
         from voiceforge.core.pipeline import AnalysisPipeline
 
-        pipeline = AnalysisPipeline(cfg)
-        result, err = pipeline.run(seconds)
+        with AnalysisPipeline(cfg) as pipeline:
+            result, err = pipeline.run(seconds)
     except ImportError:
         return (t("error.install_deps"), [], {})
 
@@ -304,8 +304,8 @@ def run_live_summary_pipeline(seconds: int) -> tuple[list[str], float]:
     try:
         from voiceforge.core.pipeline import AnalysisPipeline
 
-        pipeline = AnalysisPipeline(cfg)
-        result, err = pipeline.run(seconds)
+        with AnalysisPipeline(cfg) as pipeline:
+            result, err = pipeline.run(seconds)
     except ImportError:
         return ([t("error.install_deps")], 0.0)
 

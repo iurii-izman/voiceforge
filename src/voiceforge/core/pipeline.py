@@ -196,10 +196,18 @@ def _step2_pii(transcript: str, pii_mode: str = "ON") -> str:
 
 
 class AnalysisPipeline:
-    """Block 10.2: Step 1 STT, Step 2 parallel (diarization + RAG + PII), profiling."""
+    """Block 10.2: Step 1 STT, Step 2 parallel (diarization + RAG + PII), profiling.
+    ThreadPoolExecutor is created once per instance (W15/QW3), use as context manager for cleanup."""
 
     def __init__(self, cfg: Any) -> None:
         self._cfg = cfg
+        self._executor = ThreadPoolExecutor(max_workers=3)
+
+    def __enter__(self) -> AnalysisPipeline:
+        return self
+
+    def __exit__(self, *args: Any) -> None:
+        self._executor.shutdown(wait=False, cancel_futures=True)
 
     def run(self, seconds: int) -> tuple[PipelineResult | None, str | None]:
         """Run steps 1–2. Returns (PipelineResult, None) or (None, error_str)."""
@@ -254,42 +262,38 @@ class AnalysisPipeline:
 
         step2_start = time.monotonic()
         timeout_sec = max(1.0, float(getattr(self._cfg, "pipeline_step2_timeout_sec", 25.0)))
-        executor = ThreadPoolExecutor(max_workers=3)
-        try:
-            futures: dict[str, Future[Any]] = {
-                "diarization": executor.submit(
-                    _step2_diarization,
-                    audio_f,
-                    effective_rate,
-                    self._cfg.pyannote_restart_hours,
-                ),
-                "rag": executor.submit(
-                    _step2_rag,
-                    transcript,
-                    self._cfg.get_rag_db_path(),
-                ),
-                "pii": executor.submit(_step2_pii, transcript, getattr(self._cfg, "pii_mode", "ON")),
-            }
+        futures: dict[str, Future[Any]] = {
+            "diarization": self._executor.submit(
+                _step2_diarization,
+                audio_f,
+                effective_rate,
+                self._cfg.pyannote_restart_hours,
+            ),
+            "rag": self._executor.submit(
+                _step2_rag,
+                transcript,
+                self._cfg.get_rag_db_path(),
+            ),
+            "pii": self._executor.submit(_step2_pii, transcript, getattr(self._cfg, "pii_mode", "ON")),
+        }
 
-            done, not_done = wait(futures.values(), timeout=timeout_sec)
-            timed_out = [name for name, fut in futures.items() if fut in not_done]
-            for name in timed_out:
-                futures[name].cancel()
-            if timed_out:
-                log.warning(
-                    "pipeline.step2_timeout",
-                    timeout_sec=timeout_sec,
-                    timed_out=timed_out,
-                )
+        done, not_done = wait(futures.values(), timeout=timeout_sec)
+        timed_out = [name for name, fut in futures.items() if fut in not_done]
+        for name in timed_out:
+            futures[name].cancel()
+        if timed_out:
+            log.warning(
+                "pipeline.step2_timeout",
+                timeout_sec=timeout_sec,
+                timed_out=timed_out,
+            )
 
-            if "diarization" in futures and futures["diarization"] in done:
-                diar_segments = futures["diarization"].result()
-            if "rag" in futures and futures["rag"] in done:
-                context = futures["rag"].result()
-            if "pii" in futures and futures["pii"] in done:
-                transcript_redacted = futures["pii"].result()
-        finally:
-            executor.shutdown(wait=False, cancel_futures=True)
+        if "diarization" in futures and futures["diarization"] in done:
+            diar_segments = futures["diarization"].result()
+        if "rag" in futures and futures["rag"] in done:
+            context = futures["rag"].result()
+        if "pii" in futures and futures["pii"] in done:
+            transcript_redacted = futures["pii"].result()
         step2_duration = time.monotonic() - step2_start
         log.info("pipeline.step2_total", duration_sec=round(step2_duration, 2))
 
