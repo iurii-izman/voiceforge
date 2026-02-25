@@ -54,5 +54,10 @@ cloudflared tunnel --url http://127.0.0.1:8765
 - `/sessions` — last 10 sessions (id, date, duration).
 - `/latest` — latest analysis (session + first answer or "no analyses yet").
 - `/cost [days]` — cost for the period (default 7 days; up to 365).
+- `/subscribe` — enable push notifications: the bot stores your chat_id in keyring (`telegram_chat_id`), and when an analysis completes (CLI, Web UI, or daemon) you get a short message in Telegram.
 
 Further: `/analyze` etc. — as needed.
+
+## 5. Push notifications when analyze completes
+
+After sending `/subscribe` in the bot, whenever an analysis finishes successfully (`voiceforge analyze`, Web UI "Analyze" button, or daemon smart trigger), a Telegram message is sent with the session id and the start of the result. Keys: `webhook_telegram` (bot token) and `telegram_chat_id` (set automatically by `/subscribe`). If `telegram_chat_id` is not set, no notifications are sent.

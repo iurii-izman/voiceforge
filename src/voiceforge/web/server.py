@@ -20,9 +20,11 @@ _ERR_INVALID_JSON = "invalid JSON"
 def _telegram_webhook_reply(text: str) -> str:
     """Compute bot reply for given command text (S3776: extracted from _handle_telegram_webhook)."""
     if text == "/start":
-        return "VoiceForge bot. Commands: /start /help /status /sessions /latest /cost [days]"
+        return "VoiceForge bot. Commands: /start /help /status /sessions /latest /cost [days] /subscribe"
     if text == "/help":
-        return "VoiceForge bot. Commands: /start /help /status /sessions /latest /cost [days]"
+        return "VoiceForge bot. Commands: /start /help /status /sessions /latest /cost [days] /subscribe"
+    if text == "/subscribe":
+        return ""  # handled in _handle_telegram_webhook (save chat_id + custom reply)
     if text == "/status":
         try:
             from voiceforge.cli.status_helpers import get_status_data
@@ -95,7 +97,7 @@ def _telegram_webhook_reply(text: str) -> str:
         except Exception as e:
             _log.debug("telegram latest failed", exc_info=e)
             return f"Latest error: {e!s}"
-    return "Use /start, /help, /status, /sessions, /latest, /cost [days]"
+    return "Use /start, /help, /status, /sessions, /latest, /cost [days], /subscribe"
 
 
 def _telegram_send_message(token: str, chat_id: int | str, text: str) -> None:
@@ -627,6 +629,12 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
                     "analysis": analysis_for_log,
                 }
             )
+            try:
+                from voiceforge.core.telegram_notify import notify_analyze_done
+
+                notify_analyze_done(session_id, display_text[:400] if display_text else "")
+            except Exception as _e:
+                _log.debug("telegram notify_analyze_done failed", exc_info=_e)
         except Exception as e:
             self._send_error_json(str(e), 500)
 
@@ -654,7 +662,13 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.end_headers()
             return
-        reply = _telegram_webhook_reply(text)
+        if text == "/subscribe":
+            from voiceforge.core.telegram_notify import set_telegram_chat_id
+
+            set_telegram_chat_id(chat_id)
+            reply = "Push notifications enabled. You'll get a message when analyze completes."
+        else:
+            reply = _telegram_webhook_reply(text)
         _telegram_send_message(token, chat_id, reply)
         self.send_response(200)
         self.send_header("Content-Type", _CONTENT_TYPE_JSON)

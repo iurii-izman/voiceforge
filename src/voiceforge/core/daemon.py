@@ -473,6 +473,12 @@ class VoiceForgeDaemon:
                         template=analysis_for_log.get("template"),
                     )
                     log.info("smart_trigger.logged", session_id=session_id)
+                    try:
+                        from voiceforge.core.telegram_notify import notify_analyze_done
+
+                        notify_analyze_done(session_id, (text or "")[:400])
+                    except Exception as _e:
+                        log.debug("smart_trigger.telegram_notify_failed", error=str(_e))
                 finally:
                     log_db.close()
             except Exception as e:

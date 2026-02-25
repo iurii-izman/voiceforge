@@ -13,7 +13,8 @@
 | `github_token_pat` | GitHub Personal Access Token |
 | `codecov_token` | Codecov |
 | `codecov_token_codecov.yml` | Codecov (workflow) |
-| `webhook_telegram` | Telegram webhook |
+| `webhook_telegram` | Telegram webhook (bot token) |
+| `telegram_chat_id` | Telegram chat for push notifications (set by bot `/subscribe`) |
 | `b24webhook` | Bitrix24 webhook |
 | `MCPcode` | Прочие сервисы |
 | `caldav_url` | CalDAV calendar URL (e.g. https://nextcloud.example.com/remote.php/dav) |

@@ -566,6 +566,13 @@ def analyze(
     except Exception as e:
         log.warning("analyze.log_failed", error=str(e))
 
+    try:
+        from voiceforge.core.telegram_notify import notify_analyze_done
+
+        notify_analyze_done(session_id, (display_text or "")[:400])
+    except Exception as e:
+        log.debug("analyze.telegram_notify_failed", error=str(e))
+
     if output == "json":
         typer.echo(
             json.dumps(
