@@ -12,4 +12,4 @@
 
 ## Текущий статус
 
-- **CVE-2025-69872 (diskcache):** фиксирующей версии нет (transitive dependency, тянется через litellm). В CI уже используется `pip-audit --ignore-vuln CVE-2025-69872` (см. [security.md](security.md)). Рекомендуется **отложить алерт вручную**: Dependabot → Alert → Dismiss → «Accept risk», комментарий: «No fix version yet. See docs/runbooks/security.md. Revisit when upstream fixes.» После появления фикса в upstream — снять ignore в security.md и обновить зависимость.
+- **CVE-2025-69872 (diskcache):** фиксирующей версии нет (transitive dependency, тянется через litellm). В CI уже используется `pip-audit --ignore-vuln CVE-2025-69872` (см. [security.md](security.md)). Рекомендуется **отложить алерт вручную**: Dependabot → Alert → Dismiss → «Accept risk», комментарий: «No fix version yet. See docs/runbooks/security.md. Revisit when upstream fixes.» Либо запустить скрипт (нужен `github_token` в keyring с правом `security_events`): `uv run python scripts/dependabot_dismiss_moderate.py`. После появления фикса в upstream — снять ignore в security.md и обновить зависимость.
