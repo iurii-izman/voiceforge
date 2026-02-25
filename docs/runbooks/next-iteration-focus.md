@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** D2 доработка: push-уведомления по завершении analyze сделаны (/subscribe, telegram_notify, вызов из CLI/Web/daemon). Следующий шаг: приоритет по roadmap Phase D (#48 Calendar, #49 Flatpak, #50 macOS) или Phase C (#41–45); или следующая фича из docs/roadmap-priority.md.
+- **Сейчас:** D3 Calendar (#48) закрыт — контекст следующего события CalDAV инжектируется в analyze при `calendar_context_enabled: true`. Следующий шаг: Phase D #49 Flatpak или #50 macOS; или Phase C (#41–45); или фича из docs/roadmap-priority.md.
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-Telegram push: core/telegram_notify.py (get/set telegram_chat_id, notify_analyze_done); команда /subscribe в боте; уведомления после успешного analyze из CLI, Web /api/analyze и daemon smart_trigger. keyring-keys-reference + telegram-bot-setup(en): /subscribe и секция про push.
+D3 (#48) Calendar: caldav_poll.get_next_meeting_context(hours_ahead); Settings calendar_context_enabled; pipeline инжектирует контекст следующего события в RAG context для analyze. Документация calendar-integration.md, config-env-contract; тесты test_calendar.py (mock CalDAV).
 
 ---
 
@@ -47,7 +47,8 @@ Telegram push: core/telegram_notify.py (get/set telegram_chat_id, notify_analyze
 | ~~#39~~ | B | IPC envelope | **Закрыт** |
 | ~~#40~~ | B | CI cache | **Закрыт** — enable-cache в setup-uv |
 | [#41–45](https://github.com/iurii-izman/voiceforge/issues/41) | C | Prompt mgmt, RAG, retention, caching, healthcheck | Phase C scale |
-| [#46–50](https://github.com/iurii-izman/voiceforge/issues/46) | D | Desktop signals, Telegram, Calendar, Flatpak, macOS | Phase D productize |
+| ~~#48~~ | D | Calendar — auto-context в analyze | **Закрыт** — get_next_meeting_context, calendar_context_enabled, pipeline inject |
+| [#46–50](https://github.com/iurii-izman/voiceforge/issues/46) | D | Desktop signals, Telegram, Flatpak, macOS | Phase D productize |
 | [#29](https://github.com/iurii-izman/voiceforge/issues/29) | Ops | RAG ODT/RTF тесты | При добавлении парсеров |
 | [#30](https://github.com/iurii-izman/voiceforge/issues/30) | Ops | Dependabot 1 moderate | dependabot-review.md |
 
