@@ -86,6 +86,7 @@
 | sonar-pr-cleanup.md | Очистка PR/Sonar | Актуален |
 | offline-package.md | Flatpak/AppImage, чеклист next steps | Черновик |
 | planning-and-tools.md | Планирование: Markdown-backlog vs GitHub Projects в связке с агентом | Актуален |
+| prompt-management.md | Промпты LLM (prompts/), загрузка, версия, тесты (C1 #41) | Актуален |
 | backlog.md | Зеркало GitHub Project (текущий фокус + Todo) | Актуален |
 | calendar-integration.md | Интеграция с календарём (roadmap 17), исследование | Актуален |
 | rag-formats.md | RAG: форматы индексатора, план ODT/RTF (roadmap 18) | Актуален |
