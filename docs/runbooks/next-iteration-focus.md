@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** #36 Observability закрыт (core/observability.py, /metrics, Grafana dashboard, observability-alerts.md). Следующий шаг: **#37** pyannote memory guard (OOM risk ≤8GB) или следующая задача по roadmap-priority.
+- **Сейчас:** #37 pyannote memory guard закрыт (pipeline: skip diarization при available < 2GB, OOM fallback, tests/test_pipeline_memory_guard.py, pyannote-version.md). Следующий шаг: **#38** budget enforcement или следующая задача по roadmap-priority.
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-#36 Observability: prometheus_client в pyproject; core/observability.py (6 метрик: stt/diarization/rag histograms, llm_cost_usd_total, llm_calls_total, pipeline_errors_total); интеграция в pipeline.py и router.py; GET /metrics в web/server.py; docs/grafana-voiceforge-dashboard.json, docs/runbooks/observability-alerts.md; tests/test_observability.py. Коммит и пуш выполнены (Closes #36).
+#37 pyannote memory guard: pipeline.py — psutil.virtual_memory().available < 2GB → skip diarization с warning; try/except MemoryError и RuntimeError("out of memory") → return []; tests/test_pipeline_memory_guard.py (low-memory skip + OOM fallback); docs/runbooks/pyannote-version.md обновлён. Коммит и пуш выполнены (Closes #37).
 
 ---
 
@@ -42,7 +42,7 @@
 | ~~#35~~ | A | WAV integration tests | **Закрыт** — 4 WAV-теста, fixtures, CI stt-integration |
 | ~~#27~~ | A | AppImage | **Закрыт** — toolbox сборка, deb/rpm/AppImage |
 | ~~#36~~ | B · P0 | Observability (metrics/tracing) | **Закрыт** — prometheus_client, /metrics, Grafana, alerts |
-| [#37](https://github.com/iurii-izman/voiceforge/issues/37) | B · P0 | pyannote memory guard | OOM risk ≤8GB |
+| ~~#37~~ | B · P0 | pyannote memory guard | **Закрыт** — skip diarization <2GB, OOM fallback |
 | [#38–40](https://github.com/iurii-izman/voiceforge/issues/38) | B | Budget enforcement, IPC envelope, CI cache | Phase B hardening |
 | [#41–45](https://github.com/iurii-izman/voiceforge/issues/41) | C | Prompt mgmt, RAG, retention, caching, healthcheck | Phase C scale |
 | [#46–50](https://github.com/iurii-izman/voiceforge/issues/46) | D | Desktop signals, Telegram, Calendar, Flatpak, macOS | Phase D productize |
@@ -59,7 +59,7 @@
    - ~~#34 A3 unit tests daemon/streaming/smart_trigger~~ — сделано (тесты добавлены; omit оставлен).
    - ~~#27 A5 AppImage~~ — сделано (toolbox: NO_STRIP, librsvg2-devel; см. desktop-build-deps.md).
    - ~~#35 A4 WAV integration tests~~ — сделано (tests/fixtures/, test_stt_integration.py, make test-integration, CI stt-integration).
-2. **Phase B — Hardening (после A):** ~~observability (Prometheus)~~ — сделано (#36); pyannote memory guard (#37), budget enforcement.
+2. **Phase B — Hardening (после A):** ~~observability (Prometheus)~~ — сделано (#36); ~~pyannote memory guard~~ — сделано (#37); budget enforcement (#38).
 3. **Документация:** при изменении CLI/конфига обновлять installation-guide, first-meeting-5min; обновлять DOCS-INDEX при новых доках.
 
 ---
