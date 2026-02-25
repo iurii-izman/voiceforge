@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** #38 budget enforcement закрыт (pre-call daily limit в router, BudgetExceeded, daily_budget_limit_usd в config, graceful CLI). Следующий шаг: **#39** IPC envelope или следующая задача по roadmap-priority.
+- **Сейчас:** #39 IPC envelope + analyze timeout закрыт (envelope_v1 default True, analyze_timeout_sec 120, ANALYZE_TIMEOUT JSON, тесты). Следующий шаг: **#40** CI cache или следующая задача по roadmap-priority (docs/roadmap-priority.md: 1–4 быстрые победы, 5–7 доки/отчёты/STT).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-#38 budget enforcement: core/contracts BudgetExceeded; config daily_budget_limit_usd (default budget_limit_usd/30); llm/router pre-call check get_cost_today() >= daily_budget_limit_usd + alert при >80%; main.py catch BudgetExceeded в analyze/live_summary/action-items; i18n error.budget_exceeded; тесты test_llm_retry + test_config_settings; config-env-contract. Коммит и пуш (Closes #38).
+#39 IPC envelope по умолчанию + analyze timeout: daemon get_capabilities envelope_v1 default=True; config analyze_timeout_sec (120); daemon.analyze() в ThreadPoolExecutor с future.result(timeout), при TimeoutError — JSON error ANALYZE_TIMEOUT (retryable); config-env-contract, CHANGELOG; тесты get_capabilities envelope_v1, test_daemon_analyze_timeout_returns_error. Коммит и пуш (Closes #39).
 
 ---
 
@@ -60,7 +60,7 @@
    - ~~#34 A3 unit tests daemon/streaming/smart_trigger~~ — сделано (тесты добавлены; omit оставлен).
    - ~~#27 A5 AppImage~~ — сделано (toolbox: NO_STRIP, librsvg2-devel; см. desktop-build-deps.md).
    - ~~#35 A4 WAV integration tests~~ — сделано (tests/fixtures/, test_stt_integration.py, make test-integration, CI stt-integration).
-2. **Phase B — Hardening (после A):** ~~observability (Prometheus)~~ — сделано (#36); ~~pyannote memory guard~~ — сделано (#37); ~~budget enforcement~~ — сделано (#38); IPC envelope (#39).
+2. **Phase B — Hardening (после A):** ~~observability (Prometheus)~~ — сделано (#36); ~~pyannote memory guard~~ — сделано (#37); ~~budget enforcement~~ — сделано (#38); ~~IPC envelope~~ — сделано (#39); CI cache (#40).
 3. **Документация:** при изменении CLI/конфига обновлять installation-guide, first-meeting-5min; обновлять DOCS-INDEX при новых доках.
 
 ---
