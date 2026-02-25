@@ -98,6 +98,10 @@ known-first-party = ["voiceforge"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+markers = [
+    "integration: WAV-based STT integration tests (slow, real model).",
+    "slow: slow tests (e.g. download model, transcribe).",
+]
 
 [tool.coverage.run]
 source = ["src/voiceforge"]

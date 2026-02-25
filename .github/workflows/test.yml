@@ -29,7 +29,7 @@ jobs:
       - run: ./scripts/check_toolchain.sh
       - run: uv run ruff check src tests scripts
       - run: uv run mypy src/voiceforge/core src/voiceforge/llm src/voiceforge/rag src/voiceforge/stt --ignore-missing-imports
-      - run: uv run pytest tests -q --cov=src/voiceforge --cov-report=xml --cov-report=json --cov-fail-under=0
+      - run: uv run pytest tests -q -m "not integration" --cov=src/voiceforge --cov-report=xml --cov-report=json --cov-fail-under=0
       - if: matrix.python-version == '3.12'
         run: ./scripts/check_new_code_coverage.sh --fail-under 20 --exclude web/server.py  # alpha: 20% new-code; raise later
       - uses: actions/upload-artifact@v6
@@ -81,6 +81,20 @@ jobs:
           version: ${{ env.UV_VERSION }}
       - run: uv sync --extra all
       - run: uv run pytest tests/test_cli_e2e_smoke.py -q
+
+  stt-integration:
+    name: stt-integration (slow)
+    runs-on: ubuntu-latest
+    env:
+      UV_VERSION: "0.8"
+    steps:
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b # v7
+        with:
+          python-version: "3.12"
+          version: ${{ env.UV_VERSION }}
+      - run: uv sync --extra all
+      - run: uv run pytest tests/test_stt_integration.py -v -m integration
 
   security:
     name: security

@@ -5,6 +5,7 @@ __pycache__/
 dist/
 build/
 *.wav
+!tests/fixtures/*.wav
 *.mp3
 *.raw
 *.onnx
