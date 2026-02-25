@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** C3 (#43) реализован: retention_days в config, purge_before() в transcript_log, auto-cleanup при старте daemon, CLI `history --purge-before YYYY-MM-DD`, тест test_retention_purge_removes_old_sessions. Следующий шаг: **C4 (#44)** или roadmap 5 (доки «Первая встреча за 5 минут»).
+- **Сейчас:** C4 (#44) реализован: response cache (content-hash, SQLite llm_response_cache.db, TTL из config), интеграция в complete_structured, log_response_cache(hit/miss), тест test_response_cache_second_call_hits_cache. Следующий шаг: **C5 (#45)** Healthcheck endpoint или roadmap 5 (доки «Первая встреча за 5 минут»).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-C3 (#43) Data retention: config.retention_days (default 90), TranscriptLog.purge_before(cutoff_date); daemon при старте вызывает purge по retention_days; CLI `history --purge-before YYYY-MM-DD`; config-env-contract и i18n (history.purge_done); тест test_retention_purge_removes_old_sessions. Closes #43.
+C4 (#44) Response caching: config.response_cache_ttl_seconds (default 86400, 0=disable); llm/cache.py (cache_key, get, set, llm_response_cache.db); router.complete_structured — проверка кэша до вызова LLM, запись после; метрика response_cache_log уже в get_stats. Closes #44.
 
 ---
 
