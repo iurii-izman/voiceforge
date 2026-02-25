@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** #39 IPC envelope + analyze timeout закрыт (envelope_v1 default True, analyze_timeout_sec 120, ANALYZE_TIMEOUT JSON, тесты). Следующий шаг: **#40** CI cache или следующая задача по roadmap-priority (docs/roadmap-priority.md: 1–4 быстрые победы, 5–7 доки/отчёты/STT).
+- **Сейчас:** #40 CI cache закрыт (enable-cache: true в setup-uv для test.yml, sonar.yml, release.yml, security-weekly.yml). Следующий шаг: **roadmap 1** — шаблоны встреч в `analyze` (docs/roadmap-priority.md) или #41 Phase C (prompt mgmt, RAG, retention и т.д.) по доске.
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-#39 IPC envelope по умолчанию + analyze timeout: daemon get_capabilities envelope_v1 default=True; config analyze_timeout_sec (120); daemon.analyze() в ThreadPoolExecutor с future.result(timeout), при TimeoutError — JSON error ANALYZE_TIMEOUT (retryable); config-env-contract, CHANGELOG; тесты get_capabilities envelope_v1, test_daemon_analyze_timeout_returns_error. Коммит и пуш (Closes #39).
+#40 CI cache: во всех workflow с uv (test.yml, sonar.yml, release.yml, security-weekly.yml) добавлен enable-cache: true в astral-sh/setup-uv. Коммит и пуш (Closes #40).
 
 ---
 
@@ -44,7 +44,8 @@
 | ~~#36~~ | B · P0 | Observability (metrics/tracing) | **Закрыт** — prometheus_client, /metrics, Grafana, alerts |
 | ~~#37~~ | B · P0 | pyannote memory guard | **Закрыт** — skip diarization <2GB, OOM fallback |
 | ~~#38~~ | B | Budget enforcement | **Закрыт** — pre-call daily limit, BudgetExceeded, alert 80% |
-| [#39–40](https://github.com/iurii-izman/voiceforge/issues/39) | B | IPC envelope, CI cache | Phase B hardening |
+| ~~#39~~ | B | IPC envelope | **Закрыт** |
+| ~~#40~~ | B | CI cache | **Закрыт** — enable-cache в setup-uv |
 | [#41–45](https://github.com/iurii-izman/voiceforge/issues/41) | C | Prompt mgmt, RAG, retention, caching, healthcheck | Phase C scale |
 | [#46–50](https://github.com/iurii-izman/voiceforge/issues/46) | D | Desktop signals, Telegram, Calendar, Flatpak, macOS | Phase D productize |
 | [#29](https://github.com/iurii-izman/voiceforge/issues/29) | Ops | RAG ODT/RTF тесты | При добавлении парсеров |
@@ -60,7 +61,7 @@
    - ~~#34 A3 unit tests daemon/streaming/smart_trigger~~ — сделано (тесты добавлены; omit оставлен).
    - ~~#27 A5 AppImage~~ — сделано (toolbox: NO_STRIP, librsvg2-devel; см. desktop-build-deps.md).
    - ~~#35 A4 WAV integration tests~~ — сделано (tests/fixtures/, test_stt_integration.py, make test-integration, CI stt-integration).
-2. **Phase B — Hardening (после A):** ~~observability (Prometheus)~~ — сделано (#36); ~~pyannote memory guard~~ — сделано (#37); ~~budget enforcement~~ — сделано (#38); ~~IPC envelope~~ — сделано (#39); CI cache (#40).
+2. **Phase B — Hardening (после A):** ~~observability (Prometheus)~~ — сделано (#36); ~~pyannote memory guard~~ — сделано (#37); ~~budget enforcement~~ — сделано (#38); ~~IPC envelope~~ — сделано (#39); ~~CI cache~~ — сделано (#40).
 3. **Документация:** при изменении CLI/конфига обновлять installation-guide, first-meeting-5min; обновлять DOCS-INDEX при новых доках.
 
 ---
