@@ -6,7 +6,10 @@ The format is based on Keep a Changelog and this project follows SemVer pre-rele
 
 ## [Unreleased]
 
-_No changes yet._
+### Changed
+
+- **IPC envelope (#39):** D-Bus/daemon `envelope_v1` is **on by default** (was off). Set `VOICEFORGE_IPC_ENVELOPE=0` for legacy plain-string clients. GetCapabilities and all D-Bus string payloads use envelope when enabled.
+- **Analyze timeout (#39):** `analyze()` (D-Bus/CLI) now respects `analyze_timeout_sec` (default 120s). On timeout returns structured error `ANALYZE_TIMEOUT` (retryable). Config: `VOICEFORGE_ANALYZE_TIMEOUT_SEC` / `analyze_timeout_sec` in voiceforge.yaml.
 
 ## [0.2.0-alpha.1] - 2026-02-24
 

@@ -109,6 +109,10 @@ class Settings(BaseSettings):
         default=25.0,
         description="Timeout for parallel step2 (diarization/rag/pii). On timeout pipeline degrades gracefully.",
     )
+    analyze_timeout_sec: float = Field(
+        default=120.0,
+        description="Max seconds for a single analyze() call (D-Bus/CLI). On timeout returns ANALYZE_TIMEOUT error (#39).",
+    )
     streaming_stt: bool = Field(
         default=False,
         description="Block 10.1: during listen, show partial/final transcript in real time (chunk-based STT).",
@@ -170,6 +174,13 @@ class Settings(BaseSettings):
     def _timeout_positive(cls, v: float) -> float:
         if v <= 0:
             raise ValueError("pipeline_step2_timeout_sec must be positive")
+        return v
+
+    @field_validator("analyze_timeout_sec")
+    @classmethod
+    def _analyze_timeout_positive(cls, v: float) -> float:
+        if v <= 0:
+            raise ValueError("analyze_timeout_sec must be positive")
         return v
 
     @field_validator("sample_rate")

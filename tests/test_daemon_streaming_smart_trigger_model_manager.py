@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import time
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -162,6 +163,30 @@ def test_daemon_get_api_version_and_capabilities(tmp_path, monkeypatch) -> None:
     assert caps["api_version"] == "1.0"
     assert "listen" in caps["features"]
     assert caps["features"]["listen"] is True
+    assert caps["features"].get("envelope_v1") is True
+
+
+def test_daemon_analyze_timeout_returns_error(tmp_path, monkeypatch) -> None:
+    """Daemon analyze() returns ANALYZE_TIMEOUT JSON when pipeline exceeds analyze_timeout_sec (#39)."""
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path))
+
+    def block_pipeline(*args: object, **kwargs: object) -> tuple[str, list, object]:
+        time.sleep(10)
+        return ("", [], None)
+
+    with patch("voiceforge.core.daemon.Settings") as mock_settings:
+        mock_cfg = MagicMock()
+        mock_cfg.analyze_timeout_sec = 0.05
+        mock_settings.return_value = mock_cfg
+        with patch("voiceforge.main.run_analyze_pipeline", side_effect=block_pipeline):
+            from voiceforge.core.daemon import VoiceForgeDaemon
+
+            daemon = VoiceForgeDaemon(iface=None)
+            result = daemon.analyze(30)
+    data = json.loads(result)
+    assert "error" in data
+    assert data["error"]["code"] == "ANALYZE_TIMEOUT"
+    assert data["error"].get("retryable") is True
 
 
 def test_daemon_get_sessions_returns_empty_on_exception(tmp_path, monkeypatch) -> None:

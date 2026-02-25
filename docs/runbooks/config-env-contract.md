@@ -26,13 +26,14 @@ Priority order:
 | `aggressive_memory` | `VOICEFORGE_AGGRESSIVE_MEMORY` | `false` | Unload models after analyze |
 | `pyannote_restart_hours` | `VOICEFORGE_PYANNOTE_RESTART_HOURS` | `2` | Periodic pyannote restart |
 | `pipeline_step2_timeout_sec` | `VOICEFORGE_PIPELINE_STEP2_TIMEOUT_SEC` | `25.0` | Timeout for parallel stage |
+| `analyze_timeout_sec` | `VOICEFORGE_ANALYZE_TIMEOUT_SEC` | `120.0` | Max seconds for a single analyze() call; on timeout returns ANALYZE_TIMEOUT (#39) |
 | `streaming_stt` | `VOICEFORGE_STREAMING_STT` | `false` | Live transcript in listen mode |
 | `live_summary_interval_sec` | `VOICEFORGE_LIVE_SUMMARY_INTERVAL_SEC` | `90` | Interval (and window) in seconds for `listen --live-summary` (e.g. every 90s for last 90s) |
 | `language` | `VOICEFORGE_LANGUAGE` | `auto` | UI language; when `ru`/`en` also passed to Whisper as STT hint |
 | `ollama_model` | `VOICEFORGE_OLLAMA_MODEL` | `phi3:mini` | Ollama model for local classify/simple_answer |
 | `pii_mode` | `VOICEFORGE_PII_MODE` | `ON` | PII redaction before LLM: `OFF` (none), `ON` (full regex+GLiNER), `EMAIL_ONLY` (email only) |
 
-**Validation:** Settings validates `model_size` (allowed: tiny, base, small, medium, large-v2, large-v3, large), `sample_rate` (1..192000), `default_llm` (non-empty), `budget_limit_usd` (≥ 0), `daily_budget_limit_usd` (≥ 0 when set), `pipeline_step2_timeout_sec` (positive), `ollama_model` (non-empty), `ring_seconds` (positive), `pyannote_restart_hours` (≥ 1), `live_summary_interval_sec` (≥ 1). Invalid values raise at load.
+**Validation:** Settings validates `model_size` (allowed: tiny, base, small, medium, large-v2, large-v3, large), `sample_rate` (1..192000), `default_llm` (non-empty), `budget_limit_usd` (≥ 0), `daily_budget_limit_usd` (≥ 0 when set), `pipeline_step2_timeout_sec` (positive), `analyze_timeout_sec` (positive), `ollama_model` (non-empty), `ring_seconds` (positive), `pyannote_restart_hours` (≥ 1), `live_summary_interval_sec` (≥ 1). Invalid values raise at load.
 
 ## Non-VOICEFORGE Environment Inputs
 

@@ -11,6 +11,8 @@ import queue
 import signal
 import threading
 from collections import deque
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FuturesTimeoutError
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -97,11 +99,26 @@ class VoiceForgeDaemon:
 
     def analyze(self, seconds: int, template: str | None = None) -> str:
         """Run full pipeline, return formatted text. Lazy-loads models on first call.
-        template: optional meeting template (standup, sprint_review, one_on_one, brainstorm, interview)."""
+        template: optional meeting template (standup, sprint_review, one_on_one, brainstorm, interview).
+        Respects analyze_timeout_sec (#39); on timeout returns JSON error for IPC envelope."""
         from voiceforge.main import run_analyze_pipeline
 
-        text, _segments, _analysis = run_analyze_pipeline(seconds, template=template)
-        return text
+        timeout_sec = max(1.0, float(getattr(self._cfg, "analyze_timeout_sec", 120.0)))
+        with ThreadPoolExecutor(max_workers=1) as ex:
+            future = ex.submit(run_analyze_pipeline, seconds, template=template)
+            try:
+                text, _segments, _analysis = future.result(timeout=timeout_sec)
+                return text
+            except FuturesTimeoutError:
+                return json.dumps(
+                    {
+                        "error": {
+                            "code": "ANALYZE_TIMEOUT",
+                            "message": "Analysis timed out",
+                            "retryable": True,
+                        }
+                    }
+                )
 
     def status(self) -> str:
         """Return RAM + cost string."""
@@ -311,7 +328,7 @@ class VoiceForgeDaemon:
                     "signals": True,
                     "signals_v1": True,
                     "analyze_timeout_v1": True,
-                    "envelope_v1": _env_flag("VOICEFORGE_IPC_ENVELOPE", default=False),
+                    "envelope_v1": _env_flag("VOICEFORGE_IPC_ENVELOPE", default=True),
                 },
             },
             ensure_ascii=False,
