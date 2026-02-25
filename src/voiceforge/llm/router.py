@@ -8,6 +8,7 @@ from typing import Any, TypeVar
 import structlog
 from pydantic import BaseModel
 
+from voiceforge.core.contracts import BudgetExceeded
 from voiceforge.core.secrets import set_env_keys_from_keyring
 from voiceforge.llm.pii_filter import redact
 
@@ -333,8 +334,26 @@ def complete_structured(
     model: str | None = None,
 ) -> tuple[TModel, float]:
     """Call LLM with fallbacks; return (validated Pydantic model, cost_usd).
-    Uses Instructor retry (max_retries=3) with validation context on parse errors (#33)."""
-    from voiceforge.core.metrics import log_llm_call, log_response_cache
+    Uses Instructor retry (max_retries=3) with validation context on parse errors (#33).
+    Pre-call budget check: reject if daily cost >= daily_budget_limit_usd (#38)."""
+    from voiceforge.core.config import Settings
+    from voiceforge.core.metrics import get_cost_today, log_llm_call, log_response_cache
+
+    cfg = Settings()
+    cost_today = get_cost_today()
+    daily_limit = cfg.daily_budget_limit_usd or 0.0
+    if daily_limit > 0 and cost_today >= daily_limit:
+        raise BudgetExceeded(
+            f"Daily LLM budget exceeded: ${cost_today:.2f} >= ${daily_limit:.2f}. "
+            "Adjust VOICEFORGE_DAILY_BUDGET_LIMIT_USD or wait until tomorrow."
+        )
+    if daily_limit > 0 and cost_today >= 0.8 * daily_limit:
+        log.warning(
+            "llm.budget_alert",
+            cost_today_usd=round(cost_today, 4),
+            daily_limit_usd=round(daily_limit, 4),
+            pct=round(100 * cost_today / daily_limit, 1),
+        )
 
     log_response_cache(False)
     set_env_keys_from_keyring()

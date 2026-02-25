@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, Self
 
 import structlog
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 log = structlog.get_logger()
@@ -75,6 +75,10 @@ class Settings(BaseSettings):
         description="Default LLM model id for analyze (Haiku 4.5)",
     )
     budget_limit_usd: float = Field(default=75.0, description="Monthly API budget USD")
+    daily_budget_limit_usd: float | None = Field(
+        default=None,
+        description="Daily LLM budget USD; default budget_limit_usd/30 (#38).",
+    )
     ring_seconds: float = Field(default=300.0, description="Ring buffer length seconds")
     ring_file_path: str | None = Field(
         default=None,
@@ -147,6 +151,19 @@ class Settings(BaseSettings):
         if v < 0:
             raise ValueError("budget_limit_usd must be >= 0")
         return v
+
+    @field_validator("daily_budget_limit_usd")
+    @classmethod
+    def _daily_budget_non_negative(cls, v: float | None) -> float | None:
+        if v is not None and v < 0:
+            raise ValueError("daily_budget_limit_usd must be >= 0")
+        return v
+
+    @model_validator(mode="after")
+    def _set_daily_budget_default(self) -> Self:
+        if self.daily_budget_limit_usd is None:
+            object.__setattr__(self, "daily_budget_limit_usd", self.budget_limit_usd / 30.0)
+        return self
 
     @field_validator("pipeline_step2_timeout_sec")
     @classmethod

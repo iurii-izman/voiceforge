@@ -35,6 +35,7 @@ from voiceforge.cli.status_helpers import (
 )
 from voiceforge.core.config import Settings
 from voiceforge.core.contracts import (
+    BudgetExceeded,
     build_cli_error_payload,
     build_cli_success_payload,
     extract_error_message,
@@ -279,6 +280,9 @@ def run_analyze_pipeline(
         )
     except ImportError:
         return (t("error.install_llm_deps"), [], {})
+    except BudgetExceeded as e:
+        log.warning("analyze.budget_exceeded", error=str(e))
+        return (t("error.budget_exceeded", msg=str(e)), [], {})
     except Exception as e:
         log.warning("analyze.llm_failed", error=str(e))
         return (t(_I18N_ERROR_LLM_FAILED, e=str(e)), [], {})
@@ -324,6 +328,9 @@ def run_live_summary_pipeline(seconds: int) -> tuple[list[str], float]:
         )
     except ImportError:
         return ([t("error.install_llm_deps")], 0.0)
+    except BudgetExceeded as e:
+        log.warning("live_summary.budget_exceeded", error=str(e))
+        return ([t("error.budget_exceeded", msg=str(e))], 0.0)
     except Exception as e:
         log.warning("live_summary.llm_failed", error=str(e))
         return ([t(_I18N_ERROR_LLM_FAILED, e=str(e))], 0.0)
@@ -658,6 +665,9 @@ def action_items_update(
             model=cfg.default_llm,
             pii_mode=cfg.pii_mode,
         )
+    except BudgetExceeded as e:
+        typer.echo(t("error.budget_exceeded", msg=str(e)), err=True)
+        raise SystemExit(1) from None
     except Exception as e:
         typer.echo(t(_I18N_ERROR_LLM_FAILED, e=str(e)), err=True)
         raise SystemExit(1) from None

@@ -24,6 +24,7 @@
   "error.pipeline_empty": "Ошибка: pipeline вернул пустой результат.",
   "error.install_llm_deps": "Ошибка: установите LLM зависимости (uv sync --extra llm).",
   "error.llm_failed": "Ошибка LLM: {e}",
+  "error.budget_exceeded": "Дневной бюджет LLM исчерпан. {msg}",
   "error.audio_module_not_found": "Ошибка: модуль audio не найден.",
   "error.rag_deps": "Установите зависимости RAG: uv sync --extra rag",
   "error.pandoc": "Ошибка pandoc: {err}",

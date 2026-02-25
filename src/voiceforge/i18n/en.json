@@ -24,6 +24,7 @@
   "error.pipeline_empty": "Error: pipeline returned empty result.",
   "error.install_llm_deps": "Error: install LLM dependencies (uv sync --extra llm).",
   "error.llm_failed": "LLM error: {e}",
+  "error.budget_exceeded": "Daily LLM budget exceeded. {msg}",
   "error.audio_module_not_found": "Error: audio module not found.",
   "error.rag_deps": "Install RAG dependencies: uv sync --extra rag",
   "error.pandoc": "Pandoc error: {err}",

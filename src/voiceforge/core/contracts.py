@@ -5,6 +5,15 @@ from __future__ import annotations
 import json
 from typing import Any
 
+
+class BudgetExceeded(Exception):
+    """Raised when daily LLM budget limit is exceeded (#38)."""
+
+    def __init__(self, message: str = "Daily LLM budget exceeded") -> None:
+        self.message = message
+        super().__init__(message)
+
+
 CLI_SCHEMA_VERSION = "1.0"
 IPC_SCHEMA_VERSION = "1.0"
 
