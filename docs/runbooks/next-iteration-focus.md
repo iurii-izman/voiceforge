@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-02-24
+**Обновлено:** 2026-02-25
 
 ---
 
@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** #33 A2 Instructor retry закрыт (complete_structured через instructor.from_litellm, max_retries=3). Следующий шаг: **#32** — довести eval до 20+ golden samples и DeepEval/LLM-judge, или **#34 A3** unit tests daemon/streaming/smart_trigger.
+- **Сейчас:** #32 eval закрыт (21 golden samples, LLM-judge test). Следующий шаг: **#34 A3** unit tests daemon/streaming/smart_trigger (снять исключение из coverage), или **#35** WAV e2e integration tests.
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-#33 Instructor retry закрыт: complete_structured через instructor.from_litellm(completion) и create_with_completion(max_retries=3); лог instructor_retries_exhausted; тест test_llm_retry.py.
+#32 Eval закрыт: 21 golden samples (standup 5, sprint_review 4, one_on_one 4, brainstorm 4, interview 4), опциональный test_llm_judge_one_golden_sample (skip без anthropic key).
 
 ---
 
@@ -36,7 +36,7 @@
 
 | # Issue | Phase | Задача | Заметка |
 |---------|-------|--------|---------|
-| [#32](https://github.com/iurii-izman/voiceforge/issues/32) | A · P0 | Eval harness (DeepEval/ROUGE-L) | 20+ samples, DeepEval/LLM-judge |
+| ~~#32~~ | A · P0 | Eval harness (ROUGE-L + LLM-judge) | **Закрыт** — 21 samples, test_llm_judge_one_golden_sample |
 | ~~#33~~ | A · P0 | Instructor retry | **Закрыт** — max_retries=3 в complete_structured |
 | [#34](https://github.com/iurii-izman/voiceforge/issues/34) | A | Unit tests daemon/streaming/smart_trigger | W3; daemon.py excluded from coverage |
 | [#35](https://github.com/iurii-izman/voiceforge/issues/35) | A | WAV integration tests | e2e pipeline test |
@@ -54,7 +54,7 @@
 ## Следующие шаги (план)
 
 1. **Phase A — Stabilize (приоритет):**
-   - #32 A1: eval harness — `tests/test_llm_eval.py` с DeepEval/ROUGE-L, порог ROUGE-L ≥ 0.35.
+   - ~~#32 A1 eval harness~~ — сделано (21 golden samples, ROUGE-L ≥ 0.35, LLM-judge test).
    - ~~#33 A2 Instructor retry~~ — сделано (instructor.from_litellm, max_retries=3).
    - #34 A3: unit tests daemon/streaming/smart_trigger — снять исключение из coverage.
    - ~~#27 A5 AppImage~~ — сделано (toolbox: NO_STRIP, librsvg2-devel; см. desktop-build-deps.md).
