@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** #40 CI cache закрыт (enable-cache: true в setup-uv для test.yml, sonar.yml, release.yml, security-weekly.yml). Следующий шаг: **roadmap 1** — шаблоны встреч в `analyze` (docs/roadmap-priority.md) или #41 Phase C (prompt mgmt, RAG, retention и т.д.) по доске.
+- **Сейчас:** Roadmap 1 (шаблоны встреч в `analyze`) проверен по коду — реализован полностью: `--template`, 5 схем в router, pipeline, Web/D-Bus, first-meeting-5min. Следующий шаг: **roadmap 2** — обновление статусов action items по следующей встрече (docs/roadmap-priority.md) или следующий пункт Phase C по доске.
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-#40 CI cache: во всех workflow с uv (test.yml, sonar.yml, release.yml, security-weekly.yml) добавлен enable-cache: true в astral-sh/setup-uv. Коммит и пуш (Closes #40).
+Roadmap 1 — шаблоны встреч в analyze: сверка с кодом показала полную реализацию (main.py --template, llm/router.py _template_schema + 5 шаблонов, pipeline, форматтеры, БД, Web, D-Bus). Изменений не вносилось; обновлён только next-iteration-focus.
 
 ---
 
