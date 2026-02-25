@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** C2 (#42) extension сделан: multi-query RAG (extract_keyword_queries из сегментов стенограммы, merge по chunk_id, top 5), тесты. Следующий шаг: **C3 (#43)** Data retention policy или доработка документации (first-meeting-5min, roadmap 5).
+- **Сейчас:** D1 (#46) Desktop UI — reactive D-Bus signals сделан: подписка на ListenStateChanged, AnalysisDone, TranscriptChunk, TranscriptUpdated в dbus_signals.rs; обработчики в main.js (стриминг по сигналам, обновление сессий по transcript-updated). Следующий шаг: **C3 (#43)** Data retention policy или **D2 (#47)** Telegram bot / доработка документации (first-meeting-5min, roadmap 5).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-C2 (#42) RAG query context расширение: extract_keyword_queries() в query_keywords.py (первая/вторая половина стенограммы), pipeline._step2_rag — несколько запросов, объединение по chunk_id (max score), до 5 чанков в контексте; тесты для extract_keyword_queries. Refs #42.
+D1 (#46) Desktop UI — reactive D-Bus signals: в dbus_signals.rs добавлены правила и стримы для TranscriptChunk и TranscriptUpdated, эмит Tauri-событий transcript-chunk и transcript-updated; в main.js — буфер streamingFinals/streamingPartial, updateStreamingDisplay(), обработка transcript-chunk и transcript-updated. Poll GetStreamingTranscript остаётся fallback. DBUS.md обновлён. Closes #46.
 
 ---
 
