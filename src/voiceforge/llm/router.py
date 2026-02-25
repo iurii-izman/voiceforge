@@ -357,6 +357,12 @@ def complete_structured(
             max_tokens=1024,
         )
     except Exception as e:
+        try:
+            from voiceforge.core.observability import record_llm_call
+
+            record_llm_call(model_id, 0.0, success=False)
+        except ImportError:
+            pass
         log.warning(
             "llm.instructor_retries_exhausted",
             model=model_id,
@@ -374,4 +380,10 @@ def complete_structured(
     if cache_read > 0 or cache_creation > 0:
         log.info("llm.cache", model=model_id, cache_read_input_tokens=cache_read, cache_creation_input_tokens=cache_creation)
     log_llm_call(model_id, inp, out, cost, cache_read_input_tokens=cache_read, cache_creation_input_tokens=cache_creation)
+    try:
+        from voiceforge.core.observability import record_llm_call
+
+        record_llm_call(model_id, cost, success=True)
+    except ImportError:
+        pass
     return (parsed, cost)

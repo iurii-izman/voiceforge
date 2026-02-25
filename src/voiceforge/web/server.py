@@ -426,6 +426,23 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
                     with contextlib.suppress(OSError):
                         _os.unlink(p)
 
+    def _handle_get_metrics(self) -> None:
+        """Serve Prometheus metrics. Issue #36."""
+        try:
+            from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
+
+            body = generate_latest()
+        except ImportError:
+            self.send_response(501)
+            self.send_header("Content-Type", "text/plain; charset=utf-8")
+            self.end_headers()
+            self.wfile.write(b"Prometheus client not available")
+            return
+        self.send_response(200)
+        self.send_header("Content-Type", CONTENT_TYPE_LATEST)
+        self.end_headers()
+        self.wfile.write(body)
+
     def do_GET(self) -> None:
         path, params = self._parse_path()
         if path == "/" or path == "/index.html":
@@ -449,6 +466,9 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
             return
         if path == "/api/export":
             self._handle_get_export(params)
+            return
+        if path == "/metrics":
+            self._handle_get_metrics()
             return
         self.send_error(404, "Not found")
 

@@ -47,6 +47,7 @@
 | development-plan-post-audit-2026.md | План развития по аудиту; сверка — claude-proposal-alignment | Справочно (многое закрыто) |
 | desktop-tauri-implementation-plan.md | План реализации десктопа | Справочно (реализовано) |
 | PROJECT_AUDIT_AND_ROADMAP.md | Полный технический аудит: C4, матрица зрелости, 20 слабых мест, 20-шаговый roadmap Phase A–D, план AI-качества, реестр рисков | Актуален |
+| grafana-voiceforge-dashboard.json | Шаблон дашборда Grafana для метрик VoiceForge (#36) | Актуален |
 
 ### docs/runbooks/
 
@@ -88,6 +89,7 @@
 | backlog.md | Зеркало GitHub Project (текущий фокус + Todo) | Актуален |
 | calendar-integration.md | Интеграция с календарём (roadmap 17), исследование | Актуален |
 | rag-formats.md | RAG: форматы индексатора, план ODT/RTF (roadmap 18) | Актуален |
+| observability-alerts.md | Алерты Prometheus (budget > 80%, error rate > 5%), #36 | Актуален |
 
 ### docs/adr/
 

@@ -62,7 +62,14 @@ def _step1_stt(
         transcriber = Transcriber(model_size=model_size)
     segments = transcriber.transcribe(audio, sample_rate=sample_rate, language=language_hint)
     transcript = " ".join(s.text for s in segments if s.text).strip() or "(тишина)"
-    log.info("pipeline.step1_stt", segments=len(segments), duration_sec=round(time.monotonic() - t0, 2))
+    duration_sec = time.monotonic() - t0
+    log.info("pipeline.step1_stt", segments=len(segments), duration_sec=round(duration_sec, 2))
+    try:
+        from voiceforge.core.observability import record_stt_duration
+
+        record_stt_duration(duration_sec)
+    except ImportError:
+        pass
     return (segments, transcript)
 
 
@@ -91,7 +98,14 @@ def _step2_diarization(
         pass
     except Exception as e:
         log.warning("pipeline.diarization.failed", error=str(e))
-    log.info("pipeline.step2_diarization", count=len(out), duration_sec=round(time.monotonic() - t0, 2))
+    duration_sec = time.monotonic() - t0
+    log.info("pipeline.step2_diarization", count=len(out), duration_sec=round(duration_sec, 2))
+    try:
+        from voiceforge.core.observability import record_diarization_duration
+
+        record_diarization_duration(duration_sec)
+    except ImportError:
+        pass
     return out
 
 
@@ -111,7 +125,14 @@ def _step2_rag(transcript: str, rag_db_path: str) -> str:
         pass
     except Exception as e:
         log.warning("pipeline.rag.failed", error=str(e))
-    log.info("pipeline.step2_rag", context_len=len(context), duration_sec=round(time.monotonic() - t0, 2))
+    duration_sec = time.monotonic() - t0
+    log.info("pipeline.step2_rag", context_len=len(context), duration_sec=round(duration_sec, 2))
+    try:
+        from voiceforge.core.observability import record_rag_duration
+
+        record_rag_duration(duration_sec)
+    except ImportError:
+        pass
     return context
 
 
@@ -172,9 +193,21 @@ class AnalysisPipeline:
                 language_hint=language_hint,
             )
         except ImportError:
+            try:
+                from voiceforge.core.observability import record_pipeline_error
+
+                record_pipeline_error("stt")
+            except ImportError:
+                pass
             return (None, "Ошибка: установите зависимости (uv sync).")
         except Exception as e:
             log.warning("pipeline.step1_failed", error=str(e))
+            try:
+                from voiceforge.core.observability import record_pipeline_error
+
+                record_pipeline_error("stt")
+            except ImportError:
+                pass
             return (None, f"Ошибка STT: {e}")
 
         audio_f = audio.astype(np.float32) / 32768.0
