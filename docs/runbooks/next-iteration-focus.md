@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** D2 (#47) Telegram bot: добавлены /latest (последний анализ) и /help; обновлены runbook (telegram-bot-setup, -en) и first-meeting-5min (оба языка) — секция «Telegram бот (опционально)». C3 (#43) уже закрыт. Следующий шаг: по roadmap — следующая приоритетная задача (например #41–45 Phase C или D3–D5) или push-уведомления бота по завершении analyze.
+- **Сейчас:** D2 доработка: push-уведомления по завершении analyze сделаны (/subscribe, telegram_notify, вызов из CLI/Web/daemon). Следующий шаг: приоритет по roadmap Phase D (#48 Calendar, #49 Flatpak, #50 macOS) или Phase C (#41–45); или следующая фича из docs/roadmap-priority.md.
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-D2 (#47) Telegram bot + docs: в server.py — /help и /latest (последняя сессия + первый ответ или «нет анализов»); telegram-bot-setup.md/en — список команд с /help, /latest; first-meeting-5min.md/en — секция 8 «Telegram-бот (опционально)» со ссылкой на runbook. Closes #47.
+Telegram push: core/telegram_notify.py (get/set telegram_chat_id, notify_analyze_done); команда /subscribe в боте; уведомления после успешного analyze из CLI, Web /api/analyze и daemon smart_trigger. keyring-keys-reference + telegram-bot-setup(en): /subscribe и секция про push.
 
 ---
 
