@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** C4 (#44) реализован: response cache (content-hash, SQLite llm_response_cache.db, TTL из config), интеграция в complete_structured, log_response_cache(hit/miss), тест test_response_cache_second_call_hits_cache. Следующий шаг: **C5 (#45)** Healthcheck endpoint или roadmap 5 (доки «Первая встреча за 5 минут»).
+- **Сейчас:** C5 (#45) реализован: GET /health в Web UI (200, {\"status\":\"ok\"}), проверка в test_web_index_and_status. Следующий шаг: **C1 (#41)** Prompt management или roadmap 5 (доки «Первая встреча за 5 минут»).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-C4 (#44) Response caching: config.response_cache_ttl_seconds (default 86400, 0=disable); llm/cache.py (cache_key, get, set, llm_response_cache.db); router.complete_structured — проверка кэша до вызова LLM, запись после; метрика response_cache_log уже в get_stats. Closes #44.
+C5 (#45) Healthcheck: GET /health в web server (200 + JSON status ok); тест в test_web_smoke. Closes #45.
 
 ---
 
