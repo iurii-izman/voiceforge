@@ -498,6 +498,21 @@ def run_daemon() -> None:
         is_listening_fn=lambda: False,
     )
     daemon = VoiceForgeDaemon(iface)
+    # Retention auto-cleanup at startup (#43)
+    retention_days = getattr(daemon._cfg, "retention_days", 0)
+    if retention_days > 0:
+        from datetime import date, timedelta
+
+        from voiceforge.core.transcript_log import TranscriptLog
+
+        cutoff = date.today() - timedelta(days=retention_days)
+        log_db = TranscriptLog()
+        try:
+            n = log_db.purge_before(cutoff)
+            if n:
+                log.info("retention.purged_at_startup", count=n, cutoff=cutoff.isoformat())
+        finally:
+            log_db.close()
     # Now wire up the real methods
     iface._analyze = daemon.analyze
     iface._status = daemon.status

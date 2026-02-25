@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** C2 (#42) реализован: RAG query через keyword extraction (rag/query_keywords.py), pipeline._step2_rag использует extract_keywords с fallback на prefix; тесты test_rag_query_keywords. Roadmap 4 (Ollama в конфиге) уже в коде (config.ollama_model). Следующий шаг: **C3 (#43)** — Data retention policy + auto-cleanup или roadmap 5 (доки «Первая встреча за 5 минут»).
+- **Сейчас:** C3 (#43) реализован: retention_days в config, purge_before() в transcript_log, auto-cleanup при старте daemon, CLI `history --purge-before YYYY-MM-DD`, тест test_retention_purge_removes_old_sessions. Следующий шаг: **C4 (#44)** или roadmap 5 (доки «Первая встреча за 5 минут»).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-C2 (#42) RAG query: добавлен rag/query_keywords.py (extract_keywords из полной стенограммы, stdlib), pipeline._step2_rag переведён на query = extract_keywords(transcript) or prefix; тесты test_rag_query_keywords (ключевые слова из конца в запросе). Closes #42.
+C3 (#43) Data retention: config.retention_days (default 90), TranscriptLog.purge_before(cutoff_date); daemon при старте вызывает purge по retention_days; CLI `history --purge-before YYYY-MM-DD`; config-env-contract и i18n (history.purge_done); тест test_retention_purge_removes_old_sessions. Closes #43.
 
 ---
 

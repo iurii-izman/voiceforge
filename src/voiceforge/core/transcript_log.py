@@ -587,6 +587,46 @@ class TranscriptLog:
                 return
             raise
 
+    def purge_before(self, cutoff_date: date) -> int:
+        """Delete sessions with started_at before cutoff_date (exclusive). Returns count of deleted sessions.
+        Order: action_items, segments (FTS updated by trigger), analyses, sessions (#43)."""
+        conn = self._get_conn()
+        cursor = conn.cursor()
+        cutoff_str = cutoff_date.isoformat()
+        cursor.execute(
+            "SELECT id FROM sessions WHERE date(started_at) < ?",
+            (cutoff_str,),
+        )
+        session_ids = [row["id"] for row in cursor.fetchall()]
+        if not session_ids:
+            return 0
+        placeholders = ",".join("?" * len(session_ids))
+        try:
+            cursor.execute(
+                f"DELETE FROM action_items WHERE session_id IN ({placeholders})",
+                session_ids,
+            )
+        except sqlite3.OperationalError as e:
+            if _SCHEMA_ERROR_NO_SUCH_TABLE in str(e).lower():
+                pass
+            else:
+                raise
+        cursor.execute(
+            f"DELETE FROM segments WHERE session_id IN ({placeholders})",
+            session_ids,
+        )
+        cursor.execute(
+            f"DELETE FROM analyses WHERE session_id IN ({placeholders})",
+            session_ids,
+        )
+        cursor.execute(
+            f"DELETE FROM sessions WHERE id IN ({placeholders})",
+            session_ids,
+        )
+        conn.commit()
+        log.info("transcript_log.purge_before", cutoff=cutoff_str, deleted=len(session_ids))
+        return len(session_ids)
+
     def search_transcripts(self, query: str, limit: int = 20) -> list[tuple[int, str, float, float, str]]:
         """FTS5 search on segment text. Returns (session_id, text, start_sec, end_sec, snippet)."""
         conn = self._get_conn()

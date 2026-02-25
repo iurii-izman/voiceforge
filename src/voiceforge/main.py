@@ -1017,8 +1017,11 @@ def history(
     from_date: str | None = typer.Option(None, "--from", help="Начало периода (с --to)"),
     to_date: str | None = typer.Option(None, "--to", help="Конец периода (с --from)"),
     action_items: bool = typer.Option(False, "--action-items", help="Список action items по сессиям (cross-session)"),
+    purge_before: str | None = typer.Option(None, "--purge-before", help="Удалить сессии, начатые до даты YYYY-MM-DD (#43)"),
 ) -> None:
     """Show recent sessions or one detailed session."""
+    from datetime import date as date_type
+
     from voiceforge.core.transcript_log import TranscriptLog
 
     if output == "md" and session_id is None:
@@ -1026,6 +1029,15 @@ def history(
         raise SystemExit(1)
     log_db = TranscriptLog()
     try:
+        if purge_before is not None:
+            try:
+                cutoff = date_type.fromisoformat(purge_before)
+            except ValueError:
+                typer.echo(t("history.date_invalid", err=purge_before), err=True)
+                raise SystemExit(1)
+            n = log_db.purge_before(cutoff)
+            typer.echo(t("history.purge_done", count=n))
+            return
         if action_items:
             _history_echo(*history_action_items_result(log_db, output))
             return

@@ -32,8 +32,9 @@ Priority order:
 | `language` | `VOICEFORGE_LANGUAGE` | `auto` | UI language; when `ru`/`en` also passed to Whisper as STT hint |
 | `ollama_model` | `VOICEFORGE_OLLAMA_MODEL` | `phi3:mini` | Ollama model for local classify/simple_answer |
 | `pii_mode` | `VOICEFORGE_PII_MODE` | `ON` | PII redaction before LLM: `OFF` (none), `ON` (full regex+GLiNER), `EMAIL_ONLY` (email only) |
+| `retention_days` | `VOICEFORGE_RETENTION_DAYS` | `90` | Data retention: sessions with started_at before (today − retention_days) are purged at daemon start; `0` = disable auto-cleanup (#43) |
 
-**Validation:** Settings validates `model_size` (allowed: tiny, base, small, medium, large-v2, large-v3, large), `sample_rate` (1..192000), `default_llm` (non-empty), `budget_limit_usd` (≥ 0), `daily_budget_limit_usd` (≥ 0 when set), `pipeline_step2_timeout_sec` (positive), `analyze_timeout_sec` (positive), `ollama_model` (non-empty), `ring_seconds` (positive), `pyannote_restart_hours` (≥ 1), `live_summary_interval_sec` (≥ 1). Invalid values raise at load.
+**Validation:** Settings validates `model_size` (allowed: tiny, base, small, medium, large-v2, large-v3, large), `sample_rate` (1..192000), `default_llm` (non-empty), `budget_limit_usd` (≥ 0), `daily_budget_limit_usd` (≥ 0 when set), `pipeline_step2_timeout_sec` (positive), `analyze_timeout_sec` (positive), `ollama_model` (non-empty), `ring_seconds` (positive), `pyannote_restart_hours` (≥ 1), `live_summary_interval_sec` (≥ 1), `retention_days` (≥ 0). Invalid values raise at load.
 
 ## Non-VOICEFORGE Environment Inputs
 

@@ -62,6 +62,7 @@
   "history.no_sessions_period": "Нет сессий за указанный период.",
   "history.no_sessions": "Нет сохранённых сессий. Запустите voiceforge analyze.",
   "history.date_invalid": "Неверный формат даты (YYYY-MM-DD): {err}",
+  "history.purge_done": "Удалено сессий: {count}",
   "history.md_requires_id": "--output md доступен только с --id.",
   "status.ram": "RAM: {used:.1f} / {total:.1f} GB ({percent}%)",
   "status.cost_today": "Стоимость за сегодня: ${cost:.4f}",

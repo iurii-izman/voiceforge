@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import contextlib
 import sqlite3
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
 import voiceforge.core.metrics as metrics
@@ -73,6 +74,33 @@ def test_transcript_migrations_on_existing_db(tmp_path) -> None:
         assert _table_exists(conn, "action_items")
     finally:
         conn.close()
+
+
+def test_retention_purge_removes_old_sessions(tmp_path) -> None:
+    """Sessions with started_at before cutoff are removed by purge_before (#43)."""
+    db_path = tmp_path / "transcripts.db"
+    log_db = TranscriptLog(db_path=db_path)
+    now = datetime.now(UTC)
+    old_start = now - timedelta(days=100)
+    recent_start = now - timedelta(days=50)
+    log_db.log_session(
+        [{"start_sec": 0, "end_sec": 1, "speaker": "A", "text": "old"}],
+        started_at=old_start,
+        ended_at=old_start,
+    )
+    log_db.log_session(
+        [{"start_sec": 0, "end_sec": 1, "speaker": "B", "text": "recent"}],
+        started_at=recent_start,
+        ended_at=recent_start,
+    )
+    assert len(log_db.get_sessions()) == 2
+    cutoff = date.today() - timedelta(days=90)
+    n = log_db.purge_before(cutoff)
+    assert n == 1
+    sessions = log_db.get_sessions()
+    assert len(sessions) == 1
+    assert sessions[0].started_at == recent_start.isoformat()
+    log_db.close()
 
 
 def test_metrics_migrations_on_clean_db(tmp_path, monkeypatch) -> None:

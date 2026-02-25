@@ -133,6 +133,10 @@ class Settings(BaseSettings):
         default="ON",
         description="PII redaction before LLM: OFF=no redaction, ON=full (regex+GLiNER), EMAIL_ONLY=email regex only.",
     )
+    retention_days: int = Field(
+        default=90,
+        description="Data retention: sessions with started_at before (today - retention_days) are purged at daemon start. 0 = disable auto-cleanup (#43).",
+    )
 
     @field_validator("model_size")
     @classmethod
@@ -216,6 +220,13 @@ class Settings(BaseSettings):
     def _live_summary_interval_positive(cls, v: int) -> int:
         if v < 1:
             raise ValueError("live_summary_interval_sec must be >= 1")
+        return v
+
+    @field_validator("retention_days")
+    @classmethod
+    def _retention_days_non_negative(cls, v: int) -> int:
+        if v < 0:
+            raise ValueError("retention_days must be >= 0")
         return v
 
     @classmethod

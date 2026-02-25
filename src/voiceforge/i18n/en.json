@@ -62,6 +62,7 @@
   "history.no_sessions_period": "No sessions in the specified period.",
   "history.no_sessions": "No saved sessions. Run voiceforge analyze.",
   "history.date_invalid": "Invalid date format (YYYY-MM-DD): {err}",
+  "history.purge_done": "Purged sessions: {count}",
   "history.md_requires_id": "--output md is only available with --id.",
   "status.ram": "RAM: {used:.1f} / {total:.1f} GB ({percent}%)",
   "status.cost_today": "Cost today: ${cost:.4f}",
