@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** C5 (#45) реализован: GET /health в Web UI (200, {\"status\":\"ok\"}), проверка в test_web_index_and_status. Следующий шаг: **C1 (#41)** Prompt management или roadmap 5 (доки «Первая встреча за 5 минут»).
+- **Сейчас:** C1 (#41) закрыт: тесты prompt_loader (unit + snapshot по хэшам), runbook prompt-management.md, DOCS-INDEX. Следующий шаг: **C2 (#42)** RAG query context расширение или доработка документации (first-meeting-5min, roadmap 5).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-C5 (#45) Healthcheck: GET /health в web server (200 + JSON status ok); тест в test_web_smoke. Closes #45.
+C1 (#41) Prompt management: тесты test_prompt_loader.py (загрузка, snapshot по хэшам), runbook prompt-management.md, запись в DOCS-INDEX. Closes #41.
 
 ---
 
