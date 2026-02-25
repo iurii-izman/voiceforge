@@ -4,6 +4,9 @@ import { listen } from "@tauri-apps/api/event";
 let daemonOk = false;
 let listenState = false;
 let streamingInterval = null;
+/** Reactive buffer from D-Bus TranscriptChunk signals (finals + partial). */
+let streamingFinals = [];
+let streamingPartial = "";
 
 function setDaemonOff(msg) {
   daemonOk = false;
@@ -76,6 +79,9 @@ function applyListenState(isListening) {
   const streamingCard = document.getElementById("streaming-card");
   if (listenState) {
     streamingCard.style.display = "block";
+    streamingFinals = [];
+    streamingPartial = "";
+    updateStreamingDisplay();
     if (!streamingInterval) streamingInterval = setInterval(pollStreaming, 1500);
   } else {
     streamingCard.style.display = "none";
@@ -84,6 +90,13 @@ function applyListenState(isListening) {
       streamingInterval = null;
     }
   }
+}
+
+function updateStreamingDisplay() {
+  const full =
+    streamingFinals.join(" ") + (streamingPartial ? " " + streamingPartial : "");
+  const el = document.getElementById("streaming-text");
+  if (el) el.textContent = full || "—";
 }
 
 async function updateListenState() {
@@ -105,8 +118,9 @@ async function pollStreaming() {
     const data = env?.data?.streaming_transcript ?? (hasStreaming ? env : null);
     const text = data?.partial || "";
     const finals = data?.finals || [];
-    const full = finals.map((f) => (typeof f === "string" ? f : f?.text || "")).join(" ") + (text ? " " + text : "");
-    document.getElementById("streaming-text").textContent = full || "—";
+    streamingPartial = text;
+    streamingFinals = finals.map((f) => (typeof f === "string" ? f : f?.text || ""));
+    updateStreamingDisplay();
   } catch (e) {
     if (e != null) console.debug("pollStreaming", e);
   }
@@ -154,6 +168,20 @@ listen("analysis-done", (e) => {
     statusEl.textContent = msg;
   }
   document.getElementById("analyze-btn").disabled = false;
+  if (daemonOk) loadSessions();
+});
+listen("transcript-chunk", (e) => {
+  const text = e.payload?.text ?? "";
+  const isFinal = !!e.payload?.is_final;
+  if (isFinal) {
+    if (text) streamingFinals.push(text);
+    streamingPartial = "";
+  } else {
+    streamingPartial = text;
+  }
+  updateStreamingDisplay();
+});
+listen("transcript-updated", () => {
   if (daemonOk) loadSessions();
 });
 
