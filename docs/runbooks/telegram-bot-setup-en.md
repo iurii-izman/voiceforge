@@ -49,8 +49,10 @@ cloudflared tunnel --url http://127.0.0.1:8765
 ## 4. Bot commands
 
 - `/start` — greeting and list of commands.
+- `/help` — list of commands (same as /start).
 - `/status` — short status: RAM, cost today, Ollama.
 - `/sessions` — last 10 sessions (id, date, duration).
+- `/latest` — latest analysis (session + first answer or "no analyses yet").
 - `/cost [days]` — cost for the period (default 7 days; up to 365).
 
 Further: `/analyze` etc. — as needed.

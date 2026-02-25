@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** D1 (#46) Desktop UI — reactive D-Bus signals сделан: подписка на ListenStateChanged, AnalysisDone, TranscriptChunk, TranscriptUpdated в dbus_signals.rs; обработчики в main.js (стриминг по сигналам, обновление сессий по transcript-updated). Следующий шаг: **C3 (#43)** Data retention policy или **D2 (#47)** Telegram bot / доработка документации (first-meeting-5min, roadmap 5).
+- **Сейчас:** D2 (#47) Telegram bot: добавлены /latest (последний анализ) и /help; обновлены runbook (telegram-bot-setup, -en) и first-meeting-5min (оба языка) — секция «Telegram бот (опционально)». C3 (#43) уже закрыт. Следующий шаг: по roadmap — следующая приоритетная задача (например #41–45 Phase C или D3–D5) или push-уведомления бота по завершении analyze.
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-D1 (#46) Desktop UI — reactive D-Bus signals: в dbus_signals.rs добавлены правила и стримы для TranscriptChunk и TranscriptUpdated, эмит Tauri-событий transcript-chunk и transcript-updated; в main.js — буфер streamingFinals/streamingPartial, updateStreamingDisplay(), обработка transcript-chunk и transcript-updated. Poll GetStreamingTranscript остаётся fallback. DBUS.md обновлён. Closes #46.
+D2 (#47) Telegram bot + docs: в server.py — /help и /latest (последняя сессия + первый ответ или «нет анализов»); telegram-bot-setup.md/en — список команд с /help, /latest; first-meeting-5min.md/en — секция 8 «Telegram-бот (опционально)» со ссылкой на runbook. Closes #47.
 
 ---
 

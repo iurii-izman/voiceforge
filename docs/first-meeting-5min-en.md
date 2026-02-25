@@ -94,3 +94,7 @@ Main options:
 - When running `listen` you can use `--live-summary` for periodic short summaries of the last 90 seconds.
 
 See: `docs/runbooks/config-env-contract.md`, feature priorities: `docs/roadmap-priority.md`.
+
+## 8. Telegram bot (optional)
+
+For notifications and quick queries you can enable the bot: key `webhook_telegram` in keyring, run `voiceforge web`, set webhook over HTTPS. Commands: `/start`, `/status`, `/sessions`, `/latest`, `/cost`. See `docs/runbooks/telegram-bot-setup.md`.

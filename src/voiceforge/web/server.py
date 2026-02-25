@@ -20,7 +20,9 @@ _ERR_INVALID_JSON = "invalid JSON"
 def _telegram_webhook_reply(text: str) -> str:
     """Compute bot reply for given command text (S3776: extracted from _handle_telegram_webhook)."""
     if text == "/start":
-        return "VoiceForge bot. Commands: /start /status /sessions /cost [days]"
+        return "VoiceForge bot. Commands: /start /help /status /sessions /latest /cost [days]"
+    if text == "/help":
+        return "VoiceForge bot. Commands: /start /help /status /sessions /latest /cost [days]"
     if text == "/status":
         try:
             from voiceforge.cli.status_helpers import get_status_data
@@ -71,7 +73,29 @@ def _telegram_webhook_reply(text: str) -> str:
         except Exception as e:
             _log.debug("telegram cost failed", exc_info=e)
             return f"Cost error: {e!s}"
-    return "Use /start, /status, /sessions, /cost [days]"
+    if text == "/latest":
+        try:
+            from voiceforge.core.transcript_log import TranscriptLog
+
+            log_db = TranscriptLog()
+            try:
+                sessions = log_db.get_sessions(last_n=1)
+                if not sessions:
+                    return "No analyses yet. Run voiceforge analyze first."
+                sess = sessions[0]
+                detail = log_db.get_session_detail(sess.id)
+                if not detail or not detail[1]:
+                    return f"Session #{sess.id} ({getattr(sess, 'started_at', '')[:10]}): no analysis"
+                _, analysis = detail
+                answers = getattr(analysis, "answers", []) or []
+                first = (answers[0][:500] + "…") if answers and len(answers[0]) > 500 else (answers[0] if answers else "—")
+                return f"Session #{sess.id} ({getattr(sess, 'started_at', '')[:10]}):\n{first}"
+            finally:
+                log_db.close()
+        except Exception as e:
+            _log.debug("telegram latest failed", exc_info=e)
+            return f"Latest error: {e!s}"
+    return "Use /start, /help, /status, /sessions, /latest, /cost [days]"
 
 
 def _telegram_send_message(token: str, chat_id: int | str, text: str) -> None:

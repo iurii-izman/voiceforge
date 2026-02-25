@@ -94,3 +94,7 @@ uv run voiceforge action-items update --from-session 1 --next-session 2
 - При запуске `listen` можно указать `--live-summary` для периодического краткого саммари по последним 90 с.
 
 Подробнее: `docs/runbooks/config-env-contract.md`, приоритеты фич: `docs/roadmap-priority.md`.
+
+## 8. Telegram-бот (опционально)
+
+Для уведомлений и быстрых запросов можно включить бота: ключ `webhook_telegram` в keyring, запуск `voiceforge web`, настройка webhook по HTTPS. Команды: `/start`, `/status`, `/sessions`, `/latest`, `/cost`. См. `docs/runbooks/telegram-bot-setup.md`.
