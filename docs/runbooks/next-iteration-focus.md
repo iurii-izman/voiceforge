@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** #29 и #30 закрыты (RAG ODT/RTF тесты, скрипт Dependabot dismiss + runbook). Следующий шаг: Phase D #50 macOS или Phase C (#41–45); или фича из docs/roadmap-priority.md. Опционально: отложить Dependabot alert #2 вручную в GitHub UI (Security → Dependabot → Dismiss «Accept risk») или запустить `uv run python scripts/dependabot_dismiss_moderate.py` при наличии `github_token` с правом `security_events`.
+- **Сейчас:** QW1 (scipy в base deps) и QW2 (i18n в pipeline.py) выполнены. Следующий шаг: Phase D #50 macOS или Phase C (#41–45); или фича из docs/roadmap-priority.md (1–7). Опционально: Dependabot alert #2 — dismiss в UI или `uv run python scripts/dependabot_dismiss_moderate.py` при наличии `github_token` с правом `security_events`.
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-#29 (Roadmap 18 RAG ODT/RTF): добавлены тесты в `tests/test_rag_parsers.py` — `test_parse_rtf/odt_missing_file_raises`, `test_parse_rtf_empty_content_returns_segments`. #30 (Dependabot moderate): скрипт `scripts/dependabot_dismiss_moderate.py` (keyring `github_token`), обновлён `dependabot-review.md`. Закрытие алерта в UI или через скрипт (токен с scope `security_events`).
+QW1 (Weakness #13): scipy добавлен в base dependencies в pyproject.toml — ресэмплинг больше не пропускается тихо при стандартной установке. QW2 (Weakness #14): в pipeline.py все пользовательские русские строки заменены на вызовы t(): добавлены ключи error.stt_failed, pipeline.run_listen_first, pipeline.insufficient_audio, pipeline.silence в ru.json/en.json.
 
 ---
 
