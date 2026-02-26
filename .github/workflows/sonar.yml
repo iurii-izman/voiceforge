@@ -11,7 +11,6 @@ jobs:
   scan:
     name: sonarcloud-scan
     runs-on: ubuntu-latest
-    continue-on-error: true
     env:
       UV_VERSION: "0.8"
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -27,17 +26,11 @@ jobs:
       - run: uv sync --extra all
       - run: uv run pytest tests --cov=src/voiceforge --cov-report=xml --cov-fail-under=0 -q
       - name: SonarCloud Scan
-        id: sonar_scan
         if: ${{ env.SONAR_TOKEN != '' }}
-        continue-on-error: true
         uses: SonarSource/sonarqube-scan-action@v7
         env:
           SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
-      - name: SonarCloud Non-Blocking Note
-        if: ${{ env.SONAR_TOKEN != '' && steps.sonar_scan.outcome == 'failure' }}
-        run: |
-          echo "::warning::SonarCloud scan failed (quality gate or analysis). See SonarCloud dashboard for details. Non-blocking until baseline is stable (see docs/runbooks/repo-governance.md)."
       - name: SonarCloud Skip (no token)
         if: ${{ env.SONAR_TOKEN == '' }}
         run: echo "SONAR_TOKEN is not configured; scan skipped."

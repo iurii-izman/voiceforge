@@ -9,10 +9,10 @@
 
 | # | Weakness / Step | Статус | Доказательство |
 |---|----------------|--------|----------------|
-| W1 / Step 1 | Eval harness **в CI** | **НЕ СДЕЛАНО** | Нет eval job в test.yml; нет eval-*.yml workflow |
+| W1 / Step 1 | Eval harness **в CI** | **СДЕЛАНО** | test.yml: job `eval` — pytest tests/eval/ (ROUGE-L) |
 | W2 / Step 2 | Coverage omit убран | **НЕ СДЕЛАНО** | pyproject.toml L111-118: 5 модулей в omit, fail_under=80 |
-| W3 / Step 3 | Sonar blocking | **НЕ СДЕЛАНО** | sonar.yml L14,32: `continue-on-error: true` |
-| W4 / Step 5 | CodeQL blocking | **НЕ СДЕЛАНО** | codeql.yml L13,26: `continue-on-error: true` |
+| W3 / Step 3 | Sonar blocking | **СДЕЛАНО** | sonar.yml: убран continue-on-error |
+| W4 / Step 5 | CodeQL blocking | **СДЕЛАНО** | codeql.yml: убран continue-on-error |
 | W5 | Pipeline integration test | **НЕ СДЕЛАНО** | Нет test_pipeline_integration.py |
 | W6 / Step 6 | systemd MemoryMax | **НЕ СДЕЛАНО** | voiceforge.service: нет MemoryMax/MemoryHigh/OOMScoreAdjust |
 | W7 / Step 12 | Async web server | **НЕ СДЕЛАНО** | server.py L10: `from http.server import ...` |
@@ -23,8 +23,8 @@
 | W12 / Step 9 | DB backup CLI | **НЕ СДЕЛАНО** | main.py: нет backup команды |
 | W13 / Step 11 | CVE-2025-69872 | **НЕ СДЕЛАНО** | test.yml L117: `--ignore-vuln CVE-2025-69872` |
 | W14 / Step 6 | /ready endpoint | **НЕ СДЕЛАНО** | server.py: нет /ready |
-| W15 / Step 4 | Version inconsistency | **НЕ СДЕЛАНО** | __init__.py: `"0.1.0a1"` vs pyproject.toml `"0.2.0a1"` |
-| W16 / Step 5 | .editorconfig | **НЕ СДЕЛАНО** | Файл не существует |
+| W15 / Step 4 | Version inconsistency | **СДЕЛАНО** | __init__.py: importlib.metadata.version("voiceforge") |
+| W16 / Step 5 | .editorconfig | **СДЕЛАНО** | .editorconfig в корне (utf-8, indent 4/2, trim) |
 | W17 | Cognitive complexity S3776 | **ЧАСТИЧНО** | do_GET/do_POST ещё if-chains; часть S3776 закрыта |
 | W18 / Step 15 | Error responses | **НЕ СДЕЛАНО** | `{"error": msg}` — нет `{"error": {"code":...,"message":...}}` |
 | W19 / Step 10 | Alerting / monitoring stack | **НЕ СДЕЛАНО** | Нет monitoring/ директории; нет alerts.yml |
