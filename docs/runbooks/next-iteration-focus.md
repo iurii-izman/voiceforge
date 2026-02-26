@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** QW1 (scipy в base deps) и QW2 (i18n в pipeline.py) выполнены. Следующий шаг: Phase D #50 macOS или Phase C (#41–45); или фича из docs/roadmap-priority.md (1–7). Опционально: Dependabot alert #2 — dismiss в UI или `uv run python scripts/dependabot_dismiss_moderate.py` при наличии `github_token` с правом `security_events`.
+- **Сейчас:** Закрыто ~21 замечание Sonar (S3776, S1192, S3358, S108, S1481, S1244, S8233, S7677, S3923). Следующий шаг: перезапустить Sonar-скан в CI или локально `uv run python scripts/sonar_fetch_issues.py` и при необходимости доработать оставшиеся; или фича из docs/roadmap-priority.md (1–7); или Dependabot #2 — dismiss через `uv run python scripts/dependabot_dismiss_moderate.py` при наличии `github_token`.
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-QW1 (Weakness #13): scipy добавлен в base dependencies в pyproject.toml — ресэмплинг больше не пропускается тихо при стандартной установке. QW2 (Weakness #14): в pipeline.py все пользовательские русские строки заменены на вызовы t(): добавлены ключи error.stt_failed, pipeline.run_listen_first, pipeline.insufficient_audio, pipeline.silence в ru.json/en.json.
+Sonar: исправлено ~21 замечание. Быстрые правки: build-flatpak.sh stderr (S7677), release.yml permissions на уровень job (S8233), константа error.budget_exceeded (S1192), убран лишний if в prompt_loader (S3923), заполнен пустой except в transcript_log (S108), pytest.approx и _template в test_llm_eval (S1244, S1481), вложенный conditional в server.py (S3358). Рефакторинг S3776 (cognitive complexity): вынесены хелперы в dependabot_dismiss_moderate, query_keywords, metrics, server (_reply_*), caldav_poll (_event_dict, _events_from_calendar, _candidates_from_calendars), pipeline (_prepare_audio, _step1_or_error, _gather_step2, _with_calendar_context), router (_complete_structured_cached, _complete_structured_check_budget), main (_history_resolve).
 
 ---
 
@@ -70,5 +70,5 @@ QW1 (Weakness #13): scipy добавлен в base dependencies в pyproject.tom
 
 ## Актуальные напоминания
 
-- **Sonar:** список открытых issues — `uv run python scripts/sonar_fetch_issues.py`. Закрытые S1192, S3626, S3358, S7785, S3776 — в [history](../history/closed-plans-and-roadmap.md).
+- **Sonar:** список открытых issues — `uv run python scripts/sonar_fetch_issues.py`. В этой сессии закрыто ~21 замечание (S3776, S1192, S3358, S108, S1481, S1244, S8233, S7677, S3923); после следующего скана проверить остаток.
 - **Критично:** pyannote 4.0.4; при OOM — [pyannote-version.md](pyannote-version.md). Десктоп — сборка только в toolbox/окружении из [desktop-build-deps.md](desktop-build-deps.md). Новые CLI-команды — только через ADR (ADR-0001).
