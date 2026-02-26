@@ -32,6 +32,38 @@ def _dt_to_aware(dt: Any) -> datetime | None:
         return None
 
 
+def _event_dict(comp: Any, cal_name: str, start_dt: datetime, end_dt: datetime | None) -> dict[str, Any]:
+    """Build one event dict from icalendar component."""
+    summary = str(comp.get("SUMMARY", "") or "").strip() or "(no title)"
+    return {
+        "summary": summary,
+        "start_iso": start_dt.isoformat(),
+        "end_iso": end_dt.isoformat() if end_dt else "",
+        "calendar_name": cal_name,
+    }
+
+
+def _events_from_calendar(cal: Any, start_range: datetime, end_range: datetime, now: datetime) -> list[dict[str, Any]]:
+    """Fetch events from one calendar that started in [start_range, now]. For poll_events."""
+    out: list[dict[str, Any]] = []
+    try:
+        events = cal.date_search(start=start_range, end=end_range, compfilter="VEVENT")
+    except Exception as e:
+        log.warning("caldav.date_search_failed", calendar=cal.name, error=str(e))
+        return out
+    cal_name = getattr(cal, "name", None) or ""
+    for ev in events:
+        comp = getattr(ev, "icalendar_component", None)
+        if not comp:
+            continue
+        start_dt = _dt_to_aware(comp.get("DTSTART"))
+        if start_dt is None or start_dt < start_range or start_dt > now:
+            continue
+        end_dt = _dt_to_aware(comp.get("DTEND"))
+        out.append(_event_dict(comp, cal_name, start_dt, end_dt))
+    return out
+
+
 def poll_events_started_in_last(minutes: int = 5) -> tuple[list[dict[str, Any]], str | None]:
     """Poll CalDAV for events that started in the last N minutes.
 
@@ -63,39 +95,38 @@ def poll_events_started_in_last(minutes: int = 5) -> tuple[list[dict[str, Any]],
             log.debug("caldav.no_calendars")
             return [], None
         for cal in calendars:
-            try:
-                events = cal.date_search(start=start_range, end=end_range, compfilter="VEVENT")
-            except Exception as e:
-                log.warning("caldav.date_search_failed", calendar=cal.name, error=str(e))
-                continue
-            cal_name = getattr(cal, "name", None) or ""
-            for ev in events:
-                comp = getattr(ev, "icalendar_component", None)
-                if not comp:
-                    continue
-                dtstart = comp.get("DTSTART")
-                dtend = comp.get("DTEND")
-                start_dt = _dt_to_aware(dtstart)
-                end_dt = _dt_to_aware(dtend)
-                if start_dt is None:
-                    continue
-                # Only include events that *started* in [now - minutes, now]
-                if start_dt < start_range or start_dt > now:
-                    continue
-                summary = str(comp.get("SUMMARY", "") or "").strip() or "(no title)"
-                out.append(
-                    {
-                        "summary": summary,
-                        "start_iso": start_dt.isoformat(),
-                        "end_iso": end_dt.isoformat() if end_dt else "",
-                        "calendar_name": cal_name,
-                    }
-                )
+            out.extend(_events_from_calendar(cal, start_range, end_range, now))
     except Exception as e:
         log.warning("caldav.poll_failed", error=str(e))
         return [], str(e)
 
     return out, None
+
+
+def _candidates_from_calendars(client: Any, now: datetime, end_range: datetime) -> list[tuple[datetime, dict[str, Any]]]:
+    """Collect (start_dt, event_dict) from all calendars in range."""
+    candidates: list[tuple[datetime, dict[str, Any]]] = []
+    principal = client.principal()
+    calendars = principal.calendars()
+    if not calendars:
+        return candidates
+    for cal in calendars:
+        try:
+            events = cal.date_search(start=now, end=end_range, compfilter="VEVENT")
+        except Exception as e:
+            log.warning("caldav.date_search_failed", calendar=getattr(cal, "name", ""), error=str(e))
+            continue
+        cal_name = getattr(cal, "name", None) or ""
+        for ev in events:
+            comp = getattr(ev, "icalendar_component", None)
+            if not comp:
+                continue
+            start_dt = _dt_to_aware(comp.get("DTSTART"))
+            if start_dt is None:
+                continue
+            end_dt = _dt_to_aware(comp.get("DTEND"))
+            candidates.append((start_dt, _event_dict(comp, cal_name, start_dt, end_dt)))
+    return candidates
 
 
 def get_next_meeting_context(hours_ahead: int = 24) -> tuple[str, str | None]:
@@ -117,43 +148,9 @@ def get_next_meeting_context(hours_ahead: int = 24) -> tuple[str, str | None]:
 
     now = datetime.now(UTC)
     end_range = now + timedelta(hours=hours_ahead)
-    candidates: list[tuple[datetime, dict[str, Any]]] = []
-
     try:
         client = caldav.DAVClient(url=url, username=username, password=password)
-        principal = client.principal()
-        calendars = principal.calendars()
-        if not calendars:
-            return "", None
-        for cal in calendars:
-            try:
-                events = cal.date_search(start=now, end=end_range, compfilter="VEVENT")
-            except Exception as e:
-                log.warning("caldav.date_search_failed", calendar=getattr(cal, "name", ""), error=str(e))
-                continue
-            cal_name = getattr(cal, "name", None) or ""
-            for ev in events:
-                comp = getattr(ev, "icalendar_component", None)
-                if not comp:
-                    continue
-                dtstart = comp.get("DTSTART")
-                dtend = comp.get("DTEND")
-                start_dt = _dt_to_aware(dtstart)
-                if start_dt is None:
-                    continue
-                summary = str(comp.get("SUMMARY", "") or "").strip() or "(no title)"
-                end_dt = _dt_to_aware(dtend)
-                candidates.append(
-                    (
-                        start_dt,
-                        {
-                            "summary": summary,
-                            "start_iso": start_dt.isoformat(),
-                            "end_iso": end_dt.isoformat() if end_dt else "",
-                            "calendar_name": cal_name,
-                        },
-                    )
-                )
+        candidates = _candidates_from_calendars(client, now, end_range)
         if not candidates:
             return "", None
         candidates.sort(key=lambda x: x[0])

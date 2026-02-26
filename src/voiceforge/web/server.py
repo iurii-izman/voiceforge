@@ -15,89 +15,109 @@ _log = logging.getLogger(__name__)
 _TELEGRAM_API = "https://api.telegram.org"
 _CONTENT_TYPE_JSON = "application/json; charset=utf-8"
 _ERR_INVALID_JSON = "invalid JSON"
+_CMD_HELP = "VoiceForge bot. Commands: /start /help /status /sessions /latest /cost [days] /subscribe"
+
+
+def _reply_status() -> str:
+    try:
+        from voiceforge.cli.status_helpers import get_status_data
+
+        d = get_status_data()
+        ram = d.get("ram") or {}
+        return (
+            f"RAM: {ram.get('used_gb', 0)}/{ram.get('total_gb', 0)} GB | "
+            f"Today: ${d.get('cost_today_usd', 0):.4f} | "
+            f"Ollama: {'yes' if d.get('ollama_available') else 'no'}"
+        )
+    except Exception as e:
+        _log.debug("telegram status failed", exc_info=e)
+        return f"Status error: {e!s}"
+
+
+def _reply_sessions() -> str:
+    try:
+        from voiceforge.cli.history_helpers import build_sessions_payload
+        from voiceforge.core.transcript_log import TranscriptLog
+
+        log_db = TranscriptLog()
+        try:
+            sessions = log_db.get_sessions(last_n=10)
+            payload = build_sessions_payload(sessions)
+        finally:
+            log_db.close()
+        lines = []
+        for s in payload.get("sessions") or []:
+            sid = s.get("id")
+            started = (s.get("started_at") or "")[:19]
+            dur = s.get("duration_sec", 0)
+            lines.append(f"#{sid} {started} {dur:.0f}s")
+        return "\n".join(lines) if lines else "No sessions"
+    except Exception as e:
+        _log.debug("telegram sessions failed", exc_info=e)
+        return f"Sessions error: {e!s}"
+
+
+def _reply_cost(text: str) -> str:
+    try:
+        days = 7
+        parts = text.split()
+        if len(parts) >= 2 and parts[1].isdigit():
+            days = max(1, min(365, int(parts[1])))
+        from voiceforge.core.metrics import get_stats
+
+        data = get_stats(days=days)
+        total = data.get("total_cost_usd") or 0
+        calls = data.get("total_calls") or 0
+        return f"Cost last {days} days: ${total:.4f} ({calls} calls)"
+    except Exception as e:
+        _log.debug("telegram cost failed", exc_info=e)
+        return f"Cost error: {e!s}"
+
+
+def _reply_latest() -> str:
+    try:
+        from voiceforge.core.transcript_log import TranscriptLog
+
+        log_db = TranscriptLog()
+        try:
+            sessions = log_db.get_sessions(last_n=1)
+            if not sessions:
+                return "No analyses yet. Run voiceforge analyze first."
+            sess = sessions[0]
+            detail = log_db.get_session_detail(sess.id)
+            if not detail or not detail[1]:
+                return f"Session #{sess.id} ({getattr(sess, 'started_at', '')[:10]}): no analysis"
+            _, analysis = detail
+            answers = getattr(analysis, "answers", []) or []
+            if not answers:
+                first = "—"
+            elif len(answers[0]) > 500:
+                first = answers[0][:500] + "…"
+            else:
+                first = answers[0]
+            return f"Session #{sess.id} ({getattr(sess, 'started_at', '')[:10]}):\n{first}"
+        finally:
+            log_db.close()
+    except Exception as e:
+        _log.debug("telegram latest failed", exc_info=e)
+        return f"Latest error: {e!s}"
 
 
 def _telegram_webhook_reply(text: str) -> str:
-    """Compute bot reply for given command text (S3776: extracted from _handle_telegram_webhook)."""
-    if text == "/start":
-        return "VoiceForge bot. Commands: /start /help /status /sessions /latest /cost [days] /subscribe"
-    if text == "/help":
-        return "VoiceForge bot. Commands: /start /help /status /sessions /latest /cost [days] /subscribe"
+    """Compute bot reply for given command text."""
+    if text == "/start" or text == "/help":
+        return _CMD_HELP
     if text == "/subscribe":
         return ""  # handled in _handle_telegram_webhook (save chat_id + custom reply)
     if text == "/status":
-        try:
-            from voiceforge.cli.status_helpers import get_status_data
-
-            d = get_status_data()
-            ram = d.get("ram") or {}
-            return (
-                f"RAM: {ram.get('used_gb', 0)}/{ram.get('total_gb', 0)} GB | "
-                f"Today: ${d.get('cost_today_usd', 0):.4f} | "
-                f"Ollama: {'yes' if d.get('ollama_available') else 'no'}"
-            )
-        except Exception as e:
-            _log.debug("telegram status failed", exc_info=e)
-            return f"Status error: {e!s}"
+        return _reply_status()
     if text == "/sessions":
-        try:
-            from voiceforge.cli.history_helpers import build_sessions_payload
-            from voiceforge.core.transcript_log import TranscriptLog
-
-            log_db = TranscriptLog()
-            try:
-                sessions = log_db.get_sessions(last_n=10)
-                payload = build_sessions_payload(sessions)
-            finally:
-                log_db.close()
-            lines = []
-            for s in payload.get("sessions") or []:
-                sid = s.get("id")
-                started = (s.get("started_at") or "")[:19]
-                dur = s.get("duration_sec", 0)
-                lines.append(f"#{sid} {started} {dur:.0f}s")
-            return "\n".join(lines) if lines else "No sessions"
-        except Exception as e:
-            _log.debug("telegram sessions failed", exc_info=e)
-            return f"Sessions error: {e!s}"
+        return _reply_sessions()
     if text.startswith("/cost"):
-        try:
-            days = 7
-            parts = text.split()
-            if len(parts) >= 2 and parts[1].isdigit():
-                days = max(1, min(365, int(parts[1])))
-            from voiceforge.core.metrics import get_stats
-
-            data = get_stats(days=days)
-            total = data.get("total_cost_usd") or 0
-            calls = data.get("total_calls") or 0
-            return f"Cost last {days} days: ${total:.4f} ({calls} calls)"
-        except Exception as e:
-            _log.debug("telegram cost failed", exc_info=e)
-            return f"Cost error: {e!s}"
+        return _reply_cost(text)
     if text == "/latest":
-        try:
-            from voiceforge.core.transcript_log import TranscriptLog
-
-            log_db = TranscriptLog()
-            try:
-                sessions = log_db.get_sessions(last_n=1)
-                if not sessions:
-                    return "No analyses yet. Run voiceforge analyze first."
-                sess = sessions[0]
-                detail = log_db.get_session_detail(sess.id)
-                if not detail or not detail[1]:
-                    return f"Session #{sess.id} ({getattr(sess, 'started_at', '')[:10]}): no analysis"
-                _, analysis = detail
-                answers = getattr(analysis, "answers", []) or []
-                first = (answers[0][:500] + "…") if answers and len(answers[0]) > 500 else (answers[0] if answers else "—")
-                return f"Session #{sess.id} ({getattr(sess, 'started_at', '')[:10]}):\n{first}"
-            finally:
-                log_db.close()
-        except Exception as e:
-            _log.debug("telegram latest failed", exc_info=e)
-            return f"Latest error: {e!s}"
-    return "Use /start, /help, /status, /sessions, /latest, /cost [days], /subscribe"
+        return _reply_latest()
+    return _CMD_HELP
 
 
 def _telegram_send_message(token: str, chat_id: int | str, text: str) -> None:

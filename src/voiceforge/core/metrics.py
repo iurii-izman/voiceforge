@@ -214,6 +214,23 @@ def _unpack_llm_row(
         return None
 
 
+def _make_by_model_entry(unpacked: tuple, cache_cols: bool) -> dict:
+    """Build one by_model entry from unpacked row tuple."""
+    model, inp, out, cost, avg_lat, cnt, cache_read, cache_cre = unpacked
+    entry = {
+        "model": model or "",
+        "input_tokens": inp or 0,
+        "output_tokens": out or 0,
+        "cost_usd": cost or 0,
+        "avg_latency_ms": avg_lat,
+        "calls": cnt or 0,
+    }
+    if cache_cols:
+        entry["cache_read_input_tokens"] = cache_read or 0
+        entry["cache_creation_input_tokens"] = cache_cre or 0
+    return entry
+
+
 def _aggregate_by_model_rows(
     rows: list, cache_cols: bool, log_key: str = "get_stats_row"
 ) -> tuple[list[dict], float, int, list[float]]:
@@ -226,23 +243,12 @@ def _aggregate_by_model_rows(
         unpacked = _unpack_llm_row(row, cache_cols, log_key)
         if unpacked is None:
             continue
-        model, inp, out, cost, avg_lat, cnt, cache_read, cache_cre = unpacked
+        _, _, _, cost, avg_lat, cnt, _, _ = unpacked
         total_cost += cost or 0
         total_calls += cnt or 0
         if avg_lat is not None:
             latencies.append(avg_lat)
-        entry = {
-            "model": model or "",
-            "input_tokens": inp or 0,
-            "output_tokens": out or 0,
-            "cost_usd": cost or 0,
-            "avg_latency_ms": avg_lat,
-            "calls": cnt or 0,
-        }
-        if cache_cols:
-            entry["cache_read_input_tokens"] = cache_read or 0
-            entry["cache_creation_input_tokens"] = cache_cre or 0
-        by_model.append(entry)
+        by_model.append(_make_by_model_entry(unpacked, cache_cols))
     return by_model, total_cost, total_calls, latencies
 
 

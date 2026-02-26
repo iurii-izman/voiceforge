@@ -195,6 +195,100 @@ def _step2_pii(transcript: str, pii_mode: str = "ON") -> str:
     return out
 
 
+def _prepare_audio(cfg: Any, seconds: int) -> tuple[np.ndarray, int] | tuple[None, str]:
+    """Load and resample audio. Returns (audio, effective_rate) or (None, error_str)."""
+    ring_path = cfg.get_ring_file_path()
+    if not Path(ring_path).is_file():
+        return (None, t("pipeline.run_listen_first"))
+    raw = Path(ring_path).read_bytes()
+    want = int(seconds * cfg.sample_rate * 2)
+    if len(raw) > want:
+        raw = raw[-want:]
+    raw = raw[: len(raw) - (len(raw) % 2)]
+    if len(raw) < cfg.sample_rate * 2:
+        return (None, t("pipeline.insufficient_audio"))
+    audio = np.frombuffer(raw, dtype=np.int16)
+    effective_rate = cfg.sample_rate
+    if effective_rate != TARGET_SAMPLE_RATE:
+        audio = _resample_to_16k(audio, effective_rate)
+        effective_rate = TARGET_SAMPLE_RATE
+        log.info("pipeline.resampled", original_rate=cfg.sample_rate, target=TARGET_SAMPLE_RATE)
+    log.info("pipeline.start", seconds=seconds, samples=len(audio))
+    return (audio, effective_rate)
+
+
+def _step1_or_error(audio: np.ndarray, effective_rate: int, cfg: Any) -> tuple[list[Any], str] | tuple[None, str]:
+    """Run STT; return (segments, transcript) or (None, error_str)."""
+    language_hint = _get_language_hint(cfg)
+    try:
+        segments, transcript = _step1_stt(
+            audio, sample_rate=effective_rate, model_size=cfg.model_size, language_hint=language_hint
+        )
+        return (segments, transcript)
+    except ImportError:
+        try:
+            from voiceforge.core.observability import record_pipeline_error
+
+            record_pipeline_error("stt")
+        except ImportError:
+            pass
+        return (None, t("error.install_deps"))
+    except Exception as e:
+        log.warning("pipeline.step1_failed", error=str(e))
+        try:
+            from voiceforge.core.observability import record_pipeline_error
+
+            record_pipeline_error("stt")
+        except ImportError:
+            pass
+        return (None, t("error.stt_failed", e=str(e)))
+
+
+def _gather_step2(
+    executor: ThreadPoolExecutor,
+    cfg: Any,
+    audio_f: np.ndarray,
+    transcript: str,
+    effective_rate: int,
+) -> tuple[list[Any], str, str]:
+    """Run step2 parallel tasks; return (diar_segments, context, transcript_redacted)."""
+    timeout_sec = max(1.0, float(getattr(cfg, "pipeline_step2_timeout_sec", 25.0)))
+    futures: dict[str, Future[Any]] = {
+        "diarization": executor.submit(_step2_diarization, audio_f, effective_rate, cfg.pyannote_restart_hours),
+        "rag": executor.submit(_step2_rag, transcript, cfg.get_rag_db_path()),
+        "pii": executor.submit(_step2_pii, transcript, getattr(cfg, "pii_mode", "ON")),
+    }
+    done, not_done = wait(futures.values(), timeout=timeout_sec)
+    timed_out = [name for name, fut in futures.items() if fut in not_done]
+    for name in timed_out:
+        futures[name].cancel()
+    if timed_out:
+        log.warning("pipeline.step2_timeout", timeout_sec=timeout_sec, timed_out=timed_out)
+    diar_segments = futures["diarization"].result() if futures["diarization"] in done else []
+    context = futures["rag"].result() if futures["rag"] in done else ""
+    transcript_redacted = futures["pii"].result() if futures["pii"] in done else transcript
+    return (diar_segments, context, transcript_redacted)
+
+
+def _with_calendar_context(context: str, cfg: Any) -> str:
+    """Append calendar context if enabled. D3 (#48)."""
+    if not getattr(cfg, "calendar_context_enabled", False):
+        return context
+    try:
+        from voiceforge.calendar.caldav_poll import get_next_meeting_context
+
+        cal_ctx, _ = get_next_meeting_context(hours_ahead=24)
+        if cal_ctx:
+            return (
+                (context + "\n\nCalendar (next meeting): " + cal_ctx).strip()
+                if context
+                else ("Calendar (next meeting): " + cal_ctx)
+            )
+    except Exception as e:
+        log.warning("pipeline.calendar_context_failed", error=str(e))
+    return context
+
+
 class AnalysisPipeline:
     """Block 10.2: Step 1 STT, Step 2 parallel (diarization + RAG + PII), profiling.
     ThreadPoolExecutor is created once per instance (W15/QW3), use as context manager for cleanup."""
@@ -211,107 +305,22 @@ class AnalysisPipeline:
 
     def run(self, seconds: int) -> tuple[PipelineResult | None, str | None]:
         """Run steps 1–2. Returns (PipelineResult, None) or (None, error_str)."""
-        ring_path = self._cfg.get_ring_file_path()
-        if not Path(ring_path).is_file():
-            return (None, t("pipeline.run_listen_first"))
-        raw = Path(ring_path).read_bytes()
-        want = int(seconds * self._cfg.sample_rate * 2)
-        if len(raw) > want:
-            raw = raw[-want:]
-        raw = raw[: len(raw) - (len(raw) % 2)]
-        if len(raw) < self._cfg.sample_rate * 2:
-            return (None, t("pipeline.insufficient_audio"))
-        audio = np.frombuffer(raw, dtype=np.int16)
-        effective_rate = self._cfg.sample_rate
-        if effective_rate != TARGET_SAMPLE_RATE:
-            audio = _resample_to_16k(audio, effective_rate)
-            effective_rate = TARGET_SAMPLE_RATE
-            log.info("pipeline.resampled", original_rate=self._cfg.sample_rate, target=TARGET_SAMPLE_RATE)
-        log.info("pipeline.start", seconds=seconds, samples=len(audio))
-
-        language_hint = _get_language_hint(self._cfg)
-        try:
-            segments, transcript = _step1_stt(
-                audio,
-                sample_rate=effective_rate,
-                model_size=self._cfg.model_size,
-                language_hint=language_hint,
-            )
-        except ImportError:
-            try:
-                from voiceforge.core.observability import record_pipeline_error
-
-                record_pipeline_error("stt")
-            except ImportError:
-                pass
-            return (None, t("error.install_deps"))
-        except Exception as e:
-            log.warning("pipeline.step1_failed", error=str(e))
-            try:
-                from voiceforge.core.observability import record_pipeline_error
-
-                record_pipeline_error("stt")
-            except ImportError:
-                pass
-            return (None, t("error.stt_failed", e=str(e)))
-
-        audio_f = audio.astype(np.float32) / 32768.0
-        diar_segments: list[Any] = []
-        context = ""
-        transcript_redacted = transcript
-
+        prep = _prepare_audio(self._cfg, seconds)
+        if prep[0] is None:
+            return (None, prep[1])
+        audio, effective_rate = prep
+        stt_result = _step1_or_error(audio, effective_rate, self._cfg)
+        if stt_result[0] is None:
+            return (None, stt_result[1])
+        segments, transcript = stt_result
         step2_start = time.monotonic()
-        timeout_sec = max(1.0, float(getattr(self._cfg, "pipeline_step2_timeout_sec", 25.0)))
-        futures: dict[str, Future[Any]] = {
-            "diarization": self._executor.submit(
-                _step2_diarization,
-                audio_f,
-                effective_rate,
-                self._cfg.pyannote_restart_hours,
-            ),
-            "rag": self._executor.submit(
-                _step2_rag,
-                transcript,
-                self._cfg.get_rag_db_path(),
-            ),
-            "pii": self._executor.submit(_step2_pii, transcript, getattr(self._cfg, "pii_mode", "ON")),
-        }
-
-        done, not_done = wait(futures.values(), timeout=timeout_sec)
-        timed_out = [name for name, fut in futures.items() if fut in not_done]
-        for name in timed_out:
-            futures[name].cancel()
-        if timed_out:
-            log.warning(
-                "pipeline.step2_timeout",
-                timeout_sec=timeout_sec,
-                timed_out=timed_out,
-            )
-
-        if "diarization" in futures and futures["diarization"] in done:
-            diar_segments = futures["diarization"].result()
-        if "rag" in futures and futures["rag"] in done:
-            context = futures["rag"].result()
-        if "pii" in futures and futures["pii"] in done:
-            transcript_redacted = futures["pii"].result()
+        audio_f = audio.astype(np.float32) / 32768.0
+        diar_segments, context, transcript_redacted = _gather_step2(
+            self._executor, self._cfg, audio_f, transcript, effective_rate
+        )
         step2_duration = time.monotonic() - step2_start
         log.info("pipeline.step2_total", duration_sec=round(step2_duration, 2))
-
-        # D3 (#48): optional calendar context for analyze
-        if getattr(self._cfg, "calendar_context_enabled", False):
-            try:
-                from voiceforge.calendar.caldav_poll import get_next_meeting_context
-
-                cal_ctx, _ = get_next_meeting_context(hours_ahead=24)
-                if cal_ctx:
-                    context = (
-                        (context + "\n\nCalendar (next meeting): " + cal_ctx).strip()
-                        if context
-                        else ("Calendar (next meeting): " + cal_ctx)
-                    )
-            except Exception as e:
-                log.warning("pipeline.calendar_context_failed", error=str(e))
-
+        context = _with_calendar_context(context, self._cfg)
         return (
             PipelineResult(
                 segments=segments,

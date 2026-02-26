@@ -10,7 +10,7 @@ MANIFEST="$REPO_ROOT/desktop/flatpak/com.voiceforge.app.yaml"
 BUNDLE_DEB_DIR="$REPO_ROOT/desktop/src-tauri/target/release/bundle/deb"
 
 if ! command -v flatpak-builder >/dev/null 2>&1; then
-  echo "ERROR: flatpak-builder not found. Install: sudo dnf install flatpak-builder && flatpak install flathub org.gnome.Platform//46 org.gnome.Sdk//46"
+  echo "ERROR: flatpak-builder not found. Install: sudo dnf install flatpak-builder && flatpak install flathub org.gnome.Platform//46 org.gnome.Sdk//46" >&2
   exit 1
 fi
 
@@ -25,7 +25,7 @@ fi
 
 DEB=$(echo "$BUNDLE_DEB_DIR"/VoiceForge_*_amd64.deb)
 if [[ ! -f "$DEB" ]]; then
-  echo "ERROR: No .deb at $BUNDLE_DEB_DIR/VoiceForge_*_amd64.deb"
+  echo "ERROR: No .deb at $BUNDLE_DEB_DIR/VoiceForge_*_amd64.deb" >&2
   exit 1
 fi
 DEB_ABS=$(readlink -f "$DEB")

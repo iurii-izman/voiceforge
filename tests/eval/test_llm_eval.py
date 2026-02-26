@@ -61,7 +61,7 @@ def golden_samples() -> list[Path]:
 def test_rouge_l_self_match() -> None:
     """ROUGE-L of a text with itself is 1.0."""
     text = "done: Finished API. planned: Add tests. blockers: None."
-    assert _rouge_l(text, text) == 1.0
+    assert _rouge_l(text, text) == pytest.approx(1.0)
 
 
 def test_rouge_l_partial_match() -> None:
@@ -91,13 +91,13 @@ def test_load_golden_sample(golden_samples: list[Path]) -> None:
     if not golden_samples:
         pytest.skip("No golden samples in tests/eval/golden_samples/")
     path = golden_samples[0]
-    transcript, template, reference = _load_golden(path)
+    transcript, _template, reference = _load_golden(path)
     assert transcript
     assert reference
     ref_text = _structured_to_text(reference)
     assert ref_text
     # Self-match for this sample
-    assert _rouge_l(ref_text, ref_text) == 1.0
+    assert _rouge_l(ref_text, ref_text) == pytest.approx(1.0)
 
 
 def _golden_paths() -> list[Path]:

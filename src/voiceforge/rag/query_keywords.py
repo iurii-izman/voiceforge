@@ -125,6 +125,12 @@ def extract_keywords(transcript: str, top_n: int = _DEFAULT_TOP_N) -> str:
     return " ".join(top).strip()
 
 
+def _query_for_part(transcript: str, start: int, end: int, top_n: int) -> str:
+    """Extract keyword query for transcript slice [start:end]. Returns non-empty string or empty."""
+    part = transcript[start:end].strip()
+    return extract_keywords(part, top_n=top_n) if part else ""
+
+
 def extract_keyword_queries(
     transcript: str,
     num_parts: int = 2,
@@ -145,10 +151,7 @@ def extract_keyword_queries(
     for i in range(num_parts):
         start = i * part_len
         end = len(transcript) if i == num_parts - 1 else (i + 1) * part_len
-        part = transcript[start:end].strip()
-        if not part:
-            continue
-        q = extract_keywords(part, top_n=top_n)
+        q = _query_for_part(transcript, start, end, top_n)
         if q and q not in seen:
             seen.add(q)
             queries.append(q)

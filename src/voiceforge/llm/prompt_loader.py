@@ -18,10 +18,7 @@ def get_prompt_version() -> str | None:
 
 def load_prompt(name: str) -> str | None:
     """Load prompt text from prompts/<name>.txt. Return None if file missing."""
-    if name.startswith("template_"):
-        p = _PROMPTS_DIR / f"{name}.txt"
-    else:
-        p = _PROMPTS_DIR / f"{name}.txt"
+    p = _PROMPTS_DIR / f"{name}.txt"
     if not p.is_file():
         return None
     return p.read_text(encoding="utf-8").strip()

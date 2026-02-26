@@ -345,31 +345,23 @@ def _usage_and_cost_from_response(raw: Any, model_id: str) -> tuple[int, int, in
     return (inp, out, cache_read, cache_creation, cost)
 
 
-def complete_structured(
-    prompt: list[dict[str, Any]],
-    response_model: type[TModel],
-    model: str | None = None,
-) -> tuple[TModel, float]:
-    """Call LLM with fallbacks; return (validated Pydantic model, cost_usd).
-    Uses Instructor retry (max_retries=3) with validation context on parse errors (#33).
-    Pre-call budget check: reject if daily cost >= daily_budget_limit_usd (#38).
-    Response cache: content-hash key, TTL from config (#44)."""
-    from voiceforge.core.config import Settings
-    from voiceforge.core.metrics import get_cost_today, log_llm_call, log_response_cache
-    from voiceforge.llm.cache import cache_key
+def _complete_structured_cached(key: str, model_id: str, response_model: type[TModel], ttl: int) -> tuple[TModel, float] | None:
+    """Return (parsed, cost) if cache hit, else None."""
+    from voiceforge.core.metrics import log_response_cache
     from voiceforge.llm.cache import get as cache_get
-    from voiceforge.llm.cache import set as cache_set
 
-    cfg = Settings()
-    ttl = int(getattr(cfg, "response_cache_ttl_seconds", 0) or 0)
-    model_id = model or DEFAULT_MODEL
-    if ttl > 0:
-        key = cache_key(prompt, model_id, response_model.__name__)
-        cached = cache_get(key, response_model, ttl)
-        if cached is not None:
-            parsed, cost = cached
-            log_response_cache(True)
-            return (parsed, cost)
+    cached = cache_get(key, response_model, ttl)
+    if cached is not None:
+        parsed, cost = cached
+        log_response_cache(True)
+        return (parsed, cost)
+    return None
+
+
+def _complete_structured_check_budget(cfg: Any) -> None:
+    """Raise BudgetExceeded or log warning if near limit."""
+    from voiceforge.core.metrics import get_cost_today
+
     cost_today = get_cost_today()
     daily_limit = cfg.daily_budget_limit_usd or 0.0
     if daily_limit > 0 and cost_today >= daily_limit:
@@ -385,6 +377,30 @@ def complete_structured(
             pct=round(100 * cost_today / daily_limit, 1),
         )
 
+
+def complete_structured(
+    prompt: list[dict[str, Any]],
+    response_model: type[TModel],
+    model: str | None = None,
+) -> tuple[TModel, float]:
+    """Call LLM with fallbacks; return (validated Pydantic model, cost_usd).
+    Uses Instructor retry (max_retries=3) with validation context on parse errors (#33).
+    Pre-call budget check: reject if daily cost >= daily_budget_limit_usd (#38).
+    Response cache: content-hash key, TTL from config (#44)."""
+    from voiceforge.core.config import Settings
+    from voiceforge.core.metrics import log_llm_call, log_response_cache
+    from voiceforge.llm.cache import cache_key
+    from voiceforge.llm.cache import set as cache_set
+
+    cfg = Settings()
+    ttl = int(getattr(cfg, "response_cache_ttl_seconds", 0) or 0)
+    model_id = model or DEFAULT_MODEL
+    key = cache_key(prompt, model_id, response_model.__name__) if ttl > 0 else ""
+    if ttl > 0:
+        hit = _complete_structured_cached(key, model_id, response_model, ttl)
+        if hit is not None:
+            return hit
+    _complete_structured_check_budget(cfg)
     log_response_cache(False)
     set_env_keys_from_keyring()
     try:

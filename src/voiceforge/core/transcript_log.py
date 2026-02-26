@@ -608,7 +608,8 @@ class TranscriptLog:
             )
         except sqlite3.OperationalError as e:
             if _SCHEMA_ERROR_NO_SUCH_TABLE in str(e).lower():
-                pass
+                # Ignore missing table (e.g. fresh DB without action_items)
+                _ = e
             else:
                 raise
         cursor.execute(

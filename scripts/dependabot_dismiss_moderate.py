@@ -17,6 +17,33 @@ TARGET_PACKAGE = "diskcache"
 DISMISS_COMMENT = "No fix version yet. See docs/runbooks/security.md. Revisit when upstream fixes."
 
 
+def _fetch_open_alerts(headers: dict) -> list:
+    url = f"{API_BASE}/repos/{REPO}/dependabot/alerts?state=open"
+    req = urllib.request.Request(url, headers=headers)
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        return json.loads(resp.read().decode())
+
+
+def _find_target_alert(alerts: list) -> dict | None:
+    for a in alerts:
+        adv = a.get("security_advisory") or {}
+        vuln = a.get("security_vulnerability") or {}
+        pkg = (vuln.get("package") or {}).get("name", "")
+        cve_id = adv.get("cve_id") or ""
+        if cve_id == TARGET_CVE or pkg == TARGET_PACKAGE:
+            return a
+    return None
+
+
+def _dismiss_alert(alert_number: int, headers: dict) -> None:
+    body = json.dumps({"state": "dismissed", "reason": "risk_accepted", "dismiss_comment": DISMISS_COMMENT}).encode()
+    patch_url = f"{API_BASE}/repos/{REPO}/dependabot/alerts/{alert_number}"
+    req = urllib.request.Request(patch_url, data=body, headers={**headers, "Content-Type": "application/json"}, method="PATCH")
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        result = json.loads(resp.read().decode())
+    print(f"Dismissed alert #{alert_number}: {result.get('state', 'dismissed')}")
+
+
 def main() -> None:
     from voiceforge.core.secrets import get_api_key
 
@@ -32,11 +59,8 @@ def main() -> None:
         "X-GitHub-Api-Version": "2022-11-28",
     }
 
-    url = f"{API_BASE}/repos/{REPO}/dependabot/alerts?state=open"
-    req = urllib.request.Request(url, headers=headers)
     try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            alerts = json.loads(resp.read().decode())
+        alerts = _fetch_open_alerts(headers)
     except urllib.error.HTTPError as e:
         body = e.read().decode() if e.fp else ""
         print(f"GitHub API error {e.code}: {body[:500]}", file=sys.stderr)
@@ -45,16 +69,7 @@ def main() -> None:
         print(f"Request failed: {e}", file=sys.stderr)
         sys.exit(2)
 
-    target = None
-    for a in alerts:
-        adv = a.get("security_advisory") or {}
-        vuln = a.get("security_vulnerability") or {}
-        pkg = (vuln.get("package") or {}).get("name", "")
-        cve_id = adv.get("cve_id") or ""
-        if cve_id == TARGET_CVE or pkg == TARGET_PACKAGE:
-            target = a
-            break
-
+    target = _find_target_alert(alerts)
     if not target:
         print("No open Dependabot alert for diskcache / CVE-2025-69872. Already dismissed or fixed.")
         return
@@ -68,19 +83,8 @@ def main() -> None:
         print("Dry-run: would dismiss with reason=risk_accepted")
         return
 
-    body = json.dumps(
-        {
-            "state": "dismissed",
-            "reason": "risk_accepted",
-            "dismiss_comment": DISMISS_COMMENT,
-        }
-    ).encode()
-    patch_url = f"{API_BASE}/repos/{REPO}/dependabot/alerts/{alert_number}"
-    req = urllib.request.Request(patch_url, data=body, headers={**headers, "Content-Type": "application/json"}, method="PATCH")
     try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            result = json.loads(resp.read().decode())
-        print(f"Dismissed alert #{alert_number}: {result.get('state', 'dismissed')}")
+        _dismiss_alert(alert_number, headers)
     except urllib.error.HTTPError as e:
         body_read = e.read().decode() if e.fp else ""
         print(f"Dismiss failed {e.code}: {body_read[:500]}", file=sys.stderr)

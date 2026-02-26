@@ -61,6 +61,7 @@ _INDEX_EXTENSIONS = (
     ".rtf",
 )
 _I18N_ERROR_LLM_FAILED = "error.llm_failed"
+_I18N_ERROR_BUDGET_EXCEEDED = "error.budget_exceeded"
 _I18N_TEMPLATE_ACTIONS = "template.one_on_one.actions"
 _HELP_OUTPUT_TEXT_JSON = "Формат вывода: text | json"
 _HELP_OUTPUT_TEXT_JSON_MD = "Формат вывода: text | json | md (md только с --id)"
@@ -282,7 +283,7 @@ def run_analyze_pipeline(
         return (t("error.install_llm_deps"), [], {})
     except BudgetExceeded as e:
         log.warning("analyze.budget_exceeded", error=str(e))
-        return (t("error.budget_exceeded", msg=str(e)), [], {})
+        return (t(_I18N_ERROR_BUDGET_EXCEEDED, msg=str(e)), [], {})
     except Exception as e:
         log.warning("analyze.llm_failed", error=str(e))
         return (t(_I18N_ERROR_LLM_FAILED, e=str(e)), [], {})
@@ -330,7 +331,7 @@ def run_live_summary_pipeline(seconds: int) -> tuple[list[str], float]:
         return ([t("error.install_llm_deps")], 0.0)
     except BudgetExceeded as e:
         log.warning("live_summary.budget_exceeded", error=str(e))
-        return ([t("error.budget_exceeded", msg=str(e))], 0.0)
+        return ([t(_I18N_ERROR_BUDGET_EXCEEDED, msg=str(e))], 0.0)
     except Exception as e:
         log.warning("live_summary.llm_failed", error=str(e))
         return ([t(_I18N_ERROR_LLM_FAILED, e=str(e))], 0.0)
@@ -673,7 +674,7 @@ def action_items_update(
             pii_mode=cfg.pii_mode,
         )
     except BudgetExceeded as e:
-        typer.echo(t("error.budget_exceeded", msg=str(e)), err=True)
+        typer.echo(t(_I18N_ERROR_BUDGET_EXCEEDED, msg=str(e)), err=True)
         raise SystemExit(1) from None
     except Exception as e:
         typer.echo(t(_I18N_ERROR_LLM_FAILED, e=str(e)), err=True)
@@ -1014,6 +1015,49 @@ def _history_echo(kind: str, data: Any, exit_on_error: bool = True) -> None:
         typer.echo(data)
 
 
+def _history_resolve(
+    log_db: Any,
+    purge_before: str | None,
+    action_items: bool,
+    search: str | None,
+    date: str | None,
+    from_date: str | None,
+    to_date: str | None,
+    session_id: int | None,
+    last_n: int,
+    output: str,
+) -> tuple[str, Any, Any] | None:
+    """Resolve history command to (kind, data, exit_on_error) or handle purge and return None."""
+    from datetime import date as date_type
+
+    if purge_before is not None:
+        try:
+            cutoff = date_type.fromisoformat(purge_before)
+        except ValueError:
+            typer.echo(t("history.date_invalid", err=purge_before), err=True)
+            raise SystemExit(1)
+        n = log_db.purge_before(cutoff)
+        typer.echo(t("history.purge_done", count=n))
+        return None
+    if action_items:
+        kind, data = history_action_items_result(log_db, output)
+        return (kind, data, True)
+    if search is not None:
+        kind, data = history_search_result(log_db, search, output)
+        return (kind, data, True)
+    if date is not None or (from_date is not None and to_date is not None):
+        kind, data = history_date_range_result(log_db, date, from_date, to_date, output)
+        return (kind, data, kind == "error")
+    if session_id is not None:
+        kind, data = history_session_detail_result(log_db, session_id, output)
+        if kind == "error":
+            _history_echo_session_not_found(data, output)
+            raise SystemExit(1)
+        return (kind, data, False)
+    kind, data = history_list_result(log_db, last_n, output)
+    return (kind, data, True)
+
+
 @app.command()
 def history(
     session_id: int | None = typer.Option(None, "--id", help="Показать детали сессии"),
@@ -1027,8 +1071,6 @@ def history(
     purge_before: str | None = typer.Option(None, "--purge-before", help="Удалить сессии, начатые до даты YYYY-MM-DD (#43)"),
 ) -> None:
     """Show recent sessions or one detailed session."""
-    from datetime import date as date_type
-
     from voiceforge.core.transcript_log import TranscriptLog
 
     if output == "md" and session_id is None:
@@ -1036,36 +1078,13 @@ def history(
         raise SystemExit(1)
     log_db = TranscriptLog()
     try:
-        if purge_before is not None:
-            try:
-                cutoff = date_type.fromisoformat(purge_before)
-            except ValueError:
-                typer.echo(t("history.date_invalid", err=purge_before), err=True)
-                raise SystemExit(1)
-            n = log_db.purge_before(cutoff)
-            typer.echo(t("history.purge_done", count=n))
+        result = _history_resolve(
+            log_db, purge_before, action_items, search, date, from_date, to_date, session_id, last_n, output
+        )
+        if result is None:
             return
-        if action_items:
-            _history_echo(*history_action_items_result(log_db, output))
-            return
-        if search is not None:
-            _history_echo(*history_search_result(log_db, search, output))
-            return
-        if date is not None or (from_date is not None and to_date is not None):
-            kind, data = history_date_range_result(log_db, date, from_date, to_date, output)
-            if kind == "error":
-                _history_echo(kind, data)
-            else:
-                _history_echo(kind, data, exit_on_error=False)
-            return
-        if session_id is not None:
-            kind, data = history_session_detail_result(log_db, session_id, output)
-            if kind == "error":
-                _history_echo_session_not_found(data, output)
-                raise SystemExit(1)
-            _history_echo(kind, data, exit_on_error=False)
-            return
-        _history_echo(*history_list_result(log_db, last_n, output))
+        kind, data, exit_on_error = result
+        _history_echo(kind, data, exit_on_error=exit_on_error)
     finally:
         log_db.close()
 
