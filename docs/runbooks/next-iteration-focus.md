@@ -8,14 +8,11 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Phase A · Stabilize — начать с quick wins (#58, #59) затем #55, #56, #57.**
+**Phase A · Stabilize — #58 выполнен. Дальше: #59, затем #55, #56, #57.**
 
-Порядок:
-1. **#58** Step 4 · Fix version (`importlib.metadata`) — XS, ~15 мин
-2. **#59** Step 5 · `.editorconfig` + CodeQL blocking — S, ~30 мин
-3. **#55** Step 1 · Eval job в CI — S, ~30 мин
-4. **#57** Step 3 · Sonar blocking — S, ~20 мин
-5. **#56** Step 2 · Coverage omit + тесты — M, ~2–4 часа
+Следующий шаг: **#59** Step 5 · Добавить `.editorconfig` и сделать CodeQL blocking — S, ~30 мин
+
+Остальное по порядку: #55 (Eval CI), #57 (Sonar blocking), #56 (Coverage omit + тесты).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
