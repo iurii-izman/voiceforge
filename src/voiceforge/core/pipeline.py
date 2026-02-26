@@ -135,6 +135,19 @@ def _step2_diarization(
     return out
 
 
+def _rag_merge_results(queries: list[str], searcher: Any) -> str:
+    """Run multi-query RAG search, merge by chunk_id (keep higher score), return context string."""
+    by_id: dict[int, Any] = {}
+    for q in queries:
+        if not (q and q.strip()):
+            continue
+        for r in searcher.search(q, top_k=3):
+            if r.chunk_id not in by_id or r.score > by_id[r.chunk_id].score:
+                by_id[r.chunk_id] = r
+    merged = sorted(by_id.values(), key=lambda x: -x.score)[:5]
+    return "\n".join(r.content[:300] for r in merged)
+
+
 def _step2_rag(transcript: str, rag_db_path: str) -> str:
     """RAG search. Runs in thread. C2 (#42): multi-query from transcript segments, merge and dedupe."""
     t0 = time.monotonic()
@@ -148,15 +161,7 @@ def _step2_rag(transcript: str, rag_db_path: str) -> str:
             if not queries:
                 queries = [transcript[:RAG_QUERY_MAX_CHARS] or "meeting"]
             searcher = HybridSearcher(rag_db_path)
-            by_id: dict[int, Any] = {}  # chunk_id -> SearchResult (keep higher score)
-            for q in queries:
-                if not (q and q.strip()):
-                    continue
-                for r in searcher.search(q, top_k=3):
-                    if r.chunk_id not in by_id or r.score > by_id[r.chunk_id].score:
-                        by_id[r.chunk_id] = r
-            merged = sorted(by_id.values(), key=lambda x: -x.score)[:5]
-            context = "\n".join(r.content[:300] for r in merged)
+            context = _rag_merge_results(queries, searcher)
             searcher.close()
     except ImportError:
         pass

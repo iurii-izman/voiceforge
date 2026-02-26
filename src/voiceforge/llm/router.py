@@ -345,7 +345,7 @@ def _usage_and_cost_from_response(raw: Any, model_id: str) -> tuple[int, int, in
     return (inp, out, cache_read, cache_creation, cost)
 
 
-def _complete_structured_cached(key: str, model_id: str, response_model: type[TModel], ttl: int) -> tuple[TModel, float] | None:
+def _complete_structured_cached(key: str, response_model: type[TModel], ttl: int) -> tuple[TModel, float] | None:
     """Return (parsed, cost) if cache hit, else None."""
     from voiceforge.core.metrics import log_response_cache
     from voiceforge.llm.cache import get as cache_get
@@ -378,6 +378,37 @@ def _complete_structured_check_budget(cfg: Any) -> None:
         )
 
 
+def _complete_structured_finish(
+    parsed: TModel,
+    raw_used: Any,
+    model_id: str,
+    response_model: type[TModel],
+    key: str,
+    ttl: int,
+) -> tuple[TModel, float]:
+    """Log usage, optionally cache, record observability; return (parsed, cost)."""
+    from voiceforge.core.metrics import log_llm_call
+    from voiceforge.llm.cache import set as cache_set
+
+    _, raw_content = _content_from_llm_response(raw_used, model_id)
+    model_fields = getattr(response_model, "model_fields", None)
+    if isinstance(model_fields, dict) and all(not getattr(parsed, f, None) for f in model_fields) and not raw_content.strip():
+        log.warning("llm.empty_structured_response", model=model_id)
+    inp, out, cache_read, cache_creation, cost = _usage_and_cost_from_response(raw_used, model_id)
+    if cache_read > 0 or cache_creation > 0:
+        log.info("llm.cache", model=model_id, cache_read_input_tokens=cache_read, cache_creation_input_tokens=cache_creation)
+    log_llm_call(model_id, inp, out, cost, cache_read_input_tokens=cache_read, cache_creation_input_tokens=cache_creation)
+    if ttl > 0:
+        cache_set(key, model_id, response_model.__name__, parsed, cost, ttl)
+    try:
+        from voiceforge.core.observability import record_llm_call
+
+        record_llm_call(model_id, cost, success=True)
+    except ImportError:
+        pass
+    return (parsed, cost)
+
+
 def complete_structured(
     prompt: list[dict[str, Any]],
     response_model: type[TModel],
@@ -388,16 +419,15 @@ def complete_structured(
     Pre-call budget check: reject if daily cost >= daily_budget_limit_usd (#38).
     Response cache: content-hash key, TTL from config (#44)."""
     from voiceforge.core.config import Settings
-    from voiceforge.core.metrics import log_llm_call, log_response_cache
+    from voiceforge.core.metrics import log_response_cache
     from voiceforge.llm.cache import cache_key
-    from voiceforge.llm.cache import set as cache_set
 
     cfg = Settings()
     ttl = int(getattr(cfg, "response_cache_ttl_seconds", 0) or 0)
     model_id = model or DEFAULT_MODEL
     key = cache_key(prompt, model_id, response_model.__name__) if ttl > 0 else ""
     if ttl > 0:
-        hit = _complete_structured_cached(key, model_id, response_model, ttl)
+        hit = _complete_structured_cached(key, response_model, ttl)
         if hit is not None:
             return hit
     _complete_structured_check_budget(cfg)
@@ -435,21 +465,4 @@ def complete_structured(
         )
         raise
 
-    _, raw_content = _content_from_llm_response(raw_used, model_id)
-    model_fields = getattr(response_model, "model_fields", None)
-    if isinstance(model_fields, dict) and all(not getattr(parsed, f, None) for f in model_fields) and not raw_content.strip():
-        log.warning("llm.empty_structured_response", model=model_id)
-
-    inp, out, cache_read, cache_creation, cost = _usage_and_cost_from_response(raw_used, model_id)
-    if cache_read > 0 or cache_creation > 0:
-        log.info("llm.cache", model=model_id, cache_read_input_tokens=cache_read, cache_creation_input_tokens=cache_creation)
-    log_llm_call(model_id, inp, out, cost, cache_read_input_tokens=cache_read, cache_creation_input_tokens=cache_creation)
-    if ttl > 0:
-        cache_set(key, model_id, response_model.__name__, parsed, cost, ttl)
-    try:
-        from voiceforge.core.observability import record_llm_call
-
-        record_llm_call(model_id, cost, success=True)
-    except ImportError:
-        pass
-    return (parsed, cost)
+    return _complete_structured_finish(parsed, raw_used, model_id, response_model, key, ttl)

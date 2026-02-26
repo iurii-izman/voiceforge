@@ -644,6 +644,47 @@ def _action_items_update_validate(log_db: Any, from_session: int, next_session: 
     return (detail_from, detail_next, action_items, transcript_next)
 
 
+def _action_items_update_persist(from_session: int, updates: list[tuple[int, str]]) -> None:
+    """Save updates to status JSON and DB."""
+    from voiceforge.core.transcript_log import TranscriptLog
+
+    status_data = _load_action_item_status()
+    for idx, status in updates:
+        status_data[f"{from_session}:{idx}"] = status
+    _save_action_item_status(status_data)
+    try:
+        log_db2 = TranscriptLog()
+        log_db2.update_action_item_statuses_in_db(from_session, updates)
+        log_db2.close()
+    except Exception as _e:
+        structlog.get_logger().debug("action_items DB update failed", exc_info=_e)
+
+
+def _action_items_update_echo(
+    output: str, from_session: int, next_session: int, updates: list[tuple[int, str]], cost_usd: float, save: bool
+) -> None:
+    """Emit JSON or text output for action-items update."""
+    if output == "json":
+        typer.echo(
+            json.dumps(
+                _cli_success_payload(
+                    {
+                        "from_session": from_session,
+                        "next_session": next_session,
+                        "updates": [{"id": i, "status": s} for i, s in updates],
+                        "cost_usd": cost_usd,
+                    }
+                ),
+                ensure_ascii=False,
+            )
+        )
+    else:
+        for idx, status in updates:
+            typer.echo(f"  [{idx}] {status}")
+        if updates and save:
+            typer.echo(t("action_items.saved_to", path=str(_action_item_status_path())))
+
+
 @action_items_app.command("update")
 def action_items_update(
     from_session: int = typer.Option(..., "--from-session", help="ID сессии с action items"),
@@ -682,36 +723,8 @@ def action_items_update(
 
     updates = [(u.id, u.status) for u in response.updates]
     if save and updates:
-        status_data = _load_action_item_status()
-        for idx, status in updates:
-            status_data[f"{from_session}:{idx}"] = status
-        _save_action_item_status(status_data)
-        try:
-            log_db2 = TranscriptLog()
-            log_db2.update_action_item_statuses_in_db(from_session, updates)
-            log_db2.close()
-        except Exception as _e:
-            structlog.get_logger().debug("action_items DB update failed", exc_info=_e)
-
-    if output == "json":
-        typer.echo(
-            json.dumps(
-                _cli_success_payload(
-                    {
-                        "from_session": from_session,
-                        "next_session": next_session,
-                        "updates": [{"id": i, "status": s} for i, s in updates],
-                        "cost_usd": cost_usd,
-                    }
-                ),
-                ensure_ascii=False,
-            )
-        )
-    else:
-        for idx, status in updates:
-            typer.echo(f"  [{idx}] {status}")
-        if updates and save:
-            typer.echo(t("action_items.saved_to", path=str(_action_item_status_path())))
+        _action_items_update_persist(from_session, updates)
+    _action_items_update_echo(output, from_session, next_session, updates, cost_usd, save)
 
 
 def _index_directory(indexer: Any, p: Path) -> tuple[int, set[str]]:
