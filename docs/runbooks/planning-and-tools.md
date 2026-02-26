@@ -31,7 +31,7 @@
 
 ## Сделано (не удалять — история в docs/history/)
 - [x] Sonar S3776
-- [x] desktop-build-deps-en.md
+- [x] runbooks/en/ (desktop-build-deps, installation-guide, quickstart, bootstrap, dependabot-review, telegram-bot-setup)
 ```
 
 **Как использовать со мной:** в чате: «добавь в backlog задачу X», «отметь CalDAV сделанным и перенеси в раздел Сделано», «подними AppImage выше CalDAV». Я буду править этот файл и при необходимости обновлять `next-iteration-focus.md`.

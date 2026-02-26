@@ -54,7 +54,7 @@
 | [#52](https://github.com/iurii-izman/voiceforge/issues/52) | QW2 i18n (убрать хардкод рус. строк) |
 | [#53](https://github.com/iurii-izman/voiceforge/issues/53) | QW3 ThreadPoolExecutor singleton в pipeline |
 
-**Done (недавно):** [#26 CalDAV](https://github.com/iurii-izman/voiceforge/issues/26) (voiceforge calendar poll). [#28 EN runbook](https://github.com/iurii-izman/voiceforge/issues/28) (dependabot-review-en, telegram-bot-setup-en).
+**Done (недавно):** [#26 CalDAV](https://github.com/iurii-izman/voiceforge/issues/26) (voiceforge calendar poll). [#28 EN runbook](https://github.com/iurii-izman/voiceforge/issues/28) (docs/en/, docs/runbooks/en/).
 
 При выполнении задачи: коммит в формате Conventional Commits с `Closes #N` (см. [git-github-practices.md](git-github-practices.md)); на доске перевести карточку в Done (агент может через `gh project item-edit`).
 

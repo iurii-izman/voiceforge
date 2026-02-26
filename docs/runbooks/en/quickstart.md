@@ -1,6 +1,6 @@
 # Quick start — first meeting in 5 minutes
 
-Linear scenario for alpha testers. Full version: [../first-meeting-5min-en.md](../first-meeting-5min-en.md) (or [../first-meeting-5min.md](../first-meeting-5min.md)).
+Linear scenario for alpha testers. Full version: [../../en/first-meeting-5min.md](../../en/first-meeting-5min.md).
 
 ## Steps
 

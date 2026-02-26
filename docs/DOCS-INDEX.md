@@ -2,7 +2,7 @@
 
 **Назначение:** один источник правды по тому, какой документ за что отвечает и актуален ли он. При изменении кода/фич обновлять соответствующий док и при необходимости этот индекс.
 
-**Обновлено:** 2026-02-24 (PROJECT_AUDIT_AND_ROADMAP; GitHub Project #32–53 Phase A–D)
+**Обновлено:** 2026-02-26 (разделение RU/EN: docs/en/, docs/runbooks/en/; GitHub: закрыт PR #54, удалена ветка)
 
 ---
 
@@ -35,21 +35,28 @@
 |------|------|--------|
 | closed-plans-and-roadmap.md | Что сделано по roadmap и планам (аудит по коду) | Справочно |
 
-### docs/ (корень)
+### docs/ (корень, RU по умолчанию)
 
 | Файл | Роль | Статус |
 |------|------|--------|
 | README.md | Вход в документацию, ссылки по смыслу | Актуален |
 | DOCS-INDEX.md | Этот индекс; модерация актуальности | Актуален |
 | first-meeting-5min.md | Сценарий первой встречи за 5 минут | Актуален |
-| first-meeting-5min-en.md | First meeting in 5 minutes (EN) | Актуален |
 | roadmap-priority.md | Приоритет внедрения фич 1–20 | Актуален |
 | development-plan-post-audit-2026.md | План развития по аудиту; сверка — claude-proposal-alignment | Справочно (многое закрыто) |
 | desktop-tauri-implementation-plan.md | План реализации десктопа | Справочно (реализовано) |
 | PROJECT_AUDIT_AND_ROADMAP.md | Полный технический аудит: C4, матрица зрелости, 20 слабых мест, 20-шаговый roadmap Phase A–D, план AI-качества, реестр рисков | Актуален |
 | grafana-voiceforge-dashboard.json | Шаблон дашборда Grafana для метрик VoiceForge (#36) | Актуален |
 
-### docs/runbooks/
+### docs/en/ (English)
+
+| Файл | Роль | Статус |
+|------|------|--------|
+| README.md | Вход в EN-документацию | Актуален |
+| first-meeting-5min.md | First meeting in 5 minutes | Актуален |
+| runbooks/ | Runbooks (EN): installation-guide, quickstart, bootstrap, desktop-build-deps, dependabot-review, telegram-bot-setup | Актуален |
+
+### docs/runbooks/ (RU по умолчанию)
 
 | Файл | Роль | Статус |
 |------|------|--------|
@@ -58,21 +65,16 @@
 | config-env-contract.md | VOICEFORGE_*, Settings, D-Bus, keyring | Актуален |
 | keyring-keys-reference.md | Список имён ключей в keyring | Актуален |
 | installation-guide.md | Гайд установки и запуска (toolbox, демон, ребилд) | Актуален |
-| installation-guide-en.md | Installation and run guide (EN) | Актуален |
 | desktop-build-deps.md | Зависимости сборки Tauri, pyannote при OOM | Актуален |
-| desktop-build-deps-en.md | Desktop build dependencies (EN) | Актуален |
 | first-meeting-5min — в docs/ | — | См. docs/first-meeting-5min.md |
 | quickstart.md | Краткий сценарий; полная версия — first-meeting-5min | Актуален |
-| quickstart-en.md | Quick start (EN) | Актуален |
 | bootstrap.md | bootstrap.sh, uv sync, doctor | Актуален |
-| bootstrap-en.md | Bootstrap runbook (EN) | Актуален |
 | dependencies.md | Политика зависимостей, uv.lock, CVE-исключения | Актуален |
 | security.md | Секреты, pip-audit, CVE-2025-69872 | Актуален |
 | dependabot-review.md | Как закрывать Dependabot алерты | Актуален |
-| dependabot-review-en.md | Dependabot: reviewing and closing alerts (EN) | Актуален |
 | telegram-bot-setup.md | Включение Telegram-бота (keyring, webhook, туннель) | Актуален |
-| telegram-bot-setup-en.md | Telegram bot setup (EN) | Актуален |
 | pyannote-version.md | Версия pyannote, откат при OOM | Актуален |
+| en/ | Runbooks (EN): installation-guide, quickstart, bootstrap, desktop-build-deps, dependabot-review, telegram-bot-setup | Актуален |
 | cursor-agent-setup.md | Настройка Cursor (My Secrets / keyring) | Актуален |
 | voiceforge-cursor-tz.md | Расширенное ТЗ для Cursor, чеклисты | Актуален |
 | claude-proposal-alignment.md | Сверка предложений с кодом (что реализовано) | Справочно |

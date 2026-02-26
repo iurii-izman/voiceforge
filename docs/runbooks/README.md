@@ -2,6 +2,8 @@
 
 Операционные инструкции и справочники. Группировка по смыслу. **Индекс всей документации (актуальность, модерация):** [../DOCS-INDEX.md](../DOCS-INDEX.md).
 
+**English:** [en/README.md](en/README.md) — installation-guide, quickstart, bootstrap, desktop-build-deps, dependabot-review, telegram-bot-setup.
+
 ---
 
 ## Контекст и агент

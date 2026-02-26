@@ -2,6 +2,8 @@
 
 Единая точка входа. Структура по смыслу, без дублирования. **Индекс и актуальность:** [DOCS-INDEX.md](DOCS-INDEX.md).
 
+**English:** [en/README.md](en/README.md) — first meeting, installation, quickstart, runbooks (EN).
+
 ---
 
 ## Старт

@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-02-25
+**Обновлено:** 2026-02-26
 
 ---
 
@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** Закрыто ~21 замечание Sonar (S3776, S1192, S3358, S108, S1481, S1244, S8233, S7677, S3923). Следующий шаг: перезапустить Sonar-скан в CI или локально `uv run python scripts/sonar_fetch_issues.py` и при необходимости доработать оставшиеся; или фича из docs/roadmap-priority.md (1–7); или Dependabot #2 — dismiss через `uv run python scripts/dependabot_dismiss_moderate.py` при наличии `github_token`.
+- **Сейчас:** GitHub: закрыт PR #54 (дублировал agent-context/runbooks), ветка удалена; открыт только PR #25 (pre-commit.ci autoupdate). Документация: RU по умолчанию в docs/ и docs/runbooks/; EN в docs/en/ и docs/runbooks/en/. Следующий шаг: фича из docs/roadmap-priority.md (1–7); или PR #25 — смержить при зелёном CI; или Dependabot #2 — dismiss при наличии `github_token`.
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-Sonar: исправлено ~21 замечание. Быстрые правки: build-flatpak.sh stderr (S7677), release.yml permissions на уровень job (S8233), константа error.budget_exceeded (S1192), убран лишний if в prompt_loader (S3923), заполнен пустой except в transcript_log (S108), pytest.approx и _template в test_llm_eval (S1244, S1481), вложенный conditional в server.py (S3358). Рефакторинг S3776 (cognitive complexity): вынесены хелперы в dependabot_dismiss_moderate, query_keywords, metrics, server (_reply_*), caldav_poll (_event_dict, _events_from_calendar, _candidates_from_calendars), pipeline (_prepare_audio, _step1_or_error, _gather_step2, _with_calendar_context), router (_complete_structured_cached, _complete_structured_check_budget), main (_history_resolve).
+GitHub: закрыт PR #54 (Development environment setup — дублировал agent-context и runbooks), удалена ветка cursor/development-environment-setup-3e7b; fetch --prune. Документация: разделение RU/EN — EN перенесены в docs/en/ и docs/runbooks/en/ (first-meeting-5min, installation-guide, quickstart, bootstrap, desktop-build-deps, dependabot-review, telegram-bot-setup); добавлены README в en/ и runbooks/en/; обновлены DOCS-INDEX.md, docs/README.md, backlog.md, planning-and-tools.md, runbooks/en/quickstart.md (ссылка на first-meeting-5min). Ранее: Sonar ~21 замечание. Быстрые правки: build-flatpak.sh stderr (S7677), release.yml permissions на уровень job (S8233), константа error.budget_exceeded (S1192), убран лишний if в prompt_loader (S3923), заполнен пустой except в transcript_log (S108), pytest.approx и _template в test_llm_eval (S1244, S1481), вложенный conditional в server.py (S3358). Рефакторинг S3776 (cognitive complexity): вынесены хелперы в dependabot_dismiss_moderate, query_keywords, metrics, server (_reply_*), caldav_poll (_event_dict, _events_from_calendar, _candidates_from_calendars), pipeline (_prepare_audio, _step1_or_error, _gather_step2, _with_calendar_context), router (_complete_structured_cached, _complete_structured_check_budget), main (_history_resolve).
 
 ---
 
