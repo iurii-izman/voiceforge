@@ -1,6 +1,6 @@
 # История: закрытые планы и roadmap (сверка с кодом)
 
-Документ фиксирует **что уже сделано** по планам развития и roadmap. Аудит по коду выполнен 2026-02-24. Текущий фокус и открытые задачи — в [next-iteration-focus.md](../runbooks/next-iteration-focus.md).
+Документ фиксирует **что уже сделано** по планам развития и roadmap. Последний аудит: 2026-02-26. Текущий фокус и открытые задачи — в [next-iteration-focus.md](../runbooks/next-iteration-focus.md). Маппинг новых задач: [audit-to-github-map.md](../audit/audit-to-github-map.md).
 
 ---
 
@@ -64,9 +64,52 @@
 
 ---
 
-## Что здесь не перечислено
+## Закрытые GitHub issues (старый план, #32–53)
 
-- **Roadmap 13:** десктоп (Tauri) — реализован.
-- **Roadmap 14–20:** частично (Telegram бот — ADR-0005, webhook, runbook); календарь, RAG ODT/RTF, AppImage/Flatpak полный цикл, prompt caching, macOS/WSL2 — открытые или в плане.
+Все issues по предыдущему плану развития (development-plan-post-audit-2026.md) закрыты, кроме #50 (macOS/WSL2). Сверка 2026-02-26 подтверждает: код реализован, тесты пройдены.
 
-Текущий список **не сделанного** и следующих шагов — в [next-iteration-focus.md](../runbooks/next-iteration-focus.md).
+| Issue | Тема | Статус |
+|---|---|---|
+| #32 A1 | Eval harness (golden samples, ROUGE-L) | Закрыт |
+| #33 A2 | Instructor retry (max_retries=3) | Закрыт |
+| #34 A3 | Unit-тесты daemon/streaming/smart_trigger | Закрыт |
+| #35 A4 | WAV integration тесты | Закрыт |
+| #36 B1 | Observability (Prometheus, /metrics) | Закрыт |
+| #37 B2 | pyannote memory guard (2GB) | Закрыт |
+| #38 B3 | Budget enforcement (pre-call, daily limit) | Закрыт |
+| #39 B4 | IPC envelope default | Закрыт |
+| #40 B5 | CI cache (uv) | Закрыт |
+| #41 C1 | Prompt management (файлы) | Закрыт |
+| #42 C2 | RAG query keyword extraction | Закрыт |
+| #43 C3 | Data retention policy | Закрыт |
+| #44 C4 | Response caching (SQLite) | Закрыт |
+| #45 C5 | Healthcheck /health | Закрыт |
+| #46 D1 | Desktop D-Bus signals | Закрыт |
+| #47 D2 | Telegram bot (webhook, push) | Закрыт |
+| #48 D3 | Calendar CalDAV auto-context | Закрыт |
+| #49 D4 | Flatpak packaging | Закрыт |
+| #50 D5 | macOS / WSL2 | **Открыт** |
+| #51 QW1 | scipy в base deps | Закрыт |
+| #52 QW2 | i18n hardcoded strings | Закрыт |
+| #53 QW3 | ThreadPoolExecutor single | Закрыт |
+
+---
+
+## Roadmap 13–20 (реализовано в коде)
+
+| # | Направление | Где в коде / доказательство |
+|---|-------------|-----------------------------|
+| 13 | Десктоп (Tauri) | `desktop/`: Tauri 2, D-Bus client, UI screens |
+| 14 | Офлайн-пакет | Flatpak manifest + build-flatpak.sh + AppImage скрипты |
+| 15 | Smart trigger | `audio/smart_trigger.py`, default false в config |
+| 16 | Telegram bot | ADR-0005, `web/server.py` webhook, runbook |
+| 17 | Календарь (CalDAV) | `calendar/caldav_poll.py`, ADR-0006, auto-context |
+| 18 | RAG ODT/RTF | `rag/parsers.py`, тесты в test_rag_parsers.py |
+| 19 | Prompt caching | Не реализовано (research R6 в новом аудите) |
+| 20 | macOS / WSL2 | Не реализовано (issue #50, Step 19 нового аудита) |
+
+---
+
+## Следующий слой: PROJECT_AUDIT_AND_ROADMAP (2026-02-26)
+
+Новый аудит выявил 20 Weaknesses и 20 Steps (Phase A–D). Все 20 Steps — **не реализованы** на момент сверки 2026-02-26. Маппинг и issues: [docs/audit/audit-to-github-map.md](../audit/audit-to-github-map.md).
