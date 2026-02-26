@@ -10,7 +10,7 @@
 
 Один конкретный шаг для следующего чата (или пользователь подставляет свою задачу).
 
-- **Сейчас:** GitHub: закрыт PR #54 (дублировал agent-context/runbooks), ветка удалена; открыт только PR #25 (pre-commit.ci autoupdate). Документация: RU по умолчанию в docs/ и docs/runbooks/; EN в docs/en/ и docs/runbooks/en/. Следующий шаг: фича из docs/roadmap-priority.md (1–7); или PR #25 — смержить при зелёном CI; или Dependabot #2 — dismiss при наличии `github_token`.
+- **Сейчас:** Sonar: закрыты ещё 4 issues (S1172, S3776) и Security Hotspot S7637 (dtolnay/rust-toolchain — полный SHA в release.yml). Следующий шаг: фича из docs/roadmap-priority.md (1–7); или PR #25 — смержить при зелёном CI; или Dependabot #2 — dismiss при наличии `github_token`.
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -18,7 +18,7 @@
 
 ## Последняя итерация (кратко)
 
-GitHub: закрыт PR #54 (Development environment setup — дублировал agent-context и runbooks), удалена ветка cursor/development-environment-setup-3e7b; fetch --prune. Документация: разделение RU/EN — EN перенесены в docs/en/ и docs/runbooks/en/ (first-meeting-5min, installation-guide, quickstart, bootstrap, desktop-build-deps, dependabot-review, telegram-bot-setup); добавлены README в en/ и runbooks/en/; обновлены DOCS-INDEX.md, docs/README.md, backlog.md, planning-and-tools.md, runbooks/en/quickstart.md (ссылка на first-meeting-5min). Ранее: Sonar ~21 замечание. Быстрые правки: build-flatpak.sh stderr (S7677), release.yml permissions на уровень job (S8233), константа error.budget_exceeded (S1192), убран лишний if в prompt_loader (S3923), заполнен пустой except в transcript_log (S108), pytest.approx и _template в test_llm_eval (S1244, S1481), вложенный conditional в server.py (S3358). Рефакторинг S3776 (cognitive complexity): вынесены хелперы в dependabot_dismiss_moderate, query_keywords, metrics, server (_reply_*), caldav_poll (_event_dict, _events_from_calendar, _candidates_from_calendars), pipeline (_prepare_audio, _step1_or_error, _gather_step2, _with_calendar_context), router (_complete_structured_cached, _complete_structured_check_budget), main (_history_resolve).
+Sonar: 4 оставшихся замечания (S1172 — убран неиспользуемый model_id в _complete_structured_cached; S3776 — _complete_structured_finish, _rag_merge_results, _action_items_update_persist/_echo). Security Hotspot S7637: dtolnay/rust-toolchain@stable заменён на полный SHA в .github/workflows/release.yml. Ранее: GitHub/доки (PR #54, docs/en), Sonar ~21 + 4. Быстрые правки: build-flatpak.sh stderr (S7677), release.yml permissions на уровень job (S8233), константа error.budget_exceeded (S1192), убран лишний if в prompt_loader (S3923), заполнен пустой except в transcript_log (S108), pytest.approx и _template в test_llm_eval (S1244, S1481), вложенный conditional в server.py (S3358). Рефакторинг S3776 (cognitive complexity): вынесены хелперы в dependabot_dismiss_moderate, query_keywords, metrics, server (_reply_*), caldav_poll (_event_dict, _events_from_calendar, _candidates_from_calendars), pipeline (_prepare_audio, _step1_or_error, _gather_step2, _with_calendar_context), router (_complete_structured_cached, _complete_structured_check_budget), main (_history_resolve).
 
 ---
 
