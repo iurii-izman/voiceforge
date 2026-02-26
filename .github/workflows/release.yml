@@ -56,7 +56,7 @@ jobs:
           cache: "npm"
           cache-dependency-path: desktop/package-lock.json
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@631a55b12751854ce901bb631d5902ceb48146f7  # stable (S7637: full SHA)
       - name: Build desktop (.deb)
         run: |
           cd desktop
