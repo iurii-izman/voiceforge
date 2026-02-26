@@ -96,3 +96,5 @@ def test_contract_payload_builders_and_extractors() -> None:
     assert contracts.extract_error_message(structured_error) == "bad request"
     assert contracts.extract_error_message("Ошибка: legacy fail") == "Ошибка: legacy fail"
     assert contracts.extract_error_message("not-an-error") is None
+    assert contracts.extract_error_message("[1,2]") is None
+    assert contracts.extract_error_message('{"error": "string"}') is None

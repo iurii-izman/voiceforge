@@ -28,6 +28,13 @@ def test_record_llm_call() -> None:
     observability.record_llm_call("openai/gpt-4o-mini", 0.0, success=False)
 
 
+def test_get_registry_returns_default_registry() -> None:
+    """get_registry() returns the module REGISTRY."""
+    from voiceforge.core.observability import REGISTRY, get_registry
+
+    assert get_registry() is REGISTRY
+
+
 def test_metrics_expose_voiceforge_metrics() -> None:
     """Generate_latest returns bytes containing our metric names."""
     from prometheus_client import generate_latest

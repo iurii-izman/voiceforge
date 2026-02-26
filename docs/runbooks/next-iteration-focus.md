@@ -8,9 +8,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Phase A · Stabilize — #55, #57, #58, #59 выполнены. Осталось: #56.**
+**#56 частично выполнено.** Добавлены тесты для daemon, streaming, smart_trigger, model_manager (+ observability, contracts, schemas). Omit оставлен для тяжёлых/интеграционных модулей (main, pipeline, server, diarizer, RAG/LLM heavy). fail_under=80. Текущее покрытие ~63%; при `pytest --cov` порог не достигается.
 
-Следующий шаг: **#56** Step 2 · Coverage: убрать omit из pyproject.toml, добавить тесты, fail_under 70→80 — M, ~2–4 ч
+Следующий шаг: **#56 доработка** — поднять coverage до 80%: добавить тесты для core/metrics, llm/router, cli/history_helpers, cli/status_helpers, core/daemon (потоки), rag/parsers; либо временно снизить fail_under до 64 для прохождения CI. После #56 — Phase B (#60).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
