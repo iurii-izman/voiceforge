@@ -473,13 +473,37 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
                         _os.unlink(p)
 
     def _handle_get_health(self) -> None:
-        """Healthcheck endpoint for readiness/liveness. C5 (#45)."""
+        """Healthcheck endpoint for liveness. C5 (#45)."""
         body = json.dumps({"status": "ok"}).encode("utf-8")
         self.send_response(200)
         self.send_header("Content-Type", _CONTENT_TYPE_JSON)
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
+
+    def _handle_get_ready(self) -> None:
+        """Readiness endpoint: 200 if DB reachable, else 503. Issue #60."""
+        try:
+            from voiceforge.core.transcript_log import TranscriptLog
+
+            log_db = TranscriptLog()
+            try:
+                log_db.get_sessions(last_n=1)
+            finally:
+                log_db.close()
+            body = json.dumps({"ready": True}).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", _CONTENT_TYPE_JSON)
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+        except Exception:
+            body = json.dumps({"ready": False}).encode("utf-8")
+            self.send_response(503)
+            self.send_header("Content-Type", _CONTENT_TYPE_JSON)
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
 
     def _handle_get_metrics(self) -> None:
         """Serve Prometheus metrics. Issue #36."""
@@ -524,6 +548,9 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
             return
         if path == "/health":
             self._handle_get_health()
+            return
+        if path == "/ready":
+            self._handle_get_ready()
             return
         if path == "/metrics":
             self._handle_get_metrics()

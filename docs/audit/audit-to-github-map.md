@@ -14,7 +14,7 @@
 | W3 / Step 3 | Sonar blocking | **СДЕЛАНО** | sonar.yml: убран continue-on-error |
 | W4 / Step 5 | CodeQL blocking | **СДЕЛАНО** | codeql.yml: убран continue-on-error |
 | W5 | Pipeline integration test | **НЕ СДЕЛАНО** | Нет test_pipeline_integration.py |
-| W6 / Step 6 | systemd MemoryMax | **НЕ СДЕЛАНО** | voiceforge.service: нет MemoryMax/MemoryHigh/OOMScoreAdjust |
+| W6 / Step 6 | systemd MemoryMax | **СДЕЛАНО** | scripts/voiceforge.service: MemoryMax=4G, MemoryHigh=3G, OOMScoreAdjust=500 |
 | W7 / Step 12 | Async web server | **НЕ СДЕЛАНО** | server.py L10: `from http.server import ...` |
 | W8 / Step 8 | Circuit breaker | **НЕ СДЕЛАНО** | Нет circuit_breaker.py; нет tracking в router.py |
 | W9 / Step 7 | Trace IDs | **НЕ СДЕЛАНО** | Нет trace_id нигде в src/ |
@@ -22,7 +22,7 @@
 | W11 / Step 9 | Periodic retention purge | **НЕ СДЕЛАНО** | daemon.py: purge_before() только в init, нет Timer |
 | W12 / Step 9 | DB backup CLI | **НЕ СДЕЛАНО** | main.py: нет backup команды |
 | W13 / Step 11 | CVE-2025-69872 | **НЕ СДЕЛАНО** | test.yml L117: `--ignore-vuln CVE-2025-69872` |
-| W14 / Step 6 | /ready endpoint | **НЕ СДЕЛАНО** | server.py: нет /ready |
+| W14 / Step 6 | /ready endpoint | **СДЕЛАНО** | web/server.py: GET /ready (DB check), 200/503; test_web_smoke |
 | W15 / Step 4 | Version inconsistency | **СДЕЛАНО** | __init__.py: importlib.metadata.version("voiceforge") |
 | W16 / Step 5 | .editorconfig | **СДЕЛАНО** | .editorconfig в корне (utf-8, indent 4/2, trim) |
 | W17 | Cognitive complexity S3776 | **ЧАСТИЧНО** | do_GET/do_POST ещё if-chains; часть S3776 закрыта |

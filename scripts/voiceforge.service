@@ -12,6 +12,10 @@ Type=simple
 ExecStart=distrobox enter voiceforge -- uv run voiceforge daemon
 Restart=on-failure
 RestartSec=5
+# Resource limits (issue #60): mitigate pyannote OOM on low-RAM hosts
+MemoryMax=4G
+MemoryHigh=3G
+OOMScoreAdjust=500
 # Pass session env into distrobox so D-Bus and runtime dir work
 Environment=DBUS_SESSION_BUS_ADDRESS=%E(DBUS_SESSION_BUS_ADDRESS)
 Environment=XDG_RUNTIME_DIR=%E(XDG_RUNTIME_DIR)

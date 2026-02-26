@@ -46,6 +46,10 @@ def test_web_index_and_status(monkeypatch, tmp_path) -> None:
             assert r.status == 200
             data = __import__("json").loads(r.read().decode("utf-8"))
             assert data.get("status") == "ok"
+        with urllib.request.urlopen(f"http://127.0.0.1:{port}/ready", timeout=2) as r:
+            assert r.status == 200
+            data = __import__("json").loads(r.read().decode("utf-8"))
+            assert data.get("ready") is True
     finally:
         server.shutdown()
 
