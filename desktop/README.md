@@ -26,8 +26,8 @@ npm run tauri build  # релизный бинарник в src-tauri/target/rel
 
 ## Контракт D-Bus
 
-Интерфейс: `com.voiceforge.App`, путь: `/com/voiceforge/App`.  
-Методы, используемые в каркасе: `Ping`, `GetSettings`, `GetSessions(limit)`.  
+Интерфейс: `com.voiceforge.App`, путь: `/com/voiceforge/App`.
+Методы, используемые в каркасе: `Ping`, `GetSettings`, `GetSessions(limit)`.
 Формат ответов при `VOICEFORGE_IPC_ENVELOPE=1`: envelope `{ "schema_version", "ok", "data" }`, данные в `data.settings` / `data.sessions`.
 
 Подробнее: [docs/runbooks/config-env-contract.md](../docs/runbooks/config-env-contract.md), [docs/adr/0004-desktop-tauri-dbus.md](../docs/adr/0004-desktop-tauri-dbus.md).
