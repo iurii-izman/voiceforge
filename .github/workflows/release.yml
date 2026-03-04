@@ -18,14 +18,14 @@ jobs:
       UV_VERSION: "0.8"
     steps:
       - uses: actions/checkout@v6
-      - uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b # v7
+      - uses: astral-sh/setup-uv@5a095e7a2014a4212f075830d4f7277575a9d098 # v7
         with:
           python-version: "3.12"
           version: ${{ env.UV_VERSION }}
           enable-cache: true
       - run: uv sync --extra all
       - run: uv build --wheel
-      - uses: anchore/sbom-action@28d71544de8eaf1b958d335707167c5f783590ad # v0
+      - uses: anchore/sbom-action@17ae1740179002c89186b61233e0f892c3118b11 # v0
         with:
           path: .
           format: cyclonedx-json
