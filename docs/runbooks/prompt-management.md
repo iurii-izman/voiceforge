@@ -18,13 +18,18 @@
 - `load_template_prompts()` — загружает все `template_*.txt`, возвращает `None` если хотя бы один отсутствует
 - `get_prompt_version()` — читает `prompts/version`, возвращает `None` если файла нет или он пустой
 
-В `router.py` при отсутствии файлов используются fallback-промпты из кода.
+В `router.py` при отсутствии файлов используются fallback-промпты из кода. **Block 6 (#67):** при использовании fallback пишется предупреждение в лог (`prompt_loader_fallback`, prompt=…, reason="file missing").
 
 ## Изменение промптов
 
 1. Редактировать нужный `.txt` в `src/voiceforge/llm/prompts/`.
 2. При необходимости обновить `version`.
 3. Запустить тесты: `uv run pytest tests/test_prompt_loader.py -v`. Snapshot-тест `test_prompt_content_snapshot` упадёт при изменении содержимого — обновить ожидаемые хэши в тесте (константа `expected` в `test_prompt_content_snapshot`).
+
+## Целостность (hash / CI). Block 6 (#67)
+
+- **Хэши:** `get_prompt_hashes()` в `prompt_loader` возвращает SHA256 по каждому промпту (для скриптов/CI).
+- **CI:** тест `test_prompt_content_snapshot` в `tests/test_prompt_loader.py` проверяет совпадение хэшей с эталоном; при изменении промптов нужно обновить словарь `expected` в этом тесте.
 
 ## Тесты
 

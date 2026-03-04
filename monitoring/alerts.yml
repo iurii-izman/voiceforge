@@ -1,0 +1,30 @@
+# Prometheus alert rules for VoiceForge. Issue #64.
+# Alerts: pipeline errors, LLM error rate, optional budget (if daily cost exported).
+
+groups:
+  - name: voiceforge
+    rules:
+      # Pipeline errors: > 3 in 15m
+      - alert: VoiceForgePipelineErrorsHigh
+        expr: increase(voiceforge_pipeline_errors_total[15m]) > 3
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "VoiceForge pipeline errors elevated"
+          description: "Pipeline errors (STT/diarization/RAG) increased by more than 3 in 15m."
+
+      # LLM error rate > 5% over 5m
+      - alert: VoiceForgeLLMErrorRateHigh
+        expr: |
+          (
+            sum(rate(voiceforge_llm_calls_total{status="error"}[5m]))
+            /
+            sum(rate(voiceforge_llm_calls_total[5m]))
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "VoiceForge LLM error rate > 5%"
+          description: "Fraction of LLM calls with status=error exceeds 5% over 5m."

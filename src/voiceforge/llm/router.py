@@ -79,12 +79,20 @@ Write in the same language as the transcript. Be concise. Output only valid JSON
 
 def _system_prompt() -> str:
     """System prompt for meeting analysis (from prompts/analysis.txt or fallback)."""
-    return load_prompt("analysis") or _SYSTEM_PROMPT_FALLBACK
+    out = load_prompt("analysis")
+    if out is None:
+        log.warning("prompt_loader_fallback", prompt="analysis", reason="file missing")
+        return _SYSTEM_PROMPT_FALLBACK
+    return out
 
 
 def _template_prompts() -> dict[str, str]:
     """Template prompts (from prompts/template_*.txt or fallback)."""
-    return load_template_prompts() or _TEMPLATE_PROMPTS_FALLBACK
+    out = load_template_prompts()
+    if out is None:
+        log.warning("prompt_loader_fallback", prompt="template_*", reason="one or more files missing")
+        return _TEMPLATE_PROMPTS_FALLBACK
+    return out
 
 
 def _is_claude_model(model_id: str) -> bool:
@@ -205,7 +213,11 @@ def _live_summary_system() -> str:
 - action_items: only concrete action items with description; assignee and deadline if clearly stated.
 
 Write in the same language as the transcript. Be very concise. Output only valid JSON matching the schema (key_points, action_items)."""
-    return load_prompt("live_summary") or fallback
+    out = load_prompt("live_summary")
+    if out is None:
+        log.warning("prompt_loader_fallback", prompt="live_summary", reason="file missing")
+        return fallback
+    return out
 
 
 def analyze_live_summary(
@@ -248,7 +260,11 @@ def _status_update_system() -> str:
 2. The transcript of the FOLLOW-UP meeting.
 
 Your task: determine which action items were mentioned in the follow-up as DONE or CANCELLED. Output only the list of (id, status) for items that were clearly stated as done or cancelled. Use the same language as the transcript for any reasoning; output only valid JSON matching the schema (updates: list of {id, status})."""
-    return load_prompt("status_update") or fallback
+    out = load_prompt("status_update")
+    if out is None:
+        log.warning("prompt_loader_fallback", prompt="status_update", reason="file missing")
+        return fallback
+    return out
 
 
 def update_action_item_statuses(

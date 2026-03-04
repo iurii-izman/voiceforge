@@ -1,0 +1,23 @@
+# Prometheus config for VoiceForge. Issue #64.
+# Scrape /metrics from VoiceForge web server.
+# Usage: see monitoring/README.md (runbook).
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []  # optional: e.g. ["alertmanager:9093"]
+
+rule_files:
+  - alerts.yml
+
+scrape_configs:
+  - job_name: voiceforge
+    static_configs:
+      # VoiceForge web must be reachable (e.g. host.docker.internal or host IP)
+      - targets: ["host.docker.internal:8765"]
+    metrics_path: /metrics
+    scrape_interval: 30s

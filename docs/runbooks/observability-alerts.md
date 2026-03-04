@@ -44,7 +44,13 @@
 - Импорт дашборда: `docs/grafana-voiceforge-dashboard.json`.
 - Datasource: Prometheus, указывающий на скрап `/metrics` (например через Pushgateway или прямой скрап HTTP сервера VoiceForge).
 
+## Развёртывание стека (Prometheus + Grafana)
+
+См. **`monitoring/README.md`** в корне репо: конфиги `prometheus.yml`, `alerts.yml`, `docker-compose.yml`, импорт дашборда Grafana из `docs/grafana-voiceforge-dashboard.json`. Issue [#64](https://github.com/iurii-izman/voiceforge/issues/64).
+
 ## Ссылки
 
 - Issue [#36](https://github.com/iurii-izman/voiceforge/issues/36) — Observability (metrics/tracing).
+- Issue [#64](https://github.com/iurii-izman/voiceforge/issues/64) — Monitoring stack (Grafana + alerts).
+- `monitoring/` — конфиги Prometheus и алертов.
 - `src/voiceforge/core/observability.py` — определение метрик.
