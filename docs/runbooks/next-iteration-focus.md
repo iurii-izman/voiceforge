@@ -2,15 +2,15 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-04 (сессия: pre-commit clean, docs, coverage #56 ref)
+**Обновлено:** 2026-03-04 (сессия: #56 transcript_log + W5 pipeline integration)
 
 ---
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** pre-commit clean выполнен; в напоминания добавлено: при ошибке кэша — `uv run pre-commit clean`, без python3.12 — `git commit/push --no-verify`. В pyproject.toml — комментарий для #56 (coverage omit). uv sync --extra all — тесты 179 passed. Dependabot dismiss не запускался (401: нужен github_token в keyring).
+**Сделано в сессии:** #56: transcript_log выведен из coverage omit; добавлен tests/test_transcript_log.py (13 тестов). W5: добавлен tests/test_pipeline_integration.py (6 тестов: _prepare_audio, _resample_to_16k, AnalysisPipeline.run с моком STT). Обновлён audit-to-github-map (W2 частично, W5 сделано). Покрытие 69% (198 тестов). Коммит и пуш в конце.
 
-Следующий шаг: **По желанию:** закрыть Dependabot moderate (`uv run python scripts/dependabot_dismiss_moderate.py` при наличии github_token в keyring). Дальше: вывести один модуль из coverage omit + тесты (#56), pipeline integration test (W5), полный async web (W7) или Phase D.
+Следующий шаг: вывести ещё модули из omit + тесты (#56), например calendar/caldav_poll или core/pipeline; поднять fail_under до 70. Либо: полный async web (W7), Phase D (A/B testing, OTel, plugins).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 

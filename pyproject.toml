@@ -129,7 +129,7 @@ omit = [
     "src/voiceforge/rag/searcher.py",
     "src/voiceforge/rag/watcher.py",
     "src/voiceforge/llm/local_llm.py",
-    "src/voiceforge/core/transcript_log.py",
+    # transcript_log removed from omit (#56): test_transcript_log.py + test_db_migrations.py cover it
     "src/voiceforge/calendar/caldav_poll.py",
 ]
 

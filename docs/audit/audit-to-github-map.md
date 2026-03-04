@@ -10,10 +10,10 @@
 | # | Weakness / Step | Статус | Доказательство |
 |---|----------------|--------|----------------|
 | W1 / Step 1 | Eval harness **в CI** | **СДЕЛАНО** | test.yml: job `eval` — pytest tests/eval/ (ROUGE-L) |
-| W2 / Step 2 | Coverage omit убран | **НЕ СДЕЛАНО** | pyproject.toml: omit, fail_under=63 |
+| W2 / Step 2 | Coverage omit убран | **ЧАСТИЧНО** | transcript_log выведен из omit (#56); test_transcript_log.py; fail_under=63 |
 | W3 / Step 3 | Sonar blocking | **СДЕЛАНО** | sonar.yml: убран continue-on-error |
 | W4 / Step 5 | CodeQL blocking | **СДЕЛАНО** | codeql.yml: убран continue-on-error |
-| W5 | Pipeline integration test | **НЕ СДЕЛАНО** | Нет test_pipeline_integration.py |
+| W5 | Pipeline integration test | **СДЕЛАНО** | tests/test_pipeline_integration.py: _prepare_audio, run with mocked STT |
 | W6 / Step 6 | systemd MemoryMax | **СДЕЛАНО** | scripts/voiceforge.service: MemoryMax=4G, MemoryHigh=3G, OOMScoreAdjust=500 |
 | W7 / Step 12 | Async web server | **ЧАСТИЧНО** | ThreadingMixIn (#66); не Starlette/Litestar |
 | W8 / Step 8 | Circuit breaker | **СДЕЛАНО** | llm/circuit_breaker.py, router wrap_completion, метрика state (#62) |
