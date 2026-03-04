@@ -10,6 +10,8 @@ import urllib.request
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Any
 
+from voiceforge.core.tracing import bind_trace_id, clear_trace_context, get_trace_id
+
 _log = logging.getLogger(__name__)
 
 _TELEGRAM_API = "https://api.telegram.org"
@@ -307,12 +309,18 @@ def _html_index() -> str:
 class _VoiceForgeHandler(BaseHTTPRequestHandler):
     def _send_json(self, obj: Any, status: int = 200) -> None:
         self.send_response(status)
+        tid = get_trace_id()
+        if tid:
+            self.send_header("X-Trace-Id", tid)
         self.send_header("Content-Type", _CONTENT_TYPE_JSON)
         self.end_headers()
         self.wfile.write(json.dumps(obj, ensure_ascii=False).encode("utf-8"))
 
     def _send_html(self, html: str, status: int = 200) -> None:
         self.send_response(status)
+        tid = get_trace_id()
+        if tid:
+            self.send_header("X-Trace-Id", tid)
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.end_headers()
         self.wfile.write(html.encode("utf-8"))
@@ -523,6 +531,8 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_GET(self) -> None:
+        clear_trace_context()
+        bind_trace_id((self.headers.get("X-Trace-Id") or "").strip() or None)
         path, params = self._parse_path()
         if path == "/" or path == "/index.html":
             self._handle_get_index()
@@ -733,6 +743,8 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
             return None
 
     def do_POST(self) -> None:
+        clear_trace_context()
+        bind_trace_id((self.headers.get("X-Trace-Id") or "").strip() or None)
         path, _ = self._parse_path()
         if path == "/api/telegram/webhook":
             content_length = int(self.headers.get("Content-Length") or 0)

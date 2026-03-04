@@ -34,6 +34,7 @@ from voiceforge.cli.status_helpers import (
     get_status_text,
 )
 from voiceforge.core.config import Settings
+from voiceforge.core.tracing import bind_trace_id
 from voiceforge.core.contracts import (
     BudgetExceeded,
     build_cli_error_payload,
@@ -48,6 +49,13 @@ action_items_app = typer.Typer(help=t("cli.action_items_help"))
 app.add_typer(action_items_app, name="action-items")
 calendar_app = typer.Typer(help="CalDAV calendar poll (keyring: caldav_url, caldav_username, caldav_password)")
 app.add_typer(calendar_app, name="calendar")
+
+
+@app.callback()
+def _cli_trace(_ctx: typer.Context) -> None:
+    """Bind trace_id for this CLI invocation (Phase B #61)."""
+    bind_trace_id()
+
 
 _INDEX_EXTENSIONS = (
     ".pdf",
@@ -237,6 +245,7 @@ def run_analyze_pipeline(
     template: str | None = None,
 ) -> tuple[str, list[dict[str, Any]], dict[str, Any]]:
     """Run core analyze pipeline and return (display_text, segments_for_log, analysis_for_log)."""
+    bind_trace_id()  # one trace_id per pipeline run (CLI or daemon worker)
     cfg = _get_config()
     try:
         from voiceforge.core.pipeline import AnalysisPipeline
@@ -1140,7 +1149,13 @@ def calendar_poll(
 
 
 def main() -> None:
-    structlog.configure(processors=[structlog.dev.ConsoleRenderer()])
+    structlog.configure(
+        processors=[
+            structlog.contextvars.merge_contextvars,
+            structlog.processors.TimeStamper(fmt="iso"),
+            structlog.dev.ConsoleRenderer(),
+        ]
+    )
     app()
 
 
