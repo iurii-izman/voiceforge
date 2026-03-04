@@ -1,0 +1,6 @@
+{
+  "description": "Baseline for STT/RAG benchmarks (#68). Optional: CI compares benchmark output to these thresholds.",
+  "stt_silence_5s_max_seconds": 30,
+  "extract_keywords_max_seconds": 0.1,
+  "extract_keyword_queries_max_seconds": 0.2
+}

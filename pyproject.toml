@@ -74,6 +74,7 @@ dev = [
     "mypy>=1.19.1",
     "types-pyyaml>=6.0.12.20250915",
     "rouge-score>=0.1.2",
+    "pytest-benchmark>=4.0.0",
 ]
 
 [tool.ruff]
@@ -103,6 +104,7 @@ asyncio_mode = "auto"
 markers = [
     "integration: WAV-based STT integration tests (slow, real model).",
     "slow: slow tests (e.g. download model, transcribe).",
+    "benchmark: performance benchmarks (STT, RAG); optional in CI (#68).",
 ]
 
 [tool.coverage.run]
