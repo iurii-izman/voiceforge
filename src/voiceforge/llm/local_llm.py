@@ -1,5 +1,5 @@
 """Block 5.2: Local LLM via Ollama — classify and simple_answer ($0).
-Phi-3 Mini 4bit ~2.5 GB RAM."""
+Phi-3 Mini 4bit ~2.5 GB RAM. Circuit breaker (#62) skips Ollama when open."""
 
 from __future__ import annotations
 
@@ -12,7 +12,11 @@ from typing import Literal
 
 import structlog
 
+from voiceforge.llm.circuit_breaker import get_circuit_breaker
+
 log = structlog.get_logger()
+
+OLLAMA_CIRCUIT_KEY = "ollama"
 
 
 def _ollama_base() -> str:
@@ -58,8 +62,11 @@ def is_available(timeout: float = 2.0) -> bool:
 
 def classify(text: str, model: str = DEFAULT_MODEL) -> Classification:
     """Classify transcript into: code | faq | multilang | analysis.
-    Uses Ollama; on failure returns 'analysis'."""
+    Uses Ollama; on failure or circuit open returns 'analysis'."""
     if not text or not text.strip():
+        return "analysis"
+    breaker = get_circuit_breaker()
+    if not breaker.can_execute(OLLAMA_CIRCUIT_KEY):
         return "analysis"
     prompt = (
         "Classify the following meeting/transcript snippet into exactly one category. "
@@ -73,6 +80,10 @@ def classify(text: str, model: str = DEFAULT_MODEL) -> Classification:
         {"model": model, "messages": [{"role": "user", "content": prompt}], "stream": False},
         timeout=CLASSIFY_TIMEOUT,
     )
+    if out:
+        breaker.record_success(OLLAMA_CIRCUIT_KEY)
+    else:
+        breaker.record_failure(OLLAMA_CIRCUIT_KEY)
     if not out:
         return "analysis"
     content = (out.get("message") or {}).get("content") or ""
@@ -87,6 +98,9 @@ def simple_answer(question: str, context: str, model: str = DEFAULT_MODEL) -> st
     """Answer briefly using context. For FAQ-style queries without API call. Returns plain text."""
     if not question.strip():
         return ""
+    breaker = get_circuit_breaker()
+    if not breaker.can_execute(OLLAMA_CIRCUIT_KEY):
+        return ""
     user = (
         f"Context:\n{context[:2000]}\n\nQuestion or transcript excerpt:\n{question[:1500]}\n\n"
         "Answer briefly in the same language."
@@ -96,6 +110,10 @@ def simple_answer(question: str, context: str, model: str = DEFAULT_MODEL) -> st
         {"model": model, "messages": [{"role": "user", "content": user}], "stream": False},
         timeout=GENERATE_TIMEOUT,
     )
+    if out:
+        breaker.record_success(OLLAMA_CIRCUIT_KEY)
+    else:
+        breaker.record_failure(OLLAMA_CIRCUIT_KEY)
     if not out:
         return ""
     return ((out.get("message") or {}).get("content") or "").strip()

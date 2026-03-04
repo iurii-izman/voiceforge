@@ -10,6 +10,7 @@ from pydantic import BaseModel
 
 from voiceforge.core.contracts import BudgetExceeded
 from voiceforge.core.secrets import set_env_keys_from_keyring
+from voiceforge.llm.circuit_breaker import wrap_completion
 from voiceforge.llm.pii_filter import redact
 from voiceforge.llm.prompt_loader import load_prompt, load_template_prompts
 
@@ -440,7 +441,7 @@ def complete_structured(
         raise ImportError("Install [llm] extras: uv sync --extra llm") from e
 
     fallbacks = [m for m in FALLBACK_MODELS if m != model_id][:3]
-    client = instructor.from_litellm(completion)
+    client = instructor.from_litellm(wrap_completion(completion))
     try:
         parsed, raw_used = client.create_with_completion(
             messages=prompt,

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from prometheus_client import REGISTRY, CollectorRegistry, Counter, Histogram
+from prometheus_client import REGISTRY, CollectorRegistry, Counter, Gauge, Histogram
 
 # Histograms: duration in seconds
 stt_duration_seconds = Histogram(
@@ -37,6 +37,12 @@ pipeline_errors_total = Counter(
     "Pipeline errors by step",
     ["step"],
 )
+# Circuit breaker state per model (0=closed, 1=half_open, 2=open). #62
+llm_circuit_breaker_state = Gauge(
+    "voiceforge_llm_circuit_breaker_state",
+    "LLM circuit breaker state (0=closed, 1=half_open, 2=open)",
+    ["model"],
+)
 
 
 def get_registry() -> CollectorRegistry:
@@ -65,3 +71,9 @@ def record_llm_call(model: str, cost_usd: float, success: bool) -> None:
     llm_calls_total.labels(model=model, status=status).inc()
     if cost_usd > 0:
         llm_cost_usd_total.labels(model=model).inc(cost_usd)
+
+
+def set_circuit_breaker_states(states: dict[str, int]) -> None:
+    """Update circuit breaker gauge from get_circuit_breaker().get_all_states(). #62"""
+    for model, state in states.items():
+        llm_circuit_breaker_state.labels(model=model).set(state)

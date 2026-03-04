@@ -514,10 +514,17 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
             self.wfile.write(body)
 
     def _handle_get_metrics(self) -> None:
-        """Serve Prometheus metrics. Issue #36."""
+        """Serve Prometheus metrics. Issue #36. Includes circuit breaker state (#62)."""
         try:
             from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
+            try:
+                from voiceforge.core.observability import set_circuit_breaker_states
+                from voiceforge.llm.circuit_breaker import get_circuit_breaker
+
+                set_circuit_breaker_states(get_circuit_breaker().get_all_states())
+            except ImportError:
+                pass
             body = generate_latest()
         except ImportError:
             self.send_response(501)
