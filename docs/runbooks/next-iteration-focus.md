@@ -2,15 +2,15 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-04 (сессия: упорядочивание документации — cursor.md, planning.md, архив аудита)
+**Обновлено:** 2026-03-04 (сессия: единый аудит + единый план, Python 3.12 в toolbox 43)
 
 ---
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Консолидация документации: созданы [cursor.md](cursor.md) (объединение cursor-agent-setup, cursor-speedup, cursor-tuning) и [planning.md](planning.md) (объединение backlog, planning-and-tools). Аудит PROJECT_AUDIT_AND_ROADMAP перенесён в [archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](../archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md), в docs/ оставлена заглушка. Обновлены DOCS-INDEX, doc-governance, README runbooks/docs, ссылки в audit и history. Коммит запушен (aa1de65).
+**Сделано в сессии:** Все аудиты объединены в один [audit/audit.md](../audit/audit.md); старые FULL_AUDIT и audit-to-github-map перенесены в archive как снимки. Все планы (roadmap, что сделано, текущие задачи) — в один [plans.md](../plans.md); roadmap-priority — заглушка на plans.md. Добавлен [archive/audit/REMAINING_AND_PLAN_TO_100_2026.md](../archive/audit/REMAINING_AND_PLAN_TO_100_2026.md). Прописано: **Python 3.12 в toolbox 43** (bootstrap.md, next-iteration-focus). Обновлены все ссылки в DOCS-INDEX, doc-governance, agent-context, planning, cursor, quickstart, first-meeting. Коммит 00c20e9 запушен.
 
-Следующий шаг: довести покрытие до 70% и поднять fail_under до 70 (#56). Либо: полный async web (W7), Phase D (A/B testing, OTel, plugins).
+Следующий шаг: довести покрытие до 70% и поднять fail_under до 70 (#56). Либо: полный async web (#66), Phase D (A/B testing, OTel, plugins).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
