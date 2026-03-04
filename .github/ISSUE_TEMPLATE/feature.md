@@ -13,8 +13,8 @@ assignees: []
 <!-- Why is this needed? Link roadmap/runbook if relevant. -->
 
 ## Acceptance criteria
-- [ ] 
-- [ ] 
+- [ ]
+- [ ]
 
 ## Context
 <!-- ADR, docs, alternatives considered. -->
