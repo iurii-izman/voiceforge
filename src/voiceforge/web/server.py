@@ -7,8 +7,20 @@ import json
 import logging
 import urllib.parse
 import urllib.request
+import socketserver
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Any
+
+# Unified API error format (#69): all 4xx/5xx return {"error": {"code": "...", "message": "..."}}
+_HTTP_STATUS_TO_CODE = {
+    400: "BAD_REQUEST",
+    401: "UNAUTHORIZED",
+    404: "NOT_FOUND",
+    422: "UNPROCESSABLE_ENTITY",
+    500: "INTERNAL_ERROR",
+    501: "NOT_IMPLEMENTED",
+    503: "SERVICE_UNAVAILABLE",
+}
 
 from voiceforge.core.tracing import bind_trace_id, clear_trace_context, get_trace_id
 
@@ -326,7 +338,8 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
         self.wfile.write(html.encode("utf-8"))
 
     def _send_error_json(self, message: str, status: int = 400) -> None:
-        self._send_json({"error": message}, status=status)
+        code = _HTTP_STATUS_TO_CODE.get(status, "ERROR")
+        self._send_json({"error": {"code": code, "message": message}}, status=status)
 
     def _parse_path(self) -> tuple[str, dict[str, str]]:
         path = urllib.parse.unquote(self.path)
@@ -572,7 +585,7 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
         if path == "/metrics":
             self._handle_get_metrics()
             return
-        self.send_error(404, "Not found")
+        self._send_error_json("Not found", 404)
 
     def _handle_action_items_update(self, data: dict) -> None:
         """Handle POST /api/action-items/update: from_session, next_session."""
@@ -667,7 +680,7 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
             except Exception as _e:
                 _log.debug("extract_error_message failed", exc_info=_e)
             if error_message:
-                self._send_json({"error": error_message, "display_text": display_text}, 200)
+                self._send_error_json(error_message, 422)
                 return
             session_id = None
             try:
@@ -768,13 +781,17 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
             if data is not None:
                 self._handle_action_items_update(data)
             return
-        self.send_error(404, "Not found")
+        self._send_error_json("Not found", 404)
 
     def log_message(self, format: str, *args: Any) -> None:
         pass  # quiet by default; set log_request=True on server to enable
 
 
+class _ThreadedHTTPServer(socketserver.ThreadingMixIn, HTTPServer):
+    """One request per thread so /api/status is not blocked by long /api/analyze (#66)."""
+
+
 def run_server(host: str = "127.0.0.1", port: int = 8765) -> None:
-    with HTTPServer((host, port), _VoiceForgeHandler) as httpd:
+    with _ThreadedHTTPServer((host, port), _VoiceForgeHandler) as httpd:
         print(f"VoiceForge Web UI: http://{host}:{port}")
         httpd.serve_forever()
