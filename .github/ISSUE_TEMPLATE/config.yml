@@ -1,0 +1,8 @@
+# Issue template chooser (GitHub: New Issue → choose template)
+# https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/configuring-issue-templates-for-your-repository
+
+blank_issues_enabled: true
+contact_links:
+  - name: Documentation
+    url: https://github.com/iurii-izman/voiceforge/blob/main/docs/DOCS-INDEX.md
+    about: Project docs and runbooks

@@ -2,7 +2,7 @@
 
 <!-- What changed and why -->
 
-## Change Type
+## Change type (Conventional Commits)
 
 - [ ] feat
 - [ ] fix
@@ -10,6 +10,8 @@
 - [ ] docs
 - [ ] refactor
 - [ ] test
+
+Commit message: `type(scope): description` — see [git-github-practices](https://github.com/iurii-izman/voiceforge/blob/main/docs/runbooks/git-github-practices.md). Use `Closes #N` in body when fixing an issue.
 
 ## Definition Of Done (alpha0.1)
 

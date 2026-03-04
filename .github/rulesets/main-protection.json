@@ -42,10 +42,16 @@
             "context": "cli-contract"
           },
           {
+            "context": "eval (ROUGE-L)"
+          },
+          {
             "context": "db-migrations"
           },
           {
             "context": "e2e-smoke"
+          },
+          {
+            "context": "security"
           }
         ]
       }
