@@ -1,6 +1,6 @@
 # История: закрытые планы и roadmap (сверка с кодом)
 
-Документ фиксирует **что уже сделано** по планам развития и roadmap. Последний аудит: 2026-02-26. Текущий фокус и открытые задачи — в [next-iteration-focus.md](../runbooks/next-iteration-focus.md). Маппинг новых задач: [audit-to-github-map.md](../audit/audit-to-github-map.md).
+Документ фиксирует **что уже сделано** по планам развития и roadmap. Последний аудит: 2026-02-26. Текущий фокус и открытые задачи — в [next-iteration-focus.md](../runbooks/next-iteration-focus.md). Маппинг новых задач: [audit/audit.md](../audit/audit.md).
 
 ---
 
@@ -112,4 +112,4 @@
 
 ## Следующий слой: PROJECT_AUDIT_AND_ROADMAP (2026-02-26)
 
-Новый аудит выявил 20 Weaknesses и 20 Steps (Phase A–D). Полный снимок: [docs/archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](../archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md). Маппинг и issues: [docs/audit/audit-to-github-map.md](../audit/audit-to-github-map.md).
+Новый аудит выявил 20 Weaknesses и 20 Steps (Phase A–D). Полный снимок: [docs/archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](../archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md). Маппинг и issues: [docs/audit/audit.md](../audit/audit.md).

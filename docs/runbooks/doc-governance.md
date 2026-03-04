@@ -6,9 +6,9 @@
 
 ## Источники правды (не дублировать)
 
-- **Текущий план и задачи:** [next-iteration-focus.md](next-iteration-focus.md) + [audit/audit-to-github-map.md](../audit/audit-to-github-map.md). Единая точка входа по плану и канбану: [planning.md](planning.md).
-- **Приоритеты фич:** [roadmap-priority.md](../roadmap-priority.md).
-- **Аудит:** снимок 2026-02-26 в [archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](../archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md); актуальный статус — [audit/audit-to-github-map.md](../audit/audit-to-github-map.md) и [audit/FULL_AUDIT_2026.md](../audit/FULL_AUDIT_2026.md) (10 блоков). Не плодить новые «планы по аудиту» — дополнять эти или переносить выполненное в архив.
+- **Текущий план и задачи:** [next-iteration-focus.md](next-iteration-focus.md) + [audit/audit.md](../audit/audit.md). Единая точка входа по плану и канбану: [planning.md](planning.md).
+- **Приоритеты фич и планы:** [plans.md](../plans.md).
+- **Аудит:** снимок 2026-02-26 в [archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](../archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md); актуальный статус — [audit/audit.md](../audit/audit.md). Не плодить новые «планы по аудиту» — дополнять audit.md или переносить выполненное в архив.
 - **Конфиг и ключи:** [config-env-contract.md](config-env-contract.md), [keyring-keys-reference.md](keyring-keys-reference.md).
 - **Индекс:** [DOCS-INDEX.md](../DOCS-INDEX.md) — один перечень актуальных документов и архива.
 
@@ -26,7 +26,7 @@
 
 ## После большой итерации (чеклист для агента)
 
-1. **Обновить текущие доки:** next-iteration-focus (следующий шаг, дата), при изменении поведения — runbook’и (installation-guide, config-env-contract и т.д.), при необходимости audit-to-github-map (статус issues).
+1. **Обновить текущие доки:** next-iteration-focus (следующий шаг, дата), при изменении поведения — runbook’и (installation-guide, config-env-contract и т.д.), при необходимости [audit/audit.md](../audit/audit.md) (статус issues).
 2. **Архивировать:** выполненный план или устаревший документ → docs/archive/; в старом месте — заглушка со ссылкой.
 3. **Индекс:** при появлении/перемещении документа обновить DOCS-INDEX.md (раздел, статус).
 4. **Не дублировать:** не создавать новый «план по аудиту» или «next steps» — дополнять существующие источники правды.

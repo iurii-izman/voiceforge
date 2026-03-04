@@ -7,10 +7,10 @@
 ## Единый источник текущих задач
 
 - **Канбан и приоритеты:** [GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1).
-- **Задачи Phase A–D (issues #55–73):** [audit/audit-to-github-map.md](../audit/audit-to-github-map.md) — маппинг Weaknesses → issues.
+- **Задачи Phase A–D (issues #55–73):** [audit/audit.md](../audit/audit.md) — статус W1–W20, маппинг на issues.
 - **Следующий шаг и фокус итерации:** [next-iteration-focus.md](next-iteration-focus.md) — обновляет агент в конце сессии.
 - **История (что сделано):** [history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
-- **Приоритет фич (roadmap 1–20):** [roadmap-priority.md](../roadmap-priority.md) — порядок внедрения фич, не заменяет audit map.
+- **Приоритет фич (roadmap 1–20):** [plans.md](../plans.md) — порядок внедрения, что сделано; детали по задачам — [audit/audit.md](../audit/audit.md).
 
 При выполнении задачи: коммит с `Closes #N`; на доске перевести карточку в Done. См. [git-github-practices.md](git-github-practices.md).
 
@@ -45,6 +45,6 @@ gh auth refresh -s project
 
 - **Фокус и «следующий шаг»:** [next-iteration-focus.md](next-iteration-focus.md).
 - **Всё сделанное:** [docs/history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
-- **Приоритет фич:** [roadmap-priority.md](../roadmap-priority.md).
+- **Приоритет фич:** [plans.md](../plans.md).
 
 Индекс документации: [DOCS-INDEX.md](../DOCS-INDEX.md).

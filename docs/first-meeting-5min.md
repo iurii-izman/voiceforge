@@ -93,7 +93,7 @@ uv run voiceforge action-items update --from-session 1 --next-session 2
 - **streaming_stt** — показывать partial/final транскрипт во время `listen` (true/false).
 - При запуске `listen` можно указать `--live-summary` для периодического краткого саммари по последним 90 с.
 
-Подробнее: `docs/runbooks/config-env-contract.md`, приоритеты фич: `docs/roadmap-priority.md`.
+Подробнее: `docs/runbooks/config-env-contract.md`, приоритеты фич: `docs/plans.md`.
 
 ## 8. Telegram-бот (опционально)
 

@@ -23,7 +23,7 @@
 Ключи: все в keyring (сервис `voiceforge`). Список: `docs/runbooks/keyring-keys-reference.md`. Для LLM/STT: `anthropic`, `openai`, `huggingface`; для CI: `sonar_token`, `github_token`. Проверка: `uv run python -c "from voiceforge.core.secrets import get_api_key; print([n for n in ('anthropic','openai','huggingface') if get_api_key(n)])"`.
 
 ```
-Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md (правила, конфиг, приоритеты). Фокус: @docs/runbooks/next-iteration-focus.md. Полный аудит и 10 блоков усиления: @docs/audit/FULL_AUDIT_2026.md. Приоритет фич — docs/roadmap-priority.md.
+Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md (правила, конфиг, приоритеты). Фокус: @docs/runbooks/next-iteration-focus.md. Аудит и задачи: @docs/audit/audit.md. Планы и приоритеты: docs/plans.md.
 
 Режим: максимальные объёмы, автопилот. Делай всё сам, без лишних вопросов. Запрашивай пользователя только если нужен явный выбор, подтверждение или данные вне keyring. Ключи в keyring (keyring-keys-reference.md). Fedora Atomic/toolbox/uv; uv sync --extra all. В конце сессии: тесты (uv run pytest tests/ -q --tb=line), коммит и пуш из корня репо (Conventional Commits, Closes #N где уместно), обновить next-iteration-focus (следующий шаг + дата), выдать промпт для следующего чата.
 
@@ -36,7 +36,7 @@
 
 Полная доска: **[GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1)**
 
-Маппинг: [docs/audit/audit-to-github-map.md](../audit/audit-to-github-map.md)
+Аудит и маппинг: [docs/audit/audit.md](../audit/audit.md)
 
 | Phase | Issues | Описание |
 |-------|--------|----------|
@@ -58,7 +58,7 @@
 ## Актуальные напоминания
 
 - **OOM при тестах:** если полный `pytest tests/` вылетает по памяти (pyannote/torch), запускать подмножество: `uv run pytest tests/test_pipeline_integration.py tests/test_caldav_poll.py tests/test_calendar.py tests/test_transcript_log.py -q`. В test_pipeline_integration тест с полным run мокает _gather_step2, чтобы не загружать diarizer/RAG.
-- **Pre-commit (Fedora Atomic):** python3.12 есть в **toolbox** (например toolbox 43). Выполнять `./scripts/ensure_precommit_env.sh` или `./scripts/bootstrap.sh` **внутри toolbox** — тогда хуки используют python3.12. При ошибке кэша (3.14.2 vs 3.14.3): `uv run pre-commit clean`. Вне toolbox (на хосте без 3.12) — временно `git commit --no-verify`, `git push --no-verify`.
+- **Pre-commit (Fedora Atomic):** Python 3.12 есть в **toolbox 43** (и в других Fedora-образах). Выполнять `./scripts/ensure_precommit_env.sh` или `./scripts/bootstrap.sh` **внутри toolbox** — тогда хуки используют python3.12. При ошибке кэша (3.14.2 vs 3.14.3): `uv run pre-commit clean`. Вне toolbox (на хосте без 3.12) — временно `git commit --no-verify`, `git push --no-verify`.
 - **Sonar:** `uv run python scripts/sonar_fetch_issues.py` — проверить остаток после последнего скана.
 - **Критично:** pyannote 4.0.4; при OOM — [pyannote-version.md](pyannote-version.md). Десктоп — toolbox ([desktop-build-deps.md](desktop-build-deps.md)). Новые CLI-команды — через ADR (ADR-0001).
 - **Ключи:** только keyring ([keyring-keys-reference.md](keyring-keys-reference.md)).

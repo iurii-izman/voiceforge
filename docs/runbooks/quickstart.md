@@ -36,4 +36,4 @@
 7. **Следующие шаги**
    - Action items: `uv run voiceforge action-items update --from-session 1 --next-session 2`
    - Конфиг и переменные: [config-env-contract.md](config-env-contract.md)
-   - Приоритет фич: [../roadmap-priority.md](../roadmap-priority.md)
+   - Приоритет фич: [../plans.md](../plans.md)

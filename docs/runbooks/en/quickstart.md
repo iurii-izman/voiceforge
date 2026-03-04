@@ -36,4 +36,4 @@ Linear scenario for alpha testers. Full version: [../../en/first-meeting-5min.md
 7. **Next steps**
    - Action items: `uv run voiceforge action-items update --from-session 1 --next-session 2`
    - Config and env: [config-env-contract.md](config-env-contract.md)
-   - Feature priorities: [../roadmap-priority.md](../roadmap-priority.md)
+   - Feature priorities: [../../plans.md](../../plans.md)

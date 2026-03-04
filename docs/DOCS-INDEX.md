@@ -2,7 +2,7 @@
 
 **Назначение:** один источник правды по тому, какой документ за что отвечает и актуален ли он. При изменении кода/фич обновлять соответствующий док и при необходимости этот индекс.
 
-**Обновлено:** 2026-03-04 (архив планов и аудита, cursor.md + planning.md, doc governance)
+**Обновлено:** 2026-03-04 (аудит и планы в один док каждый; Python 3.12 в toolbox 43)
 
 ---
 
@@ -12,9 +12,9 @@
 |------|----------|
 | Контекст агента, правила, конец сессии | [runbooks/agent-context.md](runbooks/agent-context.md) |
 | Следующий шаг / фокус итерации | [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md) |
-| Текущие задачи (Phase A–D, #55–73) | [audit/audit-to-github-map.md](audit/audit-to-github-map.md) |
-| Приоритет фич (roadmap 1–20) | [roadmap-priority.md](roadmap-priority.md) |
-| Аудит: задачи и 10 блоков усиления | [audit/audit-to-github-map.md](audit/audit-to-github-map.md), [audit/FULL_AUDIT_2026.md](audit/FULL_AUDIT_2026.md); снимок 2026-02-26 — [archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md) |
+| Текущие задачи и аудит (Phase A–D, W1–W20) | [audit/audit.md](audit/audit.md) |
+| Планы и приоритеты (roadmap 1–20, что сделано) | [plans.md](plans.md) |
+| Аудит: статус, оставшееся до 100%, архив | [audit/audit.md](audit/audit.md); снимки — [archive/audit/](archive/audit/) |
 | Конфиг, env, keyring | [runbooks/config-env-contract.md](runbooks/config-env-contract.md), [runbooks/keyring-keys-reference.md](runbooks/keyring-keys-reference.md) |
 | Установка, сборка десктопа | [runbooks/installation-guide.md](runbooks/installation-guide.md), [runbooks/desktop-build-deps.md](runbooks/desktop-build-deps.md) |
 | Управление документацией | [runbooks/doc-governance.md](runbooks/doc-governance.md) |
@@ -38,7 +38,8 @@
 | README.md | Вход в документацию | Актуален |
 | DOCS-INDEX.md | Этот индекс | Актуален |
 | first-meeting-5min.md | Первая встреча за 5 минут | Актуален |
-| roadmap-priority.md | Приоритет фич 1–20 | Актуален |
+| plans.md | Планы, roadmap 1–20, что сделано, Phase A–D | Актуален |
+| roadmap-priority.md | Заглушка → [plans.md](plans.md) | Объединён в plans.md |
 | PROJECT_AUDIT_AND_ROADMAP.md | Заглушка → [archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md) | Архив |
 | grafana-voiceforge-dashboard.json | Дашборд Grafana | Актуален |
 | development-plan-post-audit-2026.md | Заглушка → архив | [archive/plans/](archive/plans/) |
@@ -52,14 +53,14 @@
 | archive/plans/ | Выполненные/устаревшие планы (development-plan, desktop-tauri, claude-proposal-alignment) |
 | archive/adr/ | Superseded ADR (0002-archive-first-cleanup) |
 | archive/runbooks/ | Устаревшие/объёмные runbook’и (voiceforge-cursor-tz-2026) |
-| archive/audit/ | Снимки аудита (PROJECT_AUDIT_AND_ROADMAP_2026) |
+| archive/audit/ | Снимки аудита (PROJECT_AUDIT_AND_ROADMAP_2026, REMAINING_AND_PLAN, FULL_AUDIT, audit-to-github-map) |
 
 ### docs/audit/
 
 | Файл | Роль | Статус |
 |------|------|--------|
-| audit-to-github-map.md | Weaknesses → issues #55–73; статус по коду | Актуален |
-| FULL_AUDIT_2026.md | Степень реализации по фронтам, 10 блоков усиления | Актуален |
+| [audit.md](audit/audit.md) | Единый аудит: статус W1–W20, Phase A–D, оставшееся до 100% | Актуален |
+| [README.md](audit/README.md) | Вход в аудит, ссылки на архив | Актуален |
 
 ### docs/history/
 

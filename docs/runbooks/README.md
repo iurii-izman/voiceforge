@@ -74,4 +74,4 @@
 
 ---
 
-Текущие задачи и план: [../audit/audit-to-github-map.md](../audit/audit-to-github-map.md), [next-iteration-focus.md](next-iteration-focus.md). Архив планов: [../archive/README.md](../archive/README.md).
+Текущие задачи и план: [../audit/audit.md](../audit/audit.md), [../plans.md](../plans.md), [next-iteration-focus.md](next-iteration-focus.md). Архив: [../archive/README.md](../archive/README.md).

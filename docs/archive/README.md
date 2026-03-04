@@ -6,11 +6,11 @@
 
 ## Когда переносить в архив
 
-- **План/аудит выполнен** — основной объём задач закрыт, актуальный статус отражён в `audit/audit-to-github-map.md` и `history/closed-plans-and-roadmap.md`.
+- **План/аудит выполнен** — основной объём задач закрыт, актуальный статус отражён в `audit/audit.md` и `history/closed-plans-and-roadmap.md`.
 - **Документ заменён** — появился новый источник правды (например, backlog заменён на audit map).
 - **Superseded** — решение или процесс заменён другим ADR/runbook’ом.
 
-Не архивировать: текущие runbook’и, DOCS-INDEX, agent-context, next-iteration-focus, audit-to-github-map, roadmap-priority, активные ADR.
+Не архивировать: текущие runbook’и, DOCS-INDEX, agent-context, next-iteration-focus, audit/audit.md, plans.md, активные ADR.
 
 ---
 

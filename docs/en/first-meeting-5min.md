@@ -93,7 +93,7 @@ Main options:
 - **streaming_stt** — show partial/final transcript during `listen` (true/false).
 - When running `listen` you can use `--live-summary` for periodic short summaries of the last 90 seconds.
 
-See: `docs/runbooks/config-env-contract.md`, feature priorities: `docs/roadmap-priority.md`.
+See: `docs/runbooks/config-env-contract.md`, feature priorities: `docs/plans.md`.
 
 ## 8. Telegram bot (optional)
 
