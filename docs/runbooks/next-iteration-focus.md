@@ -2,15 +2,15 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-02-26
+**Обновлено:** 2026-03-04
 
 ---
 
 ## Следующий шаг (для копирования в новый чат)
 
-**#56:** fail_under временно снижен до 63 (coverage ~64%); цель 80% — тесты для core/metrics, llm/router, cli/history_helpers, cli/status_helpers, core/daemon, rag/parsers. **#60 сделано:** GET /ready в web/server.py (200 при доступной БД, 503 иначе), MemoryMax=4G/MemoryHigh=3G/OOMScoreAdjust=500 в scripts/voiceforge.service.
+**#61 сделано:** request tracing (trace_id в structlog context, CLI callback, run_analyze_pipeline, web X-Trace-Id).
 
-Следующий шаг: **Phase B #61** — request tracing (trace IDs + structlog). Либо продолжить подъём coverage до 80% (#56).
+Следующий шаг: **Phase B #62** — circuit breaker для LLM провайдеров. Либо подъём coverage до 80% (#56): тесты для core/metrics, llm/router, cli/history_helpers, cli/status_helpers, core/daemon, rag/parsers.
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
