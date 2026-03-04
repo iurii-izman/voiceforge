@@ -26,8 +26,8 @@
 ## Security exceptions
 
 Temporary pinned exception:
-- `CVE-2025-69872` (`diskcache`) has no fix version yet.
-- Keep explicit ignore in scripts/workflows until fix is published.
+- `CVE-2025-69872` (`diskcache`) has no fix version yet. **Source:** transitive dependency via `instructor` (see `uv.lock`: instructor → diskcache).
+- Keep explicit ignore in scripts/workflows until upstream publishes a fix. See `docs/runbooks/security.md`.
 
 ## Lockfile rules
 
