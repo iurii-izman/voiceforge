@@ -2,15 +2,15 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-04
+**Обновлено:** 2026-03-04 (сессия: pre-commit clean, docs, coverage #56 ref)
 
 ---
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Блоки 4, 6, 7, 9, 10 FULL_AUDIT_2026; pre-commit: скрипт ensure_precommit_env.sh (в toolbox ставит python3.12 через dnf), default_language_version python3.12 возвращён, bootstrap вызывает скрипт.
+**Сделано в сессии:** pre-commit clean выполнен; в напоминания добавлено: при ошибке кэша — `uv run pre-commit clean`, без python3.12 — `git commit/push --no-verify`. В pyproject.toml — комментарий для #56 (coverage omit). uv sync --extra all — тесты 179 passed. Dependabot dismiss не запускался (401: нужен github_token в keyring).
 
-Следующий шаг: **На Fedora Atomic Cosmic:** один раз в toolbox выполнить `./scripts/bootstrap.sh` или `./scripts/ensure_precommit_env.sh` — установится python3.12 и pre-commit хуки. Дальше: Dependabot 1 moderate, coverage/omit (#56), pipeline test (W5), async web (W7) или Phase D.
+Следующий шаг: **По желанию:** закрыть Dependabot moderate (`uv run python scripts/dependabot_dismiss_moderate.py` при наличии github_token в keyring). Дальше: вывести один модуль из coverage omit + тесты (#56), pipeline integration test (W5), полный async web (W7) или Phase D.
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -57,7 +57,7 @@
 
 ## Актуальные напоминания
 
-- **Pre-commit (Fedora Atomic):** в toolbox выполнить `./scripts/ensure_precommit_env.sh` или `./scripts/bootstrap.sh` — ставится python3.12 (dnf) и хуки; без 3.12 можно временно использовать `git commit --no-verify`, `git push --no-verify`.
+- **Pre-commit (Fedora Atomic):** в toolbox выполнить `./scripts/ensure_precommit_env.sh` или `./scripts/bootstrap.sh` — ставится python3.12 (dnf) и хуки. При ошибке кэша (3.14.2 vs 3.14.3): `uv run pre-commit clean`. Без python3.12 в системе — временно `git commit --no-verify`, `git push --no-verify`.
 - **Sonar:** `uv run python scripts/sonar_fetch_issues.py` — проверить остаток после последнего скана.
 - **Критично:** pyannote 4.0.4; при OOM — [pyannote-version.md](pyannote-version.md). Десктоп — toolbox ([desktop-build-deps.md](desktop-build-deps.md)). Новые CLI-команды — через ADR (ADR-0001).
 - **Ключи:** только keyring ([keyring-keys-reference.md](keyring-keys-reference.md)).

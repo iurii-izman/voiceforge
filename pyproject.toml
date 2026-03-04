@@ -110,6 +110,7 @@ markers = [
 [tool.coverage.run]
 source = ["src/voiceforge"]
 branch = true
+# Reduce omit gradually + add tests; target fail_under 80% (issue #56, FULL_AUDIT W2).
 omit = [
     "*/tests/*",
     "src/voiceforge/__main__.py",
