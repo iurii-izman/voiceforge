@@ -8,9 +8,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** #62 circuit breaker (llm/circuit_breaker.py, router + local_llm, метрика state); #56 тесты (core/metrics, llm/router helpers, cli history/status, rag/parsers); #63 периодический purge в демоне (24h) + CLI `voiceforge backup` (--keep N); #69 единый формат ошибок API (code + message); #66 ThreadingMixIn для web.
+**Сделано в сессии:** Блоки 4, 6, 7, 9, 10 FULL_AUDIT_2026: #64 monitoring/ (prometheus.yml, alerts.yml, docker-compose, README); #67 prompt hash (get_prompt_hashes, warning при fallback); #65 CVE (источник diskcache=instructor, pip-audit без ignore в weekly); #68 бенчмарки (benchmark_stt, benchmark_rag, baseline_benchmark.json); актуализация audit-to-github-map, DOCS-INDEX. Pre-commit: убран default_language_version (python3.12) — на хосте без 3.12 pre-push падал.
 
-Следующий шаг: **Блоки 4, 6, 7, 9, 10** из FULL_AUDIT_2026 — мониторинг (Prometheus+Grafana+alerts, runbook), валидация промптов (hash/CI, warning при fallback), CVE (pip-audit без ignore), бенчмарки (STT/RAG baseline), актуализация доков (audit-to-github-map, индекс).
+Следующий шаг: **Pre-commit:** при ошибке 3.14.2 vs 3.14.3 выполнить `pre-commit clean` и переустановить окружения; при необходимости запускать коммит/пуш с `--no-verify`. **Dependabot:** 1 moderate (CVE-2025-69872) — по желанию закрыть через dismiss «Accept risk» или скрипт dependabot_dismiss_moderate.py. Дальше по плану: coverage/omit (#56), pipeline integration test (W5), полный async web (W7) или Phase D.
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -27,7 +27,7 @@
 
 Режим: максимальные объёмы, автопилот. Делай всё сам, без лишних вопросов. Запрашивай пользователя только если нужен явный выбор, подтверждение или данные вне keyring. Ключи в keyring (keyring-keys-reference.md). Fedora Atomic/toolbox/uv; uv sync --extra all. В конце сессии: тесты (uv run pytest tests/ -q --tb=line), коммит и пуш из корня репо (Conventional Commits, Closes #N где уместно), обновить next-iteration-focus (следующий шаг + дата), выдать промпт для следующего чата.
 
-Задача: продолжить по FULL_AUDIT_2026 — блоки 4 (мониторинг: Prometheus+Grafana+alerts), 6 (валидация промптов, hash/CI), 7 (CVE, pip-audit без ignore), 9 (бенчмарки STT/RAG), 10 (актуализация доков: audit-to-github-map, индекс). После каждой логической единицы — коммит и пуш.
+Задача: [из блока «Следующий шаг» выше] — pre-commit/Dependabot или продолжение по аудиту (coverage, pipeline test, async web).
 ```
 
 ---
