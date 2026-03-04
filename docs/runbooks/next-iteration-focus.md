@@ -57,6 +57,7 @@
 
 ## Актуальные напоминания
 
+- **Pre-commit:** при ошибке virtualenv (3.14.2 vs 3.14.3) — `pre-commit clean`; до исправления окружения: `git commit --no-verify`, `git push --no-verify`.
 - **Sonar:** `uv run python scripts/sonar_fetch_issues.py` — проверить остаток после последнего скана.
 - **Критично:** pyannote 4.0.4; при OOM — [pyannote-version.md](pyannote-version.md). Десктоп — toolbox ([desktop-build-deps.md](desktop-build-deps.md)). Новые CLI-команды — через ADR (ADR-0001).
 - **Ключи:** только keyring ([keyring-keys-reference.md](keyring-keys-reference.md)).
