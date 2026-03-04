@@ -8,11 +8,27 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**#61 сделано:** request tracing (trace_id в structlog context, CLI callback, run_analyze_pipeline, web X-Trace-Id).
+**Сделано в сессии:** #62 circuit breaker (llm/circuit_breaker.py, router + local_llm, метрика state); #56 тесты (core/metrics, llm/router helpers, cli history/status, rag/parsers); #63 периодический purge в демоне (24h) + CLI `voiceforge backup` (--keep N); #69 единый формат ошибок API (code + message); #66 ThreadingMixIn для web.
 
-Следующий шаг: **Phase B #62** — circuit breaker для LLM провайдеров. Либо подъём coverage до 80% (#56): тесты для core/metrics, llm/router, cli/history_helpers, cli/status_helpers, core/daemon, rag/parsers.
+Следующий шаг: **Блоки 4, 6, 7, 9, 10** из FULL_AUDIT_2026 — мониторинг (Prometheus+Grafana+alerts, runbook), валидация промптов (hash/CI, warning при fallback), CVE (pip-audit без ignore), бенчмарки (STT/RAG baseline), актуализация доков (audit-to-github-map, индекс).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
+
+---
+
+## Промпт для следующего чата (максимальная производительность, автопилот)
+
+**Скопируй блок ниже в начало нового чата.** Агент будет работать максимальными объёмами на автопилоте; запрашивает пользователя только когда без него нельзя (выбор стратегии, секреты не в keyring, и т.п.).
+
+Ключи: все в keyring (сервис `voiceforge`). Список: `docs/runbooks/keyring-keys-reference.md`. Для LLM/STT: `anthropic`, `openai`, `huggingface`; для CI: `sonar_token`, `github_token`. Проверка: `uv run python -c "from voiceforge.core.secrets import get_api_key; print([n for n in ('anthropic','openai','huggingface') if get_api_key(n)])"`.
+
+```
+Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md (правила, конфиг, приоритеты). Фокус: @docs/runbooks/next-iteration-focus.md. Полный аудит и 10 блоков усиления: @docs/audit/FULL_AUDIT_2026.md. Приоритет фич — docs/roadmap-priority.md.
+
+Режим: максимальные объёмы, автопилот. Делай всё сам, без лишних вопросов. Запрашивай пользователя только если нужен явный выбор, подтверждение или данные вне keyring. Ключи в keyring (keyring-keys-reference.md). Fedora Atomic/toolbox/uv; uv sync --extra all. В конце сессии: тесты (uv run pytest tests/ -q --tb=line), коммит и пуш из корня репо (Conventional Commits, Closes #N где уместно), обновить next-iteration-focus (следующий шаг + дата), выдать промпт для следующего чата.
+
+Задача: продолжить по FULL_AUDIT_2026 — блоки 4 (мониторинг: Prometheus+Grafana+alerts), 6 (валидация промптов, hash/CI), 7 (CVE, pip-audit без ignore), 9 (бенчмарки STT/RAG), 10 (актуализация доков: audit-to-github-map, индекс). После каждой логической единицы — коммит и пуш.
+```
 
 ---
 
