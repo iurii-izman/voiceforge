@@ -68,6 +68,8 @@
   "history.date_invalid": "Неверный формат даты (YYYY-MM-DD): {err}",
   "history.purge_done": "Удалено сессий: {count}",
   "history.md_requires_id": "--output md доступен только с --id.",
+  "backup.done": "Бэкап: {path} ({count} файлов)",
+  "backup.no_files": "Нет файлов БД для бэкапа.",
   "status.ram": "RAM: {used:.1f} / {total:.1f} GB ({percent}%)",
   "status.cost_today": "Стоимость за сегодня: ${cost:.4f}",
   "status.ollama_available": "Ollama: доступен",

@@ -32,7 +32,7 @@ Priority order:
 | `language` | `VOICEFORGE_LANGUAGE` | `auto` | UI language; when `ru`/`en` also passed to Whisper as STT hint |
 | `ollama_model` | `VOICEFORGE_OLLAMA_MODEL` | `phi3:mini` | Ollama model for local classify/simple_answer |
 | `pii_mode` | `VOICEFORGE_PII_MODE` | `ON` | PII redaction before LLM: `OFF` (none), `ON` (full regex+GLiNER), `EMAIL_ONLY` (email only) |
-| `retention_days` | `VOICEFORGE_RETENTION_DAYS` | `90` | Data retention: sessions with started_at before (today − retention_days) are purged at daemon start; `0` = disable auto-cleanup (#43) |
+| `retention_days` | `VOICEFORGE_RETENTION_DAYS` | `90` | Data retention: sessions with started_at before (today − retention_days) are purged at daemon start and every 24h while daemon runs; `0` = disable (#43, #63). Manual: `voiceforge history --purge-before YYYY-MM-DD`. |
 | `response_cache_ttl_seconds` | `VOICEFORGE_RESPONSE_CACHE_TTL_SECONDS` | `86400` | LLM response cache TTL (seconds); `0` = disable (#44) |
 | `calendar_context_enabled` | `VOICEFORGE_CALENDAR_CONTEXT_ENABLED` | `false` | D3 (#48): inject next CalDAV event into analyze context (keyring: caldav_*) |
 
@@ -66,6 +66,11 @@ Method `GetSettings` returns a JSON object with settings for UI. It includes:
 - **metrics.db** (`llm_calls`): source of truth for **totals and reporting**. All LLM calls are logged here with `cost_usd`; `get_stats(days)`, `get_cost_today()`, and D-Bus `GetAnalytics` use this DB.
 - **transcripts.db** (`analyses.cost_usd`): **per-session snapshot** of the cost of the analyze call that produced that analysis. Used for session detail and export. Not re-synced if metrics are migrated or recalculated.
 - For consistency: prefer metrics.db for dashboards and budgets; use analyses.cost_usd only for “cost of this session”.
+
+## Backup (#63)
+
+- **CLI:** `voiceforge backup` copies `transcripts.db`, `metrics.db`, `rag.db` (from `$XDG_DATA_HOME/voiceforge` and config `rag_db_path`) into a timestamped directory. Default output: `$XDG_DATA_HOME/voiceforge/backups/voiceforge-backup-YYYYMMDD-HHMMSS`. Option `--keep N` keeps only the last N backup directories.
+- **Restore:** stop daemon; replace DB files from a backup directory; restart. No automated restore CLI.
 
 ## Keyring Contract
 

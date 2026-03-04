@@ -999,6 +999,52 @@ def export_session(
         raise SystemExit(1) from e
 
 
+def _backup_data_dir() -> Path:
+    """VoiceForge data directory (transcripts.db, metrics.db). #63"""
+    base = os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
+    return Path(base) / "voiceforge"
+
+
+@app.command("backup")
+def backup_cmd(
+    output_dir: Path = typer.Option(
+        None,
+        "--output",
+        "-o",
+        path_type=Path,
+        help="Каталог для бэкапов (по умолчанию: <data_dir>/backups)",
+    ),
+    keep: int = typer.Option(5, "--keep", help="Хранить последние N бэкапов (0 = не удалять старые)"),
+) -> None:
+    """Создать бэкап transcripts.db, metrics.db, rag.db в каталог с меткой времени (#63)."""
+    data_dir = _backup_data_dir()
+    out = output_dir or (data_dir / "backups")
+    out.mkdir(parents=True, exist_ok=True)
+    cfg = _get_config()
+    timestamp = time.strftime("%Y%m%d-%H%M%S")
+    backup_sub = out / f"voiceforge-backup-{timestamp}"
+    backup_sub.mkdir(parents=True, exist_ok=True)
+    copied = []
+    for name, src_path in [
+        ("transcripts.db", data_dir / "transcripts.db"),
+        ("metrics.db", data_dir / "metrics.db"),
+        ("rag.db", Path(cfg.get_rag_db_path())),
+    ]:
+        if src_path.exists():
+            dest = backup_sub / name
+            shutil.copy2(src_path, dest)
+            copied.append(name)
+    if not copied:
+        typer.echo(t("backup.no_files"), err=True)
+        raise SystemExit(1)
+    typer.echo(t("backup.done", path=str(backup_sub), count=len(copied)))
+    if keep > 0:
+        existing = sorted([p for p in out.iterdir() if p.is_dir() and p.name.startswith("voiceforge-backup-")], reverse=True)
+        for old in existing[keep:]:
+            shutil.rmtree(old, ignore_errors=True)
+            log.info("backup.rotated", path=str(old))
+
+
 def _history_echo_error_data(data: Any) -> None:
     """Emit error message for history_helpers error kind (reduces S3776 complexity)."""
     if isinstance(data, tuple):

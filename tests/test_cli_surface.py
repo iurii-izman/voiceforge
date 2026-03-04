@@ -26,6 +26,7 @@ def _normalized_command_names() -> set[str]:
 
 def test_help_exposes_only_core_commands() -> None:
     expected = {
+        "backup",
         "listen",
         "analyze",
         "status",

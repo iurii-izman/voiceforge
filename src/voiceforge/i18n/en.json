@@ -68,6 +68,8 @@
   "history.date_invalid": "Invalid date format (YYYY-MM-DD): {err}",
   "history.purge_done": "Purged sessions: {count}",
   "history.md_requires_id": "--output md is only available with --id.",
+  "backup.done": "Backup: {path} ({count} files)",
+  "backup.no_files": "No DB files found to backup.",
   "status.ram": "RAM: {used:.1f} / {total:.1f} GB ({percent}%)",
   "status.cost_today": "Cost today: ${cost:.4f}",
   "status.ollama_available": "Ollama: available",

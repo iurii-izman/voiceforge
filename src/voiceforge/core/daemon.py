@@ -556,11 +556,47 @@ def run_daemon() -> None:
     pid_path.write_text(str(os.getpid()))
     atexit.register(lambda: pid_path.unlink(missing_ok=True))
 
+    PURGE_INTERVAL_SEC = 86400  # 24h (#63)
+
+    async def _periodic_purge() -> None:
+        """Run retention purge every 24h (#63)."""
+        retention_days = getattr(daemon._cfg, "retention_days", 0)
+        if retention_days <= 0:
+            return
+        while not stop_event.is_set():
+            await asyncio.sleep(PURGE_INTERVAL_SEC)
+            if stop_event.is_set():
+                break
+            try:
+                from datetime import date, timedelta
+
+                from voiceforge.core.transcript_log import TranscriptLog
+
+                cutoff = date.today() - timedelta(days=retention_days)
+                loop = asyncio.get_running_loop()
+                def do_purge() -> int:
+                    log_db = TranscriptLog()
+                    try:
+                        return log_db.purge_before(cutoff)
+                    finally:
+                        log_db.close()
+                n = await loop.run_in_executor(None, do_purge)
+                if n:
+                    log.info("retention.purged_periodic", count=n, cutoff=cutoff.isoformat())
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                log.warning("retention.purge_failed", error=str(e))
+
     async def _serve() -> None:
         service_task = asyncio.create_task(run_dbus_service(iface))
+        purge_task = asyncio.create_task(_periodic_purge())
         try:
             await stop_event.wait()
         finally:
+            purge_task.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await purge_task
             service_task.cancel()
             with contextlib.suppress(asyncio.CancelledError):
                 await service_task
