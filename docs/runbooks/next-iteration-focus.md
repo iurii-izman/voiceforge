@@ -2,15 +2,15 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-04 (сессия: #56 caldav_poll + pipeline из omit, fail_under 69)
+**Обновлено:** 2026-03-04 (сессия: упорядочивание документации — cursor.md, planning.md, архив аудита)
 
 ---
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** #56: caldav_poll и pipeline выведены из omit; добавлены test_caldav_poll.py и расширен test_pipeline_integration.py. Тесты pipeline сделаны щадящими по памяти: в test_pipeline_run_returns_result_with_mocked_stt замокан _gather_step2 (не грузим pyannote/torch), уменьшены буферы аудио (1 s вместо 2 s). fail_under=69. При OOM в Cursor/IDE: запускать только лёгкие тесты, напр. `uv run pytest tests/test_pipeline_integration.py tests/test_caldav_poll.py tests/test_calendar.py -q`.
+**Сделано в сессии:** Консолидация документации: созданы [cursor.md](cursor.md) (объединение cursor-agent-setup, cursor-speedup, cursor-tuning) и [planning.md](planning.md) (объединение backlog, planning-and-tools). Аудит PROJECT_AUDIT_AND_ROADMAP перенесён в [archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](../archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md), в docs/ оставлена заглушка. Обновлены DOCS-INDEX, doc-governance, README runbooks/docs, ссылки в audit и history. Коммит запушен (aa1de65).
 
-Следующий шаг: довести покрытие до 70% и поднять fail_under до 70. Либо: полный async web (W7), Phase D (A/B testing, OTel, plugins).
+Следующий шаг: довести покрытие до 70% и поднять fail_under до 70 (#56). Либо: полный async web (W7), Phase D (A/B testing, OTel, plugins).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
