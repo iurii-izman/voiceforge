@@ -2,15 +2,15 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-04 (сессия: #56 transcript_log + W5 pipeline integration)
+**Обновлено:** 2026-03-04 (сессия: #56 caldav_poll + pipeline из omit, fail_under 69)
 
 ---
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** #56: transcript_log выведен из coverage omit; добавлен tests/test_transcript_log.py (13 тестов). W5: добавлен tests/test_pipeline_integration.py (6 тестов: _prepare_audio, _resample_to_16k, AnalysisPipeline.run с моком STT). Обновлён audit-to-github-map (W2 частично, W5 сделано). Покрытие 69% (198 тестов). Коммит и пуш в конце.
+**Сделано в сессии:** #56: calendar/caldav_poll и core/pipeline выведены из coverage omit. Добавлены tests/test_caldav_poll.py (16 тестов: _dt_to_aware, _event_dict, _events_from_calendar, poll_events_*, _candidates_from_calendars) и расширен test_pipeline_integration.py (_get_language_hint, _with_calendar_context, _resample_to_16k без scipy, _rag_merge_results, STT failure/ImportError, _prepare_audio resample). fail_under поднят до 69 (покрытие ~70%). Коммит и пуш в конце.
 
-Следующий шаг: вывести ещё модули из omit + тесты (#56), например calendar/caldav_poll или core/pipeline; поднять fail_under до 70. Либо: полный async web (W7), Phase D (A/B testing, OTel, plugins).
+Следующий шаг: один тест для покрытия 70% и поднять fail_under до 70. Либо: полный async web (W7), Phase D (A/B testing, OTel, plugins).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -57,7 +57,7 @@
 
 ## Актуальные напоминания
 
-- **Pre-commit (Fedora Atomic):** в toolbox выполнить `./scripts/ensure_precommit_env.sh` или `./scripts/bootstrap.sh` — ставится python3.12 (dnf) и хуки. При ошибке кэша (3.14.2 vs 3.14.3): `uv run pre-commit clean`. Без python3.12 в системе — временно `git commit --no-verify`, `git push --no-verify`.
+- **Pre-commit (Fedora Atomic):** python3.12 есть в **toolbox** (например toolbox 43). Выполнять `./scripts/ensure_precommit_env.sh` или `./scripts/bootstrap.sh` **внутри toolbox** — тогда хуки используют python3.12. При ошибке кэша (3.14.2 vs 3.14.3): `uv run pre-commit clean`. Вне toolbox (на хосте без 3.12) — временно `git commit --no-verify`, `git push --no-verify`.
 - **Sonar:** `uv run python scripts/sonar_fetch_issues.py` — проверить остаток после последнего скана.
 - **Критично:** pyannote 4.0.4; при OOM — [pyannote-version.md](pyannote-version.md). Десктоп — toolbox ([desktop-build-deps.md](desktop-build-deps.md)). Новые CLI-команды — через ADR (ADR-0001).
 - **Ключи:** только keyring ([keyring-keys-reference.md](keyring-keys-reference.md)).

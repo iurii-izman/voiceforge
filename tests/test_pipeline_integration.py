@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
@@ -13,9 +13,13 @@ from voiceforge.core.pipeline import (
     AnalysisPipeline,
     PipelineResult,
     TARGET_SAMPLE_RATE,
+    _get_language_hint,
     _prepare_audio,
+    _rag_merge_results,
     _resample_to_16k,
+    _with_calendar_context,
 )
+from voiceforge.rag.searcher import SearchResult
 
 
 def _make_cfg(tmp_path: Path, ring_path: Path, rag_path: Path | None = None) -> SimpleNamespace:
@@ -69,10 +73,133 @@ def test_prepare_audio_returns_audio_and_rate(tmp_path: Path) -> None:
     assert len(audio) >= TARGET_SAMPLE_RATE
 
 
+def test_prepare_audio_resamples_when_rate_not_16k(tmp_path: Path) -> None:
+    """When cfg.sample_rate is 48000, _prepare_audio resamples to 16k and returns 16k rate."""
+    # 2 seconds at 48 kHz = 96000 samples
+    rate_48k = 48000
+    num_samples = rate_48k * 2
+    ring = tmp_path / "ring.raw"
+    ring.write_bytes(np.zeros(num_samples, dtype=np.int16).tobytes())
+    cfg = _make_cfg(tmp_path, ring)
+    cfg.sample_rate = rate_48k
+    result = _prepare_audio(cfg, seconds=2)
+    assert result[0] is not None
+    audio, rate = result[0], result[1]
+    assert rate == TARGET_SAMPLE_RATE
+    assert len(audio) == TARGET_SAMPLE_RATE * 2
+
+
 def test_resample_to_16k_passthrough() -> None:
     """When from_rate == 16k, _resample_to_16k returns array unchanged."""
     arr = np.zeros(1600, dtype=np.int16)
     out = _resample_to_16k(arr, 16000)
+    np.testing.assert_array_equal(out, arr)
+
+
+def test_resample_to_16k_resamples_when_scipy_available() -> None:
+    """When from_rate != 16k and scipy available, _resample_to_16k resamples."""
+    arr = np.zeros(48000, dtype=np.int16)  # 1 s at 48 kHz
+    out = _resample_to_16k(arr, 48000)
+    assert out is not None
+    assert out.dtype == np.int16
+    assert len(out) == 16000
+
+
+def test_get_language_hint_auto_returns_none() -> None:
+    """_get_language_hint returns None for language 'auto' or missing."""
+    cfg = SimpleNamespace(language="auto")
+    assert _get_language_hint(cfg) is None
+    cfg2 = SimpleNamespace()
+    assert _get_language_hint(cfg2) is None
+
+
+def test_get_language_hint_explicit_returns_value() -> None:
+    """_get_language_hint returns language when set (e.g. 'en')."""
+    cfg = SimpleNamespace(language="en")
+    assert _get_language_hint(cfg) == "en"
+
+
+def test_with_calendar_context_disabled_returns_unchanged() -> None:
+    """_with_calendar_context returns context unchanged when disabled."""
+    cfg = SimpleNamespace(calendar_context_enabled=False)
+    assert _with_calendar_context("existing", cfg) == "existing"
+
+
+def test_with_calendar_context_enabled_injects_calendar(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """_with_calendar_context appends calendar context when enabled and available."""
+    monkeypatch.setattr(
+        "voiceforge.calendar.caldav_poll.get_next_meeting_context",
+        lambda **kw: ("Next meeting: Standup — 2025-03-04T10:00:00+00:00", None),
+    )
+    cfg = SimpleNamespace(calendar_context_enabled=True)
+    out = _with_calendar_context("rag context", cfg)
+    assert "rag context" in out
+    assert "Calendar" in out
+    assert "Standup" in out
+
+
+def test_with_calendar_context_exception_returns_context_unchanged(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """_with_calendar_context on exception returns context without calendar."""
+    monkeypatch.setattr(
+        "voiceforge.calendar.caldav_poll.get_next_meeting_context",
+        lambda **kw: (_ for _ in ()).throw(RuntimeError("cal error")),
+    )
+    cfg = SimpleNamespace(calendar_context_enabled=True)
+    out = _with_calendar_context("rag context", cfg)
+    assert out == "rag context"
+
+
+def test_with_calendar_context_enabled_empty_cal_returns_unchanged(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """_with_calendar_context when calendar returns empty string leaves context unchanged."""
+    monkeypatch.setattr(
+        "voiceforge.calendar.caldav_poll.get_next_meeting_context",
+        lambda **kw: ("", None),
+    )
+    cfg = SimpleNamespace(calendar_context_enabled=True)
+    out = _with_calendar_context("rag context", cfg)
+    assert out == "rag context"
+
+
+def test_rag_merge_results_empty_queries_returns_empty() -> None:
+    """_rag_merge_results with no queries returns empty string."""
+    searcher = MagicMock()
+    assert _rag_merge_results([], searcher) == ""
+    assert _rag_merge_results(["  ", ""], searcher) == ""
+
+
+def test_rag_merge_results_merges_by_chunk_id() -> None:
+    """_rag_merge_results merges results by chunk_id keeping higher score."""
+    r1 = SearchResult(chunk_id=1, content="first", source="", page=0, chunk_index=0, timestamp="", score=0.8)
+    r2 = SearchResult(chunk_id=1, content="first", source="", page=0, chunk_index=0, timestamp="", score=0.9)
+    r3 = SearchResult(chunk_id=2, content="second", source="", page=0, chunk_index=0, timestamp="", score=0.7)
+    searcher = MagicMock()
+    searcher.search = MagicMock(side_effect=[[r1, r3], [r2]])
+    out = _rag_merge_results(["q1", "q2"], searcher)
+    assert "first" in out
+    assert "second" in out
+    searcher.search.assert_called()
+
+
+def test_resample_to_16k_no_scipy_returns_unchanged(monkeypatch: pytest.MonkeyPatch) -> None:
+    """When scipy is not available, _resample_to_16k returns audio unchanged."""
+    import builtins
+
+    orig_import = builtins.__import__
+
+    def no_scipy(name: str, *args: object, **kwargs: object):  # type: ignore[no-untyped-def]
+        if name == "scipy.signal":
+            raise ImportError("No module named 'scipy'")
+        return orig_import(name, *args, **kwargs)
+
+    with patch.object(builtins, "__import__", side_effect=no_scipy):
+        arr = np.zeros(48000, dtype=np.int16)
+        out = _resample_to_16k(arr, 48000)
     np.testing.assert_array_equal(out, arr)
 
 
@@ -82,6 +209,40 @@ def test_pipeline_run_returns_none_when_no_ring(tmp_path: Path) -> None:
     cfg = _make_cfg(tmp_path, ring)
     with AnalysisPipeline(cfg) as pipeline:
         result, err = pipeline.run(seconds=1)
+    assert result is None
+    assert err is not None
+
+
+@patch("voiceforge.core.pipeline._step1_stt")
+def test_pipeline_run_returns_none_when_stt_raises(
+    mock_stt: object,
+    tmp_path: Path,
+) -> None:
+    """When _step1_stt raises, pipeline.run returns (None, error_str)."""
+    num_samples = TARGET_SAMPLE_RATE * 2
+    ring = tmp_path / "ring.raw"
+    ring.write_bytes(np.zeros(num_samples, dtype=np.int16).tobytes())
+    cfg = _make_cfg(tmp_path, ring)
+    mock_stt.side_effect = RuntimeError("STT failed")
+    with AnalysisPipeline(cfg) as pipeline:
+        result, err = pipeline.run(seconds=2)
+    assert result is None
+    assert err is not None
+
+
+@patch("voiceforge.core.pipeline._step1_stt")
+def test_pipeline_run_returns_none_when_stt_import_error(
+    mock_stt: object,
+    tmp_path: Path,
+) -> None:
+    """When _step1_stt raises ImportError, pipeline.run returns (None, install_deps message)."""
+    num_samples = TARGET_SAMPLE_RATE * 2
+    ring = tmp_path / "ring.raw"
+    ring.write_bytes(np.zeros(num_samples, dtype=np.int16).tobytes())
+    cfg = _make_cfg(tmp_path, ring)
+    mock_stt.side_effect = ImportError("faster_whisper")
+    with AnalysisPipeline(cfg) as pipeline:
+        result, err = pipeline.run(seconds=2)
     assert result is None
     assert err is not None
 

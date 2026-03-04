@@ -117,7 +117,7 @@ omit = [
     "src/voiceforge/main.py",
     "src/voiceforge/audio/buffer.py",
     "src/voiceforge/audio/capture.py",
-    "src/voiceforge/core/pipeline.py",
+    # pipeline removed from omit (#56): test_pipeline_integration.py + test_pipeline_memory_guard.py
     "src/voiceforge/core/dbus_service.py",
     "src/voiceforge/web/server.py",
     "src/voiceforge/stt/diarizer.py",
@@ -130,12 +130,12 @@ omit = [
     "src/voiceforge/rag/watcher.py",
     "src/voiceforge/llm/local_llm.py",
     # transcript_log removed from omit (#56): test_transcript_log.py + test_db_migrations.py cover it
-    "src/voiceforge/calendar/caldav_poll.py",
+    # caldav_poll removed from omit (#56): test_caldav_poll.py + test_calendar.py cover it
 ]
 
 [tool.coverage.report]
-# Target 80%; temporarily 63 so CI passes until tests for core/metrics, llm/router, cli/*, rag/parsers added (issue #56).
-fail_under = 63
+# Target 80%; raised to 69 after pipeline + caldav_poll removed from omit (issue #56). Next: one more test → 70%.
+fail_under = 69
 exclude_lines = ["pragma: no cover", "def __repr__", "raise NotImplementedError"]
 
 [build-system]
