@@ -8,9 +8,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Блоки 4, 6, 7, 9, 10 FULL_AUDIT_2026: #64 monitoring/ (prometheus.yml, alerts.yml, docker-compose, README); #67 prompt hash (get_prompt_hashes, warning при fallback); #65 CVE (источник diskcache=instructor, pip-audit без ignore в weekly); #68 бенчмарки (benchmark_stt, benchmark_rag, baseline_benchmark.json); актуализация audit-to-github-map, DOCS-INDEX. Pre-commit: убран default_language_version (python3.12) — на хосте без 3.12 pre-push падал.
+**Сделано в сессии:** Блоки 4, 6, 7, 9, 10 FULL_AUDIT_2026; pre-commit: скрипт ensure_precommit_env.sh (в toolbox ставит python3.12 через dnf), default_language_version python3.12 возвращён, bootstrap вызывает скрипт.
 
-Следующий шаг: **Pre-commit:** при ошибке 3.14.2 vs 3.14.3 выполнить `pre-commit clean` и переустановить окружения; при необходимости запускать коммит/пуш с `--no-verify`. **Dependabot:** 1 moderate (CVE-2025-69872) — по желанию закрыть через dismiss «Accept risk» или скрипт dependabot_dismiss_moderate.py. Дальше по плану: coverage/omit (#56), pipeline integration test (W5), полный async web (W7) или Phase D.
+Следующий шаг: **На Fedora Atomic Cosmic:** один раз в toolbox выполнить `./scripts/bootstrap.sh` или `./scripts/ensure_precommit_env.sh` — установится python3.12 и pre-commit хуки. Дальше: Dependabot 1 moderate, coverage/omit (#56), pipeline test (W5), async web (W7) или Phase D.
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -57,7 +57,7 @@
 
 ## Актуальные напоминания
 
-- **Pre-commit:** при ошибке virtualenv (3.14.2 vs 3.14.3) — `pre-commit clean`; до исправления окружения: `git commit --no-verify`, `git push --no-verify`.
+- **Pre-commit (Fedora Atomic):** в toolbox выполнить `./scripts/ensure_precommit_env.sh` или `./scripts/bootstrap.sh` — ставится python3.12 (dnf) и хуки; без 3.12 можно временно использовать `git commit --no-verify`, `git push --no-verify`.
 - **Sonar:** `uv run python scripts/sonar_fetch_issues.py` — проверить остаток после последнего скана.
 - **Критично:** pyannote 4.0.4; при OOM — [pyannote-version.md](pyannote-version.md). Десктоп — toolbox ([desktop-build-deps.md](desktop-build-deps.md)). Новые CLI-команды — через ADR (ADR-0001).
 - **Ключи:** только keyring ([keyring-keys-reference.md](keyring-keys-reference.md)).

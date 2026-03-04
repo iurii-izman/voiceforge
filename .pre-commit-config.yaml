@@ -1,3 +1,7 @@
+# Use Python 3.12 for hook envs (avoids 3.14.x cache mismatch). On Fedora Atomic: run scripts/ensure_precommit_env.sh once (in toolbox).
+default_language_version:
+  python: python3.12
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0

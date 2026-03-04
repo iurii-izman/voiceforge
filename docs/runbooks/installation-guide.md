@@ -63,7 +63,7 @@ cd /var/home/user/Projects/voiceforge
 ./scripts/bootstrap.sh
 ```
 
-Дождитесь окончания (keyring при необходимости настройте здесь же: `keyring set voiceforge anthropic` и т.д.).
+Дождитесь окончания (keyring при необходимости настройте здесь же: `keyring set voiceforge anthropic` и т.д.). Bootstrap при отсутствии python3.12 ставит его через `dnf` и настраивает pre-commit хуки (см. `scripts/ensure_precommit_env.sh`).
 
 Для записи аудио (`voiceforge listen`) в контейнере нужен `pw-record`:
 

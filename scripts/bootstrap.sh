@@ -10,8 +10,8 @@ fi
 
 uv sync --extra all
 
-echo "Installing git hooks (pre-commit + pre-push)..."
-uv run pre-commit install --hook-type pre-commit --hook-type pre-push
+echo "Ensuring pre-commit env (python3.12 + hooks)..."
+./scripts/ensure_precommit_env.sh
 
 echo "Set keyring entries if missing:"
 echo "  keyring set voiceforge anthropic"
