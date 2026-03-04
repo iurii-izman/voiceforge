@@ -88,6 +88,7 @@ def test_parse_pdf_import_error_when_no_pymupdf(tmp_path: Path) -> None:
     pdf.write_bytes(b"not a pdf")
     try:
         import fitz  # noqa: F401
+
         # With pymupdf, fitz.open may raise on invalid content
         try:
             parsers.parse_pdf(pdf)

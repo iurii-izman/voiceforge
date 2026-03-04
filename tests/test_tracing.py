@@ -4,8 +4,6 @@ from __future__ import annotations
 
 import re
 
-import pytest
-
 
 def test_bind_trace_id_generates_16_hex() -> None:
     """bind_trace_id() with no arg returns 16-char hex."""

@@ -9,7 +9,7 @@
 
 ## Запуск
 
-1. **Настроить scrape target.**  
+1. **Настроить scrape target.**
    VoiceForge должен быть доступен с контейнера Prometheus. Варианты:
    - **Linux (Docker):** в `prometheus.yml` заменить `host.docker.internal:8765` на IP хоста или добавить в `docker-compose.yml` для сервиса prometheus: `extra_hosts: ["host.docker.internal:host-gateway"]`.
    - **Локально:** запустить VoiceForge на хосте и в `prometheus.yml` указать `targets: ["127.0.0.1:8765"]` (тогда Prometheus лучше запускать с `network_mode: host` или через host-gateway).

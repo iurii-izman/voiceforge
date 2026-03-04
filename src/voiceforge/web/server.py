@@ -5,9 +5,9 @@ from __future__ import annotations
 import contextlib
 import json
 import logging
+import socketserver
 import urllib.parse
 import urllib.request
-import socketserver
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Any
 

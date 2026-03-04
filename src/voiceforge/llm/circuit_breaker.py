@@ -19,7 +19,7 @@ STATE_OPEN = 2
 class _CircuitState:
     """Per-key state: closed / open / half_open, failure count, last failure time."""
 
-    __slots__ = ("state", "consecutive_failures", "last_failure_ts")
+    __slots__ = ("consecutive_failures", "last_failure_ts", "state")
 
     def __init__(self) -> None:
         self.state = STATE_CLOSED
@@ -154,6 +154,8 @@ def _completion_with_breaker(completion_fn: Any, **kwargs: Any) -> Any:
 
 def wrap_completion(completion_fn: Any) -> Any:
     """Return a completion function wrapped with circuit breaker (for use with Instructor)."""
+
     def wrapped(**kwargs: Any) -> Any:
         return _completion_with_breaker(completion_fn, **kwargs)
+
     return wrapped
