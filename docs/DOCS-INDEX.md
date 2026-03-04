@@ -2,141 +2,126 @@
 
 **Назначение:** один источник правды по тому, какой документ за что отвечает и актуален ли он. При изменении кода/фич обновлять соответствующий док и при необходимости этот индекс.
 
-**Обновлено:** 2026-03-04 (audit-to-github-map, monitoring stack #64, benchmarks #68, prompt hash #67)
+**Обновлено:** 2026-03-04 (архив планов и аудита, cursor.md + planning.md, doc governance)
 
 ---
 
-## Источники истины (что где искать)
+## Источники истины (минимум для работы)
 
-| Тема | Документ | Статус |
-|------|----------|--------|
-| Контекст агента, правила, конец сессии | [runbooks/agent-context.md](runbooks/agent-context.md) | Актуален |
-| Следующий шаг / фокус итерации | [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md) | Обновляет агент; только открытые задачи и план |
-| История: что сделано (аудит по коду) | [history/closed-plans-and-roadmap.md](history/closed-plans-and-roadmap.md) | Справочно |
-| Правило автопилота (копия для .cursor/rules/) | [runbooks/agent-session-handoff-rule.md](runbooks/agent-session-handoff-rule.md) | Актуален |
-| Приоритет фич (roadmap 1–20) | [roadmap-priority.md](roadmap-priority.md) | Актуален |
-| Технический аудит + roadmap Phase A–D | [PROJECT_AUDIT_AND_ROADMAP.md](PROJECT_AUDIT_AND_ROADMAP.md) | Актуален |
-| Полный аудит: степень реализации + 10 блоков усиления | [audit/FULL_AUDIT_2026.md](audit/FULL_AUDIT_2026.md) | Актуален |
-| Статус Weaknesses → issues (сверка с кодом) | [audit/audit-to-github-map.md](audit/audit-to-github-map.md) | Актуален |
-| Конфиг, env, keyring-имена | [runbooks/config-env-contract.md](runbooks/config-env-contract.md), [runbooks/keyring-keys-reference.md](runbooks/keyring-keys-reference.md) | Актуален |
-| Установка и запуск (хост/toolbox, демон) | [runbooks/installation-guide.md](runbooks/installation-guide.md) | Актуален |
-| Первая встреча за 5 минут | [first-meeting-5min.md](first-meeting-5min.md) | Актуален |
-| Сборка десктопа (Tauri) | [runbooks/desktop-build-deps.md](runbooks/desktop-build-deps.md) | Актуален |
-| Архитектурные решения | [adr/README.md](adr/README.md) + файлы 0001–0006 | Актуален (0005 Telegram, 0006 календарь) |
-| Зависимости, uv, CVE-исключения | [runbooks/dependencies.md](runbooks/dependencies.md), [runbooks/security.md](runbooks/security.md) | Актуален |
-| Dependabot (как закрывать алерты) | [runbooks/dependabot-review.md](runbooks/dependabot-review.md) | Актуален |
-| Telegram-бот | [runbooks/telegram-bot-setup.md](runbooks/telegram-bot-setup.md), [adr/0005-telegram-bot.md](adr/0005-telegram-bot.md) | Актуален |
-| Мониторинг (Prometheus + Grafana + алерты) | [../monitoring/README.md](../monitoring/README.md) (корень репо), [runbooks/observability-alerts.md](runbooks/observability-alerts.md) | Актуален (#64) |
+| Тема | Документ |
+|------|----------|
+| Контекст агента, правила, конец сессии | [runbooks/agent-context.md](runbooks/agent-context.md) |
+| Следующий шаг / фокус итерации | [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md) |
+| Текущие задачи (Phase A–D, #55–73) | [audit/audit-to-github-map.md](audit/audit-to-github-map.md) |
+| Приоритет фич (roadmap 1–20) | [roadmap-priority.md](roadmap-priority.md) |
+| Аудит: задачи и 10 блоков усиления | [audit/audit-to-github-map.md](audit/audit-to-github-map.md), [audit/FULL_AUDIT_2026.md](audit/FULL_AUDIT_2026.md); снимок 2026-02-26 — [archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md) |
+| Конфиг, env, keyring | [runbooks/config-env-contract.md](runbooks/config-env-contract.md), [runbooks/keyring-keys-reference.md](runbooks/keyring-keys-reference.md) |
+| Установка, сборка десктопа | [runbooks/installation-guide.md](runbooks/installation-guide.md), [runbooks/desktop-build-deps.md](runbooks/desktop-build-deps.md) |
+| Управление документацией | [runbooks/doc-governance.md](runbooks/doc-governance.md) |
+| Инструкции Cursor Agent (автозагрузка) | [AGENTS.md](../AGENTS.md) (корень репо) |
+| Тюнинг Cursor (промпты, правила, OOM) | [runbooks/cursor.md](runbooks/cursor.md) |
 
 ---
 
-## Полный список по каталогам
+## Вся документация по каталогам
 
-### monitoring/ (корень репо)
-
-| Файл | Роль | Статус |
-|------|------|--------|
-| README.md | Запуск стека Prometheus + Grafana, алерты, импорт дашборда | Актуален (#64) |
-| prometheus.yml | Scrape /metrics, rule_files: alerts.yml | Актуален |
-| alerts.yml | Правила: pipeline errors, LLM error rate | Актуален |
-| docker-compose.yml | Сервисы prometheus, grafana | Актуален |
-
-### docs/history/
+### Корень репо
 
 | Файл | Роль | Статус |
 |------|------|--------|
-| closed-plans-and-roadmap.md | Что сделано по roadmap и планам (аудит по коду) | Справочно |
+| AGENTS.md | Инструкции для Cursor Agent (подхватываются автоматически) | Актуален |
 
-### docs/ (корень, RU по умолчанию)
+### docs/ (корень)
 
 | Файл | Роль | Статус |
 |------|------|--------|
-| README.md | Вход в документацию, ссылки по смыслу | Актуален |
-| DOCS-INDEX.md | Этот индекс; модерация актуальности | Актуален |
-| first-meeting-5min.md | Сценарий первой встречи за 5 минут | Актуален |
-| roadmap-priority.md | Приоритет внедрения фич 1–20 | Актуален |
-| development-plan-post-audit-2026.md | План развития по аудиту; сверка — claude-proposal-alignment | Справочно (многое закрыто) |
-| desktop-tauri-implementation-plan.md | План реализации десктопа | Справочно (реализовано) |
-| PROJECT_AUDIT_AND_ROADMAP.md | Полный технический аудит: C4, матрица зрелости, 20 слабых мест, 20-шаговый roadmap Phase A–D, план AI-качества, реестр рисков | Актуален |
-| grafana-voiceforge-dashboard.json | Шаблон дашборда Grafana для метрик VoiceForge (#36) | Актуален |
+| README.md | Вход в документацию | Актуален |
+| DOCS-INDEX.md | Этот индекс | Актуален |
+| first-meeting-5min.md | Первая встреча за 5 минут | Актуален |
+| roadmap-priority.md | Приоритет фич 1–20 | Актуален |
+| PROJECT_AUDIT_AND_ROADMAP.md | Заглушка → [archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md) | Архив |
+| grafana-voiceforge-dashboard.json | Дашборд Grafana | Актуален |
+| development-plan-post-audit-2026.md | Заглушка → архив | [archive/plans/](archive/plans/) |
+| desktop-tauri-implementation-plan.md | Заглушка → архив | [archive/plans/](archive/plans/) |
+
+### docs/archive/
+
+| Файл/каталог | Роль |
+|--------------|------|
+| [README.md](archive/README.md) | Когда и что архивировать; правило для агента |
+| archive/plans/ | Выполненные/устаревшие планы (development-plan, desktop-tauri, claude-proposal-alignment) |
+| archive/adr/ | Superseded ADR (0002-archive-first-cleanup) |
+| archive/runbooks/ | Устаревшие/объёмные runbook’и (voiceforge-cursor-tz-2026) |
+| archive/audit/ | Снимки аудита (PROJECT_AUDIT_AND_ROADMAP_2026) |
 
 ### docs/audit/
 
 | Файл | Роль | Статус |
 |------|------|--------|
-| audit-to-github-map.md | Маппинг Weaknesses/Steps на GitHub issues; статус реализации по коду | Актуален |
-| FULL_AUDIT_2026.md | Полный аудит 2026: оценка реализации по фронтам, 10 блоков усиления до 100% | Актуален |
+| audit-to-github-map.md | Weaknesses → issues #55–73; статус по коду | Актуален |
+| FULL_AUDIT_2026.md | Степень реализации по фронтам, 10 блоков усиления | Актуален |
 
-### docs/en/ (English)
-
-| Файл | Роль | Статус |
-|------|------|--------|
-| README.md | Вход в EN-документацию | Актуален |
-| first-meeting-5min.md | First meeting in 5 minutes | Актуален |
-| runbooks/ | Runbooks (EN): installation-guide, quickstart, bootstrap, desktop-build-deps, dependabot-review, telegram-bot-setup | Актуален |
-
-### docs/runbooks/ (RU по умолчанию)
+### docs/history/
 
 | Файл | Роль | Статус |
 |------|------|--------|
-| agent-context.md | Контекст для агента, правила, чеклист конца сессии | Актуален |
-| next-iteration-focus.md | Фокус следующей итерации; обновляет агент | Актуален |
-| config-env-contract.md | VOICEFORGE_*, Settings, D-Bus, keyring | Актуален |
-| keyring-keys-reference.md | Список имён ключей в keyring | Актуален |
-| installation-guide.md | Гайд установки и запуска (toolbox, демон, ребилд) | Актуален |
-| desktop-build-deps.md | Зависимости сборки Tauri, pyannote при OOM | Актуален |
-| first-meeting-5min — в docs/ | — | См. docs/first-meeting-5min.md |
+| closed-plans-and-roadmap.md | Что сделано по roadmap и планам | Справочно |
+
+### docs/runbooks/
+
+| Файл | Роль | Статус |
+|------|------|--------|
+| agent-context.md | Контекст агента, чеклист конца сессии | Актуален |
+| next-iteration-focus.md | Следующий шаг; обновляет агент | Актуален |
+| doc-governance.md | Порядок в доках: архив, источники правды, после итерации | Актуален |
+| config-env-contract.md, keyring-keys-reference.md | Конфиг и ключи | Актуален |
+| installation-guide.md, desktop-build-deps.md, bootstrap.md | Установка и сборка | Актуален |
 | quickstart.md | Краткий сценарий; полная версия — first-meeting-5min | Актуален |
-| bootstrap.md | bootstrap.sh, uv sync, doctor | Актуален |
-| dependencies.md | Политика зависимостей, uv.lock, CVE-исключения | Актуален |
-| security.md | Секреты, pip-audit, CVE-2025-69872 | Актуален |
-| dependabot-review.md | Как закрывать Dependabot алерты | Актуален |
-| telegram-bot-setup.md | Включение Telegram-бота (keyring, webhook, туннель) | Актуален |
-| pyannote-version.md | Версия pyannote, откат при OOM | Актуален |
-| en/ | Runbooks (EN): installation-guide, quickstart, bootstrap, desktop-build-deps, dependabot-review, telegram-bot-setup | Актуален |
-| cursor-agent-setup.md | Настройка Cursor (My Secrets / keyring) | Актуален |
-| voiceforge-cursor-tz.md | Расширенное ТЗ для Cursor, чеклисты | Актуален |
-| claude-proposal-alignment.md | Сверка предложений с кодом (что реализовано) | Справочно |
-| repo-governance.md | main, PR, SonarCloud, security baseline | Актуален |
-| git-github-practices.md | Conventional Commits, теги, issues, labels, GitHub Project | Актуален |
-| git-github-practices-rule.md | Копия правила для .cursor/rules (git-github-practices.mdc) | Актуален |
-| release.md, rollback-alpha-release.md | Релизы и откат | Актуален |
-| alpha2-checklist.md, alpha0.1-dod.md | Чеклисты релизов / DoD | Справочно |
-| web-api.md | Web UI API | Актуален |
-| test-operations.md | Flaky, CI, карантин | Актуален |
-| sonar-pr-cleanup.md | Очистка PR/Sonar | Актуален |
-| offline-package.md | Flatpak/AppImage, чеклист next steps | Черновик |
-| planning-and-tools.md | Планирование: Markdown-backlog vs GitHub Projects в связке с агентом | Актуален |
-| prompt-management.md | Промпты LLM (prompts/), загрузка, версия, тесты (C1 #41) | Актуален |
-| backlog.md | Зеркало GitHub Project (текущий фокус + Todo) | Актуален |
-| calendar-integration.md | Интеграция с календарём (roadmap 17), исследование | Актуален |
-| rag-formats.md | RAG: форматы индексатора, план ODT/RTF (roadmap 18) | Актуален |
-| observability-alerts.md | Алерты Prometheus, ссылка на monitoring/ (#36, #64) | Актуален |
+| planning.md | Канбан, audit map, next-iteration-focus; GitHub Project и gh | Актуален |
+| dependencies.md, security.md, dependabot-review.md | Зависимости и безопасность | Актуален |
+| telegram-bot-setup.md, pyannote-version.md | Фичи | Актуален |
+| repo-governance.md, git-github-practices.md | Git, PR, Sonar | Актуален |
+| release.md, rollback-alpha-release.md, alpha2-checklist.md, alpha0.1-dod.md | Релизы | Актуален |
+| web-api.md, observability-alerts.md | API и мониторинг | Актуален |
+| test-operations.md, sonar-pr-cleanup.md | Тесты и CI | Актуален |
+| prompt-management.md, calendar-integration.md, rag-formats.md | Фичи и форматы | Актуален |
+| cursor.md, voiceforge-cursor-tz.md | Cursor: настройка, тюнинг; расширенное ТЗ (архив) | Актуален / заглушка |
+| claude-proposal-alignment.md | Заглушка → архив | [archive/plans/](archive/plans/) |
+| git-github-practices-rule.md, agent-session-handoff-rule.md | Копии для .cursor/rules/ | Актуален |
+| offline-package.md | Flatpak/AppImage | Черновик |
 
 ### docs/adr/
 
 | Файл | Роль | Статус |
 |------|------|--------|
 | README.md | Список ADR 0001–0006 | Актуален |
-| 0001-core-scope-0.1.md | Заморозка 9 CLI-команд; новые — через ADR | Актуален |
-| 0002-action-items-table.md | Таблица action_items, history --action-items | Актуален |
-| 0003-version-reset-0.1-alpha1.md | Сброс версии | Актуален |
-| 0004-desktop-tauri-dbus.md | Десктоп: Tauri, D-Bus, демон | Актуален |
-| 0005-telegram-bot.md | Telegram-бот через voiceforge web, key webhook_telegram | Актуален |
-| 0006-calendar-integration.md | Календарь (roadmap 17): CalDAV, keyring | Актуален |
-| 0002-archive-first-cleanup.md | Superseded (исторический) | Архив |
+| 0001–0006 | Активные решения | Актуален |
+| 0002-archive-first-cleanup.md | Superseded → [archive/adr/](archive/adr/) | Архив |
 
 ### docs/architecture/
 
 | Файл | Роль | Статус |
 |------|------|--------|
-| README.md | Что где лежит | Актуален |
-| overview.md | Пайплайн, модули (mermaid) | Актуален |
+| README.md, overview.md | Пайплайн, модули | Актуален |
+
+### monitoring/ (корень репо)
+
+| Файл | Роль |
+|------|------|
+| README.md | Prometheus + Grafana, алерты; см. также [runbooks/observability-alerts.md](runbooks/observability-alerts.md) |
+| prometheus.yml, alerts.yml, docker-compose.yml | Конфиги стека |
+
+### docs/en/
+
+| Файл | Роль |
+|------|------|
+| README.md, first-meeting-5min.md | EN-документация |
+| runbooks/ | Runbooks (EN): installation-guide, quickstart, bootstrap, desktop-build-deps, dependabot-review, telegram-bot-setup |
 
 ---
 
 ## Правила модерации
 
-1. **При добавлении документа:** внести в этот индекс с ролью и статусом «Актуален».
-2. **При устаревании:** сменить статус на «Справочно» или «Архив» и при необходимости указать замену.
-3. **После большой итерации:** проверить, не устарели ли runbooks (installation-guide, first-meeting-5min, config-env-contract) и при необходимости обновить их и индекс.
+1. **Добавление документа:** внести в индекс с ролью и статусом.
+2. **Устаревание:** сменить статус на «Справочно» или перенести в [archive/](archive/) (заглушка в старом месте с ссылкой на архив).
+3. **После большой итерации:** обновить актуальные доки (next-iteration-focus, runbooks при изменении поведения); завершённые планы перенести в docs/archive/; обновить этот индекс (см. [runbooks/doc-governance.md](runbooks/doc-governance.md)).

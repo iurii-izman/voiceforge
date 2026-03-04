@@ -50,7 +50,7 @@ If you have multiple containers, specify the name:
 toolbox enter fedora-toolbox-43
 ```
 
-(substitute your name from `toolbox list`). After entering, the prompt may change (e.g. show the container name) — from then on run all commands **in this same terminal (in toolbox)**.
+(check container name in `toolbox list`; on Fedora 43 it is usually `fedora-toolbox-43`). After entering, the prompt may change (e.g. show the container name) — from then on run all commands **in this same terminal (in toolbox)**.
 
 ---
 

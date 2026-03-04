@@ -8,9 +8,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** #56: calendar/caldav_poll и core/pipeline выведены из coverage omit. Добавлены tests/test_caldav_poll.py (16 тестов: _dt_to_aware, _event_dict, _events_from_calendar, poll_events_*, _candidates_from_calendars) и расширен test_pipeline_integration.py (_get_language_hint, _with_calendar_context, _resample_to_16k без scipy, _rag_merge_results, STT failure/ImportError, _prepare_audio resample). fail_under поднят до 69 (покрытие ~70%). Коммит и пуш в конце.
+**Сделано в сессии:** #56: caldav_poll и pipeline выведены из omit; добавлены test_caldav_poll.py и расширен test_pipeline_integration.py. Тесты pipeline сделаны щадящими по памяти: в test_pipeline_run_returns_result_with_mocked_stt замокан _gather_step2 (не грузим pyannote/torch), уменьшены буферы аудио (1 s вместо 2 s). fail_under=69. При OOM в Cursor/IDE: запускать только лёгкие тесты, напр. `uv run pytest tests/test_pipeline_integration.py tests/test_caldav_poll.py tests/test_calendar.py -q`.
 
-Следующий шаг: один тест для покрытия 70% и поднять fail_under до 70. Либо: полный async web (W7), Phase D (A/B testing, OTel, plugins).
+Следующий шаг: довести покрытие до 70% и поднять fail_under до 70. Либо: полный async web (W7), Phase D (A/B testing, OTel, plugins).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -51,12 +51,13 @@
 
 Всё закрытое: [docs/history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
 
-Вкратце: Roadmap 1–18 реализован. Старые issues #32–49, #51–53 закрыты. Sonar ~25 замечаний закрыто. Новый аудит (PROJECT_AUDIT_AND_ROADMAP) выявил 20 Weaknesses — все 20 оформлены как issues #55–73.
+Вкратце: Roadmap 1–18 реализован. Старые issues #32–49, #51–53 закрыты. Sonar ~25 замечаний закрыто. Аудит 2026-02-26 (архив: docs/archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md) выявил 20 Weaknesses — все 20 оформлены как issues #55–73.
 
 ---
 
 ## Актуальные напоминания
 
+- **OOM при тестах:** если полный `pytest tests/` вылетает по памяти (pyannote/torch), запускать подмножество: `uv run pytest tests/test_pipeline_integration.py tests/test_caldav_poll.py tests/test_calendar.py tests/test_transcript_log.py -q`. В test_pipeline_integration тест с полным run мокает _gather_step2, чтобы не загружать diarizer/RAG.
 - **Pre-commit (Fedora Atomic):** python3.12 есть в **toolbox** (например toolbox 43). Выполнять `./scripts/ensure_precommit_env.sh` или `./scripts/bootstrap.sh` **внутри toolbox** — тогда хуки используют python3.12. При ошибке кэша (3.14.2 vs 3.14.3): `uv run pre-commit clean`. Вне toolbox (на хосте без 3.12) — временно `git commit --no-verify`, `git push --no-verify`.
 - **Sonar:** `uv run python scripts/sonar_fetch_issues.py` — проверить остаток после последнего скана.
 - **Критично:** pyannote 4.0.4; при OOM — [pyannote-version.md](pyannote-version.md). Десктоп — toolbox ([desktop-build-deps.md](desktop-build-deps.md)). Новые CLI-команды — через ADR (ADR-0001).

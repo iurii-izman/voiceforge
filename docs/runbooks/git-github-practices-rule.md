@@ -30,5 +30,5 @@ alwaysApply: true
 
 ## Ссылки
 
-- docs/runbooks/release.md, repo-governance.md, planning-and-tools.md, backlog.md
+- docs/runbooks/release.md, repo-governance.md, planning.md
 ```

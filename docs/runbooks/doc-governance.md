@@ -1,0 +1,39 @@
+# Управление документацией (doc governance)
+
+Единые правила: минимум источников правды, архив для устаревшего, актуализация после итераций.
+
+---
+
+## Источники правды (не дублировать)
+
+- **Текущий план и задачи:** [next-iteration-focus.md](next-iteration-focus.md) + [audit/audit-to-github-map.md](../audit/audit-to-github-map.md). Единая точка входа по плану и канбану: [planning.md](planning.md).
+- **Приоритеты фич:** [roadmap-priority.md](../roadmap-priority.md).
+- **Аудит:** снимок 2026-02-26 в [archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](../archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md); актуальный статус — [audit/audit-to-github-map.md](../audit/audit-to-github-map.md) и [audit/FULL_AUDIT_2026.md](../audit/FULL_AUDIT_2026.md) (10 блоков). Не плодить новые «планы по аудиту» — дополнять эти или переносить выполненное в архив.
+- **Конфиг и ключи:** [config-env-contract.md](config-env-contract.md), [keyring-keys-reference.md](keyring-keys-reference.md).
+- **Индекс:** [DOCS-INDEX.md](../DOCS-INDEX.md) — один перечень актуальных документов и архива.
+
+---
+
+## Архив (docs/archive/)
+
+**Когда переносить:** план/аудит в основном выполнен; документ заменён другим; ADR superseded.
+
+**Как:** скопировать файл в `docs/archive/plans/` или `docs/archive/adr/`; в исходном месте оставить короткую заглушку со ссылкой на архив. В коммите указать «архивирован: …».
+
+**Структура:** см. [archive/README.md](../archive/README.md).
+
+---
+
+## После большой итерации (чеклист для агента)
+
+1. **Обновить текущие доки:** next-iteration-focus (следующий шаг, дата), при изменении поведения — runbook’и (installation-guide, config-env-contract и т.д.), при необходимости audit-to-github-map (статус issues).
+2. **Архивировать:** выполненный план или устаревший документ → docs/archive/; в старом месте — заглушка со ссылкой.
+3. **Индекс:** при появлении/перемещении документа обновить DOCS-INDEX.md (раздел, статус).
+4. **Не дублировать:** не создавать новый «план по аудиту» или «next steps» — дополнять существующие источники правды.
+
+---
+
+## Ссылки
+
+- Полный индекс: [DOCS-INDEX.md](../DOCS-INDEX.md).
+- Правило для Cursor: `.cursor/rules/doc-governance.mdc` — напоминание про архив и актуализацию после итерации.

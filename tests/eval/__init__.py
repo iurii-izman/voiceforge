@@ -1,2 +1,2 @@
 # Eval harness for LLM outputs (ROUGE-L, golden samples).
-# See docs/PROJECT_AUDIT_AND_ROADMAP.md Step 1, issue #32.
+# See docs/archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md Step 1, issue #32.

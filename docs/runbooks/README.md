@@ -12,9 +12,10 @@
 |------|------------|
 | [agent-context.md](agent-context.md) | Единый контекст для Cursor: правила, keyring, чеклист конца сессии, универсальный промпт. Прикладывать в новый чат. |
 | [next-iteration-focus.md](next-iteration-focus.md) | Следующий шаг (один для следующего чата); обновляет агент в конце сессии. |
-| [cursor-agent-setup.md](cursor-agent-setup.md) | Настройка Cursor (My Secrets только без keyring; локально — keyring). |
-| [voiceforge-cursor-tz.md](voiceforge-cursor-tz.md) | Расширенное ТЗ для Cursor: среда, стек, ограничения, шаблоны промптов. |
-| [claude-proposal-alignment.md](claude-proposal-alignment.md) | Сверка предложений с кодом (что реализовано). Справочно. |
+| [doc-governance.md](doc-governance.md) | Порядок в доках: источники правды, архив, актуализация после итераций. |
+| [cursor.md](cursor.md) | Cursor: настройка (Cloud/локально), тюнинг, промпты, OOM, справка. |
+| [voiceforge-cursor-tz.md](voiceforge-cursor-tz.md) | Заглушка → [archive/runbooks/voiceforge-cursor-tz-2026.md](../archive/runbooks/voiceforge-cursor-tz-2026.md). |
+| [claude-proposal-alignment.md](claude-proposal-alignment.md) | Заглушка → архив (см. [../archive/plans/](../archive/plans/)). |
 
 ---
 
@@ -56,6 +57,12 @@
 | [telegram-bot-setup.md](telegram-bot-setup.md) | Telegram-бот (ADR-0005): keyring webhook_telegram, webhook, туннель. |
 | [pyannote-version.md](pyannote-version.md) | Версия pyannote, откат при OOM. |
 
+## Планирование и задачи
+
+| Файл | Назначение |
+|------|------------|
+| [planning.md](planning.md) | Канбан (GitHub Project), audit map, next-iteration-focus; gh и связка с агентом. |
+
 ## Операции и справочники
 
 | Файл | Назначение |
@@ -67,4 +74,4 @@
 
 ---
 
-План реализации десктопа (Tauri) — в корне docs: [../desktop-tauri-implementation-plan.md](../desktop-tauri-implementation-plan.md).
+Текущие задачи и план: [../audit/audit-to-github-map.md](../audit/audit-to-github-map.md), [next-iteration-focus.md](next-iteration-focus.md). Архив планов: [../archive/README.md](../archive/README.md).

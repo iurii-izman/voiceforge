@@ -2,7 +2,7 @@
 
 Единый контекст для Cursor-агента. Новый чат: приложи этот файл (@docs/runbooks/agent-context.md) — не ищи по проекту, работай по этому документу. Для продолжения — @docs/runbooks/next-iteration-focus.md (обновляет агент в конце сессии).
 
-**Индекс документации (актуальность):** `docs/DOCS-INDEX.md`. **Автопилот конца сессии:** `.cursor/rules/agent-session-handoff.mdc` (копия в репо: [agent-session-handoff-rule.md](agent-session-handoff-rule.md) — скопировать в .cursor/rules/ при необходимости).
+**Индекс документации (актуальность):** `docs/DOCS-INDEX.md`. **Порядок в доках (архив, источники правды):** [doc-governance.md](doc-governance.md). **Автопилот конца сессии:** `.cursor/rules/agent-session-handoff.mdc` (копия в репо: [agent-session-handoff-rule.md](agent-session-handoff-rule.md)).
 
 ---
 
@@ -75,7 +75,7 @@
 В начале **каждого** нового чата вставлять этот блок (и при необходимости дописать задачу). Агент по нему знает: контекст, keyring, что в конце сессии делать коммит/пуш и обновлять next-iteration-focus.
 
 ```
-Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md (правила, конфиг, приоритеты). Работай по нему без поиска по проекту. Приоритет фич — docs/roadmap-priority.md. Эффективно и дёшево; все ключи и доступы в keyring (см. keyring-keys-reference.md). Fedora Atomic/toolbox/uv. В конце сессии: тесты, коммит, пуш, обновить next-iteration-focus, выдать промпт для следующего чата.
+Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md (правила, конфиг, приоритеты). Работай по нему без поиска по проекту. Приоритет фич — docs/roadmap-priority.md. Эффективно и дёшево; все ключи и доступы в keyring (см. keyring-keys-reference.md). Fedora Atomic/toolbox/uv. В конце сессии: тесты, коммит, пуш, обновить next-iteration-focus, выдать промпт для следующего чата. После большой итерации: актуализировать доки, архивировать выполненное (doc-governance.md).
 
 [Задача или: продолжить с @docs/runbooks/next-iteration-focus.md]
 ```

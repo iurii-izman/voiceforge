@@ -27,8 +27,9 @@
 ## План и приоритеты
 
 - [roadmap-priority.md](roadmap-priority.md) — приоритет внедрения фич (1–20)
-- [development-plan-post-audit-2026.md](development-plan-post-audit-2026.md) — план развития по аудиту; сверка с кодом — в [runbooks/claude-proposal-alignment.md](runbooks/claude-proposal-alignment.md)
+- [audit/audit-to-github-map.md](audit/audit-to-github-map.md) — текущие задачи (Phase A–D, issues #55–73)
 - [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md) — фокус следующей итерации (обновляет агент)
+- Выполненные планы и архив: [archive/README.md](archive/README.md), [DOCS-INDEX.md](DOCS-INDEX.md)
 
 ---
 
@@ -36,7 +37,7 @@
 
 Операционные инструкции и справочники — [runbooks/README.md](runbooks/README.md). Полный список и статусы — [DOCS-INDEX.md](DOCS-INDEX.md). Кратко:
 
-- **Контекст и агент:** agent-context, next-iteration-focus, cursor-agent-setup, voiceforge-cursor-tz
+- **Контекст и агент:** agent-context, next-iteration-focus, cursor, voiceforge-cursor-tz (заглушка)
 - **Конфиг и среда:** config-env-contract, keyring-keys-reference, bootstrap, installation-guide, desktop-build-deps
 - **Безопасность и зависимости:** security, dependencies, dependabot-review
 - **Фичи:** telegram-bot-setup (ADR-0005), pyannote-version
@@ -50,7 +51,7 @@
 - Сборка в toolbox: [runbooks/desktop-build-deps.md](runbooks/desktop-build-deps.md); скрипт `./scripts/setup-desktop-toolbox.sh`, затем `cd desktop && npm run tauri build`
 - Перед запуском десктопа обязательно: **voiceforge daemon**
 - Полный гайд установки и запуска (хост/toolbox, ребилд, демон, обновление): [runbooks/installation-guide.md](runbooks/installation-guide.md)
-- План реализации: [desktop-tauri-implementation-plan.md](desktop-tauri-implementation-plan.md)
+- План реализации десктопа выполнен; история — [archive/plans/desktop-tauri-implementation-plan.md](archive/plans/desktop-tauri-implementation-plan.md)
 
 ---
 

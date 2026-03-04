@@ -112,4 +112,4 @@
 
 ## Следующий слой: PROJECT_AUDIT_AND_ROADMAP (2026-02-26)
 
-Новый аудит выявил 20 Weaknesses и 20 Steps (Phase A–D). Все 20 Steps — **не реализованы** на момент сверки 2026-02-26. Маппинг и issues: [docs/audit/audit-to-github-map.md](../audit/audit-to-github-map.md).
+Новый аудит выявил 20 Weaknesses и 20 Steps (Phase A–D). Полный снимок: [docs/archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](../archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md). Маппинг и issues: [docs/audit/audit-to-github-map.md](../audit/audit-to-github-map.md).

@@ -1,6 +1,5 @@
-# ADR-0002: Archive-First Cleanup Policy (superseded)
+# ADR-0002: Archive-First Cleanup (superseded)
 
-Status: Accepted (historical)
+**Status:** Superseded (historical). **Перенесён в архив:** [../archive/adr/0002-archive-first-cleanup.md](../archive/adr/0002-archive-first-cleanup.md).
 
-Before zero-reset, legacy content was archived to preserve traceability.
-For alpha0.1 zero-reset, archived and legacy materials are fully removed.
+Текущий ADR-0002 — [0002-action-items-table.md](0002-action-items-table.md) (таблица action_items).

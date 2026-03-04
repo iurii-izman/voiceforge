@@ -52,4 +52,4 @@
 
 - [release.md](release.md) — релизы и теги
 - [repo-governance.md](repo-governance.md) — правила main, security
-- [planning-and-tools.md](planning-and-tools.md), [backlog.md](backlog.md) — план и Project
+- [planning.md](planning.md) — план, канбан, audit map, Project
