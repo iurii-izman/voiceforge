@@ -1,7 +1,7 @@
 # Audit → GitHub: маппинг задач
 
 Источник: `docs/PROJECT_AUDIT_AND_ROADMAP.md` (2026-02-26, commit 6a49402).
-Сверка с кодом: 2026-02-26 (агент).
+Сверка с кодом: 2026-03-04 (агент).
 
 ---
 
@@ -10,25 +10,25 @@
 | # | Weakness / Step | Статус | Доказательство |
 |---|----------------|--------|----------------|
 | W1 / Step 1 | Eval harness **в CI** | **СДЕЛАНО** | test.yml: job `eval` — pytest tests/eval/ (ROUGE-L) |
-| W2 / Step 2 | Coverage omit убран | **НЕ СДЕЛАНО** | pyproject.toml L111-118: 5 модулей в omit, fail_under=80 |
+| W2 / Step 2 | Coverage omit убран | **НЕ СДЕЛАНО** | pyproject.toml: omit, fail_under=63 |
 | W3 / Step 3 | Sonar blocking | **СДЕЛАНО** | sonar.yml: убран continue-on-error |
 | W4 / Step 5 | CodeQL blocking | **СДЕЛАНО** | codeql.yml: убран continue-on-error |
 | W5 | Pipeline integration test | **НЕ СДЕЛАНО** | Нет test_pipeline_integration.py |
 | W6 / Step 6 | systemd MemoryMax | **СДЕЛАНО** | scripts/voiceforge.service: MemoryMax=4G, MemoryHigh=3G, OOMScoreAdjust=500 |
-| W7 / Step 12 | Async web server | **НЕ СДЕЛАНО** | server.py L10: `from http.server import ...` |
-| W8 / Step 8 | Circuit breaker | **НЕ СДЕЛАНО** | Нет circuit_breaker.py; нет tracking в router.py |
-| W9 / Step 7 | Trace IDs | **НЕ СДЕЛАНО** | Нет trace_id нигде в src/ |
-| W10 / Step 13 | Prompt hash validation | **НЕ СДЕЛАНО** | prompt_loader.py: нет hash/SHA256 |
-| W11 / Step 9 | Periodic retention purge | **НЕ СДЕЛАНО** | daemon.py: purge_before() только в init, нет Timer |
-| W12 / Step 9 | DB backup CLI | **НЕ СДЕЛАНО** | main.py: нет backup команды |
-| W13 / Step 11 | CVE-2025-69872 | **НЕ СДЕЛАНО** | test.yml L117: `--ignore-vuln CVE-2025-69872` |
+| W7 / Step 12 | Async web server | **ЧАСТИЧНО** | ThreadingMixIn (#66); не Starlette/Litestar |
+| W8 / Step 8 | Circuit breaker | **СДЕЛАНО** | llm/circuit_breaker.py, router wrap_completion, метрика state (#62) |
+| W9 / Step 7 | Trace IDs | **СДЕЛАНО** | core/tracing.py, main.py, web/server.py (X-Trace-Id); test_tracing.py |
+| W10 / Step 13 | Prompt hash validation | **СДЕЛАНО** | prompt_loader.get_prompt_hashes(), warning при fallback, test_prompt_content_snapshot (#67) |
+| W11 / Step 9 | Periodic retention purge | **СДЕЛАНО** | daemon: Timer 24h purge (#63) |
+| W12 / Step 9 | DB backup CLI | **СДЕЛАНО** | voiceforge backup (--keep N) (#63) |
+| W13 / Step 11 | CVE-2025-69872 | **ЧАСТИЧНО** | Источник (instructor) задокументирован; pip-audit без ignore в weekly (continue-on-error); ignore в CI пока нет фикса (#65) |
 | W14 / Step 6 | /ready endpoint | **СДЕЛАНО** | web/server.py: GET /ready (DB check), 200/503; test_web_smoke |
 | W15 / Step 4 | Version inconsistency | **СДЕЛАНО** | __init__.py: importlib.metadata.version("voiceforge") |
 | W16 / Step 5 | .editorconfig | **СДЕЛАНО** | .editorconfig в корне (utf-8, indent 4/2, trim) |
 | W17 | Cognitive complexity S3776 | **ЧАСТИЧНО** | do_GET/do_POST ещё if-chains; часть S3776 закрыта |
-| W18 / Step 15 | Error responses | **НЕ СДЕЛАНО** | `{"error": msg}` — нет `{"error": {"code":...,"message":...}}` |
-| W19 / Step 10 | Alerting / monitoring stack | **НЕ СДЕЛАНО** | Нет monitoring/ директории; нет alerts.yml |
-| W20 / Step 14 | Benchmark suite | **НЕ СДЕЛАНО** | Нет benchmark файлов в tests/ |
+| W18 / Step 15 | Error responses | **СДЕЛАНО** | Единый формат `{"error": {"code", "message"}}` (#69) |
+| W19 / Step 10 | Alerting / monitoring stack | **СДЕЛАНО** | monitoring/: prometheus.yml, alerts.yml, docker-compose, README (#64) |
+| W20 / Step 14 | Benchmark suite | **СДЕЛАНО** | tests/benchmark_stt.py, benchmark_rag.py, baseline_benchmark.json (#68) |
 
 ---
 

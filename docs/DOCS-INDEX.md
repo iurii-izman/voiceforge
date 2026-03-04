@@ -2,7 +2,7 @@
 
 **Назначение:** один источник правды по тому, какой документ за что отвечает и актуален ли он. При изменении кода/фич обновлять соответствующий док и при необходимости этот индекс.
 
-**Обновлено:** 2026-02-26 (разделение RU/EN: docs/en/, docs/runbooks/en/; GitHub: закрыт PR #54, удалена ветка)
+**Обновлено:** 2026-03-04 (audit-to-github-map, monitoring stack #64, benchmarks #68, prompt hash #67)
 
 ---
 
@@ -16,6 +16,8 @@
 | Правило автопилота (копия для .cursor/rules/) | [runbooks/agent-session-handoff-rule.md](runbooks/agent-session-handoff-rule.md) | Актуален |
 | Приоритет фич (roadmap 1–20) | [roadmap-priority.md](roadmap-priority.md) | Актуален |
 | Технический аудит + roadmap Phase A–D | [PROJECT_AUDIT_AND_ROADMAP.md](PROJECT_AUDIT_AND_ROADMAP.md) | Актуален |
+| Полный аудит: степень реализации + 10 блоков усиления | [audit/FULL_AUDIT_2026.md](audit/FULL_AUDIT_2026.md) | Актуален |
+| Статус Weaknesses → issues (сверка с кодом) | [audit/audit-to-github-map.md](audit/audit-to-github-map.md) | Актуален |
 | Конфиг, env, keyring-имена | [runbooks/config-env-contract.md](runbooks/config-env-contract.md), [runbooks/keyring-keys-reference.md](runbooks/keyring-keys-reference.md) | Актуален |
 | Установка и запуск (хост/toolbox, демон) | [runbooks/installation-guide.md](runbooks/installation-guide.md) | Актуален |
 | Первая встреча за 5 минут | [first-meeting-5min.md](first-meeting-5min.md) | Актуален |
@@ -24,10 +26,20 @@
 | Зависимости, uv, CVE-исключения | [runbooks/dependencies.md](runbooks/dependencies.md), [runbooks/security.md](runbooks/security.md) | Актуален |
 | Dependabot (как закрывать алерты) | [runbooks/dependabot-review.md](runbooks/dependabot-review.md) | Актуален |
 | Telegram-бот | [runbooks/telegram-bot-setup.md](runbooks/telegram-bot-setup.md), [adr/0005-telegram-bot.md](adr/0005-telegram-bot.md) | Актуален |
+| Мониторинг (Prometheus + Grafana + алерты) | [../monitoring/README.md](../monitoring/README.md) (корень репо), [runbooks/observability-alerts.md](runbooks/observability-alerts.md) | Актуален (#64) |
 
 ---
 
 ## Полный список по каталогам
+
+### monitoring/ (корень репо)
+
+| Файл | Роль | Статус |
+|------|------|--------|
+| README.md | Запуск стека Prometheus + Grafana, алерты, импорт дашборда | Актуален (#64) |
+| prometheus.yml | Scrape /metrics, rule_files: alerts.yml | Актуален |
+| alerts.yml | Правила: pipeline errors, LLM error rate | Актуален |
+| docker-compose.yml | Сервисы prometheus, grafana | Актуален |
 
 ### docs/history/
 
@@ -47,6 +59,13 @@
 | desktop-tauri-implementation-plan.md | План реализации десктопа | Справочно (реализовано) |
 | PROJECT_AUDIT_AND_ROADMAP.md | Полный технический аудит: C4, матрица зрелости, 20 слабых мест, 20-шаговый roadmap Phase A–D, план AI-качества, реестр рисков | Актуален |
 | grafana-voiceforge-dashboard.json | Шаблон дашборда Grafana для метрик VoiceForge (#36) | Актуален |
+
+### docs/audit/
+
+| Файл | Роль | Статус |
+|------|------|--------|
+| audit-to-github-map.md | Маппинг Weaknesses/Steps на GitHub issues; статус реализации по коду | Актуален |
+| FULL_AUDIT_2026.md | Полный аудит 2026: оценка реализации по фронтам, 10 блоков усиления до 100% | Актуален |
 
 ### docs/en/ (English)
 
@@ -92,7 +111,7 @@
 | backlog.md | Зеркало GitHub Project (текущий фокус + Todo) | Актуален |
 | calendar-integration.md | Интеграция с календарём (roadmap 17), исследование | Актуален |
 | rag-formats.md | RAG: форматы индексатора, план ODT/RTF (roadmap 18) | Актуален |
-| observability-alerts.md | Алерты Prometheus (budget > 80%, error rate > 5%), #36 | Актуален |
+| observability-alerts.md | Алерты Prometheus, ссылка на monitoring/ (#36, #64) | Актуален |
 
 ### docs/adr/
 
