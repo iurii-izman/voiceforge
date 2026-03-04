@@ -13,8 +13,7 @@ def _long_transcript() -> str:
         "The meeting started with updates and the team discussed the project. "
         "We went through the backlog and the budget. "
         "Final: договор договор подписан квартальный отчёт отчёт. "
-        "Alpha beta gamma delta " * 8
-        + "Omega sigma theta report " * 8
+        "Alpha beta gamma delta " * 8 + "Omega sigma theta report " * 8
     )
 
 
