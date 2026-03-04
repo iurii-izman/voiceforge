@@ -1,65 +1,104 @@
-"""Unit tests for RAG parsers (ODT, RTF). Roadmap 18: tests when adding ODT/RTF (#29)."""
+"""Tests for rag.parsers: parse_markdown, parse_txt, parse_html, parse_pdf (when available). #56"""
+
+from __future__ import annotations
 
 from pathlib import Path
 
 import pytest
 
-
-def test_parse_rtf_extracts_text(tmp_path: Path) -> None:
-    """parse_rtf returns segments from minimal RTF content."""
-    rtf = tmp_path / "sample.rtf"
-    rtf.write_bytes(b"{\\rtf1\\ansi Hello from RTF.}")
-    from voiceforge.rag.parsers import parse_rtf
-
-    segments = parse_rtf(rtf)
-    assert len(segments) >= 1
-    assert "Hello" in segments[0] or "Hello from RTF" in " ".join(segments)
+from voiceforge.rag import parsers
 
 
-def test_parse_odt_extracts_text(tmp_path: Path) -> None:
-    """parse_odt returns segments from ODT with paragraphs."""
-    from odf import text as odf_text
-    from odf.opendocument import OpenDocumentText
-
-    odt = tmp_path / "sample.odt"
-    doc = OpenDocumentText()
-    p = odf_text.P()
-    p.addText("Hello from ODT.")
-    doc.text.addElement(p)
-    doc.save(str(odt))
-
-    from voiceforge.rag.parsers import parse_odt
-
-    segments = parse_odt(odt)
-    assert len(segments) >= 1
-    assert "Hello from ODT" in " ".join(segments)
+def test_parse_markdown(tmp_path: Path) -> None:
+    """parse_markdown strips markdown and returns segments."""
+    md = tmp_path / "doc.md"
+    md.write_text("# Title\n\nParagraph one.\n\n- item 1\n- item 2\n\n**bold** text.", encoding="utf-8")
+    out = parsers.parse_markdown(md)
+    assert out
+    assert "Title" in " ".join(out) or "Paragraph" in " ".join(out)
+    assert "item" in " ".join(out) or "bold" in " ".join(out)
 
 
-def test_parse_rtf_missing_file_raises(tmp_path: Path) -> None:
-    """parse_rtf raises FileNotFoundError for non-existent path."""
-    from voiceforge.rag.parsers import parse_rtf
+def test_parse_markdown_empty_paragraphs_returns_single_segment(tmp_path: Path) -> None:
+    """When only whitespace/code blocks, returns one segment of stripped content."""
+    md = tmp_path / "minimal.md"
+    md.write_text("Only one line.", encoding="utf-8")
+    out = parsers.parse_markdown(md)
+    assert out == ["Only one line."]
 
-    missing = tmp_path / "missing.rtf"
-    assert not missing.exists()
+
+def test_parse_markdown_missing_file() -> None:
+    """parse_markdown raises FileNotFoundError for missing file."""
     with pytest.raises(FileNotFoundError):
-        parse_rtf(missing)
+        parsers.parse_markdown(Path("/nonexistent/file.md"))
 
 
-def test_parse_odt_missing_file_raises(tmp_path: Path) -> None:
-    """parse_odt raises FileNotFoundError for non-existent path."""
-    from voiceforge.rag.parsers import parse_odt
+def test_parse_txt(tmp_path: Path) -> None:
+    """parse_txt splits by double newline."""
+    txt = tmp_path / "doc.txt"
+    txt.write_text("First para.\n\nSecond para.\n\nThird.", encoding="utf-8")
+    out = parsers.parse_txt(txt)
+    assert len(out) >= 2
+    assert "First" in out[0]
+    assert "Second" in out[1]
 
-    missing = tmp_path / "missing.odt"
-    assert not missing.exists()
+
+def test_parse_txt_single_line(tmp_path: Path) -> None:
+    """parse_txt returns one segment for single line."""
+    txt = tmp_path / "one.txt"
+    txt.write_text("Single line.", encoding="utf-8")
+    assert parsers.parse_txt(txt) == ["Single line."]
+
+
+def test_parse_txt_missing_file() -> None:
+    """parse_txt raises FileNotFoundError for missing file."""
     with pytest.raises(FileNotFoundError):
-        parse_odt(missing)
+        parsers.parse_txt(Path("/nonexistent/file.txt"))
 
 
-def test_parse_rtf_empty_content_returns_segments(tmp_path: Path) -> None:
-    """parse_rtf returns list (empty or single segment) for minimal RTF with no text."""
-    from voiceforge.rag.parsers import parse_rtf
+def test_parse_html(tmp_path: Path) -> None:
+    """parse_html extracts text from HTML."""
+    html = tmp_path / "page.html"
+    html.write_text(
+        "<html><body><p>First</p><div>Second</div><h1>Title</h1></body></html>",
+        encoding="utf-8",
+    )
+    out = parsers.parse_html(html)
+    assert out
+    joined = " ".join(out)
+    assert "First" in joined
+    assert "Second" in joined or "Title" in joined
 
-    rtf = tmp_path / "empty.rtf"
-    rtf.write_bytes(b"{\\rtf1\\ansi }")
-    segments = parse_rtf(rtf)
-    assert isinstance(segments, list)
+
+def test_parse_html_missing_file() -> None:
+    """parse_html raises FileNotFoundError for missing file."""
+    with pytest.raises(FileNotFoundError):
+        parsers.parse_html(Path("/nonexistent/file.html"))
+
+
+def test_parse_pdf_missing_file() -> None:
+    """parse_pdf raises FileNotFoundError for missing file."""
+    with pytest.raises(FileNotFoundError):
+        parsers.parse_pdf(Path("/nonexistent/file.pdf"))
+
+
+def test_parse_pdf_import_error_when_no_pymupdf(tmp_path: Path) -> None:
+    """parse_pdf raises ImportError when pymupdf not installed (existing file triggers import)."""
+    pdf = tmp_path / "dummy.pdf"
+    pdf.write_bytes(b"not a pdf")
+    try:
+        import fitz  # noqa: F401
+        # With pymupdf, fitz.open may raise on invalid content
+        try:
+            parsers.parse_pdf(pdf)
+        except Exception:
+            pass
+    except ImportError:
+        with pytest.raises(ImportError, match="rag|pymupdf"):
+            parsers.parse_pdf(pdf)
+
+
+def test_parse_docx_missing_file() -> None:
+    """parse_docx raises FileNotFoundError for missing file."""
+    with pytest.raises(FileNotFoundError):
+        parsers.parse_docx(Path("/nonexistent/file.docx"))

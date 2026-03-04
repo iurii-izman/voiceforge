@@ -37,6 +37,15 @@ def test_history_helpers_payloads_and_lines() -> None:
     assert hh.sessions_list_lines([]) == ["Нет сохранённых сессий. Запустите voiceforge analyze."]
     assert any("id" in line for line in hh.render_sessions_table_lines([session]))
 
+    md = hh.build_session_markdown(7, [segment], analysis, started_at="2026-02-21T12:00:00+00:00")
+    assert "# Сессия 7" in md
+    assert "## Транскрипт" in md
+    assert "## Анализ" in md
+    assert "Шаблон" not in md
+    analysis_with_tpl = SimpleNamespace(model="m1", template="standup", questions=[], answers=[], recommendations=[], action_items=[], cost_usd=None)
+    md_tpl = hh.build_session_markdown(8, [segment], analysis_with_tpl)
+    assert "Шаблон" in md_tpl
+
 
 def test_status_helpers_text_and_data(monkeypatch) -> None:
     fake_psutil = types.ModuleType("psutil")
@@ -66,6 +75,40 @@ def test_status_helpers_text_and_data(monkeypatch) -> None:
     assert data["cost_today_usd"] == pytest.approx(1.234568)
     assert data["pii_mode"] in ("OFF", "ON", "EMAIL_ONLY")
     assert data["ollama_available"] is True
+
+
+def test_status_helpers_format_stats_and_detailed(monkeypatch) -> None:
+    """_format_stats_block and get_status_detailed_* with mocked get_stats."""
+    fake_psutil = types.ModuleType("psutil")
+    fake_psutil.virtual_memory = lambda: SimpleNamespace(used=4 * 1024**3, total=8 * 1024**3, percent=50.0)
+    monkeypatch.setitem(sys.modules, "psutil", fake_psutil)
+    fake_metrics = types.ModuleType("voiceforge.core.metrics")
+    fake_metrics.get_cost_today = lambda: 0.5
+    fake_metrics.get_stats = lambda days=30: {
+        "by_model": [{"model": "m1", "cost_usd": 0.3, "calls": 2}],
+        "by_day": [{"date": "2026-03-01", "cost_usd": 0.1, "calls": 1}],
+        "total_cost_usd": 0.3,
+        "total_calls": 2,
+        "response_cache_hit_rate": 0.25,
+    }
+    monkeypatch.setitem(sys.modules, "voiceforge.core.metrics", fake_metrics)
+    fake_i18n = types.ModuleType("voiceforge.i18n")
+    fake_i18n.t = lambda key, **kwargs: f"{key}:{kwargs}"
+    monkeypatch.setitem(sys.modules, "voiceforge.i18n", fake_i18n)
+    fake_local_llm = types.ModuleType("voiceforge.llm.local_llm")
+    fake_local_llm.is_available = lambda: False
+    monkeypatch.setitem(sys.modules, "voiceforge.llm.local_llm", fake_local_llm)
+    fake_config = types.ModuleType("voiceforge.core.config")
+    fake_config.Settings = lambda: SimpleNamespace(pii_mode="ON")
+    monkeypatch.setitem(sys.modules, "voiceforge.core.config", fake_config)
+
+    detailed_text = sh.get_status_detailed_text(budget_limit_usd=10.0)
+    assert "7" in detailed_text
+    assert "30" in detailed_text
+    detailed_data = sh.get_status_detailed_data(budget_limit_usd=10.0)
+    assert detailed_data["budget_limit_usd"] == 10.0
+    assert "stats_7d" in detailed_data
+    assert "stats_30d" in detailed_data
 
 
 def test_contract_payload_builders_and_extractors() -> None:
