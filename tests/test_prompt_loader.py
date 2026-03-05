@@ -43,7 +43,7 @@ def test_get_prompt_hashes_returns_hashes_for_all_keys() -> None:
     assert "analysis" in hashes
     assert "version" in hashes
     assert "template_standup" in hashes
-    for k, v in hashes.items():
+    for _k, v in hashes.items():
         assert isinstance(v, str) and len(v) == 64 and all(c in "0123456789abcdef" for c in v)
 
 

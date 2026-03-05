@@ -42,7 +42,9 @@ def test_history_helpers_payloads_and_lines() -> None:
     assert "## Транскрипт" in md
     assert "## Анализ" in md
     assert "Шаблон" not in md
-    analysis_with_tpl = SimpleNamespace(model="m1", template="standup", questions=[], answers=[], recommendations=[], action_items=[], cost_usd=None)
+    analysis_with_tpl = SimpleNamespace(
+        model="m1", template="standup", questions=[], answers=[], recommendations=[], action_items=[], cost_usd=None
+    )
     md_tpl = hh.build_session_markdown(8, [segment], analysis_with_tpl)
     assert "Шаблон" in md_tpl
 

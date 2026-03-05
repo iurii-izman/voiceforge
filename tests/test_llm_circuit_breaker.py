@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import time
 
 import pytest
@@ -84,18 +85,18 @@ def test_wrap_completion_records_success_and_failure() -> None:
     """Wrapped completion records success on return, failure on exception."""
     cb = get_circuit_breaker()
     ok_key, fail_key = "wrap_ok_key", "wrap_fail_key"
+
     def fake_completion(**kwargs: object) -> str:
         if kwargs.get("model") == fail_key:
             raise ValueError("simulated")
         return "ok"
+
     wrapped = wrap_completion(fake_completion)
     wrapped(model=ok_key)
     assert cb.get_state(ok_key) == STATE_CLOSED
     for _ in range(3):
-        try:
+        with contextlib.suppress(ValueError):
             wrapped(model=fail_key)
-        except ValueError:
-            pass
     assert cb.get_state(fail_key) == STATE_OPEN
 
 
@@ -106,8 +107,10 @@ def test_wrap_completion_raises_when_circuit_open() -> None:
     for _ in range(3):
         cb.record_failure(key)
     called: list = []
+
     def track_completion(**kwargs: object) -> None:
         called.append(kwargs)
+
     wrapped = wrap_completion(track_completion)
     with pytest.raises(RuntimeError, match="Circuit breaker open"):
         wrapped(model=key)

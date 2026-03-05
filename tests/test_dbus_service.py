@@ -14,7 +14,6 @@ from voiceforge.core.dbus_service import (
     run_dbus_service,
 )
 
-
 # --- Helpers (test via public behaviour or import private for unit coverage) ---
 
 
@@ -274,7 +273,6 @@ def test_daemon_get_api_version_and_capabilities_with_callbacks() -> None:
 
 def test_run_dbus_service_mocked_bus() -> None:
     """run_dbus_service with mocked MessageBus runs and exits."""
-    from voiceforge.core.dbus_service import run_dbus_service
 
     mock_bus = MagicMock()
     mock_bus.export = MagicMock()

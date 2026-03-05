@@ -574,12 +574,14 @@ def run_daemon() -> None:
 
                 cutoff = date.today() - timedelta(days=retention_days)
                 loop = asyncio.get_running_loop()
-                def do_purge() -> int:
+
+                def do_purge(_cutoff: date = cutoff) -> int:
                     log_db = TranscriptLog()
                     try:
-                        return log_db.purge_before(cutoff)
+                        return log_db.purge_before(_cutoff)
                     finally:
                         log_db.close()
+
                 n = await loop.run_in_executor(None, do_purge)
                 if n:
                     log.info("retention.purged_periodic", count=n, cutoff=cutoff.isoformat())

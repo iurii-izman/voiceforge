@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, date, datetime, timedelta
+from datetime import date, timedelta
 
 import pytest
 
@@ -33,6 +33,7 @@ def test_log_response_cache(tmp_path, monkeypatch) -> None:
     db_path = tmp_path / "data" / "voiceforge" / "metrics.db"
     assert db_path.exists()
     import sqlite3
+
     conn = sqlite3.connect(db_path)
     try:
         rows = conn.execute("SELECT hit FROM response_cache_log ORDER BY timestamp").fetchall()

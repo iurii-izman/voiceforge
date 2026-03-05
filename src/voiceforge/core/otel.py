@@ -3,20 +3,19 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Iterator
 from contextlib import contextmanager
-from typing import Any, Iterator
+from typing import Any
 
-__all__ = ["get_tracer", "span", "is_enabled"]
+__all__ = ["get_tracer", "is_enabled", "span"]
 
 _cached_tracer: Any | None = None
 
 
 def _env_enabled() -> bool:
-    if os.environ.get("VOICEFORGE_OTEL_ENABLED", "").strip() in ("1", "true", "yes"):
-        return True
-    if os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT", "").strip():
-        return True
-    return False
+    return os.environ.get("VOICEFORGE_OTEL_ENABLED", "").strip() in ("1", "true", "yes") or bool(
+        os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT", "").strip()
+    )
 
 
 def is_enabled() -> bool:

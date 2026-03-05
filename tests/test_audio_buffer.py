@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from voiceforge.audio.buffer import BYTES_PER_SAMPLE, CHANNELS, RingBuffer, SAMPLE_RATE
+from voiceforge.audio.buffer import BYTES_PER_SAMPLE, CHANNELS, SAMPLE_RATE, RingBuffer
 
 
 def test_ring_buffer_constants() -> None:
@@ -46,9 +46,9 @@ def test_ring_buffer_read_last_empty() -> None:
 def test_ring_buffer_drops_oldest_when_over_capacity() -> None:
     # 1 s at 16k = 32000 bytes
     buf = RingBuffer(maxlen_seconds=1.0, sample_rate=16000)
-    buf.write((b"\x00\x01" * 8000))  # 0.5 s
-    buf.write((b"\x00\x02" * 8000))  # another 0.5 s
-    buf.write((b"\x00\x03" * 8000))  # total 1.5 s — should drop first 0.5 s
+    buf.write(b"\x00\x01" * 8000)  # 0.5 s
+    buf.write(b"\x00\x02" * 8000)  # another 0.5 s
+    buf.write(b"\x00\x03" * 8000)  # total 1.5 s — should drop first 0.5 s
     out = buf.read_last(1.0)
     assert len(out) == 16000
     assert buf._total_bytes <= 32000

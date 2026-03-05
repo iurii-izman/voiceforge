@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import io
-import subprocess
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -64,9 +63,11 @@ def test_audio_capture_stop_before_start() -> None:
 def test_audio_capture_start_pw_record_not_found() -> None:
     """start raises FileNotFoundError when pw-record missing."""
     cap = AudioCapture(buffer_seconds=1.0)
-    with patch("voiceforge.audio.capture.subprocess.Popen", side_effect=FileNotFoundError):
-        with pytest.raises(FileNotFoundError):
-            cap.start()
+    with (
+        patch("voiceforge.audio.capture.subprocess.Popen", side_effect=FileNotFoundError),
+        pytest.raises(FileNotFoundError),
+    ):
+        cap.start()
     assert cap._mic_proc is None
 
 
@@ -102,7 +103,7 @@ def test_audio_capture_start_monitor_not_found_fallback() -> None:
     cap = AudioCapture(buffer_seconds=1.0)
     call_count = [0]
 
-    def fake_popen(*args, **kwargs):  # noqa: ARG001
+    def fake_popen(*args, **kwargs):
         call_count[0] += 1
         if call_count[0] == 1:
             # First call: mic succeeds

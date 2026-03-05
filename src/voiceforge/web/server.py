@@ -5,9 +5,9 @@ from __future__ import annotations
 import contextlib
 import json
 import logging
+import socketserver
 import urllib.parse
 import urllib.request
-import socketserver
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Any
 
@@ -22,7 +22,7 @@ _HTTP_STATUS_TO_CODE = {
     503: "SERVICE_UNAVAILABLE",
 }
 
-from voiceforge.core.tracing import bind_trace_id, clear_trace_context, get_trace_id
+from voiceforge.core.tracing import bind_trace_id, clear_trace_context, get_trace_id  # noqa: E402
 
 _log = logging.getLogger(__name__)
 
