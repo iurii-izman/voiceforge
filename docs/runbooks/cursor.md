@@ -56,15 +56,15 @@
 
 ## 6. OOM и тяжёлые тесты
 
-Если полный `pytest tests/` вылетает по памяти (pyannote/torch): запускать подмножество  
-`uv run pytest tests/test_pipeline_integration.py tests/test_caldav_poll.py tests/test_calendar.py tests/test_transcript_log.py -q`  
+Если полный `pytest tests/` вылетает по памяти (pyannote/torch): запускать подмножество
+`uv run pytest tests/test_pipeline_integration.py tests/test_caldav_poll.py tests/test_calendar.py tests/test_transcript_log.py -q`
 Подробности — в [next-iteration-focus.md](next-iteration-focus.md) (блок «Актуальные напоминания»).
 
 ---
 
 ## 7. Справка (кратко)
 
-**Keyring (сервис voiceforge):**  
+**Keyring (сервис voiceforge):**
 `keyring set voiceforge anthropic`, `openai`, `huggingface`, `google` (опц.), `sonar_token`, `github_token`.
 
 **RAM (пиковый, sequential):** ОС + COSMIC + PipeWire ~2–2.5 ГБ; faster-whisper small INT8 ~0.8–1 ГБ; pyannote ~1–1.4 ГБ; all-MiniLM ONNX ~0.1–0.2 ГБ; Python runtime ~0.2–0.3 ГБ. Итого пиковый ~4.2–5.5 ГБ. Swap — safety net.
@@ -75,6 +75,6 @@
 
 ## Ссылки
 
-- [agent-context.md](agent-context.md) — контекст и конец сессии  
-- [next-iteration-focus.md](next-iteration-focus.md) — следующий шаг и промпт  
+- [agent-context.md](agent-context.md) — контекст и конец сессии
+- [next-iteration-focus.md](next-iteration-focus.md) — следующий шаг и промпт
 - [DOCS-INDEX.md](../DOCS-INDEX.md) — индекс документации

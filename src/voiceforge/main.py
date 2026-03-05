@@ -34,13 +34,13 @@ from voiceforge.cli.status_helpers import (
     get_status_text,
 )
 from voiceforge.core.config import Settings
-from voiceforge.core.tracing import bind_trace_id
 from voiceforge.core.contracts import (
     BudgetExceeded,
     build_cli_error_payload,
     build_cli_success_payload,
     extract_error_message,
 )
+from voiceforge.core.tracing import bind_trace_id
 from voiceforge.i18n import t
 
 log = structlog.get_logger()
