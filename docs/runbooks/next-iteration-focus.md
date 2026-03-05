@@ -2,15 +2,15 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-05 (#56: dbus_service выведен из omit, тесты меньшими блоками)
+**Обновлено:** 2026-03-05 (#56: dbus_service + audio/buffer выведены из omit)
 
 ---
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** #56 — выведен **core/dbus_service** из omit: добавлен `tests/test_dbus_service.py` (хелперы, VoiceForgeAppInterface и DaemonVoiceForgeInterface через `__wrapped__`, run_dbus_service с моком MessageBus). Покрытие ~70.5%, fail_under=70 выполняется. Тесты добавлялись небольшими блоками; при риске OOM запускать только подмножество, напр. `uv run pytest tests/test_dbus_service.py tests/test_dbus_contract_snapshot.py -q`.
+**Сделано в сессии:** коммит+пуш (test_dbus_service, dbus_service из omit). Автопилот: выведен **audio/buffer** из omit — добавлен `tests/test_audio_buffer.py` (RingBuffer: write, read_last, drop oldest, константы). Покрытие ~70.7%. web/server пробовали вывести — падение до 64%, откатили; кандидат на следующий раз: audio/capture или ещё один мелкий модуль.
 
-**Следующий шаг:** #56 — вывести из omit ещё один модуль с тестами (кандидаты: server, main, audio/buffer и др.) или поднять fail_under до 75; либо взять задачу из Phase D (#70–#73, #50).
+**Следующий шаг:** #56 — вывести из omit ещё один модуль (audio/capture при наличии тестов, или другой мелкий) или поднять fail_under до 75; либо задача из Phase D (#70–#73, #50).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 

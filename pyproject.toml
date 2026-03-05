@@ -115,7 +115,7 @@ omit = [
     "*/tests/*",
     "src/voiceforge/__main__.py",
     "src/voiceforge/main.py",
-    "src/voiceforge/audio/buffer.py",
+    # audio/buffer removed from omit (#56): test_audio_buffer.py
     "src/voiceforge/audio/capture.py",
     # pipeline removed from omit (#56): test_pipeline_integration.py + test_pipeline_memory_guard.py
     # dbus_service removed from omit (#56): test_dbus_service.py + test_dbus_contract_snapshot.py
