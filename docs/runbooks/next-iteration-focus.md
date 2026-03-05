@@ -2,15 +2,15 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-05 (#56: dbus_service + audio/buffer выведены из omit)
+**Обновлено:** 2026-03-05 (#56: audio/capture из omit, fail_under 72, тесты telegram/prompt_loader)
 
 ---
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** коммит+пуш (test_dbus_service, dbus_service из omit). Автопилот: выведен **audio/buffer** из omit — добавлен `tests/test_audio_buffer.py` (RingBuffer: write, read_last, drop oldest, константы). Покрытие ~70.7%. web/server пробовали вывести — падение до 64%, откатили; кандидат на следующий раз: audio/capture или ещё один мелкий модуль.
+**Сделано в сессии (автопилот):** выведен **audio/capture** из omit — добавлен `tests/test_audio_capture.py` (моки subprocess/keyring, без реального pw-record). Добавлены `tests/test_telegram_notify.py` и тест `get_prompt_hashes` в test_prompt_loader. fail_under поднят до **72** (покрытие ~72.4%); цель 75 — следующий шаг. Python 3.12 есть в **toolbox 43** — pre-commit можно запускать там.
 
-**Следующий шаг:** #56 — вывести из omit ещё один модуль (audio/capture при наличии тестов, или другой мелкий) или поднять fail_under до 75; либо задача из Phase D (#70–#73, #50).
+**Следующий шаг:** #56 — поднять fail_under до 75 (добавить тесты) или вывести из omit ещё модуль; либо задача из Phase D (#70–#73, #50).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -85,7 +85,7 @@
 
 - **OOM / зависание Cursor при тестах:** запускать тесты **меньшими блоками**, напр. один файл: `uv run pytest tests/test_dbus_service.py -q` или лёгкие: `uv run pytest tests/test_core_metrics.py tests/test_dbus_service.py tests/test_dbus_contract_snapshot.py -q`. Полный `pytest tests/` при нехватке памяти — подмножество без тяжёлых: `uv run pytest tests/ --ignore=tests/test_pipeline_integration.py -q`.
 - **OOM при тестах (pyannote/torch):** если полный `pytest tests/` вылетает по памяти, запускать подмножество: `uv run pytest tests/test_pipeline_integration.py tests/test_caldav_poll.py tests/test_calendar.py tests/test_transcript_log.py -q`. В test_pipeline_integration тест с полным run мокает _gather_step2, чтобы не загружать diarizer/RAG.
-- **Pre-commit (Fedora Atomic):** Python 3.12 есть в **toolbox 43** (и в других Fedora-образах). Выполнять `./scripts/ensure_precommit_env.sh` или `./scripts/bootstrap.sh` **внутри toolbox** — тогда хуки используют python3.12. При ошибке кэша (3.14.2 vs 3.14.3): `uv run pre-commit clean`. Вне toolbox (на хосте без 3.12) — временно `git commit --no-verify`, `git push --no-verify`.
+- **Pre-commit (Fedora Atomic):** Python 3.12 есть в **toolbox 43**. Выполнять `./scripts/ensure_precommit_env.sh` или `./scripts/bootstrap.sh` **внутри toolbox 43** — тогда хуки используют python3.12. При ошибке кэша (3.14.2 vs 3.14.3): `uv run pre-commit clean`. Вне toolbox (на хосте без 3.12) — временно `git commit --no-verify`, `git push --no-verify`.
 - **Sonar:** `uv run python scripts/sonar_fetch_issues.py` — проверить остаток после последнего скана.
 - **Критично:** pyannote 4.0.4; при OOM — [pyannote-version.md](pyannote-version.md). Десктоп — toolbox ([desktop-build-deps.md](desktop-build-deps.md)). Новые CLI-команды — через ADR (ADR-0001).
 - **Ключи:** только keyring ([keyring-keys-reference.md](keyring-keys-reference.md)).

@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 
 from voiceforge.llm.prompt_loader import (
+    get_prompt_hashes,
     get_prompt_version,
     load_prompt,
     load_template_prompts,
@@ -34,6 +35,16 @@ def test_load_template_prompts_returns_all() -> None:
     for key, text in prompts.items():
         assert text, f"template {key} should be non-empty"
         assert len(text) > 20
+
+
+def test_get_prompt_hashes_returns_hashes_for_all_keys() -> None:
+    """get_prompt_hashes returns SHA256 hex per prompt key (Block 6 #67)."""
+    hashes = get_prompt_hashes()
+    assert "analysis" in hashes
+    assert "version" in hashes
+    assert "template_standup" in hashes
+    for k, v in hashes.items():
+        assert isinstance(v, str) and len(v) == 64 and all(c in "0123456789abcdef" for c in v)
 
 
 def test_get_prompt_version() -> None:

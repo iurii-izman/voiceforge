@@ -9,7 +9,7 @@
 | # | Weakness / Step | Статус | Доказательство |
 |---|-----------------|--------|----------------|
 | W1 / Step 1 | Eval harness в CI | **СДЕЛАНО** | test.yml: job `eval` — pytest tests/eval/ (ROUGE-L) |
-| W2 / Step 2 | Coverage omit, fail_under | **ЧАСТИЧНО** | pipeline, transcript_log, caldav_poll, dbus_service, **audio/buffer** выведены из omit; fail_under=70 (цель 75→80); в omit остаются main, audio/capture, server, diarizer, rag/*, local_llm (#56). След. шаг: вывести из omit ещё один модуль. |
+| W2 / Step 2 | Coverage omit, fail_under | **ЧАСТИЧНО** | pipeline, transcript_log, caldav_poll, dbus_service, audio/buffer, **audio/capture** выведены из omit; fail_under=72 (цель 75→80); в omit остаются main, server, diarizer, rag/*, local_llm (#56). Добавлены test_audio_capture, test_telegram_notify, get_prompt_hashes тест. |
 | W3 / Step 3 | Sonar blocking | **СДЕЛАНО** | sonar.yml: убран continue-on-error |
 | W4 / Step 5 | CodeQL blocking | **СДЕЛАНО** | codeql.yml: убран continue-on-error |
 | W5 | Pipeline integration test | **СДЕЛАНО** | test_pipeline_integration.py: _prepare_audio, run with mocked STT/_gather_step2 |
@@ -46,7 +46,7 @@
 
 ## 3. Оставшееся до 100% (кратко)
 
-- **#56 Coverage:** fail_under=70 достигнут; dbus_service и audio/buffer выведены из omit (test_dbus_service.py, test_audio_buffer.py); далее 75→80%, вывести из omit по одному модулю (кандидаты: audio/capture, server, main и др.).
+- **#56 Coverage:** fail_under=72 достигнут; dbus_service, audio/buffer, audio/capture выведены из omit; добавлены test_telegram_notify, test_get_prompt_hashes; далее 75→80%, вывести из omit ещё модули (server, main и др.) или добавить тесты.
 - **#65 CVE:** убрать `--ignore-vuln` после фикса upstream (diskcache/instructor).
 - **#66 Async web (полный):** миграция на Starlette/Litestar — опционально; минимальный путь (ThreadingMixIn) выполнен.
 - **W17:** снизить когнитивную сложность do_GET/do_POST или отложить до полного #66.

@@ -116,7 +116,7 @@ omit = [
     "src/voiceforge/__main__.py",
     "src/voiceforge/main.py",
     # audio/buffer removed from omit (#56): test_audio_buffer.py
-    "src/voiceforge/audio/capture.py",
+    # audio/capture removed from omit (#56): test_audio_capture.py
     # pipeline removed from omit (#56): test_pipeline_integration.py + test_pipeline_memory_guard.py
     # dbus_service removed from omit (#56): test_dbus_service.py + test_dbus_contract_snapshot.py
     "src/voiceforge/web/server.py",
@@ -134,8 +134,8 @@ omit = [
 ]
 
 [tool.coverage.report]
-# Target 80%; raised to 70 (issue #56). Next: remove one module from omit + add tests, then 75→80.
-fail_under = 70
+# Target 80%; raised to 72 (issue #56). Next: 75 then 80.
+fail_under = 72
 exclude_lines = ["pragma: no cover", "def __repr__", "raise NotImplementedError"]
 
 [build-system]
