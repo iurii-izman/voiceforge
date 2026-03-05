@@ -1,6 +1,6 @@
 # Планы и приоритеты (единый документ)
 
-Объединённый обзор: приоритет фич (roadmap 1–20), что сделано, текущие задачи Phase A–D. Детальная история закрытых планов: [history/closed-plans-and-roadmap.md](history/closed-plans-and-roadmap.md). Архив планов: [archive/plans/](archive/plans/) (development-plan, desktop-tauri, claude-proposal-alignment).
+Единый источник правды по планам VoiceForge: roadmap 1–20, Phase A–D (Steps 1–20), оставшееся до 100%. Детальная история закрытых планов: [history/closed-plans-and-roadmap.md](history/closed-plans-and-roadmap.md). Архив планов: [archive/plans/](archive/plans/). Полный текст аудита 2026-02-26: [archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md).
 
 ---
 
@@ -31,20 +31,73 @@
 
 ---
 
-## 2. Что сделано (кратко)
+## 2. Phase A–D → Steps 1–20 и GitHub Issues
 
-- **Roadmap 1–18:** в коде (см. [history/closed-plans-and-roadmap.md](history/closed-plans-and-roadmap.md)).
-- **План развития (development-plan) Часть I:** все 10 пунктов реализованы (--template, streaming listen, export, status --detailed, history --search, action items DB, history --date/--from/--to, quickstart, GetAnalytics, status --doctor).
-- **Issues #32–49, #51–53:** закрыты. **#50** (macOS/WSL2) открыт.
-- **Аудит Phase A–D:** большинство W1–W20 в статусе «СДЕЛАНО»; см. [audit/audit.md](audit/audit.md).
+Единая нумерация: **Phase** (A=Stabilize, B=Hardening, C=Scale, D=Productize), **Step** 1–20, **Issue**. Статус по W1–W20: [audit/audit.md](audit/audit.md).
+
+| Phase | Step | Описание | Issue |
+|-------|------|----------|-------|
+| **A · Stabilize** | 1 | Eval harness в CI (ROUGE-L) | [#55](https://github.com/iurii-izman/voiceforge/issues/55) |
+| A | 2 | Coverage: omit → тесты, fail_under 70→80 | [#56](https://github.com/iurii-izman/voiceforge/issues/56) |
+| A | 3 | Sonar quality gate blocking | [#57](https://github.com/iurii-izman/voiceforge/issues/57) |
+| A | 4 | Version: importlib.metadata | [#58](https://github.com/iurii-izman/voiceforge/issues/58) |
+| A | 5 | .editorconfig + CodeQL blocking | [#59](https://github.com/iurii-izman/voiceforge/issues/59) |
+| **B · Hardening** | 6 | /ready + systemd MemoryMax | [#60](https://github.com/iurii-izman/voiceforge/issues/60) |
+| B | 7 | Trace IDs (structlog) | [#61](https://github.com/iurii-izman/voiceforge/issues/61) |
+| B | 8 | Circuit breaker для LLM | [#62](https://github.com/iurii-izman/voiceforge/issues/62) |
+| B | 9 | Periodic purge + backup CLI | [#63](https://github.com/iurii-izman/voiceforge/issues/63) |
+| B | 10 | Monitoring stack (Grafana + alerts) | [#64](https://github.com/iurii-izman/voiceforge/issues/64) |
+| **C · Scale** | 11 | CVE-2025-69872 (upstream fix) | [#65](https://github.com/iurii-izman/voiceforge/issues/65) |
+| C | 12 | Async web (Starlette/Litestar опционально) | [#66](https://github.com/iurii-izman/voiceforge/issues/66) |
+| C | 13 | Prompt hash validation | [#67](https://github.com/iurii-izman/voiceforge/issues/67) |
+| C | 14 | Benchmark suite | [#68](https://github.com/iurii-izman/voiceforge/issues/68) |
+| C | 15 | Единый error format API | [#69](https://github.com/iurii-izman/voiceforge/issues/69) |
+| **D · Productize** | 16 | Model A/B testing framework | [#70](https://github.com/iurii-izman/voiceforge/issues/70) |
+| D | 17 | OpenTelemetry integration | [#71](https://github.com/iurii-izman/voiceforge/issues/71) |
+| D | 18 | Plugin system (custom templates) | [#72](https://github.com/iurii-izman/voiceforge/issues/72) |
+| D | 19 | macOS / WSL2 support | [#50](https://github.com/iurii-izman/voiceforge/issues/50) |
+| D | 20 | Offline packaging GA (AppImage+Flatpak) | [#73](https://github.com/iurii-izman/voiceforge/issues/73) |
+
+Доска: [GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1).
 
 ---
 
-## 3. Текущие задачи (Phase A–D)
+## 3. Оставшееся до 100% (полный список)
 
-Источник правды: [audit/audit.md](audit/audit.md).
+### 3.1 Текущие (не Phase D)
 
-- **В работе / частично:** #56 (coverage, fail_under 70→80), #65 (CVE), #66 (async web — опционально полный путь), W17 (S3776).
-- **Phase D (бэклог):** #70 A/B testing, #71 OTel, #72 plugins, #50 macOS/WSL2, #73 packaging GA.
+- **#56 (Step 2):** fail_under=72; цель 75→80%; вывести из omit по одному модулю (server, main, diarizer, rag/*, local_llm) с тестами.
+- **#65 (Step 11):** убрать `--ignore-vuln CVE-2025-69872` после фикса upstream (diskcache/instructor).
+- **#66 (Step 12):** полная миграция на Starlette/Litestar — опционально; минимальный путь (ThreadingMixIn) выполнен.
+- **W17:** снизить когнитивную сложность do_GET/do_POST или отложить до #66.
 
-Доска: [GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1). Фокус итерации: [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md).
+### 3.2 Phase D (Steps 16–20)
+
+| Step | Issue | Цель | Критерий приёмки |
+|------|-------|------|------------------|
+| 16 | #70 | A/B testing моделей/промптов | `make eval-ab MODEL_A=haiku MODEL_B=sonnet` → сравнение |
+| 17 | #71 | OpenTelemetry (tracing) | Trace в Jaeger: все шаги pipeline с durations |
+| 18 | #72 | Plugin system (custom templates) | Custom template из `~/.config/voiceforge/templates/`; eval на custom |
+| 19 | #50 | macOS / WSL2 | `voiceforge listen` + `analyze` на macOS и WSL2 |
+| 20 | #73 | Packaging GA | AppImage: download → chmod +x → run; Flatpak: install → run |
+
+Подробные формулировки (Scope, Effort, KPI): [archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md) — раздел «Phase D: Productization».
+
+---
+
+## 4. Что сделано (кратко)
+
+- **Roadmap 1–18:** в коде; см. [history/closed-plans-and-roadmap.md](history/closed-plans-and-roadmap.md).
+- **План развития (development-plan) Часть I:** все 10 пунктов реализованы (--template, streaming listen, export, status --detailed, history --search, action items DB, history --date/--from/--to, quickstart, GetAnalytics, status --doctor).
+- **Issues #32–49, #51–53:** закрыты. **#50** (macOS/WSL2) открыт.
+- **Phase A–C (Steps 1–15):** большинство в статусе «СДЕЛАНО»; частично #56, #65, #66, W17. См. [audit/audit.md](audit/audit.md).
+- **Phase D (Steps 16–20):** в работе/бэклог; #71 (OTel) — базовая интеграция в работе.
+
+---
+
+## 5. Текущие задачи и фокус
+
+- **В работе / частично:** #56 (coverage 75→80), #65 (CVE), #66 (async web опционально), W17 (S3776), #71 (OTel).
+- **Phase D бэклог:** #70 (A/B), #72 (plugins), #50 (macOS/WSL2), #73 (packaging GA).
+
+Фокус итерации: [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md). Статус W1–W20: [audit/audit.md](audit/audit.md).

@@ -1,6 +1,6 @@
 # Аудит VoiceForge: статус и задачи (единый документ)
 
-**Обновлено:** 2026-03-05. **Полный аудит 2026-03:** [audit-2026-03.md](audit-2026-03.md) (executive summary, системный и блочный аудит, приоритеты следующей фазы). Исторический снимок 2026-02-26 и полный текст 20 Weaknesses: [archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](../archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md). План «оставшееся до 100%»: [archive/audit/REMAINING_AND_PLAN_TO_100_2026.md](../archive/audit/REMAINING_AND_PLAN_TO_100_2026.md).
+**Обновлено:** 2026-03-05. **Единый план (Phase A–D, Steps 1–20, оставшееся до 100%):** [plans.md](../plans.md). **Полный аудит 2026-03:** [audit-2026-03.md](audit-2026-03.md). Исторический снимок 2026-02-26: [archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](../archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md).
 
 ---
 
@@ -50,7 +50,7 @@
 - **#65 CVE:** убрать `--ignore-vuln` после фикса upstream (diskcache/instructor).
 - **#66 Async web (полный):** миграция на Starlette/Litestar — опционально; минимальный путь (ThreadingMixIn) выполнен.
 - **W17:** снизить когнитивную сложность do_GET/do_POST или отложить до полного #66.
-- **Phase D (#70, #71, #72, #50, #73):** отдельный бэклог следующих итераций.
+- **Phase D (#70–#73, #50):** см. [plans.md](../plans.md) (раздел 3.2); #71 OTel — в работе.
 
 ---
 

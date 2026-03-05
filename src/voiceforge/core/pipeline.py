@@ -12,6 +12,7 @@ import numpy as np
 import psutil
 import structlog
 
+from voiceforge.core.otel import span
 from voiceforge.i18n import t
 
 log = structlog.get_logger()
@@ -309,30 +310,34 @@ class AnalysisPipeline:
         self._executor.shutdown(wait=False, cancel_futures=True)
 
     def run(self, seconds: int) -> tuple[PipelineResult | None, str | None]:
-        """Run steps 1–2. Returns (PipelineResult, None) or (None, error_str)."""
-        prep = _prepare_audio(self._cfg, seconds)
-        if prep[0] is None:
-            return (None, prep[1])
-        audio, effective_rate = prep
-        stt_result = _step1_or_error(audio, effective_rate, self._cfg)
-        if stt_result[0] is None:
-            return (None, stt_result[1])
-        segments, transcript = stt_result
-        step2_start = time.monotonic()
-        audio_f = audio.astype(np.float32) / 32768.0
-        diar_segments, context, transcript_redacted = _gather_step2(
-            self._executor, self._cfg, audio_f, transcript, effective_rate
-        )
-        step2_duration = time.monotonic() - step2_start
-        log.info("pipeline.step2_total", duration_sec=round(step2_duration, 2))
-        context = _with_calendar_context(context, self._cfg)
-        return (
-            PipelineResult(
-                segments=segments,
-                transcript=transcript,
-                diar_segments=diar_segments,
-                context=context,
-                transcript_redacted=transcript_redacted,
-            ),
-            None,
-        )
+        """Run steps 1–2. Returns (PipelineResult, None) or (None, error_str). OTel spans when #71 enabled."""
+        with span("pipeline.run", seconds=seconds):
+            with span("pipeline.prepare_audio"):
+                prep = _prepare_audio(self._cfg, seconds)
+            if prep[0] is None:
+                return (None, prep[1])
+            audio, effective_rate = prep
+            with span("pipeline.step1_stt"):
+                stt_result = _step1_or_error(audio, effective_rate, self._cfg)
+            if stt_result[0] is None:
+                return (None, stt_result[1])
+            segments, transcript = stt_result
+            step2_start = time.monotonic()
+            audio_f = audio.astype(np.float32) / 32768.0
+            with span("pipeline.step2_parallel"):
+                diar_segments, context, transcript_redacted = _gather_step2(
+                    self._executor, self._cfg, audio_f, transcript, effective_rate
+                )
+            step2_duration = time.monotonic() - step2_start
+            log.info("pipeline.step2_total", duration_sec=round(step2_duration, 2))
+            context = _with_calendar_context(context, self._cfg)
+            return (
+                PipelineResult(
+                    segments=segments,
+                    transcript=transcript,
+                    diar_segments=diar_segments,
+                    context=context,
+                    transcript_redacted=transcript_redacted,
+                ),
+                None,
+            )

@@ -2,15 +2,15 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-05 (#56: audio/capture из omit, fail_under 72, тесты telegram/prompt_loader)
+**Обновлено:** 2026-03-05 (единый план в plans.md; Phase D #71 OTel: core/otel.py, pipeline spans, опция [otel], тесты test_otel.py)
 
 ---
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии (автопилот):** выведен **audio/capture** из omit — добавлен `tests/test_audio_capture.py` (моки subprocess/keyring, без реального pw-record). Добавлены `tests/test_telegram_notify.py` и тест `get_prompt_hashes` в test_prompt_loader. fail_under поднят до **72** (покрытие ~72.4%); цель 75 — следующий шаг. Python 3.12 есть в **toolbox 43** — pre-commit можно запускать там.
+**Сделано в сессии:** (1) Единый план в **docs/plans.md**: roadmap 1–20, Phase A–D Steps 1–20, оставшееся до 100%, критерии Phase D. (2) Phase D **#71 OpenTelemetry**: `core/otel.py` (опционально по VOICEFORGE_OTEL_ENABLED / OTEL_EXPORTER_OTLP_ENDPOINT), спаны в pipeline (pipeline.run, prepare_audio, step1_stt, step2_parallel), опция `[otel]` в pyproject, config-env-contract, тесты test_otel.py. (3) Обновлены audit.md, next-iteration-focus, DOCS-INDEX, REMAINING — ссылки на plans.md.
 
-**Следующий шаг:** #56 — поднять fail_under до 75 (добавить тесты) или вывести из omit ещё модуль; либо задача из Phase D (#70–#73, #50).
+**Следующий шаг:** Запустить pre-commit в **toolbox 43** (Python 3.12); затем продолжать Phase D (#70 A/B, #72 plugins, #50, #73) или #56 fail_under 75. Единый план: [plans.md](../plans.md).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -60,16 +60,14 @@
 
 ## Текущий план: Phase A–D (20 задач)
 
-Полная доска: **[GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1)**
-
-Аудит и маппинг: [docs/audit/audit.md](../audit/audit.md)
+**Единый источник:** [docs/plans.md](../plans.md) (Steps 1–20, оставшееся до 100%, критерии Phase D). Доска: [GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1). Статус W1–W20: [audit/audit.md](../audit/audit.md).
 
 | Phase | Issues | Описание |
 |-------|--------|----------|
 | **A · Stabilize** | #55–59 | Eval CI, coverage, Sonar/CodeQL blocking, version, .editorconfig |
 | **B · Hardening** | #60–64 | /ready, trace IDs, circuit breaker, purge/backup, monitoring |
 | **C · Scale** | #65–69 | CVE, async web, prompt hash, benchmarks, error format |
-| **D · Productize** | #50, #70–73 | A/B testing, OTel, plugins, macOS/WSL2, packaging GA |
+| **D · Productize** | #50, #70–73 | A/B testing, OTel (#71 в работе), plugins, macOS/WSL2, packaging GA |
 
 ---
 

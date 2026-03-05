@@ -36,6 +36,13 @@ Priority order:
 | `response_cache_ttl_seconds` | `VOICEFORGE_RESPONSE_CACHE_TTL_SECONDS` | `86400` | LLM response cache TTL (seconds); `0` = disable (#44) |
 | `calendar_context_enabled` | `VOICEFORGE_CALENDAR_CONTEXT_ENABLED` | `false` | D3 (#48): inject next CalDAV event into analyze context (keyring: caldav_*) |
 
+## OpenTelemetry (Phase D #71)
+
+| Variable | Default | Description |
+|----------|---------|--------------|
+| `VOICEFORGE_OTEL_ENABLED` | unset | Set to `1` to enable OTel tracing (requires `voiceforge[otel]`). Spans: pipeline.run, prepare_audio, step1_stt, step2_parallel. |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | `http://localhost:4318` | OTLP HTTP endpoint (e.g. Jaeger collector). When set, OTel is enabled even without VOICEFORGE_OTEL_ENABLED. |
+
 **Validation:** Settings validates `model_size` (allowed: tiny, base, small, medium, large-v2, large-v3, large), `sample_rate` (1..192000), `default_llm` (non-empty), `budget_limit_usd` (≥ 0), `daily_budget_limit_usd` (≥ 0 when set), `pipeline_step2_timeout_sec` (positive), `analyze_timeout_sec` (positive), `ollama_model` (non-empty), `ring_seconds` (positive), `pyannote_restart_hours` (≥ 1), `live_summary_interval_sec` (≥ 1), `retention_days` (≥ 0), `response_cache_ttl_seconds` (≥ 0). Invalid values raise at load.
 
 ## Non-VOICEFORGE Environment Inputs
