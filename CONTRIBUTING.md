@@ -1,6 +1,6 @@
 # Contributing (Lite)
 
-VoiceForge keeps a focused alpha scope (see ADR-0001). Changes must stay minimal, testable, and reversible.
+VoiceForge keeps a focused alpha scope (currently 0.2). Changes must stay minimal, testable, and reversible.
 
 ## Branches
 
@@ -24,7 +24,7 @@ VoiceForge keeps a focused alpha scope (see ADR-0001). Changes must stay minimal
 
 ## CLI Contract Guardrails
 
-Per ADR-0001, the public CLI surface is fixed to 9 commands; new commands require a new ADR. Current set:
+Keep the frozen set of public CLI commands (see ADR-0001); currently 9:
 
 - `listen`
 - `analyze`
