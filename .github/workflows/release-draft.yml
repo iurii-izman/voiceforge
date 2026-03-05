@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: release-draft-main
+  group: release-draft
   cancel-in-progress: true
 
 permissions:

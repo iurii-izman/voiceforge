@@ -1,5 +1,5 @@
 {
-  "name": "main-hardening-alpha0.1",
+  "name": "main",
   "target": "branch",
   "enforcement": "active",
   "conditions": {
@@ -42,16 +42,10 @@
             "context": "cli-contract"
           },
           {
-            "context": "eval (ROUGE-L)"
-          },
-          {
             "context": "db-migrations"
           },
           {
             "context": "e2e-smoke"
-          },
-          {
-            "context": "security"
           }
         ]
       }

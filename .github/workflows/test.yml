@@ -8,8 +8,11 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
+
+env:
+  UV_VERSION: "0.8"
 
 permissions:
   contents: read
@@ -23,8 +26,6 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.12", "3.13"]
-    env:
-      UV_VERSION: "0.8"
     steps:
       - uses: actions/checkout@v6
         with:
@@ -52,8 +53,6 @@ jobs:
   cli-contract:
     name: cli-contract
     runs-on: ubuntu-latest
-    env:
-      UV_VERSION: "0.8"
     steps:
       - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b # v7
@@ -67,8 +66,6 @@ jobs:
   eval:
     name: eval (ROUGE-L)
     runs-on: ubuntu-latest
-    env:
-      UV_VERSION: "0.8"
     steps:
       - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b # v7
@@ -82,8 +79,6 @@ jobs:
   db-migrations:
     name: db-migrations
     runs-on: ubuntu-latest
-    env:
-      UV_VERSION: "0.8"
     steps:
       - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b # v7
@@ -97,8 +92,6 @@ jobs:
   e2e-smoke:
     name: e2e-smoke
     runs-on: ubuntu-latest
-    env:
-      UV_VERSION: "0.8"
     steps:
       - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b # v7
@@ -112,8 +105,6 @@ jobs:
   stt-integration:
     name: stt-integration (slow)
     runs-on: ubuntu-latest
-    env:
-      UV_VERSION: "0.8"
     steps:
       - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b # v7
@@ -127,8 +118,6 @@ jobs:
   security:
     name: security
     runs-on: ubuntu-latest
-    env:
-      UV_VERSION: "0.8"
     steps:
       - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b # v7

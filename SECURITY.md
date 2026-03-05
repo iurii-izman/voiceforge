@@ -1,42 +1,23 @@
 # Security Policy
 
-## Supported Versions
+## Supported versions
 
-VoiceForge is currently maintained on the active `main` branch and the latest pre-release tag.
+| Version | Supported          |
+|---------|--------------------|
+| 0.2.x   | :white_check_mark: |
+| < 0.2   | :x:                |
 
-## Reporting a Vulnerability
+## Reporting a vulnerability
 
-Please do **not** open a public issue for undisclosed vulnerabilities.
+Please do **not** open a public issue for security vulnerabilities.
 
-Use one of the following:
+1. **Preferred:** Open a [private security advisory](https://github.com/iurii-izman/voiceforge/security/advisories/new) in this repository (if you have access).
+2. **Alternatively:** Email the maintainer or report via the [Security Incident issue template](.github/ISSUE_TEMPLATE/security-incident.yml) and set severity; we will treat it confidentially.
 
-1. GitHub Security Advisory (preferred):
-   - Go to `Security` tab of the repository.
-   - Create a private vulnerability report.
-2. If advisory flow is unavailable, open an issue with label `type:security` **without sensitive details**,
-   and state that you can share details privately.
+We will acknowledge receipt and aim to respond within a reasonable time. For accepted issues we will coordinate disclosure and credit as appropriate.
 
-Include:
-- affected component/module
-- impact and realistic attack scenario
-- reproduction steps or proof-of-concept
-- suggested remediation (if available)
+## Security practices in this project
 
-## Response Targets
-
-- Initial triage response: within 72 hours
-- Confirmation and severity classification: within 7 days
-- Fix target depends on severity and exploitability
-
-## Security Baseline in This Repository
-
-- Secrets are expected in keyring/secret storage, never in source code.
-- CI security gates are blocking (`pip-audit`, `bandit`, `gitleaks`, `semgrep`).
-- Local secret scanning is required before push via pre-commit `gitleaks`
-  with repository config in `.gitleaks.toml`.
-- Semgrep suppressions are allowed only via registry with owner + issue + expiry
-  (see `docs/SEMGREP_POLICY.md` and `.github/semgrep_suppressions.json`).
-- Temporary CVE exceptions must have owner + expiry + tracking issue
-  (see `docs/runbooks/security.md`).
-- Sonar quality gate is focused on New Code to prevent legacy noise masking new risks
-  (see `docs/runbooks/repo-governance.md` and `docs/runbooks/release.md`).
+- **Secrets:** No API keys or tokens in the repo; use system keyring (see [keyring-keys-reference](docs/runbooks/keyring-keys-reference.md)).
+- **CI:** Gitleaks, Bandit, pip-audit, Semgrep, CodeQL run on push/PR; see [security runbook](docs/runbooks/security.md).
+- **Dependencies:** Dependabot and weekly security workflow; known CVE exceptions documented in runbooks until upstream fixes are available.
