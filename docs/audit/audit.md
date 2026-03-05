@@ -1,6 +1,6 @@
 # Аудит VoiceForge: статус и задачи (единый документ)
 
-**Обновлено:** 2026-03-04. Исторический снимок 2026-02-26 и полный текст 20 Weaknesses: [archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](../archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md). План «оставшееся до 100%»: [archive/audit/REMAINING_AND_PLAN_TO_100_2026.md](../archive/audit/REMAINING_AND_PLAN_TO_100_2026.md).
+**Обновлено:** 2026-03-05. **Полный аудит 2026-03:** [audit-2026-03.md](audit-2026-03.md) (executive summary, системный и блочный аудит, приоритеты следующей фазы). Исторический снимок 2026-02-26 и полный текст 20 Weaknesses: [archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](../archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md). План «оставшееся до 100%»: [archive/audit/REMAINING_AND_PLAN_TO_100_2026.md](../archive/audit/REMAINING_AND_PLAN_TO_100_2026.md).
 
 ---
 
