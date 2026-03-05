@@ -1,4 +1,4 @@
-# Web UI API Contract (alpha0.1)
+# Web UI API Contract
 
 Source of truth: `src/voiceforge/web/server.py`. Локальный HTTP-сервер без внешних зависимостей (stdlib only).
 

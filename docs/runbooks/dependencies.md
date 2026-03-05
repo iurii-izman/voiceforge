@@ -1,4 +1,4 @@
-# Dependency Policy (alpha0.1)
+# Dependency Policy
 
 ## Source of truth
 

@@ -38,7 +38,7 @@
 | [alpha2-checklist.md](alpha2-checklist.md) | Чеклист перед тегом v0.2.0-alpha.1. |
 | [release.md](release.md) | Release runbook: проверки, команды, артефакты. |
 | [rollback-alpha-release.md](rollback-alpha-release.md) | Откат неудачного альфа-релиза. |
-| [alpha0.1-dod.md](alpha0.1-dod.md) | Definition of Done для alpha0.1. |
+| [alpha0.1-dod.md](alpha0.1-dod.md) | Definition of Done (alpha releases). |
 
 ---
 

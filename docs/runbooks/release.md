@@ -31,7 +31,7 @@ uv run pytest tests/test_db_migrations.py -q
 uv build --wheel
 ./scripts/check_repo_governance.sh
 ./scripts/check_new_code_coverage.sh
-git tag -a v0.1.0-alpha.1 -m "voiceforge alpha0.1"
+git tag -a v0.2.0-alpha.1 -m "VoiceForge alpha2"
 ```
 
 Для альфа2 (тег после коммита с версией 0.2.0a1 и обновлённым CHANGELOG):

@@ -2,11 +2,11 @@
 
 VoiceForge is a local-first assistant for audio meetings on Linux.
 
-Baseline: `0.1.0-alpha.1` (`0.1.0a1` Python package version).
+Current: **0.2.0-alpha** (see [CHANGELOG.md](CHANGELOG.md)).
 
-## Alpha0.1 Core
+## Core CLI
 
-Core CLI commands:
+Commands:
 - `listen` (optional `--stream`, `--live-summary`)
 - `analyze` (optional `--template`: standup, sprint_review, one_on_one, brainstorm, interview)
 - `status`
@@ -72,12 +72,12 @@ Contribution/process:
 
 ## Documentation
 
-- `docs/README.md`
-- `docs/first-meeting-5min.md` — quick start (5 min)
-- `docs/roadmap-priority.md` — feature priorities
-- `docs/runbooks/agent-context.md` — agent context
-- `docs/runbooks/web-api.md` — Web UI API contract
-- `docs/architecture/overview.md`
+- [docs/README.md](docs/README.md) — entry point
+- [docs/first-meeting-5min.md](docs/first-meeting-5min.md) — quick start (5 min)
+- [docs/plans.md](docs/plans.md) — plans and feature priorities
+- [docs/audit/audit.md](docs/audit/audit.md) — audit status and tasks
+- [docs/runbooks/agent-context.md](docs/runbooks/agent-context.md) — agent context
+- [docs/architecture/overview.md](docs/architecture/overview.md)
 - `docs/architecture/runtime-flow.md`
 - `docs/runbooks/bootstrap.md`
 - `docs/runbooks/security.md`

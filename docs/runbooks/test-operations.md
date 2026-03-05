@@ -1,4 +1,4 @@
-# Test Operations (alpha0.1)
+# Test Operations
 
 ## Flaky test policy
 

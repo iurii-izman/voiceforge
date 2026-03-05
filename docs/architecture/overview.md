@@ -1,4 +1,4 @@
-# Architecture Overview (alpha0.1)
+# Architecture Overview
 
 VoiceForge pipeline:
 1. Capture audio via PipeWire into ring buffer.

@@ -2,17 +2,31 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-04 (сессия: единый аудит + единый план, Python 3.12 в toolbox 43)
+**Обновлено:** 2026-03-04 (полировка проекта, промпт для нового аудита)
 
 ---
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Все аудиты объединены в один [audit/audit.md](../audit/audit.md); старые FULL_AUDIT и audit-to-github-map перенесены в archive как снимки. Все планы (roadmap, что сделано, текущие задачи) — в один [plans.md](../plans.md); roadmap-priority — заглушка на plans.md. Добавлен [archive/audit/REMAINING_AND_PLAN_TO_100_2026.md](../archive/audit/REMAINING_AND_PLAN_TO_100_2026.md). Прописано: **Python 3.12 в toolbox 43** (bootstrap.md, next-iteration-focus). Обновлены все ссылки в DOCS-INDEX, doc-governance, agent-context, planning, cursor, quickstart, first-meeting. Коммит 00c20e9 запушен.
+**Сделано в сессии:** Полный аудит GitHub (concurrency, permissions, Dependabot groups+npm, issue/PR templates, SECURITY.md, ruleset main). Полировка: README (0.2, ссылки на plans.md и audit.md), AGENTS.md и CONTRIBUTING (plans.md, ADR), заголовки runbooks и docs (alpha0.1 → alpha/текущее), release.md (пример тега v0.2.0-alpha.1). Ниже — **промпт для чата «Новый аудит и рост»**.
 
-Следующий шаг: довести покрытие до 70% и поднять fail_under до 70 (#56). Либо: полный async web (#66), Phase D (A/B testing, OTel, plugins).
+Следующий шаг: **провести новый аудит по системе в целом и основным блокам; определить направления роста и развития проекта** (использовать промпт из секции ниже).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
+
+---
+
+## Промпт для нового аудита (система + рост)
+
+**Скопируй в начало нового чата**, когда будешь готов к полному аудиту и обсуждению развития.
+
+```
+Проект VoiceForge — локальный AI-ассистент для аудиовстреч (Linux, PipeWire → STT → diarization → RAG → LLM). Контекст: @docs/runbooks/agent-context.md. Текущее состояние: @docs/audit/audit.md (статус W1–W20, Phase A–D), @docs/plans.md (roadmap 1–20, что сделано). Ключи в keyring (keyring-keys-reference.md). Fedora Atomic / toolbox 43 / uv.
+
+Задача: провести новый аудит по системе в целом и по основным блокам (код, тесты, документация, CI/GitHub, безопасность, наблюдаемость, продукт). Оценить текущее состояние без шума и устаревших пунктов. Предложить приоритеты: что довести до идеала в первую очередь, куда расти и развивать проект дальше (фичи, платформы, качество, сообщество). Выдать структурированный отчёт и рекомендации; при необходимости — обновить docs/audit/audit.md и docs/plans.md под новый срез.
+
+В конце сессии: тесты, коммит и пуш из корня репо; обновить next-iteration-focus; выдать промпт для следующего чата.
+```
 
 ---
 

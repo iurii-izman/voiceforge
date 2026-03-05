@@ -1,4 +1,4 @@
-# Repo Governance (alpha0.1)
+# Repo Governance
 
 ## Main Branch Ruleset — минимальный набор
 
@@ -38,7 +38,7 @@ Verification command:
 
 ## Alpha0.1 Milestone Planning
 
-Milestone: `alpha0.1-hardening`
+Milestone: e.g. `alpha2` (see [release.md](release.md))
 
 Automation helper:
 - `scripts/create_alpha_milestone_issues.sh` (requires authenticated `gh`)

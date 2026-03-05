@@ -1,4 +1,4 @@
-# Config and Env Contract (alpha0.1)
+# Config and Env Contract
 
 Source of truth: `src/voiceforge/core/config.py`.
 

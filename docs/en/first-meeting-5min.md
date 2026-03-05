@@ -1,4 +1,4 @@
-# First meeting in 5 minutes (alpha0.1)
+# First meeting in 5 minutes
 
 Short scenario: record audio → analyze meeting → view history and export.
 
