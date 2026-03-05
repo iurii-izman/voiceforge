@@ -2,15 +2,15 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-05 (единый план в plans.md; Phase D #71 OTel: core/otel.py, pipeline spans, опция [otel], тесты test_otel.py)
+**Обновлено:** 2026-03-05 (pre-commit в fedora-toolbox-43, ruff-фиксы; следующий — Phase D или #56)
 
 ---
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** (1) Единый план в **docs/plans.md**: roadmap 1–20, Phase A–D Steps 1–20, оставшееся до 100%, критерии Phase D. (2) Phase D **#71 OpenTelemetry**: `core/otel.py` (опционально по VOICEFORGE_OTEL_ENABLED / OTEL_EXPORTER_OTLP_ENDPOINT), спаны в pipeline (pipeline.run, prepare_audio, step1_stt, step2_parallel), опция `[otel]` в pyproject, config-env-contract, тесты test_otel.py. (3) Обновлены audit.md, next-iteration-focus, DOCS-INDEX, REMAINING — ссылки на plans.md.
+**Сделано в сессии:** (1) Pre-commit запущен в **fedora-toolbox-43** (контейнер: `toolbox run -c fedora-toolbox-43`; на хосте без Python 3.12 — `git commit --no-verify`, `git push --no-verify`). (2) Исправлены 9 замечаний ruff: daemon B023 (do_purge default arg), otel SIM103 (return condition), server E402 (noqa), tests SIM117/SIM105/B007; trailing whitespace и ruff-format. (3) Тесты 294 passed; коммит и пуш.
 
-**Следующий шаг:** Запустить pre-commit в **toolbox 43** (Python 3.12); затем продолжать Phase D (#70 A/B, #72 plugins, #50, #73) или #56 fail_under 75. Единый план: [plans.md](../plans.md).
+**Следующий шаг:** Выбрать и начать задачу: **Phase D** (#70 A/B testing, #72 plugins, #50 macOS/WSL2, #73 packaging GA) или **#56** (fail_under 75, вывод модулей из omit). Единый план: [plans.md](../plans.md).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -83,7 +83,7 @@
 
 - **OOM / зависание Cursor при тестах:** запускать тесты **меньшими блоками**, напр. один файл: `uv run pytest tests/test_dbus_service.py -q` или лёгкие: `uv run pytest tests/test_core_metrics.py tests/test_dbus_service.py tests/test_dbus_contract_snapshot.py -q`. Полный `pytest tests/` при нехватке памяти — подмножество без тяжёлых: `uv run pytest tests/ --ignore=tests/test_pipeline_integration.py -q`.
 - **OOM при тестах (pyannote/torch):** если полный `pytest tests/` вылетает по памяти, запускать подмножество: `uv run pytest tests/test_pipeline_integration.py tests/test_caldav_poll.py tests/test_calendar.py tests/test_transcript_log.py -q`. В test_pipeline_integration тест с полным run мокает _gather_step2, чтобы не загружать diarizer/RAG.
-- **Pre-commit (Fedora Atomic):** Python 3.12 есть в **toolbox 43**. Выполнять `./scripts/ensure_precommit_env.sh` или `./scripts/bootstrap.sh` **внутри toolbox 43** — тогда хуки используют python3.12. При ошибке кэша (3.14.2 vs 3.14.3): `uv run pre-commit clean`. Вне toolbox (на хосте без 3.12) — временно `git commit --no-verify`, `git push --no-verify`.
+- **Pre-commit (Fedora Atomic):** Python 3.12 в контейнере **fedora-toolbox-43** (`toolbox run -c fedora-toolbox-43 bash -c 'cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files'`). Выполнять `./scripts/ensure_precommit_env.sh` внутри этого контейнера. Вне toolbox (на хосте без 3.12) — временно `git commit --no-verify`, `git push --no-verify`.
 - **Sonar:** `uv run python scripts/sonar_fetch_issues.py` — проверить остаток после последнего скана.
 - **Критично:** pyannote 4.0.4; при OOM — [pyannote-version.md](pyannote-version.md). Десктоп — toolbox ([desktop-build-deps.md](desktop-build-deps.md)). Новые CLI-команды — через ADR (ADR-0001).
 - **Ключи:** только keyring ([keyring-keys-reference.md](keyring-keys-reference.md)).
