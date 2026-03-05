@@ -28,6 +28,14 @@ def test_record_llm_call() -> None:
     observability.record_llm_call("openai/gpt-4o-mini", 0.0, success=False)
 
 
+def test_set_circuit_breaker_states() -> None:
+    """set_circuit_breaker_states updates gauge from get_all_states dict."""
+    from voiceforge.core.observability import set_circuit_breaker_states
+
+    set_circuit_breaker_states({"model-a": 0, "model-b": 1})
+    # No raise; gauge updated in REGISTRY
+
+
 def test_get_registry_returns_default_registry() -> None:
     """get_registry() returns the module REGISTRY."""
     from voiceforge.core.observability import REGISTRY, get_registry

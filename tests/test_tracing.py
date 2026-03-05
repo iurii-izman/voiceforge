@@ -4,8 +4,6 @@ from __future__ import annotations
 
 import re
 
-import pytest
-
 
 def test_bind_trace_id_generates_16_hex() -> None:
     """bind_trace_id() with no arg returns 16-char hex."""
@@ -47,6 +45,17 @@ def test_bind_trace_id_uses_provided() -> None:
     out = bind_trace_id("  custom-id-16ch  ")
     assert out == "custom-id-16ch"
     assert get_trace_id() == "custom-id-16ch"
+
+
+def test_bind_trace_id_empty_after_strip_generates() -> None:
+    """bind_trace_id with whitespace-only generates new id (branch coverage)."""
+    from voiceforge.core.tracing import bind_trace_id, clear_trace_context, get_trace_id
+
+    clear_trace_context()
+    out = bind_trace_id("   ")
+    assert isinstance(out, str)
+    assert len(out) == 16
+    assert get_trace_id() == out
 
 
 def test_web_response_includes_x_trace_id(monkeypatch, tmp_path) -> None:

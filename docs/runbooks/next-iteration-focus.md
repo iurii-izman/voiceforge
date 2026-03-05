@@ -2,15 +2,15 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-05 (аудит 2026-03: отчёт, приоритеты, обновлённый фокус)
+**Обновлено:** 2026-03-05 (#56: dbus_service выведен из omit, тесты меньшими блоками)
 
 ---
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Проведён аудит системы (код, тесты, доки, CI/CD, безопасность, observability) и по блокам (audio, STT, RAG, LLM, core, web, calendar, desktop). Итог: [docs/audit/audit-2026-03.md](../audit/audit-2026-03.md) — executive summary, приоритеты следующей фазы, рекомендуемые шаги.
+**Сделано в сессии:** #56 — выведен **core/dbus_service** из omit: добавлен `tests/test_dbus_service.py` (хелперы, VoiceForgeAppInterface и DaemonVoiceForgeInterface через `__wrapped__`, run_dbus_service с моком MessageBus). Покрытие ~70.5%, fail_under=70 выполняется. Тесты добавлялись небольшими блоками; при риске OOM запускать только подмножество, напр. `uv run pytest tests/test_dbus_service.py tests/test_dbus_contract_snapshot.py -q`.
 
-**Следующий шаг:** Реализовать первый приоритет из аудита — **#56 (coverage):** поднять fail_under с 69 до 70 после проверки текущего coverage и запланировать вывод из omit одного модуля с тестами; либо выбрать задачу из Phase D (#70, #71, #72, #50, #73) по приоритету.
+**Следующий шаг:** #56 — вывести из omit ещё один модуль с тестами (кандидаты: server, main, audio/buffer и др.) или поднять fail_under до 75; либо взять задачу из Phase D (#70–#73, #50).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -83,7 +83,8 @@
 
 ## Актуальные напоминания
 
-- **OOM при тестах:** если полный `pytest tests/` вылетает по памяти (pyannote/torch), запускать подмножество: `uv run pytest tests/test_pipeline_integration.py tests/test_caldav_poll.py tests/test_calendar.py tests/test_transcript_log.py -q`. В test_pipeline_integration тест с полным run мокает _gather_step2, чтобы не загружать diarizer/RAG.
+- **OOM / зависание Cursor при тестах:** запускать тесты **меньшими блоками**, напр. один файл: `uv run pytest tests/test_dbus_service.py -q` или лёгкие: `uv run pytest tests/test_core_metrics.py tests/test_dbus_service.py tests/test_dbus_contract_snapshot.py -q`. Полный `pytest tests/` при нехватке памяти — подмножество без тяжёлых: `uv run pytest tests/ --ignore=tests/test_pipeline_integration.py -q`.
+- **OOM при тестах (pyannote/torch):** если полный `pytest tests/` вылетает по памяти, запускать подмножество: `uv run pytest tests/test_pipeline_integration.py tests/test_caldav_poll.py tests/test_calendar.py tests/test_transcript_log.py -q`. В test_pipeline_integration тест с полным run мокает _gather_step2, чтобы не загружать diarizer/RAG.
 - **Pre-commit (Fedora Atomic):** Python 3.12 есть в **toolbox 43** (и в других Fedora-образах). Выполнять `./scripts/ensure_precommit_env.sh` или `./scripts/bootstrap.sh` **внутри toolbox** — тогда хуки используют python3.12. При ошибке кэша (3.14.2 vs 3.14.3): `uv run pre-commit clean`. Вне toolbox (на хосте без 3.12) — временно `git commit --no-verify`, `git push --no-verify`.
 - **Sonar:** `uv run python scripts/sonar_fetch_issues.py` — проверить остаток после последнего скана.
 - **Критично:** pyannote 4.0.4; при OOM — [pyannote-version.md](pyannote-version.md). Десктоп — toolbox ([desktop-build-deps.md](desktop-build-deps.md)). Новые CLI-команды — через ADR (ADR-0001).

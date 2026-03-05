@@ -69,7 +69,7 @@ def test_usage_and_cost_from_response_fallback_cost() -> None:
     )
     raw = SimpleNamespace(usage=usage, _hidden_params={"response_cost": 0.002})
     with patch("litellm.completion_cost", side_effect=Exception("no cost")):
-        inp, out, cr, cc, cost = router._usage_and_cost_from_response(raw, "m1")
+        inp, out, _cr, _cc, cost = router._usage_and_cost_from_response(raw, "m1")
     assert cost == 0.002
     assert inp == 5
     assert out == 10

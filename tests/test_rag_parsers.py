@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 from pathlib import Path
 
 import pytest
@@ -89,10 +90,8 @@ def test_parse_pdf_import_error_when_no_pymupdf(tmp_path: Path) -> None:
     try:
         import fitz  # noqa: F401
         # With pymupdf, fitz.open may raise on invalid content
-        try:
+        with contextlib.suppress(Exception):
             parsers.parse_pdf(pdf)
-        except Exception:
-            pass
     except ImportError:
         with pytest.raises(ImportError, match="rag|pymupdf"):
             parsers.parse_pdf(pdf)

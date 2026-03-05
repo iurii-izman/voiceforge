@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from datetime import UTC, date, datetime, timedelta
-from pathlib import Path
 
 import pytest
 
@@ -59,7 +58,6 @@ def test_get_stats_with_data(tmp_path, monkeypatch) -> None:
     """get_stats returns by_model and by_day when data exists."""
     monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
     metrics._init_done_paths.clear()
-    ts = (datetime.now(UTC) - timedelta(days=1)).isoformat()
     metrics.log_llm_call("m1", 100, 50, 0.01, success=True)
     out = metrics.get_stats(days=7)
     assert out["total_calls"] >= 1

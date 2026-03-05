@@ -75,18 +75,18 @@ def test_prepare_audio_returns_audio_and_rate(tmp_path: Path) -> None:
 
 def test_prepare_audio_resamples_when_rate_not_16k(tmp_path: Path) -> None:
     """When cfg.sample_rate is 48000, _prepare_audio resamples to 16k and returns 16k rate."""
-    # 2 seconds at 48 kHz = 96000 samples
+    # 1 second at 48 kHz to keep buffer small (avoids OOM in constrained envs)
     rate_48k = 48000
-    num_samples = rate_48k * 2
+    num_samples = rate_48k
     ring = tmp_path / "ring.raw"
     ring.write_bytes(np.zeros(num_samples, dtype=np.int16).tobytes())
     cfg = _make_cfg(tmp_path, ring)
     cfg.sample_rate = rate_48k
-    result = _prepare_audio(cfg, seconds=2)
+    result = _prepare_audio(cfg, seconds=1)
     assert result[0] is not None
     audio, rate = result[0], result[1]
     assert rate == TARGET_SAMPLE_RATE
-    assert len(audio) == TARGET_SAMPLE_RATE * 2
+    assert len(audio) == TARGET_SAMPLE_RATE
 
 
 def test_resample_to_16k_passthrough() -> None:
@@ -219,13 +219,13 @@ def test_pipeline_run_returns_none_when_stt_raises(
     tmp_path: Path,
 ) -> None:
     """When _step1_stt raises, pipeline.run returns (None, error_str)."""
-    num_samples = TARGET_SAMPLE_RATE * 2
+    num_samples = TARGET_SAMPLE_RATE  # 1 s — minimal to avoid large buffers
     ring = tmp_path / "ring.raw"
     ring.write_bytes(np.zeros(num_samples, dtype=np.int16).tobytes())
     cfg = _make_cfg(tmp_path, ring)
     mock_stt.side_effect = RuntimeError("STT failed")
     with AnalysisPipeline(cfg) as pipeline:
-        result, err = pipeline.run(seconds=2)
+        result, err = pipeline.run(seconds=1)
     assert result is None
     assert err is not None
 
@@ -236,24 +236,29 @@ def test_pipeline_run_returns_none_when_stt_import_error(
     tmp_path: Path,
 ) -> None:
     """When _step1_stt raises ImportError, pipeline.run returns (None, install_deps message)."""
-    num_samples = TARGET_SAMPLE_RATE * 2
+    num_samples = TARGET_SAMPLE_RATE
     ring = tmp_path / "ring.raw"
     ring.write_bytes(np.zeros(num_samples, dtype=np.int16).tobytes())
     cfg = _make_cfg(tmp_path, ring)
     mock_stt.side_effect = ImportError("faster_whisper")
     with AnalysisPipeline(cfg) as pipeline:
-        result, err = pipeline.run(seconds=2)
+        result, err = pipeline.run(seconds=1)
     assert result is None
     assert err is not None
 
 
+@patch("voiceforge.core.pipeline._gather_step2")
 @patch("voiceforge.core.pipeline._step1_stt")
 def test_pipeline_run_returns_result_with_mocked_stt(
     mock_stt: object,
+    mock_gather: object,
     tmp_path: Path,
 ) -> None:
-    """With mocked STT, pipeline runs step2 and returns PipelineResult."""
-    num_samples = TARGET_SAMPLE_RATE * 2
+    """With mocked STT and step2 (no diarizer/RAG load), pipeline returns PipelineResult.
+    Step2 is mocked to avoid loading pyannote/torch in CI/constrained environments (OOM).
+    """
+    mock_gather.return_value = ([], "", "mocked transcript")
+    num_samples = TARGET_SAMPLE_RATE  # 1 s of audio — minimal to avoid large buffers
     ring = tmp_path / "ring.raw"
     ring.write_bytes(np.zeros(num_samples, dtype=np.int16).tobytes())
     cfg = _make_cfg(tmp_path, ring)
@@ -275,7 +280,7 @@ def test_pipeline_run_returns_result_with_mocked_stt(
     mock_stt.side_effect = fake_step1
 
     with AnalysisPipeline(cfg) as pipeline:
-        result, err = pipeline.run(seconds=2)
+        result, err = pipeline.run(seconds=1)
 
     assert err is None
     assert result is not None
@@ -283,7 +288,6 @@ def test_pipeline_run_returns_result_with_mocked_stt(
     assert result.transcript == "mocked transcript"
     assert len(result.segments) == 1
     assert result.segments[0].text == "mocked"
-    # Step2 (diarization, RAG, PII) run; without real services we get empty/transcript
-    assert result.diar_segments is not None
-    assert result.context is not None
-    assert result.transcript_redacted is not None
+    assert result.diar_segments == []
+    assert result.context == ""
+    assert result.transcript_redacted == "mocked transcript"

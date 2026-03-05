@@ -425,6 +425,52 @@ def test_model_manager_unload_stt_calls_torch_cuda_when_available() -> None:
     assert mgr._transcriber is None
 
 
+def test_model_manager_unload_stt_handles_import_error() -> None:
+    """ModelManager.unload_stt() completes when torch import fails (except ImportError branch)."""
+    import builtins
+
+    from voiceforge.core.model_manager import ModelManager
+
+    real_import = builtins.__import__
+
+    def fake_import(name, *args, **kwargs):
+        if name == "torch":
+            raise ImportError("no torch")
+        return real_import(name, *args, **kwargs)
+
+    cfg = MagicMock()
+    cfg.model_size = "tiny"
+    cfg.default_llm = "x"
+    mgr = ModelManager(cfg)
+    mgr._transcriber = MagicMock()
+    with patch("builtins.__import__", side_effect=fake_import):
+        mgr.unload_stt()
+    assert mgr._transcriber is None
+
+
+def test_model_manager_swap_stt_handles_import_error() -> None:
+    """ModelManager.swap_stt() completes when torch import fails (except ImportError branch)."""
+    import builtins
+
+    from voiceforge.core.model_manager import ModelManager
+
+    real_import = builtins.__import__
+
+    def fake_import(name, *args, **kwargs):
+        if name == "torch":
+            raise ImportError("no torch")
+        return real_import(name, *args, **kwargs)
+
+    cfg = MagicMock()
+    cfg.model_size = "tiny"
+    cfg.default_llm = "x"
+    mgr = ModelManager(cfg)
+    mgr._transcriber = None
+    with patch("builtins.__import__", side_effect=fake_import):
+        mgr.swap_stt("small")
+    assert mgr._stt_model_size == "small"
+
+
 def test_model_manager_get_transcriber_lazy_loads_and_reuses() -> None:
     """ModelManager.get_transcriber() lazy-loads Transcriber and reuses for same size."""
     from voiceforge.core.model_manager import ModelManager
