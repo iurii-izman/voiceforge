@@ -2,13 +2,13 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-05 (test-operations: команда coverage в toolbox #56; следующий — выполнить и при ≥75% fail_under=75)
+**Обновлено:** 2026-03-05 (доска: #70–73 → In Progress; инструкция обновления доски в planning.md)
 
 ---
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** В [test-operations.md](test-operations.md) добавлен подраздел «Coverage в toolbox (#56)»: команда `toolbox run -c fedora-toolbox-43 bash -c '... make coverage'` и напоминание про fail_under=75 при ≥75%.
+**Сделано в сессии:** (1) Карточки #70, #71, #72, #73 на доске переведены в **In Progress** (частичная реализация уже была). (2) В [planning.md](planning.md) добавлена инструкция «Обновление доски» с командами и ID полей; в next-iteration-focus — напоминание обновлять доску при работе по issue и при Closes #N.
 
 **Следующий шаг:** Выполнить команду из test-operations (coverage в toolbox); при ≥75% выставить fail_under=75 (#56). Либо доработки (#66 async, W17). Единый план: [plans.md](../plans.md).
 
@@ -87,3 +87,4 @@
 - **Sonar:** `uv run python scripts/sonar_fetch_issues.py` — проверить остаток после последнего скана.
 - **Критично:** pyannote 4.0.4; при OOM — [pyannote-version.md](pyannote-version.md). Десктоп — toolbox ([desktop-build-deps.md](desktop-build-deps.md)). Новые CLI-команды — через ADR (ADR-0001).
 - **Ключи:** только keyring ([keyring-keys-reference.md](keyring-keys-reference.md)).
+- **Доска (Project):** при работе по issue — перевести карточку в In Progress; при коммите с `Closes #N` — в Done. Команды и ID полей: [planning.md](planning.md) раздел «Обновление доски».
