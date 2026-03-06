@@ -1,13 +1,20 @@
-"""C1 (#41): Prompt management — load prompts from files with versioning. Block 6 (#67): hash for CI."""
+"""C1 (#41): Prompt management — load prompts from files with versioning. Block 6 (#67): hash for CI. Phase D #72: custom templates from ~/.config/voiceforge/templates/."""
 
 from __future__ import annotations
 
 import hashlib
+import os
 from pathlib import Path
 
 _PROMPTS_DIR = Path(__file__).resolve().parent / "prompts"
 _TEMPLATE_NAMES = ("standup", "sprint_review", "one_on_one", "brainstorm", "interview")
 _SINGLE_PROMPTS = ("analysis", "live_summary", "status_update")
+
+
+def _user_templates_dir() -> Path:
+    """Path to user custom templates (Phase D #72). Override built-in template_*.txt here."""
+    base = os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config")
+    return Path(base) / "voiceforge" / "templates"
 
 
 def get_prompt_version() -> str | None:
@@ -19,7 +26,11 @@ def get_prompt_version() -> str | None:
 
 
 def load_prompt(name: str) -> str | None:
-    """Load prompt text from prompts/<name>.txt. Return None if file missing."""
+    """Load prompt text: for template_* try ~/.config/voiceforge/templates/ first (#72), else prompts/<name>.txt."""
+    if name.startswith("template_"):
+        user_path = _user_templates_dir() / f"{name}.txt"
+        if user_path.is_file():
+            return user_path.read_text(encoding="utf-8").strip()
     p = _PROMPTS_DIR / f"{name}.txt"
     if not p.is_file():
         return None

@@ -1,14 +1,18 @@
-"""C1 (#41): Tests for prompt_loader — load from prompts/ with snapshot guard."""
+"""C1 (#41): Tests for prompt_loader — load from prompts/ with snapshot guard. Phase D #72: custom templates."""
 
 from __future__ import annotations
 
 import hashlib
+from pathlib import Path
+
+import pytest
 
 from voiceforge.llm.prompt_loader import (
     get_prompt_hashes,
     get_prompt_version,
     load_prompt,
     load_template_prompts,
+    _user_templates_dir,
 )
 
 
@@ -45,6 +49,27 @@ def test_get_prompt_hashes_returns_hashes_for_all_keys() -> None:
     assert "template_standup" in hashes
     for _k, v in hashes.items():
         assert isinstance(v, str) and len(v) == 64 and all(c in "0123456789abcdef" for c in v)
+
+
+def test_custom_template_override_loads_from_user_dir(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """Phase D #72: template_* loads from ~/.config/voiceforge/templates/ when present."""
+    (tmp_path / "voiceforge" / "templates").mkdir(parents=True)
+    user_template = tmp_path / "voiceforge" / "templates" / "template_standup.txt"
+    user_template.write_text("Custom standup prompt from user config.", encoding="utf-8")
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
+    # Reload module to pick up new env; simpler: patch _user_templates_dir
+    from voiceforge.llm import prompt_loader
+
+    monkeypatch.setattr(prompt_loader, "_user_templates_dir", lambda: tmp_path / "voiceforge" / "templates")
+    text = load_prompt("template_standup")
+    assert text == "Custom standup prompt from user config."
+
+
+def test_user_templates_dir_respects_xdg() -> None:
+    """_user_templates_dir returns voiceforge/templates under XDG_CONFIG_HOME or ~/.config."""
+    d = _user_templates_dir()
+    assert "voiceforge" in str(d)
+    assert d.name == "templates"
 
 
 def test_get_prompt_version() -> None:
