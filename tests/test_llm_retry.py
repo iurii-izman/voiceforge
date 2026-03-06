@@ -34,6 +34,7 @@ def test_complete_structured_raises_budget_exceeded_when_daily_cost_over_limit()
 
 def test_complete_structured_uses_instructor_with_max_retries() -> None:
     """complete_structured uses instructor.from_litellm and create_with_completion(max_retries=3) (#33)."""
+    pytest.importorskip("instructor")
     from voiceforge.llm.router import complete_structured
 
     msg = SimpleNamespace(content='{"done":["Did X"],"planned":["Do Y"],"blockers":[]}', refusal=None, tool_calls=None)
@@ -78,6 +79,7 @@ def test_complete_structured_uses_instructor_with_max_retries() -> None:
 
 def test_response_cache_second_call_hits_cache(tmp_path: object) -> None:
     """With response_cache_ttl_seconds > 0, second identical complete_structured returns from cache (#44)."""
+    pytest.importorskip("instructor")
     from voiceforge.llm.router import complete_structured
 
     msg = SimpleNamespace(content='{"done":["A"],"planned":["B"],"blockers":[]}', refusal=None, tool_calls=None)

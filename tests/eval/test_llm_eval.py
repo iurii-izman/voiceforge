@@ -127,7 +127,8 @@ class _JudgeOutput(BaseModel):
 
 
 def test_llm_judge_one_golden_sample() -> None:
-    """Run real LLM on one golden sample, then LLM-judge candidate vs reference. Skip without key."""
+    """Run real LLM on one golden sample, then LLM-judge candidate vs reference. Skip without key or [llm]."""
+    pytest.importorskip("instructor")
     if not get_api_key("anthropic"):
         pytest.skip("No anthropic key in keyring (LLM-judge requires API)")
     from voiceforge.llm.router import analyze_meeting, complete_structured

@@ -62,7 +62,7 @@ otel = [
     "opentelemetry-sdk>=1.28",
     "opentelemetry-exporter-otlp-proto-http>=1.28",
 ]
-all = ["voiceforge[rag,llm,pii,calendar]"]
+all = ["voiceforge[rag,llm,pii,calendar,otel]"]
 
 [project.scripts]
 voiceforge = "voiceforge.main:main"
@@ -139,8 +139,8 @@ omit = [
 ]
 
 [tool.coverage.report]
-# Target 75% (issue #56). Current ~73% in toolbox; fail_under=73 so CI passes until more tests added.
-fail_under = 73
+# Target 75% (issue #56). Run `make coverage` in toolbox; optional [otel] extra adds OTel path coverage.
+fail_under = 75
 exclude_lines = ["pragma: no cover", "def __repr__", "raise NotImplementedError"]
 
 [build-system]

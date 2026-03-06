@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 
 def test_otel_is_enabled_false_by_default(monkeypatch) -> None:
     """Without VOICEFORGE_OTEL_ENABLED or OTEL_EXPORTER_OTLP_ENDPOINT, is_enabled() is False."""
@@ -53,3 +55,22 @@ def test_otel_is_enabled_true_when_otlp_endpoint_set(monkeypatch) -> None:
 
     result = is_enabled()
     assert isinstance(result, bool)
+
+
+def test_otel_get_tracer_and_span_when_sdk_enabled(monkeypatch) -> None:
+    """When [otel] deps installed and VOICEFORGE_OTEL_ENABLED=1, get_tracer returns tracer and span() runs (#71)."""
+    pytest.importorskip("opentelemetry.sdk.trace")
+    monkeypatch.setenv("VOICEFORGE_OTEL_ENABLED", "1")
+    monkeypatch.delenv("OTEL_EXPORTER_OTLP_ENDPOINT", raising=False)
+    import voiceforge.core.otel as otel_mod
+
+    monkeypatch.setattr(otel_mod, "_cached_tracer", None)
+    from voiceforge.core.otel import get_tracer, span, is_enabled
+
+    if not is_enabled():
+        pytest.skip("opentelemetry SDK not available")
+    tracer = get_tracer()
+    assert tracer is not None
+    assert hasattr(tracer, "start_as_current_span")
+    with span("test.span", key="value"):
+        pass

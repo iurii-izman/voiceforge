@@ -4545,6 +4545,9 @@ all = [
     { name = "litellm" },
     { name = "odfpy" },
     { name = "onnxruntime" },
+    { name = "opentelemetry-api" },
+    { name = "opentelemetry-exporter-otlp-proto-http" },
+    { name = "opentelemetry-sdk" },
     { name = "pydantic" },
     { name = "pymupdf" },
     { name = "python-docx" },
@@ -4560,6 +4563,11 @@ llm = [
     { name = "instructor" },
     { name = "litellm" },
     { name = "pydantic" },
+]
+otel = [
+    { name = "opentelemetry-api" },
+    { name = "opentelemetry-exporter-otlp-proto-http" },
+    { name = "opentelemetry-sdk" },
 ]
 pii = [
     { name = "gliner" },
@@ -4605,6 +4613,9 @@ requires-dist = [
     { name = "numpy", specifier = ">=1.26,<3" },
     { name = "odfpy", marker = "extra == 'rag'", specifier = ">=1.0" },
     { name = "onnxruntime", marker = "extra == 'rag'", specifier = ">=1.18,<2" },
+    { name = "opentelemetry-api", marker = "extra == 'otel'", specifier = ">=1.28" },
+    { name = "opentelemetry-exporter-otlp-proto-http", marker = "extra == 'otel'", specifier = ">=1.28" },
+    { name = "opentelemetry-sdk", marker = "extra == 'otel'", specifier = ">=1.28" },
     { name = "prometheus-client", specifier = ">=0.21" },
     { name = "psutil", specifier = ">=5.9" },
     { name = "pyannote-audio", specifier = "==4.0.4" },
@@ -4619,10 +4630,10 @@ requires-dist = [
     { name = "structlog", specifier = ">=24.0" },
     { name = "tokenizers", marker = "extra == 'rag'", specifier = ">=0.19" },
     { name = "typer", specifier = ">=0.12" },
-    { name = "voiceforge", extras = ["rag", "llm", "pii", "calendar"], marker = "extra == 'all'" },
+    { name = "voiceforge", extras = ["rag", "llm", "pii", "calendar", "otel"], marker = "extra == 'all'" },
     { name = "watchdog", marker = "extra == 'rag'", specifier = ">=4.0" },
 ]
-provides-extras = ["rag", "llm", "pii", "calendar", "all"]
+provides-extras = ["rag", "llm", "pii", "calendar", "otel", "all"]
 
 [package.metadata.requires-dev]
 dev = [

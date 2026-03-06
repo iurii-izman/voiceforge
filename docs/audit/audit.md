@@ -46,11 +46,11 @@
 
 ## 3. Оставшееся до 100% (кратко)
 
-- **#56 Coverage:** закрыто — fail_under=75, добавлены тесты doctor/history_result_builders/config paths.
+- **#56 Coverage:** закрыто — fail_under=75, тесты стабилизированы (eval/llm_retry skip при отсутствии instructor), добавлены тесты config/otel; `uv sync --extra all` включает [otel] для покрытия OTel-путей.
 - **#65 CVE:** убрать `--ignore-vuln` после фикса upstream (diskcache/instructor).
 - **#66 Async web (полный):** миграция на Starlette/Litestar — опционально; минимальный путь (ThreadingMixIn) выполнен.
 - **W17:** закрыто — do_GET/do_POST через dispatch table (S3776).
-- **Phase D (#70–#73):** см. [plans.md](../plans.md) (раздел 3.2); #71 OTel — в работе.
+- **Phase D (#70–#73):** см. [plans.md](../plans.md) (раздел 3.2); #71 OTel — базовая интеграция и тесты; #70 eval-ab, #72 custom templates, #73 flatpak-build — в коде.
 
 ---
 

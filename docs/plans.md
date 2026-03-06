@@ -94,7 +94,7 @@
 
 ## 5. Текущие задачи и фокус
 
-- **В работе / частично:** #56 (coverage 75→80, make coverage), #65 (CVE, чеклист снятия), #66 (async web опционально), W17 (S3776), #71 (OTel).
+- **В работе / частично:** #65 (CVE, чеклист снятия), #66 (async web опционально), #71 (OTel). #56 закрыто (fail_under=75, тесты стабилизированы).
 - **Phase D:** #70–#73 частично реализованы; довести до GA по критериям в разд. 3.2.
 
 Фокус итерации: [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md). Статус W1–W20: [audit/audit.md](audit/audit.md).

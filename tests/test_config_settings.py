@@ -85,3 +85,37 @@ def test_config_get_data_dir_and_paths(monkeypatch, tmp_path) -> None:
     rag_path = cfg.get_rag_db_path()
     assert "rag" in rag_path
     assert data_dir in rag_path
+
+
+def test_config_yaml_invalid_fallback(monkeypatch, tmp_path) -> None:
+    """When voiceforge.yaml is invalid or empty, Settings still loads from env/defaults (#56 coverage)."""
+    from voiceforge.core.config import Settings
+
+    config_dir = tmp_path / "voiceforge"
+    config_dir.mkdir(parents=True)
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
+    # Invalid YAML: parse error → _load_yaml_config returns None, next path or env used
+    (config_dir / "voiceforge.yaml").write_text("not: valid: yaml [[[")
+    cfg = Settings()
+    assert cfg.ring_seconds == pytest.approx(300.0)
+
+
+def test_config_yaml_non_dict_skipped(monkeypatch, tmp_path) -> None:
+    """When voiceforge.yaml is valid YAML but not a dict (e.g. list), it is skipped."""
+    config_dir = tmp_path / "voiceforge"
+    config_dir.mkdir(parents=True)
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
+    (config_dir / "voiceforge.yaml").write_text("[]")
+    from voiceforge.core.config import Settings
+
+    cfg = Settings()
+    assert cfg.model_size == "small"
+
+
+def test_config_rag_db_path_explicit(monkeypatch, tmp_path) -> None:
+    """When rag_db_path is set in Settings, get_rag_db_path returns it."""
+    from voiceforge.core.config import Settings
+
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path))
+    cfg = Settings(rag_db_path="/custom/rag.db")
+    assert cfg.get_rag_db_path() == "/custom/rag.db"

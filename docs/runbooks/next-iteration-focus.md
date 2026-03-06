@@ -2,15 +2,15 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-06 (coverage: fail_under=73, тесты rag/parsers)
+**Обновлено:** 2026-03-06 (coverage 75%, тесты стабилизированы, Phase D доки)
 
 ---
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** (1) В toolbox проверен `make coverage`: фактическое покрытие 73%, требуется 75%. Добавлены тесты в test_rag_parsers.py: parse_markdown (code blocks), parse_html (empty), parse_docx/parse_odt/parse_rtf (success + ImportError + missing file). (2) В pyproject.toml установлен fail_under=73, чтобы сборка проходила; цель 75% зафиксирована в комментарии. (3) Лёгкие тесты (без test_llm_retry при отсутствии instructor): 61 passed, 3 skipped.
+**Сделано в сессии:** (1) Стабилизация тестов: test_llm_retry (test_complete_structured_uses_instructor_with_max_retries, test_response_cache_second_call_hits_cache) и eval/test_llm_eval (test_llm_judge_one_golden_sample) — добавлен pytest.importorskip("instructor"), тесты пропускаются при отсутствии [llm]. (2) Покрытие 75%: fail_under=75 в pyproject.toml; добавлены тесты test_otel (get_tracer/span при включённом OTel), test_config_settings (yaml invalid/non-dict, get_rag_db_path явный); в extra all добавлен [otel] для покрытия OTel-путей. (3) Доки: audit.md, plans.md — обновлены статусы #56, Phase D; next-iteration-focus — этот блок.
 
-**Следующий шаг:** Довести покрытие до 75%: добавить тесты для core/otel (при включённом OTel), core/config или pipeline; либо поднять fail_under до 75 после стабилизации падающих тестов в toolbox (eval, llm_retry). Либо доработки Phase D (#70–73), #66. Единый план: [plans.md](../plans.md).
+**Следующий шаг:** Доработки Phase D по критериям (plans.md разд. 3.2): #70 eval-ab GA, #71 OTel trace в Jaeger, #72 custom templates eval, #73 packaging GA. Либо #65 (CVE чеклист), #66 (async опционально). Единый план: [plans.md](../plans.md).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
