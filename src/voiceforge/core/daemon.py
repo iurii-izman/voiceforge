@@ -485,41 +485,27 @@ class VoiceForgeDaemon:
                 log.warning("smart_trigger.error", error=str(e))
 
 
-def run_daemon() -> None:
-    """Run daemon: write PID, register D-Bus, graceful SIGTERM."""
-    import asyncio
-
-    pid_path = _pid_path()
-    pid_path.parent.mkdir(parents=True, exist_ok=True)
-
-    # Must create iface first, then pass it to daemon, which wires it to emitter thread
-    def _dummy_analyze(seconds: int, template: str | None = None) -> str:
-        return ""
-
-    iface = DaemonVoiceForgeInterface(
-        analyze_fn=_dummy_analyze,
-        status_fn=lambda: "",
-        listen_start_fn=lambda: None,
-        listen_stop_fn=lambda: None,
-        is_listening_fn=lambda: False,
-    )
-    daemon = VoiceForgeDaemon(iface)
-    # Retention auto-cleanup at startup (#43)
+def _retention_purge_at_startup(daemon: VoiceForgeDaemon) -> None:
+    """Run retention purge once at daemon startup (#43). Extracted for S3776."""
     retention_days = getattr(daemon._cfg, "retention_days", 0)
-    if retention_days > 0:
-        from datetime import date, timedelta
+    if retention_days <= 0:
+        return
+    from datetime import date, timedelta
 
-        from voiceforge.core.transcript_log import TranscriptLog
+    from voiceforge.core.transcript_log import TranscriptLog
 
-        cutoff = date.today() - timedelta(days=retention_days)
-        log_db = TranscriptLog()
-        try:
-            n = log_db.purge_before(cutoff)
-            if n:
-                log.info("retention.purged_at_startup", count=n, cutoff=cutoff.isoformat())
-        finally:
-            log_db.close()
-    # Now wire up the real methods
+    cutoff = date.today() - timedelta(days=retention_days)
+    log_db = TranscriptLog()
+    try:
+        n = log_db.purge_before(cutoff)
+        if n:
+            log.info("retention.purged_at_startup", count=n, cutoff=cutoff.isoformat())
+    finally:
+        log_db.close()
+
+
+def _wire_daemon_iface(iface: DaemonVoiceForgeInterface, daemon: VoiceForgeDaemon) -> None:
+    """Wire real daemon methods to D-Bus iface. Extracted for S3776."""
     iface._analyze = daemon.analyze
     iface._status = daemon.status
     iface._listen_start = daemon.listen_start
@@ -535,6 +521,28 @@ def run_daemon() -> None:
     iface._get_analytics = daemon.get_analytics
     iface._get_api_version = daemon.get_api_version
     iface._get_capabilities = daemon.get_capabilities
+
+
+def run_daemon() -> None:
+    """Run daemon: write PID, register D-Bus, graceful SIGTERM."""
+    import asyncio
+
+    pid_path = _pid_path()
+    pid_path.parent.mkdir(parents=True, exist_ok=True)
+
+    def _dummy_analyze(seconds: int, template: str | None = None) -> str:
+        return ""
+
+    iface = DaemonVoiceForgeInterface(
+        analyze_fn=_dummy_analyze,
+        status_fn=lambda: "",
+        listen_start_fn=lambda: None,
+        listen_stop_fn=lambda: None,
+        is_listening_fn=lambda: False,
+    )
+    daemon = VoiceForgeDaemon(iface)
+    _retention_purge_at_startup(daemon)
+    _wire_daemon_iface(iface, daemon)
 
     log.info("daemon.starting", pid=os.getpid(), pid_file=str(pid_path))
     stop_event = asyncio.Event()
@@ -559,34 +567,36 @@ def run_daemon() -> None:
     PURGE_INTERVAL_SEC = 86400  # 24h (#63)
 
     async def _periodic_purge() -> None:
-        """Run retention purge every 24h (#63)."""
+        """Run retention purge every 24h (#63). S7484: wait on Event with timeout instead of sleep loop."""
         retention_days = getattr(daemon._cfg, "retention_days", 0)
         if retention_days <= 0:
             return
-        while not stop_event.is_set():
-            await asyncio.sleep(PURGE_INTERVAL_SEC)
-            if stop_event.is_set():
-                break
+        from datetime import date, timedelta
+
+        from voiceforge.core.transcript_log import TranscriptLog
+
+        def do_purge(cutoff_date: date) -> int:
+            log_db = TranscriptLog()
             try:
-                from datetime import date, timedelta
+                return log_db.purge_before(cutoff_date)
+            finally:
+                log_db.close()
 
-                from voiceforge.core.transcript_log import TranscriptLog
-
+        while True:
+            try:
+                await asyncio.wait_for(stop_event.wait(), timeout=PURGE_INTERVAL_SEC)
+            except asyncio.TimeoutError:
+                pass
+            if stop_event.is_set():
+                return
+            try:
                 cutoff = date.today() - timedelta(days=retention_days)
                 loop = asyncio.get_running_loop()
-
-                def do_purge(cutoff_date: date) -> int:
-                    log_db = TranscriptLog()
-                    try:
-                        return log_db.purge_before(cutoff_date)
-                    finally:
-                        log_db.close()
-
                 n = await loop.run_in_executor(None, lambda: do_purge(cutoff))
                 if n:
                     log.info("retention.purged_periodic", count=n, cutoff=cutoff.isoformat())
             except asyncio.CancelledError:
-                break
+                raise
             except Exception as e:
                 log.warning("retention.purge_failed", error=str(e))
 

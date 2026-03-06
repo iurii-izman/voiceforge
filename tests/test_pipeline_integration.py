@@ -140,13 +140,18 @@ def test_with_calendar_context_enabled_injects_calendar(
     assert "Standup" in out
 
 
+def _raise_cal_error() -> None:
+    """Raise to simulate calendar context failure (S7500: avoid generator in mock)."""
+    raise RuntimeError("cal error")
+
+
 def test_with_calendar_context_exception_returns_context_unchanged(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """_with_calendar_context on exception returns context without calendar."""
     monkeypatch.setattr(
         "voiceforge.calendar.caldav_poll.get_next_meeting_context",
-        lambda **kw: (_ for _ in ()).throw(RuntimeError("cal error")),
+        lambda **kw: _raise_cal_error(),
     )
     cfg = SimpleNamespace(calendar_context_enabled=True)
     out = _with_calendar_context("rag context", cfg)
