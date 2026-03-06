@@ -1,6 +1,6 @@
 # Аудит VoiceForge: статус и задачи (единый документ)
 
-**Обновлено:** 2026-03-05. **Единый план (Phase A–D, Steps 1–19, оставшееся до 100%):** [plans.md](../plans.md). **Полный аудит 2026-03:** [audit-2026-03.md](audit-2026-03.md). Исторический снимок 2026-02-26: [archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](../archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md).
+**Обновлено:** 2026-03-05. **Единый план (Phase A–D, Steps 1–19, оставшееся до 100%):** [plans.md](../plans.md). **Полный аудит 2026-03:** [archive/audit/audit-2026-03-full.md](../archive/audit/audit-2026-03-full.md); краткое содержание — раздел 5 ниже. Исторический снимок 2026-02-26: [archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](../archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md).
 
 ---
 
@@ -57,3 +57,13 @@
 ## 4. Закрытые issues (старый план)
 
 #32–49, #51–53 закрыты (development-plan, Alpha2 A–D). Детали: [history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
+
+---
+
+## 5. Подробный снимок 2026-03 (executive summary)
+
+**Дата:** 2026-03-05. Полный текст отчёта: [archive/audit/audit-2026-03-full.md](../archive/audit/audit-2026-03-full.md).
+
+**Резюме:** VoiceForge — local-first AI для аудиовстреч на Linux (PipeWire → STT → diarization → RAG → LLM → SQLite). Alpha 0.2, CLI, daemon, Web UI, Telegram, десктоп (Tauri 2). Большинство W1–W20 в статусе «СДЕЛАНО». Остаётся: #56 (coverage), #65 (CVE), #66 (async опционально), W17, Phase D в бэклоге. Сильные стороны: доки, CI, безопасность (keyring, pip-audit, bandit, gitleaks), observability. Приоритеты: качество до 100%, OTel #71, plugins #72, packaging #73, A/B #70.
+
+**Системный аудит (оценки):** Код 4/5, Тесты 3/5, Доки 5/5, CI/CD 4/5, Безопасность 4/5, Observability 4/5. Блочный аудит и рекомендуемые шаги — в полном отчёте по ссылке выше.

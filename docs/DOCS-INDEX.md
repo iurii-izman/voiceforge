@@ -2,7 +2,7 @@
 
 **Назначение:** один источник правды по тому, какой документ за что отвечает и актуален ли он. При изменении кода/фич обновлять соответствующий док и при необходимости этот индекс.
 
-**Обновлено:** 2026-03-04 (аудит и планы в один док каждый; Python 3.12 в toolbox 43)
+**Обновлено:** 2026-03-05 (консолидация runbooks: security+deps, release+quality, repo+git; аудит 2026-03 в архив)
 
 ---
 
@@ -53,7 +53,8 @@
 | archive/plans/ | Выполненные/устаревшие планы (development-plan, desktop-tauri, claude-proposal-alignment) |
 | archive/adr/ | Superseded ADR (0002-archive-first-cleanup) |
 | archive/runbooks/ | Устаревшие/объёмные runbook’и (voiceforge-cursor-tz-2026) |
-| archive/audit/ | Снимки аудита (PROJECT_AUDIT_AND_ROADMAP_2026, REMAINING_AND_PLAN, FULL_AUDIT, audit-to-github-map) |
+| archive/audit/ | Снимки аудита (PROJECT_AUDIT_AND_ROADMAP_2026, REMAINING_AND_PLAN, FULL_AUDIT, audit-to-github-map, audit-2026-03-full) |
+| archive/docs-consolidation-2026-03.md | Отчёт о консолидации доков (объединение runbooks и аудита 2026-03) |
 
 ### docs/audit/
 
@@ -79,10 +80,10 @@
 | installation-guide.md, desktop-build-deps.md, bootstrap.md | Установка и сборка | Актуален |
 | quickstart.md | Краткий сценарий; полная версия — first-meeting-5min | Актуален |
 | planning.md | Канбан, audit map, next-iteration-focus; GitHub Project и gh | Актуален |
-| dependencies.md, security.md, dependabot-review.md | Зависимости и безопасность | Актуален |
+| security-and-dependencies.md | Безопасность, зависимости, Dependabot (объединённый runbook) | Актуален |
 | telegram-bot-setup.md, pyannote-version.md | Фичи | Актуален |
-| repo-governance.md, git-github-practices.md | Git, PR, Sonar | Актуален |
-| release.md, rollback-alpha-release.md, alpha2-checklist.md, alpha0.1-dod.md | Релизы | Актуален |
+| repo-and-git-governance.md | Репо, main, Git, PR, теги, issues, Sonar | Актуален |
+| release-and-quality.md | Релиз, откат, чеклисты альфа, DoD | Актуален |
 | web-api.md, observability-alerts.md | API и мониторинг | Актуален |
 | test-operations.md, sonar-pr-cleanup.md | Тесты и CI | Актуален |
 | prompt-management.md, calendar-integration.md, rag-formats.md | Фичи и форматы | Актуален |

@@ -12,7 +12,7 @@
 - **История (что сделано):** [history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
 - **Приоритет фич (roadmap 1–19):** [plans.md](../plans.md) — порядок внедрения, что сделано; детали по задачам — [audit/audit.md](../audit/audit.md).
 
-При выполнении задачи: коммит с `Closes #N`; на доске перевести карточку в Done. См. [git-github-practices.md](git-github-practices.md).
+При выполнении задачи: коммит с `Closes #N`; на доске перевести карточку в Done. См. [repo-and-git-governance.md](repo-and-git-governance.md).
 
 ---
 

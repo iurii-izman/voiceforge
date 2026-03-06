@@ -41,7 +41,7 @@
 - **Конфиг и среда:** config-env-contract, keyring-keys-reference, bootstrap, installation-guide, desktop-build-deps
 - **Безопасность и зависимости:** security, dependencies, dependabot-review
 - **Фичи:** telegram-bot-setup (ADR-0005), pyannote-version
-- **Релизы:** alpha2-checklist, release, rollback-alpha-release
+- **Релизы и качество:** release-and-quality (релиз, откат, чеклисты альфа, DoD)
 - **Остальное:** quickstart, repo-governance, test-operations, web-api
 
 ---

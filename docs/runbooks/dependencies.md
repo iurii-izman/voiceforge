@@ -1,36 +1,3 @@
 # Dependency Policy
 
-## Source of truth
-
-1. `pyproject.toml` defines dependency intent.
-2. `uv.lock` is the pinned, reproducible source of installed versions.
-3. Runtime and CI must use `uv sync --extra all` unless explicitly scoped.
-
-## Toolchain contract
-
-1. Python versions supported in CI: `3.12`, `3.13`.
-2. `pyproject.toml` `requires-python` must stay `>=3.12`.
-3. CI uses pinned `uv` major/minor line (`0.8`).
-4. Validate locally and in CI with:
-   - `./scripts/check_toolchain.sh`
-
-## Update policy
-
-1. Default mode: no ad-hoc upgrades.
-2. Updates are performed only through:
-   - `./scripts/update_deps.sh`
-3. Every dependency update must pass:
-   - `./scripts/verify_pr.sh`
-   - `./scripts/smoke_clean_env.sh`
-
-## Security exceptions
-
-Temporary pinned exception:
-- `CVE-2025-69872` (`diskcache`) has no fix version yet. **Source:** transitive dependency via `instructor` (see `uv.lock`: instructor → diskcache).
-- Keep explicit ignore in scripts/workflows until upstream publishes a fix. See `docs/runbooks/security.md`.
-
-## Lockfile rules
-
-1. Never hand-edit `uv.lock`.
-2. Any dependency change in `pyproject.toml` requires regenerating `uv.lock`.
-3. Commit `pyproject.toml` and `uv.lock` together.
+**Объединён с security и dependabot-review.** Актуальный документ: [security-and-dependencies.md](security-and-dependencies.md).

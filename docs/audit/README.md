@@ -2,7 +2,7 @@
 
 **Единый актуальный документ:** [audit.md](audit.md) — статус W1–W20, Phase A–D, оставшееся до 100%.
 
-**Аудит 2026-03:** [audit-2026-03.md](audit-2026-03.md) — системный и блочный аудит, приоритеты следующей фазы, рекомендуемые шаги.
+**Аудит 2026-03:** полный текст [archive/audit/audit-2026-03-full.md](../archive/audit/audit-2026-03-full.md); краткое содержание — в [audit.md](audit.md) (раздел 5).
 
 **Архив:**
 - [archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](../archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md) — полный снимок 2026-02-26

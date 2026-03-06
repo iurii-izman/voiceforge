@@ -8,7 +8,7 @@
 
 **Ключи VoiceForge** — только в keyring; в Cursor My Secrets только если агент запускается без keyring (например Cloud Agent в контейнере).
 
-- **Cloud Agents:** Create PRs — только при необходимости; Slack Notifications — по желанию. My Secrets: имена переменных (без значений в репо) — `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY`, Huggingface token при использовании pyannote. См. [security.md](security.md).
+- **Cloud Agents:** Create PRs — только при необходимости; Slack Notifications — по желанию. My Secrets: имена переменных (без значений в репо) — `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY`, Huggingface token при использовании pyannote. См. [security-and-dependencies.md](security-and-dependencies.md).
 - **Локально (Fedora Atomic Cosmic):** ключи в keyring (хост или toolbox): `keyring set voiceforge anthropic`, `openai`, `huggingface`. Bootstrap: `./scripts/bootstrap.sh`, `uv sync --extra all`; проверка: `uv run voiceforge status`, `./scripts/doctor.sh`. Полный список ключей и конфига: [config-env-contract.md](config-env-contract.md), [keyring-keys-reference.md](keyring-keys-reference.md).
 
 ---

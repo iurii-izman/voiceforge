@@ -32,9 +32,9 @@
 1. Парсер: функция с сигнатурой, совместимой с остальными (например путь к файлу → список строк по «страницам»/секциям).
 2. Зарегистрировать расширение в `_SUPPORTED_EXTENSIONS` и `_PARSERS` в `indexer.py`; при наличии дублирования в `main.py` (`_INDEX_EXTENSIONS`) — синхронизировать.
 3. Добавить тесты (unit для парсера и/или интеграционный тест `voiceforge index` на файле нового типа).
-4. Обновить этот runbook (таблица форматов, при необходимости — зависимости в `dependencies.md`).
+4. Обновить этот runbook (таблица форматов, при необходимости — зависимости в [security-and-dependencies.md](security-and-dependencies.md)).
 
 ## См. также
 
-- [dependencies.md](dependencies.md) — политика зависимостей и добавление новых пакетов.
+- [security-and-dependencies.md](security-and-dependencies.md) — политика зависимостей и добавление новых пакетов.
 - [architecture/overview.md](../architecture/overview.md) — место RAG в пайплайне.

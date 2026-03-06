@@ -2,7 +2,7 @@
 
 **Чтобы правило применялось в Cursor:** скопируйте содержимое ниже в `.cursor/rules/git-github-practices.mdc` (каталог `.cursor/` в .gitignore).
 
-Полный runbook: [git-github-practices.md](git-github-practices.md).
+Полный runbook: [repo-and-git-governance.md](repo-and-git-governance.md).
 
 ```yaml
 ---
@@ -21,7 +21,7 @@ alwaysApply: true
 
 ## Теги
 
-- Формат v0.2.0-alpha.1, только аннотированные. Когда ставить: по release.md.
+- Формат v0.2.0-alpha.1, только аннотированные. Когда ставить: по release-and-quality.md.
 
 ## GitHub Issues и Project
 
@@ -30,5 +30,5 @@ alwaysApply: true
 
 ## Ссылки
 
-- docs/runbooks/release.md, repo-governance.md, planning.md
+- docs/runbooks/release-and-quality.md, repo-and-git-governance.md, planning.md
 ```

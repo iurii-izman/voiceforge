@@ -35,10 +35,7 @@
 
 | Файл | Назначение |
 |------|------------|
-| [alpha2-checklist.md](alpha2-checklist.md) | Чеклист перед тегом v0.2.0-alpha.1. |
-| [release.md](release.md) | Release runbook: проверки, команды, артефакты. |
-| [rollback-alpha-release.md](rollback-alpha-release.md) | Откат неудачного альфа-релиза. |
-| [alpha0.1-dod.md](alpha0.1-dod.md) | Definition of Done (alpha releases). |
+| [release-and-quality.md](release-and-quality.md) | **Единый документ:** релиз (чеклист, команды), откат, чеклист альфа2, Alpha0.1 DoD. Раньше: release.md, rollback-alpha-release.md, alpha2-checklist.md, alpha0.1-dod.md (теперь заглушки со ссылкой). |
 
 ---
 
@@ -46,9 +43,7 @@
 
 | Файл | Назначение |
 |------|------------|
-| [security.md](security.md) | Секреты, keyring, pip-audit, CVE-исключения (diskcache). |
-| [dependencies.md](dependencies.md) | Политика зависимостей: pyproject.toml, uv.lock, обновления. |
-| [dependabot-review.md](dependabot-review.md) | Как закрывать Dependabot алерты (в т.ч. CVE-2025-69872). |
+| [security-and-dependencies.md](security-and-dependencies.md) | **Единый документ:** секреты, keyring, pip-audit, CVE; политика зависимостей (pyproject, uv.lock); Dependabot. Раньше: security.md, dependencies.md, dependabot-review.md (теперь заглушки). |
 
 ## Фичи (runbooks)
 
@@ -68,7 +63,7 @@
 | Файл | Назначение |
 |------|------------|
 | [quickstart.md](quickstart.md) | Краткий сценарий первой встречи; полная версия — docs/first-meeting-5min.md. |
-| [repo-governance.md](repo-governance.md) | Правила main, PR, security baseline, SonarCloud. |
+| [repo-and-git-governance.md](repo-and-git-governance.md) | **Единый документ:** правила main, security baseline, SonarCloud; коммиты, ветки, теги, issues, GitHub Project. Раньше: repo-governance.md, git-github-practices.md (теперь заглушки). |
 | [test-operations.md](test-operations.md) | Flaky-тесты, CI, карантин. |
 | [web-api.md](web-api.md) | Web UI API (опционально). |
 
