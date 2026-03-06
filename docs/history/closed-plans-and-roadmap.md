@@ -66,7 +66,7 @@
 
 ## Закрытые GitHub issues (старый план, #32–53)
 
-Все issues по предыдущему плану развития (development-plan-post-audit-2026.md) закрыты, кроме #50 (macOS/WSL2). Сверка 2026-02-26 подтверждает: код реализован, тесты пройдены.
+Все issues по предыдущему плану развития (development-plan-post-audit-2026.md) закрыты. macOS/WSL2 (#50) вынесены из скоупа; работа только на текущей системе (Linux). Сверка 2026-02-26 подтверждает: код реализован, тесты пройдены.
 
 | Issue | Тема | Статус |
 |---|---|---|
@@ -88,14 +88,13 @@
 | #47 D2 | Telegram bot (webhook, push) | Закрыт |
 | #48 D3 | Calendar CalDAV auto-context | Закрыт |
 | #49 D4 | Flatpak packaging | Закрыт |
-| #50 D5 | macOS / WSL2 | **Открыт** |
 | #51 QW1 | scipy в base deps | Закрыт |
 | #52 QW2 | i18n hardcoded strings | Закрыт |
 | #53 QW3 | ThreadPoolExecutor single | Закрыт |
 
 ---
 
-## Roadmap 13–20 (реализовано в коде)
+## Roadmap 13–19 (реализовано в коде)
 
 | # | Направление | Где в коде / доказательство |
 |---|-------------|-----------------------------|
@@ -106,7 +105,6 @@
 | 17 | Календарь (CalDAV) | `calendar/caldav_poll.py`, ADR-0006, auto-context |
 | 18 | RAG ODT/RTF | `rag/parsers.py`, тесты в test_rag_parsers.py |
 | 19 | Prompt caching | Не реализовано (research R6 в новом аудите) |
-| 20 | macOS / WSL2 | Не реализовано (issue #50, Step 19 нового аудита) |
 
 ---
 

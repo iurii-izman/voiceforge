@@ -1,10 +1,10 @@
 # Планы и приоритеты (единый документ)
 
-Единый источник правды по планам VoiceForge: roadmap 1–20, Phase A–D (Steps 1–20), оставшееся до 100%. Детальная история закрытых планов: [history/closed-plans-and-roadmap.md](history/closed-plans-and-roadmap.md). Архив планов: [archive/plans/](archive/plans/). Полный текст аудита 2026-02-26: [archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md).
+Единый источник правды по планам VoiceForge: roadmap 1–19, Phase A–D (Steps 1–19), оставшееся до 100%. Работа только на текущей системе (Linux); macOS/WSL2 вне скоупа. Детальная история закрытых планов: [history/closed-plans-and-roadmap.md](history/closed-plans-and-roadmap.md). Архив планов: [archive/plans/](archive/plans/). Полный текст аудита 2026-02-26: [archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md).
 
 ---
 
-## 1. Приоритет внедрения (roadmap 1–20)
+## 1. Приоритет внедрения (roadmap 1–19)
 
 | # | Направление | Рейтинг | Статус |
 |---|-------------|--------|--------|
@@ -27,13 +27,12 @@
 | 17 | Интеграция с календарём (CalDAV) | 78 | Реализовано |
 | 18 | RAG: ODT, RTF | 62 | Реализовано |
 | 19 | Prompt caching для не-Claude | 58 | Не реализовано (research) |
-| 20 | macOS / WSL2 | 65 | Не реализовано (#50) |
 
 ---
 
-## 2. Phase A–D → Steps 1–20 и GitHub Issues
+## 2. Phase A–D → Steps 1–19 и GitHub Issues
 
-Единая нумерация: **Phase** (A=Stabilize, B=Hardening, C=Scale, D=Productize), **Step** 1–20, **Issue**. Статус по W1–W20: [audit/audit.md](audit/audit.md).
+Единая нумерация: **Phase** (A=Stabilize, B=Hardening, C=Scale, D=Productize), **Step** 1–19, **Issue**. Статус по W1–W20: [audit/audit.md](audit/audit.md).
 
 | Phase | Step | Описание | Issue |
 |-------|------|----------|-------|
@@ -55,8 +54,7 @@
 | **D · Productize** | 16 | Model A/B testing framework | [#70](https://github.com/iurii-izman/voiceforge/issues/70) |
 | D | 17 | OpenTelemetry integration | [#71](https://github.com/iurii-izman/voiceforge/issues/71) |
 | D | 18 | Plugin system (custom templates) | [#72](https://github.com/iurii-izman/voiceforge/issues/72) |
-| D | 19 | macOS / WSL2 support | [#50](https://github.com/iurii-izman/voiceforge/issues/50) |
-| D | 20 | Offline packaging GA (AppImage+Flatpak) | [#73](https://github.com/iurii-izman/voiceforge/issues/73) |
+| D | 19 | Offline packaging GA (AppImage+Flatpak) | [#73](https://github.com/iurii-izman/voiceforge/issues/73) |
 
 Доска: [GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1).
 
@@ -71,15 +69,14 @@
 - **#66 (Step 12):** полная миграция на Starlette/Litestar — опционально; минимальный путь (ThreadingMixIn) выполнен.
 - **W17:** снизить когнитивную сложность do_GET/do_POST или отложить до #66.
 
-### 3.2 Phase D (Steps 16–20)
+### 3.2 Phase D (Steps 16–19)
 
 | Step | Issue | Цель | Критерий приёмки |
 |------|-------|------|------------------|
 | 16 | #70 | A/B testing моделей/промптов | `make eval-ab MODEL_A=haiku MODEL_B=sonnet` → сравнение |
 | 17 | #71 | OpenTelemetry (tracing) | Trace в Jaeger: все шаги pipeline с durations |
 | 18 | #72 | Plugin system (custom templates) | Custom template из `~/.config/voiceforge/templates/`; eval на custom |
-| 19 | #50 | macOS / WSL2 | `voiceforge listen` + `analyze` на macOS и WSL2 |
-| 20 | #73 | Packaging GA | AppImage: download → chmod +x → run; Flatpak: install → run |
+| 19 | #73 | Packaging GA | AppImage: download → chmod +x → run; Flatpak: install → run |
 
 Подробные формулировки (Scope, Effort, KPI): [archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md) — раздел «Phase D: Productization».
 
@@ -89,15 +86,15 @@
 
 - **Roadmap 1–18:** в коде; см. [history/closed-plans-and-roadmap.md](history/closed-plans-and-roadmap.md).
 - **План развития (development-plan) Часть I:** все 10 пунктов реализованы (--template, streaming listen, export, status --detailed, history --search, action items DB, history --date/--from/--to, quickstart, GetAnalytics, status --doctor).
-- **Issues #32–49, #51–53:** закрыты. **#50** (macOS/WSL2) открыт.
+- **Issues #32–49, #51–53:** закрыты. Текущий фокус — только Linux (macOS/WSL2 вне скоупа).
 - **Phase A–C (Steps 1–15):** большинство в статусе «СДЕЛАНО»; частично #56, #65, #66, W17. См. [audit/audit.md](audit/audit.md).
-- **Phase D (Steps 16–20):** в работе/бэклог; #71 (OTel) — базовая интеграция в работе.
+- **Phase D (Steps 16–19):** в работе/бэклог; #71 (OTel) — базовая интеграция в работе.
 
 ---
 
 ## 5. Текущие задачи и фокус
 
 - **В работе / частично:** #56 (coverage 75→80), #65 (CVE), #66 (async web опционально), W17 (S3776), #71 (OTel).
-- **Phase D бэклог:** #70 (A/B), #72 (plugins), #50 (macOS/WSL2), #73 (packaging GA).
+- **Phase D бэклог:** #70 (A/B), #72 (plugins), #73 (packaging GA).
 
 Фокус итерации: [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md). Статус W1–W20: [audit/audit.md](audit/audit.md).

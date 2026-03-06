@@ -74,7 +74,7 @@ Contribution/process:
 
 - `docs/README.md`
 - `docs/first-meeting-5min.md` — quick start (5 min)
-- `docs/plans.md` — планы, приоритет фич (roadmap 1–20), текущие задачи
+- `docs/plans.md` — планы, приоритет фич (roadmap 1–19), текущие задачи
 - `docs/runbooks/agent-context.md` — agent context
 - `docs/runbooks/web-api.md` — Web UI API contract
 - `docs/architecture/overview.md`

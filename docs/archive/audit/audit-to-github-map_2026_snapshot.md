@@ -54,8 +54,7 @@
 | **D** | 16 | Model A/B testing framework | Phase D | [#70](https://github.com/iurii-izman/voiceforge/issues/70) |
 | **D** | 17 | OpenTelemetry integration | Phase D | [#71](https://github.com/iurii-izman/voiceforge/issues/71) |
 | **D** | 18 | Plugin system (custom templates) | Phase D | [#72](https://github.com/iurii-izman/voiceforge/issues/72) |
-| **D** | 19 | macOS / WSL2 support | Phase D | [#50](https://github.com/iurii-izman/voiceforge/issues/50) |
-| **D** | 20 | Offline packaging GA (AppImage+Flatpak) | Phase D | [#73](https://github.com/iurii-izman/voiceforge/issues/73) |
+| **D** | 19 | Offline packaging GA (AppImage+Flatpak) | Phase D | [#73](https://github.com/iurii-izman/voiceforge/issues/73) |
 
 ---
 
@@ -82,8 +81,7 @@
 | #46 D1 Desktop signals | D-Bus reactive | Готово |
 | #47 D2 Telegram bot | Webhook + push | Готово |
 | #48 D3 Calendar | CalDAV auto-context | Готово |
-| #49 D4 Flatpak | Manifest + build | Готово; **Step 20** = GA release |
-| #50 D5 macOS/WSL2 | Исследование | **Открыт** = Step 19 |
+| #49 D4 Flatpak | Manifest + build | Готово; **Step 19** = GA release |
 | #51 QW1 scipy | Base deps fix | Готово |
 | #52 QW2 i18n | Hardcoded strings | Готово |
 | #53 QW3 ThreadPool | Single executor | Готово |

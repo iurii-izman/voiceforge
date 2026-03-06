@@ -10,7 +10,7 @@
 
 **Сделано в сессии:** (1) Pre-commit запущен в **fedora-toolbox-43** (контейнер: `toolbox run -c fedora-toolbox-43`; на хосте без Python 3.12 — `git commit --no-verify`, `git push --no-verify`). (2) Исправлены 9 замечаний ruff: daemon B023 (do_purge default arg), otel SIM103 (return condition), server E402 (noqa), tests SIM117/SIM105/B007; trailing whitespace и ruff-format. (3) Тесты 294 passed; коммит и пуш.
 
-**Следующий шаг:** Выбрать и начать задачу: **Phase D** (#70 A/B testing, #72 plugins, #50 macOS/WSL2, #73 packaging GA) или **#56** (fail_under 75, вывод модулей из omit). Единый план: [plans.md](../plans.md).
+**Следующий шаг:** Выбрать и начать задачу: **Phase D** (#70 A/B testing, #72 plugins, #73 packaging GA) или **#56** (fail_under 75, вывод модулей из omit). Единый план: [plans.md](../plans.md).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -43,7 +43,7 @@
 
 Приложи и учти:
 - @docs/audit/audit.md — текущий статус W1–W20, Phase A–D, оставшееся до 100%
-- @docs/plans.md — планы, roadmap 1–20, что сделано, текущие задачи
+- @docs/plans.md — планы, roadmap 1–19, что сделано, текущие задачи
 - @docs/architecture/overview.md — архитектура и пайплайн
 - @docs/plans.md — приоритет фич, что сделано, текущие задачи
 
@@ -58,16 +58,16 @@
 
 ---
 
-## Текущий план: Phase A–D (20 задач)
+## Текущий план: Phase A–D (19 задач)
 
-**Единый источник:** [docs/plans.md](../plans.md) (Steps 1–20, оставшееся до 100%, критерии Phase D). Доска: [GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1). Статус W1–W20: [audit/audit.md](../audit/audit.md).
+**Единый источник:** [docs/plans.md](../plans.md) (Steps 1–19, оставшееся до 100%, критерии Phase D). Доска: [GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1). Статус W1–W20: [audit/audit.md](../audit/audit.md).
 
 | Phase | Issues | Описание |
 |-------|--------|----------|
 | **A · Stabilize** | #55–59 | Eval CI, coverage, Sonar/CodeQL blocking, version, .editorconfig |
 | **B · Hardening** | #60–64 | /ready, trace IDs, circuit breaker, purge/backup, monitoring |
 | **C · Scale** | #65–69 | CVE, async web, prompt hash, benchmarks, error format |
-| **D · Productize** | #50, #70–73 | A/B testing, OTel (#71 в работе), plugins, macOS/WSL2, packaging GA |
+| **D · Productize** | #70–73 | A/B testing, OTel (#71 в работе), plugins, packaging GA |
 
 ---
 

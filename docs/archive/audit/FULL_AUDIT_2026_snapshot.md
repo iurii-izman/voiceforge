@@ -31,7 +31,7 @@
 | **Runbooks** | agent-context, next-iteration-focus, config-env, keyring, installation, bootstrap, security, release, telegram, calendar, web-api, observability-alerts, prompt-management, dependencies, git-github-practices, planning, cursor | 20+ runbooks, RU+EN. | Часть runbooks может отставать от кода (tracing, /ready). | 92% |
 | **ADR** | 0001–0006 (scope, action_items, version, desktop, telegram, calendar) | Все ключевые решения зафиксированы. | — | 95% |
 | **Architecture** | overview, README | C4-подобные диаграммы, пайплайн. | Можно добавить диаграмму данных (БД, миграции). | 88% |
-| **Аудит и roadmap** | archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026, audit-to-github-map, roadmap-priority, development-plan | Полный аудит (архив), маппинг на issues, приоритеты 1–20. | Аудит от 2026-02-26; после #61 (tracing) нужна точечная синхронизация. | 90% |
+| **Аудит и roadmap** | archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026, audit-to-github-map, roadmap-priority, development-plan | Полный аудит (архив), маппинг на issues, приоритеты 1–19. | Аудит от 2026-02-26; после #61 (tracing) нужна точечная синхронизация. | 90% |
 | **Индекс** | DOCS-INDEX.md | Единый индекс, модерация актуальности. | — | 95% |
 | **First meeting / quickstart** | first-meeting-5min (RU/EN), quickstart | Сценарий за 5 минут. | — | 90% |
 
@@ -288,7 +288,7 @@
 9. **Блок 9 (Бенчмарки)** — после стабилизации coverage и основных фич.
 10. **Блок 10 (Документация)** — непрерывно; после каждого блока обновлять затронутые разделы.
 
-После закрытия этих блоков оценка по всем фронтам может уверенно приближаться к 95–100% при сохранении текущего объёма функциональности и без учёта опциональных больших шагов (полный async web, OTel, macOS/WSL2, плагины).
+После закрытия этих блоков оценка по всем фронтам может уверенно приближаться к 95–100% при сохранении текущего объёма функциональности и без учёта опциональных больших шагов (полный async web, OTel, плагины).
 
 ---
 

@@ -26,7 +26,7 @@
 
 ## План и приоритеты
 
-- [plans.md](plans.md) — планы, приоритет фич (roadmap 1–20), что сделано, текущие задачи
+- [plans.md](plans.md) — планы, приоритет фич (roadmap 1–19), что сделано, текущие задачи
 - [audit/audit.md](audit/audit.md) — аудит: статус W1–W20, Phase A–D (#55–73), оставшееся до 100%
 - [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md) — фокус следующей итерации (обновляет агент)
 - Выполненные планы и архив: [archive/README.md](archive/README.md), [DOCS-INDEX.md](DOCS-INDEX.md)

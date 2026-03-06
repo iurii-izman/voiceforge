@@ -59,7 +59,7 @@
 - Контроль расходов: бюджет, дневные лимиты, кеширование ответов
 
 **Non-goals (текущие):**
-- macOS / Windows (roadmap #20)
+- Другие ОС (macOS/Windows вне скоупа; работа только на текущей системе — Linux)
 - Облачный деплой / multi-tenant
 - Real-time collaboration
 
@@ -633,17 +633,7 @@ voiceforge/
 - **Acceptance criteria:** Custom template загружается из `~/.config/voiceforge/templates/`; eval на custom template.
 - **KPI:** # custom templates in use.
 
-#### Step 19: macOS / WSL2 support
-- **Цель:** Расширение платформ.
-- **Scope:** `audio/capture.py` (PipeWire → CoreAudio/WASAPI), D-Bus → альтернатива IPC.
-- **Dependencies:** Steps 12, 17 (async web, tracing).
-- **Effort:** L | Риск: High (platform-specific audio capture).
-- **Owner:** Developer.
-- **Deliverables:** macOS audio backend; WSL2 audio passthrough; platform CI.
-- **Acceptance criteria:** `voiceforge listen` + `analyze` работает на macOS + WSL2.
-- **KPI:** Platform test pass rate.
-
-#### Step 20: Offline packaging (AppImage + Flatpak GA)
+#### Step 19: Offline packaging (AppImage + Flatpak GA)
 - **Цель:** Установка без Python/uv/toolbox; single-file distribution.
 - **Scope:** `scripts/`, `desktop/flatpak/`, CI release workflow.
 - **Dependencies:** Steps 6, 12 (health checks, web server).

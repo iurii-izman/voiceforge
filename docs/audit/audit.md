@@ -1,6 +1,6 @@
 # Аудит VoiceForge: статус и задачи (единый документ)
 
-**Обновлено:** 2026-03-05. **Единый план (Phase A–D, Steps 1–20, оставшееся до 100%):** [plans.md](../plans.md). **Полный аудит 2026-03:** [audit-2026-03.md](audit-2026-03.md). Исторический снимок 2026-02-26: [archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](../archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md).
+**Обновлено:** 2026-03-05. **Единый план (Phase A–D, Steps 1–19, оставшееся до 100%):** [plans.md](../plans.md). **Полный аудит 2026-03:** [audit-2026-03.md](audit-2026-03.md). Исторический снимок 2026-02-26: [archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](../archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md).
 
 ---
 
@@ -38,7 +38,7 @@
 | **A** | 1–5 | Eval CI, coverage, Sonar, version, .editorconfig+CodeQL | [#55](https://github.com/iurii-izman/voiceforge/issues/55)–[#59](https://github.com/iurii-izman/voiceforge/issues/59) |
 | **B** | 6–10 | /ready+MemoryMax, trace IDs, circuit breaker, purge+backup, monitoring | [#60](https://github.com/iurii-izman/voiceforge/issues/60)–[#64](https://github.com/iurii-izman/voiceforge/issues/64) |
 | **C** | 11–15 | CVE, async web, prompt hash, benchmarks, error format | [#65](https://github.com/iurii-izman/voiceforge/issues/65)–[#69](https://github.com/iurii-izman/voiceforge/issues/69) |
-| **D** | 16–20 | A/B testing, OTel, plugins, macOS/WSL2, packaging GA | [#70](https://github.com/iurii-izman/voiceforge/issues/70)–[#73](https://github.com/iurii-izman/voiceforge/issues/73), [#50](https://github.com/iurii-izman/voiceforge/issues/50) |
+| **D** | 16–19 | A/B testing, OTel, plugins, packaging GA | [#70](https://github.com/iurii-izman/voiceforge/issues/70)–[#73](https://github.com/iurii-izman/voiceforge/issues/73) |
 
 Доска: [GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1).
 
@@ -50,7 +50,7 @@
 - **#65 CVE:** убрать `--ignore-vuln` после фикса upstream (diskcache/instructor).
 - **#66 Async web (полный):** миграция на Starlette/Litestar — опционально; минимальный путь (ThreadingMixIn) выполнен.
 - **W17:** снизить когнитивную сложность do_GET/do_POST или отложить до полного #66.
-- **Phase D (#70–#73, #50):** см. [plans.md](../plans.md) (раздел 3.2); #71 OTel — в работе.
+- **Phase D (#70–#73):** см. [plans.md](../plans.md) (раздел 3.2); #71 OTel — в работе.
 
 ---
 

@@ -10,7 +10,7 @@
 - **W7/#66 Async web (полный):** только ThreadingMixIn; миграция на Starlette/Litestar опциональна.
 - **W13/#65 CVE-2025-69872:** pip-audit с --ignore-vuln в CI до фикса upstream (diskcache via instructor).
 - **W17 S3776:** do_GET/do_POST if-chains; отложить до #66 или рефакторить точечно.
-- **Phase D:** #70 A/B testing, #71 OTel, #72 plugins, #50 macOS/WSL2, #73 packaging GA — бэклог следующих итераций.
+- **Phase D:** #70 A/B testing, #71 OTel, #72 plugins, #73 packaging GA — бэклог следующих итераций.
 
 ---
 
