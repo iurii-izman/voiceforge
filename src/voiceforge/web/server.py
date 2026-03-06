@@ -32,6 +32,34 @@ _ERR_INVALID_JSON = "invalid JSON"
 _CMD_HELP = "VoiceForge bot. Commands: /start /help /status /sessions /latest /cost [days] /subscribe"
 
 
+# GET path -> (handler(self, params)); index and index.html share handler (W17/S3776).
+_GET_ROUTES: dict[str, Any] = {
+    "/": lambda s, p: s._handle_get_index(),
+    "/index.html": lambda s, p: s._handle_get_index(),
+    "/api/status": lambda s, p: s._handle_get_status(),
+    "/api/sessions": lambda s, p: s._handle_get_sessions(),
+    "/api/cost": lambda s, p: s._handle_get_cost(p),
+    "/api/export": lambda s, p: s._handle_get_export(p),
+    "/health": lambda s, p: s._handle_get_health(),
+    "/ready": lambda s, p: s._handle_get_ready(),
+    "/metrics": lambda s, p: s._handle_get_metrics(),
+}
+
+
+def _read_webhook_body(self: Any) -> bytes:
+    """Read POST body for webhook (W17/S3776)."""
+    content_length = int(self.headers.get("Content-Length") or 0)
+    return self.rfile.read(content_length) if content_length else b"{}"
+
+
+# POST path -> handler(self) (W17/S3776).
+_POST_ROUTES: dict[str, Any] = {
+    "/api/telegram/webhook": lambda s: s._handle_telegram_webhook(_read_webhook_body(s)),
+    "/api/analyze": lambda s: (s._handle_post_analyze(d) if (d := s._read_post_json()) is not None else None),
+    "/api/action-items/update": lambda s: (s._handle_action_items_update(d) if (d := s._read_post_json()) is not None else None),
+}
+
+
 def _reply_status() -> str:
     try:
         from voiceforge.cli.status_helpers import get_status_data
@@ -550,40 +578,26 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _dispatch_get(self, path: str, params: dict[str, str]) -> bool:
+        """Route GET by path; return True if handled (W17/S3776: dispatch table)."""
+        if path.startswith("/api/sessions/") and path != "/api/sessions":
+            sid = path.split("/")[-1]
+            if not sid.isdigit():
+                self._send_error_json("invalid session id", 400)
+                return True
+            self._handle_get_session_by_id(sid)
+            return True
+        handler = _GET_ROUTES.get(path)
+        if handler is not None:
+            handler(self, params)
+            return True
+        return False
+
     def do_GET(self) -> None:
         clear_trace_context()
         bind_trace_id((self.headers.get("X-Trace-Id") or "").strip() or None)
         path, params = self._parse_path()
-        if path == "/" or path == "/index.html":
-            self._handle_get_index()
-            return
-        if path == "/api/status":
-            self._handle_get_status()
-            return
-        if path == "/api/sessions":
-            self._handle_get_sessions()
-            return
-        if path.startswith("/api/sessions/"):
-            sid = path.split("/")[-1]
-            if not sid.isdigit():
-                self._send_error_json("invalid session id", 400)
-                return
-            self._handle_get_session_by_id(sid)
-            return
-        if path == "/api/cost":
-            self._handle_get_cost(params)
-            return
-        if path == "/api/export":
-            self._handle_get_export(params)
-            return
-        if path == "/health":
-            self._handle_get_health()
-            return
-        if path == "/ready":
-            self._handle_get_ready()
-            return
-        if path == "/metrics":
-            self._handle_get_metrics()
+        if self._dispatch_get(path, params):
             return
         self._send_error_json("Not found", 404)
 
@@ -762,24 +776,19 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
             self._send_error_json(_ERR_INVALID_JSON, 400)
             return None
 
+    def _dispatch_post(self, path: str) -> bool:
+        """Route POST by path; return True if handled (W17/S3776: dispatch table)."""
+        handler = _POST_ROUTES.get(path)
+        if handler is not None:
+            handler(self)
+            return True
+        return False
+
     def do_POST(self) -> None:
         clear_trace_context()
         bind_trace_id((self.headers.get("X-Trace-Id") or "").strip() or None)
         path, _ = self._parse_path()
-        if path == "/api/telegram/webhook":
-            content_length = int(self.headers.get("Content-Length") or 0)
-            body = self.rfile.read(content_length) if content_length else b"{}"
-            self._handle_telegram_webhook(body)
-            return
-        if path == "/api/analyze":
-            data = self._read_post_json()
-            if data is not None:
-                self._handle_post_analyze(data)
-            return
-        if path == "/api/action-items/update":
-            data = self._read_post_json()
-            if data is not None:
-                self._handle_action_items_update(data)
+        if self._dispatch_post(path):
             return
         self._send_error_json("Not found", 404)
 

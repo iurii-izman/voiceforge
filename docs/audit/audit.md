@@ -24,7 +24,7 @@
 | W14 / Step 6 | /ready endpoint | **СДЕЛАНО** | web/server.py: GET /ready, 200/503; test_web_smoke |
 | W15 / Step 4 | Version inconsistency | **СДЕЛАНО** | __init__.py: importlib.metadata.version("voiceforge") |
 | W16 / Step 5 | .editorconfig | **СДЕЛАНО** | .editorconfig в корне |
-| W17 | Cognitive complexity S3776 | **ЧАСТИЧНО** | do_GET/do_POST ещё if-chains; часть закрыта |
+| W17 | Cognitive complexity S3776 | **СДЕЛАНО** | do_GET/do_POST переведены на dispatch table (_GET_ROUTES, _POST_ROUTES) |
 | W18 / Step 15 | Error responses | **СДЕЛАНО** | Единый формат `{"error": {"code", "message"}}` (#69) |
 | W19 / Step 10 | Monitoring stack | **СДЕЛАНО** | monitoring/: prometheus.yml, alerts.yml, docker-compose, README (#64) |
 | W20 / Step 14 | Benchmark suite | **СДЕЛАНО** | tests/benchmark_stt.py, benchmark_rag.py, baseline_benchmark.json (#68) |
@@ -46,10 +46,10 @@
 
 ## 3. Оставшееся до 100% (кратко)
 
-- **#56 Coverage:** fail_under=72 достигнут; dbus_service, audio/buffer, audio/capture выведены из omit; добавлены test_telegram_notify, test_get_prompt_hashes; далее 75→80%, вывести из omit ещё модули (server, main и др.) или добавить тесты.
+- **#56 Coverage:** fail_under=72; в toolbox make coverage даёт 71.74%. Для fail_under=75 нужны дополнительные тесты или вывод модулей из omit (server, main и др.).
 - **#65 CVE:** убрать `--ignore-vuln` после фикса upstream (diskcache/instructor).
 - **#66 Async web (полный):** миграция на Starlette/Litestar — опционально; минимальный путь (ThreadingMixIn) выполнен.
-- **W17:** снизить когнитивную сложность do_GET/do_POST или отложить до полного #66.
+- **W17:** закрыто — do_GET/do_POST через dispatch table (S3776).
 - **Phase D (#70–#73):** см. [plans.md](../plans.md) (раздел 3.2); #71 OTel — в работе.
 
 ---

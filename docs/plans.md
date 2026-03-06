@@ -67,7 +67,7 @@
 - **#56 (Step 2):** fail_under=72; цель 75→80%; вывести из omit по одному модулю (server, main, diarizer, rag/*, local_llm) с тестами.
 - **#65 (Step 11):** убрать `--ignore-vuln CVE-2025-69872` после фикса upstream (diskcache/instructor).
 - **#66 (Step 12):** полная миграция на Starlette/Litestar — опционально; минимальный путь (ThreadingMixIn) выполнен.
-- **W17:** снизить когнитивную сложность do_GET/do_POST или отложить до #66.
+- **W17:** закрыто — do_GET/do_POST через dispatch table (S3776).
 
 ### 3.2 Phase D (Steps 16–19)
 
