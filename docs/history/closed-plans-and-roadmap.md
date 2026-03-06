@@ -122,3 +122,4 @@
 | #67 | 13 | Prompt versioning + hash validation | prompt_loader.get_prompt_hashes(), test_prompt_content_snapshot, fallback warning |
 | #68 | 14 | Benchmark suite | tests/benchmark_stt.py, benchmark_rag.py, baseline_benchmark.json |
 | #69 | 15 | Standardize web error responses | Единый формат `{"error": {"code", "message"}}` в web/server |
+| #66 | 12 | Async web server (Starlette/Litestar + uvicorn) | Опциональный async: server_async.py, `voiceforge web --async`, VOICEFORGE_WEB_ASYNC=1, [web-async] |

@@ -14,7 +14,7 @@
 | W4 / Step 5 | CodeQL blocking | **СДЕЛАНО** | codeql.yml: убран continue-on-error |
 | W5 | Pipeline integration test | **СДЕЛАНО** | test_pipeline_integration.py: _prepare_audio, run with mocked STT/_gather_step2 |
 | W6 / Step 6 | systemd MemoryMax, /ready | **СДЕЛАНО** | voiceforge.service: MemoryMax=4G, MemoryHigh=3G, OOMScoreAdjust=500; GET /ready (DB check) |
-| W7 / Step 12 | Async web | **ЧАСТИЧНО** | ThreadingMixIn (#66) выполнен; полная миграция на Starlette/Litestar — опционально, не блокирует GA |
+| W7 / Step 12 | Async web | **СДЕЛАНО** | ThreadingMixIn + опциональный Starlette+uvicorn (#66): `voiceforge web --async` или VOICEFORGE_WEB_ASYNC=1, uv sync --extra web-async |
 | W8 / Step 8 | Circuit breaker | **СДЕЛАНО** | llm/circuit_breaker.py, router, метрика state (#62) |
 | W9 / Step 7 | Trace IDs | **СДЕЛАНО** | core/tracing.py, main, web (X-Trace-Id), test_tracing.py (#61) |
 | W10 / Step 13 | Prompt hash validation | **СДЕЛАНО** | prompt_loader.get_prompt_hashes(), warning при fallback, test_prompt_content_snapshot (#67) |

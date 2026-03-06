@@ -8,10 +8,14 @@
 
 ## Что требуется от вас (подтверждения и действия)
 
-- **#65 CVE:** Пока фикса в upstream (diskcache/instructor) нет — ничего делать не нужно. Когда появится: обновить зависимости и убрать `--ignore-vuln` по чеклисту в [security-and-dependencies.md](security-and-dependencies.md) разд. 4. Dependabot-алерт можно отклонить с комментарием «No fix yet; см. runbook».
-- **Diarization (pyannote):** Если ещё не делали: зайти на https://huggingface.co/pyannote/speaker-diarization-community-1 и https://huggingface.co/pyannote/segmentation-3.0 → принять условия; создать токен на https://huggingface.co/settings/tokens и сохранить в keyring: `secret-tool store --label='voiceforge huggingface' service voiceforge key huggingface` (значение — токен `hf_...`). **Если вы уже подтвердили доступ и положили токен** — diarization должен работать (при достаточной RAM >2GB).
-- **OTel/Jaeger:** Если не нужны трейсы — в сессии toolbox снимите: `unset VOICEFORGE_OTEL_ENABLED OTEL_EXPORTER_OTLP_ENDPOINT`. Если Jaeger на хосте, а команды в toolbox — используйте `OTEL_EXPORTER_OTLP_ENDPOINT=http://10.0.2.2:4318` (или IP хоста с `hostname -I`).
-- **#66 Async:** Полная миграция на Starlette/Litestar опциональна; минимальный путь (ThreadingMixIn) выполнен. Ничего подтверждать не нужно.
+- **#65 CVE:** Фикса в upstream (diskcache/instructor) **пока нет — делать ничего не нужно**. Когда появится версия с фиксом: обновить зависимости и убрать `--ignore-vuln` по чеклисту в [security-and-dependencies.md](security-and-dependencies.md) разд. 4. Dependabot-алерт можно отклонить с комментарием «No fix yet; см. runbook».
+- **Keyring (HuggingFace токен):** Одна команда — при запросе «Secret:» вставьте только токен (Ctrl+Shift+V). Команда:
+  ```bash
+  secret-tool store --label='voiceforge huggingface' service voiceforge key huggingface
+  ```
+  Когда появится запрос **Secret:** — вставьте ваш токен с https://huggingface.co/settings/tokens (hf_...) и Enter.
+- **OTel/Jaeger — что это и зачем:** OpenTelemetry (OTel) — это трассировка: каждый шаг пайплайна (подготовка аудио, STT, diarization, RAG, LLM) отправляется в Jaeger как «span» с длительностью. В Jaeger UI (http://localhost:16686) видна временная шкала: где сколько времени ушло, узкие места. Нужно для отладки и оптимизации. Если трейсы не нужны — снимите переменные (`unset VOICEFORGE_OTEL_ENABLED OTEL_EXPORTER_OTLP_ENDPOINT`). Если Jaeger крутится на хосте, а команды в toolbox — из контейнера хост доступен по адресу `10.0.2.2`, поэтому задают `OTEL_EXPORTER_OTLP_ENDPOINT=http://10.0.2.2:4318`.
+- **#66 Async:** Реализован опциональный async-сервер (Starlette + uvicorn); см. ниже. Ничего подтверждать не нужно.
 
 ---
 

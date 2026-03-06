@@ -66,7 +66,7 @@
 
 - **#56 (Step 2):** закрыто — fail_under=75, тесты status_helpers (doctor), history_helpers (result builders), config paths.
 - **#65 (Step 11):** убрать `--ignore-vuln CVE-2025-69872` после фикса upstream (diskcache/instructor).
-- **#66 (Step 12):** полная миграция на Starlette/Litestar — опционально; минимальный путь (ThreadingMixIn) выполнен, GA не блокируется.
+- **#66 (Step 12):** закрыто — опциональный async-сервер (Starlette + uvicorn): `voiceforge web --async`, VOICEFORGE_WEB_ASYNC=1, [web-async] в pyproject.
 - **W17:** закрыто — do_GET/do_POST через dispatch table (S3776).
 
 ### 3.2 Phase D (Steps 16–19)

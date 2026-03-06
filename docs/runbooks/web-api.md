@@ -1,8 +1,8 @@
 # Web UI API Contract
 
-Source of truth: `src/voiceforge/web/server.py`. Локальный HTTP-сервер без внешних зависимостей (stdlib only).
+Source of truth: `src/voiceforge/web/server.py`. Локальный HTTP-сервер без внешних зависимостей (stdlib only). Phase C #66: опционально async-сервер (Starlette + uvicorn).
 
-Запуск: `uv run voiceforge web --port 8765 --host 127.0.0.1`.
+Запуск: `uv run voiceforge web --port 8765 --host 127.0.0.1`. Async: `uv sync --extra web-async` и затем `uv run voiceforge web --async` или `VOICEFORGE_WEB_ASYNC=1 uv run voiceforge web` — те же endpoints, неблокирующий I/O.
 
 ## Endpoints
 
