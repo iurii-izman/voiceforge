@@ -2,15 +2,15 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-05 (#56: make coverage + процедура в release-and-quality; следующий — прогнать coverage в toolbox, fail_under 75)
+**Обновлено:** 2026-03-05 (#65: чеклист снятия CVE в security-and-dependencies; следующий — coverage в toolbox / fail_under 75 или Phase D)
 
 ---
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** (1) **#56 coverage:** в Makefile добавлена цель `make coverage` (pytest с отчётом покрытия; запускать в toolbox из‑за OOM в Cursor). В [release-and-quality.md](release-and-quality.md) — процедура: при ≥75% выставить fail_under=75 в pyproject.toml. (2) fail_under пока 72; следующий шаг — прогнать `make coverage` в toolbox и при достижении 75% обновить pyproject.
+**Сделано в сессии:** (1) **#65 CVE:** в [security-and-dependencies.md](security-and-dependencies.md) добавлен раздел 4 «Чеклист снятия CVE-2025-69872» — шаги при появлении фикса upstream (проверка, uv lock, удаление ignore из verify_pr/test.yml/security-weekly, pip-audit без ignore, Dependabot).
 
-**Следующий шаг:** Прогнать `make coverage` в toolbox; при ≥75% выставить fail_under=75. Либо следующие задачи Phase D / доработки. Единый план: [plans.md](../plans.md).
+**Следующий шаг:** Прогнать `make coverage` в toolbox и при ≥75% выставить fail_under=75 (#56). Либо доработки Phase D (#71 OTel, #66 async, W17). Единый план: [plans.md](../plans.md).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 

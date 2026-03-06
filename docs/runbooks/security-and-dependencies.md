@@ -33,7 +33,19 @@
 
 - **Где смотреть:** GitHub → Repository → Security → Dependabot alerts.
 - **Действия:** для каждого алерта — принять (мержить PR после проверки тестов) или отложить (Dismiss с комментарием).
-- **CVE-2025-69872 (diskcache):** фиксирующей версии нет. В CI уже `pip-audit --ignore-vuln CVE-2025-69872`. Рекомендуется отложить алерт: Dependabot → Dismiss → «Accept risk», комментарий: «No fix version yet. See docs/runbooks/security-and-dependencies.md. Revisit when upstream fixes.» Либо скрипт (нужен `github_token` в keyring с правом security_events): `uv run python scripts/dependabot_dismiss_moderate.py`. После появления фикса — снять ignore и обновить зависимость.
+- **CVE-2025-69872 (diskcache):** фиксирующей версии нет. В CI уже `pip-audit --ignore-vuln CVE-2025-69872`. Рекомендуется отложить алерт: Dependabot → Dismiss → «Accept risk», комментарий: «No fix version yet. See docs/runbooks/security-and-dependencies.md. Revisit when upstream fixes.» Либо скрипт (нужен `github_token` в keyring с правом security_events): `uv run python scripts/dependabot_dismiss_moderate.py`. После появления фикса — выполнить чеклист ниже.
+
+---
+
+## 4. Чеклист снятия CVE-2025-69872 (#65)
+
+Когда в upstream (diskcache или instructor) появится версия с фиксом:
+
+1. **Проверить:** [PyPI diskcache](https://pypi.org/project/diskcache/), [instructor](https://pypi.org/project/instructor/) или `uv run pip-audit --desc` (без ignore) — что vuln закрыта.
+2. **Обновить зависимости:** `uv lock --upgrade-package diskcache` или `--upgrade-package instructor`; при необходимости поправить pyproject.toml; `uv sync --extra all`; прогнать тесты.
+3. **Удалить `--ignore-vuln CVE-2025-69872`** из: `scripts/verify_pr.sh`, `.github/workflows/test.yml`, `.github/workflows/security-weekly.yml`; в этом runbook — убрать ignore из примеров команд и упоминаний.
+4. **Проверить:** `uv run pip-audit --desc` без аргументов — проходит без ошибок.
+5. **Dependabot:** при наличии открытого алерта — принять PR с обновлением или закрыть с комментарием «Fixed in commit …».
 
 ---
 
