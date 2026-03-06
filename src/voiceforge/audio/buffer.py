@@ -29,14 +29,16 @@ class RingBuffer:
             self._total_bytes -= len(old)
 
     def read_last(self, seconds: float) -> np.ndarray:
-        """Return last N seconds as int16 numpy array (mono)."""
+        """Return last N seconds as int16 numpy array (mono). Thread-safe: snapshot of deque to avoid 'deque mutated during iteration' when capture thread writes."""
         want_bytes = int(seconds * self._sample_rate * CHANNELS * BYTES_PER_SAMPLE)
-        if want_bytes <= 0 or self._total_bytes == 0:
+        total = self._total_bytes
+        if want_bytes <= 0 or total == 0:
             return np.array([], dtype=np.int16)
-        want_bytes = min(want_bytes, self._total_bytes)
+        want_bytes = min(want_bytes, total)
         collected: list[bytes] = []
         remaining = want_bytes
-        for chunk in reversed(self._chunks):
+        snapshot = list(self._chunks)
+        for chunk in reversed(snapshot):
             if remaining <= 0:
                 break
             take = min(remaining, len(chunk))

@@ -6,8 +6,8 @@
 
 **Цель:** Trace в Jaeger показывает все шаги pipeline с durations.
 
-1. **Запуск Jaeger (all-in-one):** `docker run -d --name jaeger -p 16686:16686 -p 4318:4318 jaegertracing/all-in-one` (OTLP HTTP на 4318, UI на 16686).
-2. **Включение OTel:** `export VOICEFORGE_OTEL_ENABLED=1` и `export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318`. Или только `OTEL_EXPORTER_OTLP_ENDPOINT` — тогда OTel включается автоматически. Установить опцию: `uv sync --extra otel`.
+1. **Запуск Jaeger (all-in-one):** на хосте `podman run -d --name jaeger -p 16686:16686 -p 4318:4318 docker.io/jaegertracing/all-in-one` (или `docker run …`). OTLP HTTP на 4318, UI на 16686.
+2. **Включение OTel:** экспорт и запуск демона делаются **в том же окружении, где крутится демон** (см. installation-guide: обычно это **внутри toolbox** — `fedora-toolbox-43`). Если демон в **toolbox**, Jaeger на хосте — endpoint должен указывать на хост. Имя `host.containers.internal` может не резолвиться в Fedora toolbox; тогда используйте IP хоста: `export OTEL_EXPORTER_OTLP_ENDPOINT=http://10.0.2.2:4318` (часто это шлюз контейнера) или с хоста выполните `hostname -I` и подставьте первый IP. Если демон на **хосте** (как и Jaeger): `export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318`. Чтобы не слать трейсы (и не получать ошибки экспорта), снимите переменные: `unset VOICEFORGE_OTEL_ENABLED OTEL_EXPORTER_OTLP_ENDPOINT`. Установить опцию: `uv sync --extra otel`.
 3. **Запуск пайплайна:** демон или CLI (например `voiceforge daemon` и триггер analyze). Спаны: `pipeline.run`, `pipeline.prepare_audio`, `pipeline.step1_stt`, `pipeline.step2_parallel` — видны в Jaeger UI: http://localhost:16686.
 4. **Проверка:** выбрать сервис `voiceforge`, найти trace с операцией `pipeline.run` и дочерними spans с длительностями.
 
