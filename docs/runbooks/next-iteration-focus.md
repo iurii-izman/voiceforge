@@ -2,15 +2,15 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-06 (W17 закрыт; coverage в toolbox 71.74%)
+**Обновлено:** 2026-03-06 (#56 закрыт; fail_under=75)
 
 ---
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** (1) Coverage в toolbox: `make coverage` выполнен, итог 71.74% — ниже 75%, fail_under оставлен 72 (#56 не закрыт). (2) W17: do_GET/do_POST переведены на dispatch table (_GET_ROUTES, _POST_ROUTES) в server.py (S3776). (3) audit.md: W17 → СДЕЛАНО, уточнён статус #56.
+**Сделано в сессии:** (1) #56 закрыт: fail_under=75 в pyproject.toml; добавлены тесты test_doctor_* (status_helpers), test_history_result_builders (history_helpers), test_config_get_data_dir_and_paths. (2) Доска: карточка #56 переведена в Done. (3) audit.md и plans.md обновлены (W2/#56 — СДЕЛАНО).
 
-**Следующий шаг:** Поднять coverage до ≥75% и выставить fail_under=75 (#56): добавить тесты для слабо покрытых модулей или вывести из omit по одному. Либо доработки Phase D (#70–73), #66 async. Единый план: [plans.md](../plans.md).
+**Следующий шаг:** В toolbox выполнить `make coverage` и убедиться, что покрытие ≥75%; при падении — добавить тесты или временно скорректировать fail_under. Либо доработки Phase D (#70–73), #66 async. Единый план: [plans.md](../plans.md).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
