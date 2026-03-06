@@ -1,4 +1,4 @@
-.PHONY: bootstrap verify smoke release-check cli-contract db-migrations e2e-smoke test-integration eval doctor toolchain security governance governance-check new-code-coverage milestone sonar-status
+.PHONY: bootstrap verify smoke release-check cli-contract db-migrations e2e-smoke test-integration eval eval-ab doctor toolchain security governance governance-check new-code-coverage milestone sonar-status flatpak-build
 
 bootstrap:
 	./scripts/bootstrap.sh
@@ -57,3 +57,7 @@ milestone:
 
 sonar-status:
 	./scripts/check_sonar_status.sh
+
+# Phase D #73: Flatpak build (desktop). Requires flatpak-builder, org.gnome.Platform//46. See docs/runbooks/offline-package.md
+flatpak-build:
+	./scripts/build-flatpak.sh

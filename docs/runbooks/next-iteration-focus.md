@@ -2,15 +2,15 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-05 (Phase D #70 eval-ab, #72 custom templates; тесты — только лёгкие, избегать OOM)
+**Обновлено:** 2026-03-05 (Phase D #73 packaging: make flatpak-build, GA в offline-package; следующий — #56 fail_under 75)
 
 ---
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** (1) docs: удалён #50/macOS/WSL2 из планов и скоупа (Linux only). (2) **#70 A/B:** `scripts/eval_ab.py` + `make eval-ab` — сравнение двух моделей по ROUGE-L на одном golden sample; ключ из keyring. (3) **#72 custom templates:** `prompt_loader` загружает `template_*` из `~/.config/voiceforge/templates/` при наличии файла. (4) Тесты: только лёгкие (`test_prompt_loader test_core_metrics test_llm_circuit_breaker test_tracing test_audio_buffer test_telegram_notify test_llm_retry` + `tests/eval/ -k "not judge"`), чтобы не уходить в OOM.
+**Сделано в сессии:** (1) **#73 packaging GA:** в Makefile добавлена цель `make flatpak-build`; в [offline-package.md](offline-package.md) — критерии приёмки GA (AppImage: download → chmod +x → run; Flatpak: install → run), уточнена установка через .local.yaml после локальной сборки. (2) Следующий шаг в фокусе: #56 fail_under 75 или дальнейшие задачи Phase D.
 
-**Следующий шаг:** **#73** packaging GA (AppImage/Flatpak) или **#56** fail_under 75 (при необходимости запускать coverage лёгким подмножеством). Единый план: [plans.md](../plans.md).
+**Следующий шаг:** **#56** — поднять fail_under до 75 (запустить coverage в CI или toolbox: `uv run pytest tests/ --cov --cov-report=term-missing -q`, при достижении ≥75% обновить pyproject.toml). Либо следующие задачи Phase D / доработки packaging. Единый план: [plans.md](../plans.md).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
