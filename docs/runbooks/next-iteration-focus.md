@@ -29,7 +29,7 @@
 - **Открытые issues:** #65 (CVE — ждём upstream), #50 (macOS/WSL2 — исследование, можно отложить). Остальные Phase A–D закрыты.
 - **Рекомендация:** перед бетой закрыть или отклонить Dependabot-PR с обновлением зависимостей; оставить #65 открытым до появления фикса; при желании перевести #50 в backlog.
 
-**Sonar (сессии):** Исправлено: S1192, S108, S1186, S1481, S5603, S1244, S7688, S8264, S1515 (lambda default c=cutoff, fn=do_purge), S7497, S2737, S3358, S5864, S7500, S7484, S3776 (run_daemon: _retention_purge_at_startup, _wire_daemon_iface, _run_daemon_loop). Остаток: `uv run python scripts/sonar_fetch_issues.py` после пуша.
+**Sonar (сессии):** Исправлено: S1192, S108, S1186, S1481, S5603, S1244, S7688, S8264, S1515, S7497, S2737, S3358, S5864, S7500, S7484, S3776 (run_daemon, _run_daemon_loop, _run_one_retention_purge, _cancel_purge_then_service_reraise). Остаток: проверить после скана.
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
