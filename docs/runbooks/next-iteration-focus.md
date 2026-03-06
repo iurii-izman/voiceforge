@@ -9,12 +9,8 @@
 ## Что требуется от вас (подтверждения и действия)
 
 - **#65 CVE:** Фикса в upstream (diskcache/instructor) **пока нет — делать ничего не нужно**. Когда появится версия с фиксом: обновить зависимости и убрать `--ignore-vuln` по чеклисту в [security-and-dependencies.md](security-and-dependencies.md) разд. 4. Dependabot-алерт можно отклонить с комментарием «No fix yet; см. runbook».
-- **Keyring (HuggingFace токен):** Одна команда — при запросе «Secret:» вставьте только токен (Ctrl+Shift+V). Команда:
-  ```bash
-  secret-tool store --label='voiceforge huggingface' service voiceforge key huggingface
-  ```
-  Когда появится запрос **Secret:** — вставьте ваш токен с https://huggingface.co/settings/tokens (hf_...) и Enter.
-- **OTel/Jaeger — что это и зачем:** OpenTelemetry (OTel) — это трассировка: каждый шаг пайплайна (подготовка аудио, STT, diarization, RAG, LLM) отправляется в Jaeger как «span» с длительностью. В Jaeger UI (http://localhost:16686) видна временная шкала: где сколько времени ушло, узкие места. Нужно для отладки и оптимизации. Если трейсы не нужны — снимите переменные (`unset VOICEFORGE_OTEL_ENABLED OTEL_EXPORTER_OTLP_ENDPOINT`). Если Jaeger крутится на хосте, а команды в toolbox — из контейнера хост доступен по адресу `10.0.2.2`, поэтому задают `OTEL_EXPORTER_OTLP_ENDPOINT=http://10.0.2.2:4318`.
+- **Keyring (HuggingFace):** Проверка, что ключ сохранён: `uv run python -c "from voiceforge.core.secrets import get_api_key; print('huggingface:', 'present' if get_api_key('huggingface') else 'absent')"`. Сохранение (один раз): `secret-tool store --label='voiceforge huggingface' service voiceforge key huggingface` → при запросе **Secret:** вставить токен (hf_...) с https://huggingface.co/settings/tokens. **Проверено:** ключ huggingface в keyring присутствует (present).
+- **OTel/Jaeger — кто управляет:** Агент не может сам запускать Jaeger, открывать браузер или смотреть трейсы. Запуск контейнера (podman/docker), открытие http://localhost:16686, установка/снятие переменных в сессии — делаете вы. Агент может только обновить доки и подсказать команды. ОTel — трассировка шагов пайплайна (длительности) в Jaeger для отладки. Если не нужны трейсы: `unset VOICEFORGE_OTEL_ENABLED OTEL_EXPORTER_OTLP_ENDPOINT`. Jaeger на хосте, команды в toolbox: `OTEL_EXPORTER_OTLP_ENDPOINT=http://10.0.2.2:4318`.
 - **#66 Async:** Реализован опциональный async-сервер (Starlette + uvicorn); см. ниже. Ничего подтверждать не нужно.
 
 ---
@@ -24,6 +20,16 @@
 **Сделано в сессии:** Закрыты #64, #67, #68, #69 (monitoring, prompt hash, benchmark, error format) — реализация была готова по аудиту; добавлена запись в history/closed-plans-and-roadmap.md; карточки 64, 67, 68, 69 на доске переведены в Done. В next-iteration-focus добавлен блок «Что требуется от вас».
 
 **Следующий шаг:** #65 (снять ignore CVE после фикса upstream) или развитие по roadmap (roadmap 19, e2e, качество). Единый план: [plans.md](../plans.md).
+
+---
+
+## GitHub: подготовка к бете (PR и issues)
+
+- **Открытые PR:** в основном Dependabot (desktop vite/tauri, actions setup-node/upload-artifact/sbom, pre-commit-ci). Решение: мержить по одному после прохода CI или батчем; при необходимости отклонить с комментарием (см. security-and-dependencies для CVE).
+- **Открытые issues:** #65 (CVE — ждём upstream), #50 (macOS/WSL2 — исследование, можно отложить). Остальные Phase A–D закрыты.
+- **Рекомендация:** перед бетой закрыть или отклонить Dependabot-PR с обновлением зависимостей; оставить #65 открытым до появления фикса; при желании перевести #50 в backlog.
+
+**Sonar (сессия):** Исправлено: S1192 (константы server_async, router), S108/S1186 (пустые блоки/методы — комментарии), S1481 (unused → _), S5603 (удалён неиспользуемый fake_t), S1244 (test_core_metrics — pytest.approx), S7688 (ensure_precommit_env [[), S8264 (permissions в job-level в test.yml). Осталось: daemon (S3776, S7484, S7497, S1515), benchmark S5864, float equality в других тестах, test_caldav S3358, test_transcript_log S1244, pipeline_integration S7500. Список: `uv run python scripts/sonar_fetch_issues.py`.
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 

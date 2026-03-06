@@ -30,17 +30,22 @@ def is_enabled() -> bool:
 
 
 class _NoOpSpan:
+    """No-op span when OTel is disabled; avoids branching in callers."""
+
     def __enter__(self) -> _NoOpSpan:
         return self
 
     def __exit__(self, *args: Any) -> None:
+        # Intentional no-op: no span to end when OTel disabled (Sonar S1186).
         pass
 
 
 class _NoOpTracer:
+    """No-op tracer when OTel disabled; start_as_current_span yields without creating a real span."""
+
     @contextmanager
     def start_as_current_span(self, name: str, **kwargs: Any) -> Iterator[Any]:
-        yield None
+        yield None  # Intentional: no real span when OTel disabled (Sonar S1186).
 
 
 def _create_tracer() -> Any:

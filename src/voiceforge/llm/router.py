@@ -16,6 +16,7 @@ from voiceforge.llm.prompt_loader import load_prompt, load_template_prompts
 
 log = structlog.get_logger()
 TModel = TypeVar("TModel", bound=BaseModel)
+_REASON_FILE_MISSING = "file missing"
 
 # Anthropic: Opus 4.6 $5/$25, Sonnet 4.6 $3/$15, Haiku 4.5 $1/$5 (per MTok in/out)
 MODEL_CLAUDE_OPUS = "anthropic/claude-opus-4-6"
@@ -81,7 +82,7 @@ def _system_prompt() -> str:
     """System prompt for meeting analysis (from prompts/analysis.txt or fallback)."""
     out = load_prompt("analysis")
     if out is None:
-        log.warning("prompt_loader_fallback", prompt="analysis", reason="file missing")
+        log.warning("prompt_loader_fallback", prompt="analysis", reason=_REASON_FILE_MISSING)
         return _SYSTEM_PROMPT_FALLBACK
     return out
 
@@ -215,7 +216,7 @@ def _live_summary_system() -> str:
 Write in the same language as the transcript. Be very concise. Output only valid JSON matching the schema (key_points, action_items)."""
     out = load_prompt("live_summary")
     if out is None:
-        log.warning("prompt_loader_fallback", prompt="live_summary", reason="file missing")
+        log.warning("prompt_loader_fallback", prompt="live_summary", reason=_REASON_FILE_MISSING)
         return fallback
     return out
 
@@ -262,7 +263,7 @@ def _status_update_system() -> str:
 Your task: determine which action items were mentioned in the follow-up as DONE or CANCELLED. Output only the list of (id, status) for items that were clearly stated as done or cancelled. Use the same language as the transcript for any reasoning; output only valid JSON matching the schema (updates: list of {id, status})."""
     out = load_prompt("status_update")
     if out is None:
-        log.warning("prompt_loader_fallback", prompt="status_update", reason="file missing")
+        log.warning("prompt_loader_fallback", prompt="status_update", reason=_REASON_FILE_MISSING)
         return fallback
     return out
 

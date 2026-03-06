@@ -10,6 +10,7 @@ from typing import Any
 from voiceforge.core.tracing import bind_trace_id, clear_trace_context, get_trace_id
 
 _CONTENT_TYPE_JSON = "application/json; charset=utf-8"
+_ERR_INVALID_JSON = "invalid JSON"
 _HTTP_STATUS_TO_CODE = {
     400: "BAD_REQUEST",
     401: "UNAUTHORIZED",
@@ -304,7 +305,7 @@ def _sync_telegram_webhook(body_bytes: bytes) -> tuple[int, str, bytes]:
     try:
         data = json.loads(body_bytes.decode("utf-8") if body_bytes else "{}")
     except json.JSONDecodeError:
-        return _err(400, "invalid JSON")
+        return _err(400, _ERR_INVALID_JSON)
     from voiceforge.web.server import _telegram_send_message, _telegram_webhook_reply
     message = (data or {}).get("message") or {}
     chat = message.get("chat") or {}
@@ -390,7 +391,7 @@ def _build_app():
             data = await request.json()
         except Exception:
             return Response(
-                json.dumps({"error": {"code": "BAD_REQUEST", "message": "invalid JSON"}}).encode("utf-8"),
+                json.dumps({"error": {"code": "BAD_REQUEST", "message": _ERR_INVALID_JSON}}).encode("utf-8"),
                 status_code=400,
                 media_type=_CONTENT_TYPE_JSON,
             )
@@ -402,7 +403,7 @@ def _build_app():
             data = await request.json()
         except Exception:
             return Response(
-                json.dumps({"error": {"code": "BAD_REQUEST", "message": "invalid JSON"}}).encode("utf-8"),
+                json.dumps({"error": {"code": "BAD_REQUEST", "message": _ERR_INVALID_JSON}}).encode("utf-8"),
                 status_code=400,
                 media_type=_CONTENT_TYPE_JSON,
             )

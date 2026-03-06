@@ -79,6 +79,7 @@
 | config-env-contract.md, keyring-keys-reference.md | Конфиг и ключи | Актуален |
 | installation-guide.md, desktop-build-deps.md, bootstrap.md | Установка и сборка | Актуален |
 | quickstart.md | Краткий сценарий; полная версия — first-meeting-5min | Актуален |
+| cli-commands-and-run.md | Все CLI-команды, когда пересобирать, как запускать демон и полный стек (toolbox) | Актуален |
 | planning.md | Канбан, audit map, next-iteration-focus; GitHub Project и gh | Актуален |
 | security-and-dependencies.md | Безопасность, зависимости, Dependabot (объединённый runbook) | Актуален |
 | telegram-bot-setup.md, pyannote-version.md | Фичи | Актуален |

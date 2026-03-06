@@ -33,7 +33,7 @@ def test_otel_span_context_manager_noop_when_disabled(monkeypatch) -> None:
     from voiceforge.core.otel import span
 
     with span("pipeline.run", seconds=5):
-        pass
+        pass  # Intentional no-op: test that context manager runs (Sonar S108).
 
 
 def test_otel_is_enabled_true_when_env_set(monkeypatch) -> None:
@@ -65,7 +65,7 @@ def test_otel_get_tracer_and_span_when_sdk_enabled(monkeypatch) -> None:
     import voiceforge.core.otel as otel_mod
 
     monkeypatch.setattr(otel_mod, "_cached_tracer", None)
-    from voiceforge.core.otel import get_tracer, span, is_enabled
+    from voiceforge.core.otel import get_tracer, is_enabled, span
 
     if not is_enabled():
         pytest.skip("opentelemetry SDK not available")
@@ -73,4 +73,4 @@ def test_otel_get_tracer_and_span_when_sdk_enabled(monkeypatch) -> None:
     assert tracer is not None
     assert hasattr(tracer, "start_as_current_span")
     with span("test.span", key="value"):
-        pass
+        pass  # Intentional no-op: test that span context manager runs (Sonar S108).

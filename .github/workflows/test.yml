@@ -14,12 +14,11 @@ concurrency:
 env:
   UV_VERSION: "0.8"
 
-permissions:
-  contents: read
-  pull-requests: read
-
 jobs:
   quality:
+    permissions:
+      contents: read
+      pull-requests: read
     name: quality (${{ matrix.python-version }})
     runs-on: ubuntu-latest
     strategy:
@@ -51,6 +50,9 @@ jobs:
             coverage.json
 
   cli-contract:
+    permissions:
+      contents: read
+      pull-requests: read
     name: cli-contract
     runs-on: ubuntu-latest
     steps:
@@ -64,6 +66,9 @@ jobs:
       - run: ./scripts/check_cli_contract.sh
 
   eval:
+    permissions:
+      contents: read
+      pull-requests: read
     name: eval (ROUGE-L)
     runs-on: ubuntu-latest
     steps:
@@ -77,6 +82,9 @@ jobs:
       - run: uv run pytest tests/eval/ -q
 
   db-migrations:
+    permissions:
+      contents: read
+      pull-requests: read
     name: db-migrations
     runs-on: ubuntu-latest
     steps:
@@ -90,6 +98,9 @@ jobs:
       - run: uv run pytest tests/test_db_migrations.py -q
 
   e2e-smoke:
+    permissions:
+      contents: read
+      pull-requests: read
     name: e2e-smoke
     runs-on: ubuntu-latest
     steps:
@@ -103,6 +114,9 @@ jobs:
       - run: uv run pytest tests/test_cli_e2e_smoke.py -q
 
   stt-integration:
+    permissions:
+      contents: read
+      pull-requests: read
     name: stt-integration (slow)
     runs-on: ubuntu-latest
     steps:
@@ -116,6 +130,9 @@ jobs:
       - run: uv run pytest tests/test_stt_integration.py -v -m integration
 
   security:
+    permissions:
+      contents: read
+      pull-requests: read
     name: security
     runs-on: ubuntu-latest
     steps:

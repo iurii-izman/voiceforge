@@ -149,9 +149,6 @@ def test_doctor_text_and_data(monkeypatch) -> None:
     """get_doctor_text and get_doctor_data run _doctor_checks; cover doctor helpers (#56)."""
     from voiceforge.cli import status_helpers as sh
 
-    def fake_t(key: str, **kwargs: object) -> str:
-        return f"t({key})"
-
     monkeypatch.setattr("voiceforge.cli.status_helpers._doctor_check_keyring", lambda t: (True, "keyring ok", "k"))
     monkeypatch.setattr(
         "voiceforge.cli.status_helpers._doctor_check_rag_ring",
@@ -160,7 +157,10 @@ def test_doctor_text_and_data(monkeypatch) -> None:
     monkeypatch.setattr("voiceforge.cli.status_helpers._doctor_check_ollama", lambda t: (True, "ollama ok", "o"))
     monkeypatch.setattr("voiceforge.cli.status_helpers._doctor_check_ram", lambda t: (True, "ram ok", "ram"))
     monkeypatch.setattr("voiceforge.cli.status_helpers._doctor_check_module", lambda mod, t: (True, f"{mod} ok", mod))
-    monkeypatch.setattr("voiceforge.core.config.Settings", lambda: SimpleNamespace(get_rag_db_path=lambda: "/x/rag.db", get_ring_file_path=lambda: "/x/ring.raw"))
+    monkeypatch.setattr(
+        "voiceforge.core.config.Settings",
+        lambda: SimpleNamespace(get_rag_db_path=lambda: "/x/rag.db", get_ring_file_path=lambda: "/x/ring.raw"),
+    )
     fake_path_class = type("FakePath", (), {"__init__": lambda self, p: None, "exists": lambda self: True})
     monkeypatch.setattr("voiceforge.cli.status_helpers.Path", fake_path_class)
 
@@ -183,7 +183,7 @@ def test_doctor_check_keyring_fail(monkeypatch) -> None:
     def fake_t(key: str, **kwargs: object) -> str:
         return key
 
-    ok, msg, key = _doctor_check_keyring(fake_t)
+    ok, _, key = _doctor_check_keyring(fake_t)
     assert ok is False
     assert "keyring" in key or "doctor" in key.lower()
 

@@ -13,7 +13,7 @@ def test_get_cost_today_empty(tmp_path, monkeypatch) -> None:
     """get_cost_today returns 0 when no data."""
     monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
     metrics._init_done_paths.clear()
-    assert metrics.get_cost_today() == 0.0
+    assert metrics.get_cost_today() == pytest.approx(0.0)
 
 
 def test_log_llm_call_and_get_cost_today(tmp_path, monkeypatch) -> None:
@@ -49,7 +49,7 @@ def test_get_stats_empty(tmp_path, monkeypatch) -> None:
     out = metrics.get_stats(days=30)
     assert "by_model" in out
     assert "by_day" in out
-    assert out["total_cost_usd"] == 0.0
+    assert out["total_cost_usd"] == pytest.approx(0.0)
     assert out["total_calls"] == 0
     assert out["response_cache_hits"] == 0
     assert out["response_cache_misses"] == 0
@@ -86,7 +86,7 @@ def test_unpack_llm_row_and_make_entry() -> None:
     assert unpacked is not None
     entry = metrics._make_by_model_entry(unpacked, True)
     assert entry["model"] == "model-x"
-    assert entry["cost_usd"] == 0.1
+    assert entry["cost_usd"] == pytest.approx(0.1)
     assert entry["cache_read_input_tokens"] == 5
 
 

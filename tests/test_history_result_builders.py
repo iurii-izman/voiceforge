@@ -75,7 +75,7 @@ def test_history_action_items_result_empty(tmp_path) -> None:
         kind, data = hh.history_action_items_result(log, "json")
         assert kind == "json"
         assert data["action_items"] == []
-        kind2, msg = hh.history_action_items_result(log, "lines")
+        kind2, _ = hh.history_action_items_result(log, "lines")
         assert kind2 == "message"
     finally:
         log.close()
@@ -104,7 +104,7 @@ def test_history_search_result_empty(tmp_path) -> None:
         kind, data = hh.history_search_result(log, "nonexistent", "json")
         assert kind == "json"
         assert data["hits"] == []
-        kind2, msg = hh.history_search_result(log, "x", "lines")
+        kind2, _ = hh.history_search_result(log, "x", "lines")
         assert kind2 == "message"
     finally:
         log.close()
@@ -119,7 +119,7 @@ def test_history_search_result_with_hits(tmp_path) -> None:
         kind, data = hh.history_search_result(log, "needle", "json")
         assert kind == "json"
         assert len(data["hits"]) >= 1
-        kind2, lines = hh.history_search_result(log, "needle", "lines")
+        kind2, _ = hh.history_search_result(log, "needle", "lines")
         assert kind2 == "lines"
     finally:
         log.close()

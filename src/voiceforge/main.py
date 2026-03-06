@@ -1161,16 +1161,15 @@ def history(
 def web_serve(
     port: int = typer.Option(8765, "--port", help="Порт HTTP-сервера"),
     host: str = typer.Option("127.0.0.1", "--host", help="Хост (только локальный по умолчанию)"),
-    use_async: bool = typer.Option(
+    web_async: bool = typer.Option(
         False,
         "--async",
-        "use_async",
         help="Использовать async-сервер (Starlette + uvicorn). Требует uv sync --extra web-async.",
     ),
 ) -> None:
     """Block 12: запустить простой локальный Web UI (статус, сессии, анализ). Phase C #66: --async для Starlette+uvicorn."""
     use_async_env = os.environ.get("VOICEFORGE_WEB_ASYNC", "").strip() in ("1", "true", "yes")
-    if use_async or use_async_env:
+    if web_async or use_async_env:
         try:
             from voiceforge.web.server_async import run_async_server
             run_async_server(host=host, port=port)
