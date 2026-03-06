@@ -2,8 +2,9 @@
 """Phase D #70: A/B eval — run golden sample(s) with two models, compare ROUGE-L vs reference.
 
 Usage:
-  MODEL_A=anthropic/claude-haiku-4-5 MODEL_B=anthropic/claude-sonnet-4-6 uv run python scripts/eval_ab.py
-  make eval-ab MODEL_A=haiku MODEL_B=sonnet   # uses defaults above
+  make eval-ab [MODEL_A=haiku] [MODEL_B=sonnet]   # defaults: haiku vs sonnet
+  MODEL_A=opus MODEL_B=sonnet uv run python scripts/eval_ab.py
+Custom templates (Phase D #72): templates from ~/.config/voiceforge/templates/ are used when present.
 Skips if no API key. Light run: one golden sample only.
 """
 

@@ -31,6 +31,12 @@
 - **Хэши:** `get_prompt_hashes()` в `prompt_loader` возвращает SHA256 по каждому промпту (для скриптов/CI).
 - **CI:** тест `test_prompt_content_snapshot` в `tests/test_prompt_loader.py` проверяет совпадение хэшей с эталоном; при изменении промптов нужно обновить словарь `expected` в этом тесте.
 
+## Custom templates (Phase D #72)
+
+Шаблоны встреч можно переопределить пользовательскими: положите `template_<name>.txt` в `~/.config/voiceforge/templates/` (или в `$XDG_CONFIG_HOME/voiceforge/templates/`). При вызове `analyze`, `eval` и `make eval-ab` загрузка идёт через `load_prompt()` — сначала проверяется пользовательский каталог, затем встроенные файлы в `prompts/`. Таким образом, **eval и eval-ab используют custom-шаблоны**, когда они присутствуют.
+
+Пример: скопируйте `src/voiceforge/llm/prompts/template_standup.txt` в `~/.config/voiceforge/templates/template_standup.txt`, отредактируйте — при следующем запуске `analyze` или `make eval-ab` будет использоваться ваша версия.
+
 ## Тесты
 
-- `tests/test_prompt_loader.py` — загрузка, наличие контента, snapshot по хэшам содержимого (регрессия при случайном изменении).
+- `tests/test_prompt_loader.py` — загрузка, наличие контента, snapshot по хэшам содержимого (регрессия при случайном изменении), загрузка custom-шаблона из пользовательского каталога (#72).

@@ -2,6 +2,15 @@
 
 Рекомендуемые алерты для Prometheus/Alertmanager при использовании метрик VoiceForge. Трассировка (Phase D #71): [config-env-contract.md](config-env-contract.md) — переменные `VOICEFORGE_OTEL_ENABLED`, `OTEL_EXPORTER_OTLP_ENDPOINT`; опция `voiceforge[otel]`; спаны pipeline.run, prepare_audio, step1_stt, step2_parallel; экспорт в Jaeger/OTLP.
 
+## Tracing: Jaeger (Phase D #71)
+
+**Цель:** Trace в Jaeger показывает все шаги pipeline с durations.
+
+1. **Запуск Jaeger (all-in-one):** `docker run -d --name jaeger -p 16686:16686 -p 4318:4318 jaegertracing/all-in-one` (OTLP HTTP на 4318, UI на 16686).
+2. **Включение OTel:** `export VOICEFORGE_OTEL_ENABLED=1` и `export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318`. Или только `OTEL_EXPORTER_OTLP_ENDPOINT` — тогда OTel включается автоматически. Установить опцию: `uv sync --extra otel`.
+3. **Запуск пайплайна:** демон или CLI (например `voiceforge daemon` и триггер analyze). Спаны: `pipeline.run`, `pipeline.prepare_audio`, `pipeline.step1_stt`, `pipeline.step2_parallel` — видны в Jaeger UI: http://localhost:16686.
+4. **Проверка:** выбрать сервис `voiceforge`, найти trace с операцией `pipeline.run` и дочерними spans с длительностями.
+
 ## Метрики
 
 - **voiceforge_llm_cost_usd_total** — накопленная стоимость по моделям.

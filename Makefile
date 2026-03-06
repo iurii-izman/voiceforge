@@ -29,9 +29,9 @@ test-integration:
 eval:
 	uv run pytest tests/eval/ -q --tb=line
 
-# Phase D #70: A/B model comparison (requires anthropic key). Usage: make eval-ab MODEL_A=haiku MODEL_B=sonnet
+# Phase D #70: A/B model comparison (requires anthropic key). Usage: make eval-ab [MODEL_A=haiku] [MODEL_B=sonnet]
 eval-ab:
-	uv run python scripts/eval_ab.py
+	MODEL_A="$(or $(MODEL_A),haiku)" MODEL_B="$(or $(MODEL_B),sonnet)" uv run python scripts/eval_ab.py
 
 doctor:
 	./scripts/doctor.sh

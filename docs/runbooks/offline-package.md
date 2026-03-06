@@ -2,6 +2,12 @@
 
 Черновик для упаковки десктопного приложения VoiceForge (Tauri 2) в форматы, не требующие установки системных пакетов на целевой машине.
 
+## GA checklist (#73)
+
+- **AppImage:** скачать `.AppImage` → `chmod +x VoiceForge_*.AppImage` → `./VoiceForge_*.AppImage` (приложение запускается).
+- **Flatpak:** `flatpak install <источник> com.voiceforge.app` → `flatpak run com.voiceforge.app` (приложение запускается).
+- **Сборка из дерева:** `make flatpak-build`; AppImage: см. раздел AppImage ниже и `desktop-build-deps.md`.
+
 ## Критерии приёмки GA (#73)
 
 - **AppImage:** пользователь может скачать один файл `.AppImage` → `chmod +x VoiceForge_*.AppImage` → `./VoiceForge_*.AppImage` (приложение запускается; демон VoiceForge на хосте должен быть запущен отдельно).

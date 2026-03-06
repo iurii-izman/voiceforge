@@ -84,13 +84,13 @@
 | telegram-bot-setup.md, pyannote-version.md | Фичи | Актуален |
 | repo-and-git-governance.md | Репо, main, Git, PR, теги, issues, Sonar | Актуален |
 | release-and-quality.md | Релиз, откат, чеклисты альфа, DoD | Актуален |
-| web-api.md, observability-alerts.md | API и мониторинг | Актуален |
+| web-api.md, observability-alerts.md | API, мониторинг, трассировка Jaeger (#71) | Актуален |
 | test-operations.md, sonar-pr-cleanup.md | Тесты и CI | Актуален |
 | prompt-management.md, calendar-integration.md, rag-formats.md | Фичи и форматы | Актуален |
 | cursor.md, voiceforge-cursor-tz.md | Cursor: настройка, тюнинг; расширенное ТЗ (архив) | Актуален / заглушка |
 | claude-proposal-alignment.md | Заглушка → архив | [archive/plans/](archive/plans/) |
 | git-github-practices-rule.md, agent-session-handoff-rule.md | Копии для .cursor/rules/ | Актуален |
-| offline-package.md | Flatpak/AppImage | Черновик |
+| offline-package.md | Flatpak/AppImage (GA #73): сборка, установка, GA checklist | Актуален |
 
 ### docs/adr/
 

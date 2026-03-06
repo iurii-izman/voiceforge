@@ -66,7 +66,7 @@
 
 - **#56 (Step 2):** закрыто — fail_under=75, тесты status_helpers (doctor), history_helpers (result builders), config paths.
 - **#65 (Step 11):** убрать `--ignore-vuln CVE-2025-69872` после фикса upstream (diskcache/instructor).
-- **#66 (Step 12):** полная миграция на Starlette/Litestar — опционально; минимальный путь (ThreadingMixIn) выполнен.
+- **#66 (Step 12):** полная миграция на Starlette/Litestar — опционально; минимальный путь (ThreadingMixIn) выполнен, GA не блокируется.
 - **W17:** закрыто — do_GET/do_POST через dispatch table (S3776).
 
 ### 3.2 Phase D (Steps 16–19)
@@ -88,7 +88,7 @@
 - **План развития (development-plan) Часть I:** все 10 пунктов реализованы (--template, streaming listen, export, status --detailed, history --search, action items DB, history --date/--from/--to, quickstart, GetAnalytics, status --doctor).
 - **Issues #32–49, #51–53:** закрыты. Текущий фокус — только Linux (macOS/WSL2 вне скоупа).
 - **Phase A–C (Steps 1–15):** большинство в статусе «СДЕЛАНО»; частично #56, #65, #66, W17. См. [audit/audit.md](audit/audit.md).
-- **Phase D (Steps 16–19):** #70 (eval-ab, make eval-ab), #72 (custom templates из ~/.config/voiceforge/templates/), #73 (make flatpak-build, GA в offline-package) — частично; #71 (OTel) — базовая интеграция. Доработки: coverage/GA по мере готовности.
+- **Phase D (Steps 16–19):** #70 eval-ab GA (make eval-ab MODEL_A=… MODEL_B=…); #71 OTel + runbook Jaeger; #72 custom templates + doc (eval uses ~/.config/voiceforge/templates/); #73 packaging GA (offline-package checklist, Flatpak/AppImage). Доработки по мере готовности.
 
 ---
 
