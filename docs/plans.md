@@ -88,13 +88,13 @@
 - **План развития (development-plan) Часть I:** все 10 пунктов реализованы (--template, streaming listen, export, status --detailed, history --search, action items DB, history --date/--from/--to, quickstart, GetAnalytics, status --doctor).
 - **Issues #32–49, #51–53:** закрыты. Текущий фокус — только Linux (macOS/WSL2 вне скоупа).
 - **Phase A–C (Steps 1–15):** большинство в статусе «СДЕЛАНО»; частично #56, #65, #66, W17. См. [audit/audit.md](audit/audit.md).
-- **Phase D (Steps 16–19):** в работе/бэклог; #71 (OTel) — базовая интеграция в работе.
+- **Phase D (Steps 16–19):** #70 (eval-ab, make eval-ab), #72 (custom templates из ~/.config/voiceforge/templates/), #73 (make flatpak-build, GA в offline-package) — частично; #71 (OTel) — базовая интеграция. Доработки: coverage/GA по мере готовности.
 
 ---
 
 ## 5. Текущие задачи и фокус
 
-- **В работе / частично:** #56 (coverage 75→80), #65 (CVE), #66 (async web опционально), W17 (S3776), #71 (OTel).
-- **Phase D бэклог:** #70 (A/B), #72 (plugins), #73 (packaging GA).
+- **В работе / частично:** #56 (coverage 75→80, make coverage), #65 (CVE, чеклист снятия), #66 (async web опционально), W17 (S3776), #71 (OTel).
+- **Phase D:** #70–#73 частично реализованы; довести до GA по критериям в разд. 3.2.
 
 Фокус итерации: [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md). Статус W1–W20: [audit/audit.md](audit/audit.md).
