@@ -549,6 +549,28 @@ async def _run_one_retention_purge(daemon: VoiceForgeDaemon) -> tuple[int, date 
     return (n, cutoff)
 
 
+async def _cancel_purge_then_service_reraise(
+    purge_task: asyncio.Task,
+    service_task: asyncio.Task,
+) -> None:
+    """Cancel purge_task, then service_task; re-raise CancelledError after cleanup. S3776/S7497."""
+    purge_task.cancel()
+    try:
+        await purge_task
+    except asyncio.CancelledError as exc:
+        service_task.cancel()
+        try:
+            await service_task
+        except asyncio.CancelledError:
+            pass
+        raise exc
+    service_task.cancel()
+    try:
+        await service_task
+    except asyncio.CancelledError:
+        raise
+
+
 def _run_daemon_loop(
     iface: DaemonVoiceForgeInterface,
     daemon: VoiceForgeDaemon,
@@ -582,21 +604,7 @@ def _run_daemon_loop(
         try:
             await stop_event.wait()
         finally:
-            purge_task.cancel()
-            try:
-                await purge_task
-            except asyncio.CancelledError:
-                service_task.cancel()
-                try:
-                    await service_task
-                except asyncio.CancelledError:
-                    pass  # Cleanup done; re-raise outer CancelledError below (S7497).
-                raise
-            service_task.cancel()
-            try:
-                await service_task
-            except asyncio.CancelledError:
-                raise
+            await _cancel_purge_then_service_reraise(purge_task, service_task)
 
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
@@ -605,7 +613,7 @@ def _run_daemon_loop(
         loop.run_until_complete(_serve())
     except Exception as e:
         log.exception("daemon.crash", error=str(e), pid=os.getpid(), pid_file=str(pid_path))
-        raise  # S2737: re-raise after logging.
+        raise
     finally:
         loop.close()
 
