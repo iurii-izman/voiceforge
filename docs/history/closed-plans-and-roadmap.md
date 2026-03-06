@@ -111,3 +111,14 @@
 ## Следующий слой: PROJECT_AUDIT_AND_ROADMAP (2026-02-26)
 
 Новый аудит выявил 20 Weaknesses и 20 Steps (Phase A–D). Полный снимок: [docs/archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](../archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md). Маппинг и issues: [docs/audit/audit.md](../audit/audit.md).
+
+### Phase B–C: Steps 10, 13–15 (#64, #67, #68, #69) — закрыты
+
+Реализация завершена (аудит W19, W10, W20, W18):
+
+| Issue | Step | Тема | Доказательство |
+|-------|------|------|----------------|
+| #64 | 10 | Monitoring stack (Grafana + alerts) | monitoring/: prometheus.yml, alerts.yml, docker-compose, README |
+| #67 | 13 | Prompt versioning + hash validation | prompt_loader.get_prompt_hashes(), test_prompt_content_snapshot, fallback warning |
+| #68 | 14 | Benchmark suite | tests/benchmark_stt.py, benchmark_rag.py, baseline_benchmark.json |
+| #69 | 15 | Standardize web error responses | Единый формат `{"error": {"code", "message"}}` в web/server |
