@@ -143,3 +143,74 @@ def test_contract_payload_builders_and_extractors() -> None:
     assert contracts.extract_error_message("not-an-error") is None
     assert contracts.extract_error_message("[1,2]") is None
     assert contracts.extract_error_message('{"error": "string"}') is None
+
+
+def test_doctor_text_and_data(monkeypatch) -> None:
+    """get_doctor_text and get_doctor_data run _doctor_checks; cover doctor helpers (#56)."""
+    from voiceforge.cli import status_helpers as sh
+
+    def fake_t(key: str, **kwargs: object) -> str:
+        return f"t({key})"
+
+    monkeypatch.setattr("voiceforge.cli.status_helpers._doctor_check_keyring", lambda t: (True, "keyring ok", "k"))
+    monkeypatch.setattr(
+        "voiceforge.cli.status_helpers._doctor_check_rag_ring",
+        lambda cfg, t: [(True, "rag ok", "r"), (True, "ring ok", "ring")],
+    )
+    monkeypatch.setattr("voiceforge.cli.status_helpers._doctor_check_ollama", lambda t: (True, "ollama ok", "o"))
+    monkeypatch.setattr("voiceforge.cli.status_helpers._doctor_check_ram", lambda t: (True, "ram ok", "ram"))
+    monkeypatch.setattr("voiceforge.cli.status_helpers._doctor_check_module", lambda mod, t: (True, f"{mod} ok", mod))
+    monkeypatch.setattr("voiceforge.core.config.Settings", lambda: SimpleNamespace(get_rag_db_path=lambda: "/x/rag.db", get_ring_file_path=lambda: "/x/ring.raw"))
+    fake_path_class = type("FakePath", (), {"__init__": lambda self, p: None, "exists": lambda self: True})
+    monkeypatch.setattr("voiceforge.cli.status_helpers.Path", fake_path_class)
+
+    text = sh.get_doctor_text()
+    assert "✓" in text or "✗" in text
+    data = sh.get_doctor_data()
+    assert "checks" in data
+    assert "errors" in data
+    assert isinstance(data["checks"], list)
+    assert len(data["checks"]) >= 5
+
+
+def test_doctor_check_keyring_fail(monkeypatch) -> None:
+    """_doctor_check_keyring returns (False, ...) when no keys found."""
+    import keyring
+
+    monkeypatch.setattr(keyring, "get_password", lambda service, name: None)
+    from voiceforge.cli.status_helpers import _doctor_check_keyring
+
+    def fake_t(key: str, **kwargs: object) -> str:
+        return key
+
+    ok, msg, key = _doctor_check_keyring(fake_t)
+    assert ok is False
+    assert "keyring" in key or "doctor" in key.lower()
+
+
+def test_doctor_check_rag_ring_optional(monkeypatch) -> None:
+    """_doctor_check_rag_ring reports rag_optional when db missing, ring_absent when ring missing."""
+    from voiceforge.cli.status_helpers import _doctor_check_rag_ring
+
+    def fake_t(key: str, **kwargs: object) -> str:
+        return key
+
+    class FakeCfg:
+        def get_rag_db_path(self) -> str:
+            return "/tmp/rag.db"
+
+        def get_ring_file_path(self) -> str:
+            return "/tmp/ring.raw"
+
+    class FakePath:
+        def __init__(self, p: str) -> None:
+            self._p = p
+
+        def exists(self) -> bool:
+            return "rag" in self._p  # rag.db exists, ring.raw "exists" is False for ring path
+
+    monkeypatch.setattr("voiceforge.cli.status_helpers.Path", FakePath)
+    results = _doctor_check_rag_ring(FakeCfg(), fake_t)
+    assert len(results) == 2
+    keys = [r[2] for r in results]
+    assert "doctor.ring_ok" in keys or "doctor.ring_absent" in keys

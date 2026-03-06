@@ -1,6 +1,6 @@
 # Аудит VoiceForge: статус и задачи (единый документ)
 
-**Обновлено:** 2026-03-05. **Единый план (Phase A–D, Steps 1–19, оставшееся до 100%):** [plans.md](../plans.md). **Полный аудит 2026-03:** [archive/audit/audit-2026-03-full.md](../archive/audit/audit-2026-03-full.md); краткое содержание — раздел 5 ниже. Исторический снимок 2026-02-26: [archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](../archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md).
+**Обновлено:** 2026-03-06. **Единый план (Phase A–D, Steps 1–19, оставшееся до 100%):** [plans.md](../plans.md). **Полный аудит 2026-03:** [archive/audit/audit-2026-03-full.md](../archive/audit/audit-2026-03-full.md); краткое содержание — раздел 5 ниже. Исторический снимок 2026-02-26: [archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](../archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md).
 
 ---
 
@@ -9,7 +9,7 @@
 | # | Weakness / Step | Статус | Доказательство |
 |---|-----------------|--------|----------------|
 | W1 / Step 1 | Eval harness в CI | **СДЕЛАНО** | test.yml: job `eval` — pytest tests/eval/ (ROUGE-L) |
-| W2 / Step 2 | Coverage omit, fail_under | **ЧАСТИЧНО** | pipeline, transcript_log, caldav_poll, dbus_service, audio/buffer, **audio/capture** выведены из omit; fail_under=72 (цель 75→80); в omit остаются main, server, diarizer, rag/*, local_llm (#56). Добавлены test_audio_capture, test_telegram_notify, get_prompt_hashes тест. |
+| W2 / Step 2 | Coverage omit, fail_under | **СДЕЛАНО** | fail_under=75 (#56). Добавлены тесты: test_doctor_* (status_helpers), test_history_result_builders (history_helpers), test_config_get_data_dir_and_paths. В omit остаются main, server, diarizer, rag/*, local_llm. |
 | W3 / Step 3 | Sonar blocking | **СДЕЛАНО** | sonar.yml: убран continue-on-error |
 | W4 / Step 5 | CodeQL blocking | **СДЕЛАНО** | codeql.yml: убран continue-on-error |
 | W5 | Pipeline integration test | **СДЕЛАНО** | test_pipeline_integration.py: _prepare_audio, run with mocked STT/_gather_step2 |
@@ -46,7 +46,7 @@
 
 ## 3. Оставшееся до 100% (кратко)
 
-- **#56 Coverage:** fail_under=72; в toolbox make coverage даёт 71.74%. Для fail_under=75 нужны дополнительные тесты или вывод модулей из omit (server, main и др.).
+- **#56 Coverage:** закрыто — fail_under=75, добавлены тесты doctor/history_result_builders/config paths.
 - **#65 CVE:** убрать `--ignore-vuln` после фикса upstream (diskcache/instructor).
 - **#66 Async web (полный):** миграция на Starlette/Litestar — опционально; минимальный путь (ThreadingMixIn) выполнен.
 - **W17:** закрыто — do_GET/do_POST через dispatch table (S3776).

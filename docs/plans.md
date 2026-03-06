@@ -64,7 +64,7 @@
 
 ### 3.1 Текущие (не Phase D)
 
-- **#56 (Step 2):** fail_under=72; цель 75→80%; вывести из omit по одному модулю (server, main, diarizer, rag/*, local_llm) с тестами.
+- **#56 (Step 2):** закрыто — fail_under=75, тесты status_helpers (doctor), history_helpers (result builders), config paths.
 - **#65 (Step 11):** убрать `--ignore-vuln CVE-2025-69872` после фикса upstream (diskcache/instructor).
 - **#66 (Step 12):** полная миграция на Starlette/Litestar — опционально; минимальный путь (ThreadingMixIn) выполнен.
 - **W17:** закрыто — do_GET/do_POST через dispatch table (S3776).

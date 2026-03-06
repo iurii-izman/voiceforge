@@ -68,3 +68,20 @@ def test_settings_daily_budget_limit_negative_raises() -> None:
 
     with pytest.raises(ValueError, match="daily_budget_limit_usd must be >= 0"):
         Settings(daily_budget_limit_usd=-1.0)
+
+
+def test_config_get_data_dir_and_paths(monkeypatch, tmp_path) -> None:
+    """get_data_dir, get_ring_file_path, get_rag_db_path respect env and defaults (#56)."""
+    from voiceforge.core.config import Settings
+
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
+    monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "runtime"))
+    cfg = Settings()
+    data_dir = cfg.get_data_dir()
+    assert "voiceforge" in data_dir
+    assert str(tmp_path / "data") in data_dir
+    ring_path = cfg.get_ring_file_path()
+    assert "ring" in ring_path or "voiceforge" in ring_path
+    rag_path = cfg.get_rag_db_path()
+    assert "rag" in rag_path
+    assert data_dir in rag_path
