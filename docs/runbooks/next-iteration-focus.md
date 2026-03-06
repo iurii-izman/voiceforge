@@ -2,15 +2,15 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-06 (coverage 75%, тесты стабилизированы, #56 закрыт, Phase D доки)
+**Обновлено:** 2026-03-06 (Phase D #70–#73 закрыты, доска Done)
 
 ---
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** (1) Стабилизация тестов: test_llm_retry (test_complete_structured_uses_instructor_with_max_retries, test_response_cache_second_call_hits_cache) и eval/test_llm_eval (test_llm_judge_one_golden_sample) — добавлен pytest.importorskip("instructor"), тесты пропускаются при отсутствии [llm]. (2) Покрытие 75%: fail_under=75 в pyproject.toml; добавлены тесты test_otel (get_tracer/span при включённом OTel), test_config_settings (yaml invalid/non-dict, get_rag_db_path явный); в extra all добавлен [otel] для покрытия OTel-путей. (3) Доки: audit.md, plans.md — обновлены статусы #56, Phase D; next-iteration-focus — этот блок.
+**Сделано в сессии:** Phase D GA: #70 eval-ab (Makefile MODEL_A/MODEL_B с дефолтами); #71 OTel — runbook Jaeger в observability-alerts.md; #72 custom templates — док в prompt-management.md и docstring eval_ab; #73 packaging GA — GA checklist в offline-package.md, DOCS-INDEX; уточнение #66 (async опционально) в audit/plans. Коммит a26bb44, пуш, карточки 70–73 на доске в Done.
 
-**Следующий шаг:** Доработки Phase D по критериям (plans.md разд. 3.2): #70 eval-ab GA, #71 OTel trace в Jaeger, #72 custom templates eval, #73 packaging GA. Либо #65 (CVE чеклист), #66 (async опционально). Единый план: [plans.md](../plans.md).
+**Следующий шаг:** #65 (CVE чеклист снятия ignore после фикса upstream) или развитие по roadmap (roadmap 19, расширенные e2e, качество). Единый план: [plans.md](../plans.md).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
