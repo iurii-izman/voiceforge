@@ -20,6 +20,8 @@
 9. `./scripts/check_repo_governance.sh` — OK
 10. New-code coverage: `./scripts/check_new_code_coverage.sh` (порог 20%; на поздних этапах поднимать)
 
+**Coverage #56:** текущий fail_under=72 (pyproject.toml). Цель 75→80%. Запуск полного отчёта: `make coverage` (рекомендуется в toolbox — в Cursor полный pytest может OOM). При достижении ≥75% выставить в pyproject.toml `fail_under = 75`.
+
 **Для альфа2 (с десктопом):** версия 0.2.0a1; сборка десктопа: `cd desktop && npm run build && cargo tauri build`; артефакты в `desktop/src-tauri/target/release/bundle/`. Чеклист: сценарий «демон → Tauri → анализ → сессия»; CHANGELOG обновлён.
 
 **Команды:**

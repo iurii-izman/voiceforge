@@ -2,15 +2,15 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-05 (Phase D #73 packaging: make flatpak-build, GA в offline-package; следующий — #56 fail_under 75)
+**Обновлено:** 2026-03-05 (#56: make coverage + процедура в release-and-quality; следующий — прогнать coverage в toolbox, fail_under 75)
 
 ---
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** (1) **#73 packaging GA:** в Makefile добавлена цель `make flatpak-build`; в [offline-package.md](offline-package.md) — критерии приёмки GA (AppImage: download → chmod +x → run; Flatpak: install → run), уточнена установка через .local.yaml после локальной сборки. (2) Следующий шаг в фокусе: #56 fail_under 75 или дальнейшие задачи Phase D.
+**Сделано в сессии:** (1) **#56 coverage:** в Makefile добавлена цель `make coverage` (pytest с отчётом покрытия; запускать в toolbox из‑за OOM в Cursor). В [release-and-quality.md](release-and-quality.md) — процедура: при ≥75% выставить fail_under=75 в pyproject.toml. (2) fail_under пока 72; следующий шаг — прогнать `make coverage` в toolbox и при достижении 75% обновить pyproject.
 
-**Следующий шаг:** **#56** — поднять fail_under до 75 (запустить coverage в CI или toolbox: `uv run pytest tests/ --cov --cov-report=term-missing -q`, при достижении ≥75% обновить pyproject.toml). Либо следующие задачи Phase D / доработки packaging. Единый план: [plans.md](../plans.md).
+**Следующий шаг:** Прогнать `make coverage` в toolbox; при ≥75% выставить fail_under=75. Либо следующие задачи Phase D / доработки. Единый план: [plans.md](../plans.md).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 

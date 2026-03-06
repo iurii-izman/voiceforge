@@ -1,4 +1,4 @@
-.PHONY: bootstrap verify smoke release-check cli-contract db-migrations e2e-smoke test-integration eval eval-ab doctor toolchain security governance governance-check new-code-coverage milestone sonar-status flatpak-build
+.PHONY: bootstrap verify smoke release-check cli-contract db-migrations e2e-smoke test-integration eval eval-ab doctor toolchain security governance governance-check new-code-coverage coverage milestone sonar-status flatpak-build
 
 bootstrap:
 	./scripts/bootstrap.sh
@@ -51,6 +51,10 @@ governance-check:
 
 new-code-coverage:
 	./scripts/check_new_code_coverage.sh
+
+# Coverage report (issue #56). Run in toolbox to avoid OOM; when ≥75%, set fail_under=75 in pyproject.toml
+coverage:
+	uv run pytest tests/ -q -m "not integration" --cov=src/voiceforge --cov-report=term-missing
 
 milestone:
 	./scripts/create_alpha_milestone_issues.sh
