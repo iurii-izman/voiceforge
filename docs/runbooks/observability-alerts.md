@@ -1,6 +1,6 @@
 # Observability: alerts (Issue #36)
 
-Рекомендуемые алерты для Prometheus/Alertmanager при использовании метрик VoiceForge.
+Рекомендуемые алерты для Prometheus/Alertmanager при использовании метрик VoiceForge. Трассировка (Phase D #71): [config-env-contract.md](config-env-contract.md) — переменные `VOICEFORGE_OTEL_ENABLED`, `OTEL_EXPORTER_OTLP_ENDPOINT`; опция `voiceforge[otel]`; спаны pipeline.run, prepare_audio, step1_stt, step2_parallel; экспорт в Jaeger/OTLP.
 
 ## Метрики
 

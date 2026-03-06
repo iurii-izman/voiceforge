@@ -2,15 +2,15 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-05 (#65: чеклист снятия CVE в security-and-dependencies; следующий — coverage в toolbox / fail_under 75 или Phase D)
+**Обновлено:** 2026-03-05 (#71 OTel в observability runbook, audit W13→чеклист CVE; следующий — coverage в toolbox / Phase D)
 
 ---
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** (1) **#65 CVE:** в [security-and-dependencies.md](security-and-dependencies.md) добавлен раздел 4 «Чеклист снятия CVE-2025-69872» — шаги при появлении фикса upstream (проверка, uv lock, удаление ignore из verify_pr/test.yml/security-weekly, pip-audit без ignore, Dependabot).
+**Сделано в сессии:** (1) **#71 OTel:** в [observability-alerts.md](observability-alerts.md) добавлена ссылка на трассировку (config-env-contract: VOICEFORGE_OTEL_ENABLED, OTEL_EXPORTER_OTLP_ENDPOINT, voiceforge[otel]). (2) В audit.md для W13 указана ссылка на чеклист снятия CVE (разд. 4 security-and-dependencies).
 
-**Следующий шаг:** Прогнать `make coverage` в toolbox и при ≥75% выставить fail_under=75 (#56). Либо доработки Phase D (#71 OTel, #66 async, W17). Единый план: [plans.md](../plans.md).
+**Следующий шаг:** Прогнать `make coverage` в toolbox и при ≥75% выставить fail_under=75 (#56). Либо доработки Phase D (#66 async, W17). Единый план: [plans.md](../plans.md).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 

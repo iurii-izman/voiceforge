@@ -20,7 +20,7 @@
 | W10 / Step 13 | Prompt hash validation | **СДЕЛАНО** | prompt_loader.get_prompt_hashes(), warning при fallback, test_prompt_content_snapshot (#67) |
 | W11 / Step 9 | Periodic retention purge | **СДЕЛАНО** | daemon: Timer 24h purge (#63) |
 | W12 / Step 9 | DB backup CLI | **СДЕЛАНО** | voiceforge backup (--keep N) (#63) |
-| W13 / Step 11 | CVE-2025-69872 | **ЧАСТИЧНО** | Источник (instructor) задокументирован; pip-audit с ignore в CI до фикса upstream (#65) |
+| W13 / Step 11 | CVE-2025-69872 | **ЧАСТИЧНО** | Источник (instructor) задокументирован; pip-audit с ignore в CI до фикса upstream (#65); чеклист снятия — [security-and-dependencies.md](../runbooks/security-and-dependencies.md) разд. 4. |
 | W14 / Step 6 | /ready endpoint | **СДЕЛАНО** | web/server.py: GET /ready, 200/503; test_web_smoke |
 | W15 / Step 4 | Version inconsistency | **СДЕЛАНО** | __init__.py: importlib.metadata.version("voiceforge") |
 | W16 / Step 5 | .editorconfig | **СДЕЛАНО** | .editorconfig в корне |
