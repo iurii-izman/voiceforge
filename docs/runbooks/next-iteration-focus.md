@@ -2,15 +2,15 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-05 (pre-commit в fedora-toolbox-43, ruff-фиксы; следующий — Phase D или #56)
+**Обновлено:** 2026-03-05 (Phase D #70 eval-ab, #72 custom templates; тесты — только лёгкие, избегать OOM)
 
 ---
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** (1) Pre-commit запущен в **fedora-toolbox-43** (контейнер: `toolbox run -c fedora-toolbox-43`; на хосте без Python 3.12 — `git commit --no-verify`, `git push --no-verify`). (2) Исправлены 9 замечаний ruff: daemon B023 (do_purge default arg), otel SIM103 (return condition), server E402 (noqa), tests SIM117/SIM105/B007; trailing whitespace и ruff-format. (3) Тесты 294 passed; коммит и пуш.
+**Сделано в сессии:** (1) docs: удалён #50/macOS/WSL2 из планов и скоупа (Linux only). (2) **#70 A/B:** `scripts/eval_ab.py` + `make eval-ab` — сравнение двух моделей по ROUGE-L на одном golden sample; ключ из keyring. (3) **#72 custom templates:** `prompt_loader` загружает `template_*` из `~/.config/voiceforge/templates/` при наличии файла. (4) Тесты: только лёгкие (`test_prompt_loader test_core_metrics test_llm_circuit_breaker test_tracing test_audio_buffer test_telegram_notify test_llm_retry` + `tests/eval/ -k "not judge"`), чтобы не уходить в OOM.
 
-**Следующий шаг:** Выбрать и начать задачу: **Phase D** (#70 A/B testing, #72 plugins, #73 packaging GA) или **#56** (fail_under 75, вывод модулей из omit). Единый план: [plans.md](../plans.md).
+**Следующий шаг:** **#73** packaging GA (AppImage/Flatpak) или **#56** fail_under 75 (при необходимости запускать coverage лёгким подмножеством). Единый план: [plans.md](../plans.md).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -81,7 +81,7 @@
 
 ## Актуальные напоминания
 
-- **OOM / зависание Cursor при тестах:** запускать тесты **меньшими блоками**, напр. один файл: `uv run pytest tests/test_dbus_service.py -q` или лёгкие: `uv run pytest tests/test_core_metrics.py tests/test_dbus_service.py tests/test_dbus_contract_snapshot.py -q`. Полный `pytest tests/` при нехватке памяти — подмножество без тяжёлых: `uv run pytest tests/ --ignore=tests/test_pipeline_integration.py -q`.
+- **OOM / зависание Cursor при тестах:** запускать **только лёгкие** тесты, напр. `uv run pytest tests/test_prompt_loader.py tests/test_core_metrics.py tests/test_llm_circuit_breaker.py tests/test_tracing.py tests/test_audio_buffer.py tests/test_telegram_notify.py tests/test_llm_retry.py -q --tb=line` и/или `uv run pytest tests/eval/ -k "not judge" -q`. Не запускать полный `pytest tests/` в Cursor (pyannote/torch/pipeline) — риск OOM.
 - **OOM при тестах (pyannote/torch):** если полный `pytest tests/` вылетает по памяти, запускать подмножество: `uv run pytest tests/test_pipeline_integration.py tests/test_caldav_poll.py tests/test_calendar.py tests/test_transcript_log.py -q`. В test_pipeline_integration тест с полным run мокает _gather_step2, чтобы не загружать diarizer/RAG.
 - **Pre-commit (Fedora Atomic):** Python 3.12 в контейнере **fedora-toolbox-43** (`toolbox run -c fedora-toolbox-43 bash -c 'cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files'`). Выполнять `./scripts/ensure_precommit_env.sh` внутри этого контейнера. Вне toolbox (на хосте без 3.12) — временно `git commit --no-verify`, `git push --no-verify`.
 - **Sonar:** `uv run python scripts/sonar_fetch_issues.py` — проверить остаток после последнего скана.
