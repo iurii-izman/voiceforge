@@ -6,6 +6,7 @@ from __future__ import annotations
 import asyncio
 import atexit
 import contextlib
+import functools
 import json
 import os
 import queue
@@ -14,6 +15,7 @@ import threading
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FuturesTimeoutError
+from datetime import date
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -524,6 +526,29 @@ def _wire_daemon_iface(iface: DaemonVoiceForgeInterface, daemon: VoiceForgeDaemo
     iface._get_capabilities = daemon.get_capabilities
 
 
+async def _run_one_retention_purge(daemon: VoiceForgeDaemon) -> tuple[int, date | None]:
+    """Run one retention purge in executor. Returns (count, cutoff_date). S3776."""
+    from datetime import date, timedelta
+
+    from voiceforge.core.transcript_log import TranscriptLog
+
+    retention_days = getattr(daemon._cfg, "retention_days", 0)
+    if retention_days <= 0:
+        return (0, None)
+
+    def do_purge(cutoff_date: date) -> int:
+        log_db = TranscriptLog()
+        try:
+            return log_db.purge_before(cutoff_date)
+        finally:
+            log_db.close()
+
+    cutoff = date.today() - timedelta(days=retention_days)
+    loop = asyncio.get_running_loop()
+    n = await loop.run_in_executor(None, functools.partial(do_purge, cutoff))
+    return (n, cutoff)
+
+
 def _run_daemon_loop(
     iface: DaemonVoiceForgeInterface,
     daemon: VoiceForgeDaemon,
@@ -535,35 +560,16 @@ def _run_daemon_loop(
     PURGE_INTERVAL_SEC = 86400  # 24h (#63)
 
     async def _periodic_purge() -> None:
-        retention_days = getattr(daemon._cfg, "retention_days", 0)
-        if retention_days <= 0:
-            return
-        from datetime import date, timedelta
-
-        from voiceforge.core.transcript_log import TranscriptLog
-
-        def do_purge(cutoff_date: date) -> int:
-            log_db = TranscriptLog()
-            try:
-                return log_db.purge_before(cutoff_date)
-            finally:
-                log_db.close()
-
         while True:
             try:
                 await asyncio.wait_for(stop_event.wait(), timeout=PURGE_INTERVAL_SEC)
             except asyncio.TimeoutError:
-                # Timeout: run purge and loop again (S2737).
                 pass
             if stop_event.is_set():
                 return
             try:
-                cutoff = date.today() - timedelta(days=retention_days)
-                loop = asyncio.get_running_loop()
-                n = await loop.run_in_executor(
-                    None, lambda c=cutoff, fn=do_purge: fn(c)
-                )
-                if n:
+                n, cutoff = await _run_one_retention_purge(daemon)
+                if n and cutoff is not None:
                     log.info("retention.purged_periodic", count=n, cutoff=cutoff.isoformat())
             except asyncio.CancelledError:
                 raise
@@ -584,7 +590,7 @@ def _run_daemon_loop(
                 try:
                     await service_task
                 except asyncio.CancelledError:
-                    pass
+                    pass  # Cleanup done; re-raise outer CancelledError below (S7497).
                 raise
             service_task.cancel()
             try:
@@ -599,7 +605,7 @@ def _run_daemon_loop(
         loop.run_until_complete(_serve())
     except Exception as e:
         log.exception("daemon.crash", error=str(e), pid=os.getpid(), pid_file=str(pid_path))
-        raise
+        raise  # S2737: re-raise after logging.
     finally:
         loop.close()
 
