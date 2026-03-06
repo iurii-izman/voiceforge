@@ -575,14 +575,14 @@ def run_daemon() -> None:
                 cutoff = date.today() - timedelta(days=retention_days)
                 loop = asyncio.get_running_loop()
 
-                def do_purge(_cutoff: date = cutoff) -> int:
+                def do_purge(cutoff_date: date) -> int:
                     log_db = TranscriptLog()
                     try:
-                        return log_db.purge_before(_cutoff)
+                        return log_db.purge_before(cutoff_date)
                     finally:
                         log_db.close()
 
-                n = await loop.run_in_executor(None, do_purge)
+                n = await loop.run_in_executor(None, lambda: do_purge(cutoff))
                 if n:
                     log.info("retention.purged_periodic", count=n, cutoff=cutoff.isoformat())
             except asyncio.CancelledError:
@@ -597,11 +597,20 @@ def run_daemon() -> None:
             await stop_event.wait()
         finally:
             purge_task.cancel()
-            with contextlib.suppress(asyncio.CancelledError):
+            try:
                 await purge_task
+            except asyncio.CancelledError:
+                service_task.cancel()
+                try:
+                    await service_task
+                except asyncio.CancelledError:
+                    pass
+                raise
             service_task.cancel()
-            with contextlib.suppress(asyncio.CancelledError):
+            try:
                 await service_task
+            except asyncio.CancelledError:
+                raise
 
     try:
         loop = asyncio.new_event_loop()

@@ -29,7 +29,7 @@
 - **Открытые issues:** #65 (CVE — ждём upstream), #50 (macOS/WSL2 — исследование, можно отложить). Остальные Phase A–D закрыты.
 - **Рекомендация:** перед бетой закрыть или отклонить Dependabot-PR с обновлением зависимостей; оставить #65 открытым до появления фикса; при желании перевести #50 в backlog.
 
-**Sonar (сессия):** Исправлено: S1192 (константы server_async, router), S108/S1186 (пустые блоки/методы — комментарии), S1481 (unused → _), S5603 (удалён неиспользуемый fake_t), S1244 (test_core_metrics — pytest.approx), S7688 (ensure_precommit_env [[), S8264 (permissions в job-level в test.yml). Осталось: daemon (S3776, S7484, S7497, S1515), benchmark S5864, float equality в других тестах, test_caldav S3358, test_transcript_log S1244, pipeline_integration S7500. Список: `uv run python scripts/sonar_fetch_issues.py`.
+**Sonar (сессии):** Исправлено: S1192, S108, S1186, S1481, S5603, S1244 (в т.ч. test_transcript_log, test_cli_helpers, test_llm_router_helpers, test_daemon_streaming), S7688, S8264, S1515 (do_purge), S7497 (CancelledError re-raise в daemon), S3358 (test_caldav_poll), S5864 (BenchmarkFixture). Осталось: daemon S3776, S7484, pipeline_integration S7500. Список: `uv run python scripts/sonar_fetch_issues.py`.
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 

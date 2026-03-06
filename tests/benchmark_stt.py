@@ -7,6 +7,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from pytest_benchmark.fixture import BenchmarkFixture
 
 from voiceforge.stt.transcriber import Transcriber
 
@@ -23,7 +24,7 @@ def _load_wav(path: Path) -> tuple[np.ndarray, int]:
 
 @pytest.mark.benchmark
 @pytest.mark.slow
-def test_bench_stt_silence_5s(benchmark: object) -> None:
+def test_bench_stt_silence_5s(benchmark: BenchmarkFixture) -> None:
     """STT on silence_5s.wav (5s) — baseline for regression."""
     path = FIXTURES_DIR / "silence_5s.wav"
     if not path.exists():

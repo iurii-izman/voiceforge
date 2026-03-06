@@ -142,7 +142,11 @@ def test_poll_events_import_error(monkeypatch: pytest.MonkeyPatch) -> None:
     from voiceforge.calendar import caldav_poll
 
     def fake_key(name: str) -> str:
-        return "https://x/" if name == "caldav_url" else "u" if name == "caldav_username" else "p"
+        if name == "caldav_url":
+            return "https://x/"
+        if name == "caldav_username":
+            return "u"
+        return "p"
 
     monkeypatch.setattr(caldav_poll, "get_api_key", fake_key)
     orig_import = builtins.__import__
@@ -164,7 +168,11 @@ def test_poll_events_no_calendars(monkeypatch: pytest.MonkeyPatch) -> None:
     from voiceforge.calendar.caldav_poll import poll_events_started_in_last
 
     def fake_key(name: str) -> str:
-        return "https://x/" if name == "caldav_url" else "u" if name == "caldav_username" else "p"
+        if name == "caldav_url":
+            return "https://x/"
+        if name == "caldav_username":
+            return "u"
+        return "p"
 
     monkeypatch.setattr("voiceforge.calendar.caldav_poll.get_api_key", fake_key)
     mock_principal = MagicMock()
@@ -184,7 +192,11 @@ def test_poll_events_client_raises(monkeypatch: pytest.MonkeyPatch) -> None:
     from voiceforge.calendar.caldav_poll import poll_events_started_in_last
 
     def fake_key(name: str) -> str:
-        return "https://x/" if name == "caldav_url" else "u" if name == "caldav_username" else "p"
+        if name == "caldav_url":
+            return "https://x/"
+        if name == "caldav_username":
+            return "u"
+        return "p"
 
     monkeypatch.setattr("voiceforge.calendar.caldav_poll.get_api_key", fake_key)
     mock_client = MagicMock()
@@ -205,7 +217,11 @@ def test_poll_events_success_with_event(monkeypatch: pytest.MonkeyPatch) -> None
     from voiceforge.calendar.caldav_poll import poll_events_started_in_last
 
     def fake_key(name: str) -> str:
-        return "https://x/" if name == "caldav_url" else "u" if name == "caldav_username" else "p"
+        if name == "caldav_url":
+            return "https://x/"
+        if name == "caldav_username":
+            return "u"
+        return "p"
 
     monkeypatch.setattr("voiceforge.calendar.caldav_poll.get_api_key", fake_key)
     now = datetime.now(UTC)

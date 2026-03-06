@@ -5,6 +5,8 @@ from __future__ import annotations
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
+import pytest
+
 from voiceforge.core.transcript_log import TranscriptLog
 
 
@@ -54,7 +56,7 @@ def test_get_session_meta(tmp_path: Path) -> None:
     )
     meta = log.get_session_meta(1)
     assert meta is not None
-    assert meta[2] == 1.0  # duration_sec
+    assert meta[2] == pytest.approx(1.0)  # duration_sec
     log.close()
 
 

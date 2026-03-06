@@ -254,8 +254,8 @@ def test_daemon_get_analytics_parses_7d_and_30d(tmp_path, monkeypatch) -> None:
             daemon = VoiceForgeDaemon(iface=None)
             out7 = daemon.get_analytics("7d")
             out30 = daemon.get_analytics("30")
-    assert json.loads(out7)["total_cost_usd"] == 1.0
-    assert json.loads(out30)["total_cost_usd"] == 1.0
+    assert json.loads(out7)["total_cost_usd"] == pytest.approx(1.0)
+    assert json.loads(out30)["total_cost_usd"] == pytest.approx(1.0)
     assert mock_get_stats.call_count == 2
     calls = [c[1] for c in mock_get_stats.call_args_list]
     assert calls[0]["days"] == 7

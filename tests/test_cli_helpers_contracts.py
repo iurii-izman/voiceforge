@@ -108,7 +108,7 @@ def test_status_helpers_format_stats_and_detailed(monkeypatch) -> None:
     assert "7" in detailed_text
     assert "30" in detailed_text
     detailed_data = sh.get_status_detailed_data(budget_limit_usd=10.0)
-    assert detailed_data["budget_limit_usd"] == 10.0
+    assert detailed_data["budget_limit_usd"] == pytest.approx(10.0)
     assert "stats_7d" in detailed_data
     assert "stats_30d" in detailed_data
 

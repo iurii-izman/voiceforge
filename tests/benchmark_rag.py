@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+from pytest_benchmark.fixture import BenchmarkFixture
 
 from voiceforge.rag.query_keywords import extract_keyword_queries, extract_keywords
 
@@ -18,7 +19,7 @@ def _long_transcript() -> str:
 
 
 @pytest.mark.benchmark
-def test_bench_extract_keywords(benchmark: object) -> None:
+def test_bench_extract_keywords(benchmark: BenchmarkFixture) -> None:
     """extract_keywords on long transcript — pure Python, no DB. Baseline: < 100ms (see baseline_benchmark.json)."""
     text = _long_transcript()
 
@@ -29,7 +30,7 @@ def test_bench_extract_keywords(benchmark: object) -> None:
 
 
 @pytest.mark.benchmark
-def test_bench_extract_keyword_queries(benchmark: object) -> None:
+def test_bench_extract_keyword_queries(benchmark: BenchmarkFixture) -> None:
     """extract_keyword_queries (multi-query) on long transcript. Baseline: < 200ms (see baseline_benchmark.json)."""
     text = _long_transcript()
 

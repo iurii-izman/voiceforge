@@ -53,7 +53,7 @@ def test_usage_and_cost_from_response() -> None:
     assert out == 20
     assert cache_read == 0
     assert cache_cre == 0
-    assert cost == 0.001
+    assert cost == pytest.approx(0.001)
 
 
 def test_usage_and_cost_from_response_fallback_cost() -> None:
@@ -70,6 +70,6 @@ def test_usage_and_cost_from_response_fallback_cost() -> None:
     raw = SimpleNamespace(usage=usage, _hidden_params={"response_cost": 0.002})
     with patch("litellm.completion_cost", side_effect=Exception("no cost")):
         inp, out, _cr, _cc, cost = router._usage_and_cost_from_response(raw, "m1")
-    assert cost == 0.002
+    assert cost == pytest.approx(0.002)
     assert inp == 5
     assert out == 10
