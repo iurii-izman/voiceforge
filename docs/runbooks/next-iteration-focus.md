@@ -2,15 +2,15 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-05 (plans.md: Phase D #70–73 частично; следующий — coverage в toolbox / доработки)
+**Обновлено:** 2026-03-05 (test-operations: команда coverage в toolbox #56; следующий — выполнить и при ≥75% fail_under=75)
 
 ---
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** В [plans.md](../plans.md) уточнён статус Phase D: #70 (eval-ab), #72 (custom templates), #73 (flatpak-build, GA) — частично; #71 OTel — базовая интеграция. Раздел 5: Phase D доводить до GA по критериям 3.2.
+**Сделано в сессии:** В [test-operations.md](test-operations.md) добавлен подраздел «Coverage в toolbox (#56)»: команда `toolbox run -c fedora-toolbox-43 bash -c '... make coverage'` и напоминание про fail_under=75 при ≥75%.
 
-**Следующий шаг:** Прогнать `make coverage` в toolbox и при ≥75% выставить fail_under=75 (#56). Либо доработки (#66 async, W17). Единый план: [plans.md](../plans.md).
+**Следующий шаг:** Выполнить команду из test-operations (coverage в toolbox); при ≥75% выставить fail_under=75 (#56). Либо доработки (#66 async, W17). Единый план: [plans.md](../plans.md).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
