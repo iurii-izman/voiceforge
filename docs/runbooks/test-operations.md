@@ -1,5 +1,9 @@
 # Test Operations
 
+## Локальный прогон (Cursor / слабая машина)
+
+Полный `pytest tests/` может вызвать OOM (pyannote/torch). Запускайте подмножество лёгких тестов, см. [next-iteration-focus.md](next-iteration-focus.md) (раздел «Актуальные напоминания»). Пример: `uv run pytest tests/test_prompt_loader.py tests/test_core_metrics.py tests/test_llm_circuit_breaker.py tests/test_tracing.py -q --tb=line`. Coverage: `make coverage` рекомендуется выполнять в toolbox.
+
 ## Flaky test policy
 
 1. Any flaky test must be triaged within 24h.

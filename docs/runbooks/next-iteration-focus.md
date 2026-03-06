@@ -2,13 +2,13 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-05 (#71 OTel в observability runbook, audit W13→чеклист CVE; следующий — coverage в toolbox / Phase D)
+**Обновлено:** 2026-03-05 (test-operations: OOM/лёгкие тесты; следующий — coverage в toolbox / Phase D)
 
 ---
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** (1) **#71 OTel:** в [observability-alerts.md](observability-alerts.md) добавлена ссылка на трассировку (config-env-contract: VOICEFORGE_OTEL_ENABLED, OTEL_EXPORTER_OTLP_ENDPOINT, voiceforge[otel]). (2) В audit.md для W13 указана ссылка на чеклист снятия CVE (разд. 4 security-and-dependencies).
+**Сделано в сессии:** (1) В [test-operations.md](test-operations.md) добавлен блок «Локальный прогон (Cursor / слабая машина)»: полный pytest может OOM, ссылка на next-iteration-focus и пример лёгких тестов; `make coverage` — в toolbox.
 
 **Следующий шаг:** Прогнать `make coverage` в toolbox и при ≥75% выставить fail_under=75 (#56). Либо доработки Phase D (#66 async, W17). Единый план: [plans.md](../plans.md).
 
