@@ -3,6 +3,7 @@ Block 6.1: GetSessions, GetSessionDetail, GetSettings, GetIndexedPaths for Tauri
 
 from __future__ import annotations
 
+import asyncio
 import atexit
 import contextlib
 import json
@@ -523,51 +524,17 @@ def _wire_daemon_iface(iface: DaemonVoiceForgeInterface, daemon: VoiceForgeDaemo
     iface._get_capabilities = daemon.get_capabilities
 
 
-def run_daemon() -> None:
-    """Run daemon: write PID, register D-Bus, graceful SIGTERM."""
-    import asyncio
-
-    pid_path = _pid_path()
-    pid_path.parent.mkdir(parents=True, exist_ok=True)
-
-    def _dummy_analyze(seconds: int, template: str | None = None) -> str:
-        return ""
-
-    iface = DaemonVoiceForgeInterface(
-        analyze_fn=_dummy_analyze,
-        status_fn=lambda: "",
-        listen_start_fn=lambda: None,
-        listen_stop_fn=lambda: None,
-        is_listening_fn=lambda: False,
-    )
-    daemon = VoiceForgeDaemon(iface)
-    _retention_purge_at_startup(daemon)
-    _wire_daemon_iface(iface, daemon)
-
-    log.info("daemon.starting", pid=os.getpid(), pid_file=str(pid_path))
-    stop_event = asyncio.Event()
-    loop: asyncio.AbstractEventLoop | None = None
-
-    def on_sigterm(*args: object) -> None:
-        log.info("daemon.sigterm")
-        daemon.listen_stop()
-        pid_path.unlink(missing_ok=True)
-        if loop is not None and loop.is_running():
-            loop.call_soon_threadsafe(stop_event.set)
-
-    # Register signal handlers BEFORE writing PID file so any signal
-    # received after writing the file is handled (not default-terminated).
-    signal.signal(signal.SIGTERM, on_sigterm)
-    signal.signal(signal.SIGINT, on_sigterm)
-
-    # Write PID file and register atexit cleanup only after signal handlers are set
-    pid_path.write_text(str(os.getpid()))
-    atexit.register(lambda: pid_path.unlink(missing_ok=True))
-
+def _run_daemon_loop(
+    iface: DaemonVoiceForgeInterface,
+    daemon: VoiceForgeDaemon,
+    stop_event: asyncio.Event,
+    pid_path: Path,
+    loop_holder: list[asyncio.AbstractEventLoop | None],
+) -> None:
+    """Run asyncio loop with D-Bus service and periodic purge. S3776: extracted from run_daemon."""
     PURGE_INTERVAL_SEC = 86400  # 24h (#63)
 
     async def _periodic_purge() -> None:
-        """Run retention purge every 24h (#63). S7484: wait on Event with timeout instead of sleep loop."""
         retention_days = getattr(daemon._cfg, "retention_days", 0)
         if retention_days <= 0:
             return
@@ -586,13 +553,16 @@ def run_daemon() -> None:
             try:
                 await asyncio.wait_for(stop_event.wait(), timeout=PURGE_INTERVAL_SEC)
             except asyncio.TimeoutError:
+                # Timeout: run purge and loop again (S2737).
                 pass
             if stop_event.is_set():
                 return
             try:
                 cutoff = date.today() - timedelta(days=retention_days)
                 loop = asyncio.get_running_loop()
-                n = await loop.run_in_executor(None, lambda: do_purge(cutoff))
+                n = await loop.run_in_executor(
+                    None, lambda c=cutoff, fn=do_purge: fn(c)
+                )
                 if n:
                     log.info("retention.purged_periodic", count=n, cutoff=cutoff.isoformat())
             except asyncio.CancelledError:
@@ -622,13 +592,52 @@ def run_daemon() -> None:
             except asyncio.CancelledError:
                 raise
 
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop_holder[0] = loop
     try:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
         loop.run_until_complete(_serve())
     except Exception as e:
         log.exception("daemon.crash", error=str(e), pid=os.getpid(), pid_file=str(pid_path))
         raise
     finally:
-        if loop is not None:
-            loop.close()
+        loop.close()
+
+
+def run_daemon() -> None:
+    """Run daemon: write PID, register D-Bus, graceful SIGTERM."""
+    pid_path = _pid_path()
+    pid_path.parent.mkdir(parents=True, exist_ok=True)
+
+    def _dummy_analyze(seconds: int, template: str | None = None) -> str:
+        return ""
+
+    iface = DaemonVoiceForgeInterface(
+        analyze_fn=_dummy_analyze,
+        status_fn=lambda: "",
+        listen_start_fn=lambda: None,
+        listen_stop_fn=lambda: None,
+        is_listening_fn=lambda: False,
+    )
+    daemon = VoiceForgeDaemon(iface)
+    _retention_purge_at_startup(daemon)
+    _wire_daemon_iface(iface, daemon)
+
+    log.info("daemon.starting", pid=os.getpid(), pid_file=str(pid_path))
+    stop_event = asyncio.Event()
+    loop_holder: list[asyncio.AbstractEventLoop | None] = [None]
+
+    def on_sigterm(*args: object) -> None:
+        log.info("daemon.sigterm")
+        daemon.listen_stop()
+        pid_path.unlink(missing_ok=True)
+        loop = loop_holder[0]
+        if loop is not None and loop.is_running():
+            loop.call_soon_threadsafe(stop_event.set)
+
+    signal.signal(signal.SIGTERM, on_sigterm)
+    signal.signal(signal.SIGINT, on_sigterm)
+    pid_path.write_text(str(os.getpid()))
+    atexit.register(lambda: pid_path.unlink(missing_ok=True))
+
+    _run_daemon_loop(iface, daemon, stop_event, pid_path, loop_holder)
