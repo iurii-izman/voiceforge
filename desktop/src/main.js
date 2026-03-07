@@ -622,7 +622,7 @@ function loadUpcomingEvents() {
       events.slice(0, 10).forEach((ev) => {
         const summary = escapeHtml(ev.summary ?? "(без названия)");
         const start = ev.start_iso ?? "";
-        const startShort = start.replace(/T.*/, "").replace(/-/g, ".") + (start.includes("T") ? " " + start.split("T")[1].slice(0, 5) : "");
+        const startShort = start.replace(/T.*/, "").replaceAll("-", ".") + (start.includes("T") ? " " + start.split("T")[1].slice(0, 5) : "");
         html += "<li><strong>" + summary + "</strong> <span class=\"muted\">" + startShort + "</span></li>";
       });
       html += "</ul>";
@@ -657,7 +657,7 @@ function loadLastAnalysisWidget() {
         const detail = denv?.data?.session_detail ?? denv?.session_detail ?? denv ?? {};
         const ana = detail.analysis || null;
         const started = session.started_at ?? session.created_at ?? "";
-        const startShort = started ? String(started).replace(/T.*/, "").replace(/-/g, ".") + (String(started).includes("T") ? " " + String(started).split("T")[1].slice(0, 5) : "") : "";
+        const startShort = started ? String(started).replace(/T.*/, "").replaceAll("-", ".") + (String(started).includes("T") ? " " + String(started).split("T")[1].slice(0, 5) : "") : "";
         let summaryHtml = "<p class=\"muted\">Сессия " + escapeHtml(String(sessionId)) + (startShort ? " · " + escapeHtml(startShort) : "") + "</p>";
         if (ana) {
           const actions = Array.isArray(ana.action_items) ? ana.action_items : [];
@@ -752,8 +752,8 @@ function initQuickActions() {
         if (statusEl) statusEl.textContent = "Готово.";
         loadSessions();
         notify("VoiceForge", "Анализ завершён.");
-      } else {
-        if (statusEl) statusEl.textContent = errorMessage(env);
+      } else if (statusEl) {
+        statusEl.textContent = errorMessage(env);
       }
     } catch (e) {
       if (statusEl) statusEl.textContent = t("error_prefix") + (e?.message ?? String(e ?? ""));
@@ -775,8 +775,8 @@ async function runDefaultAnalyze() {
       if (statusEl) statusEl.textContent = "Готово.";
       loadSessions();
       notify("VoiceForge", "Анализ завершён.");
-    } else {
-      if (statusEl) statusEl.textContent = errorMessage(env);
+    } else if (statusEl) {
+      statusEl.textContent = errorMessage(env);
     }
   } catch (e) {
     if (statusEl) statusEl.textContent = t("error_prefix") + (e?.message ?? String(e ?? ""));
@@ -788,7 +788,7 @@ async function setupGlobalShortcuts() {
   const enabled = localStorage.getItem(HOTKEYS_ENABLED_KEY) !== "false";
   if (!enabled) return;
   const [shortcutRecord, shortcutAnalyze] = getShortcuts();
-  currentShortcuts = [shortcutRecord, shortcutAnalyze].filter((s) => s);
+  currentShortcuts = [shortcutRecord, shortcutAnalyze].filter(Boolean);
   if (currentShortcuts.length === 0) return;
   try {
     await registerShortcut(currentShortcuts, (event) => {
@@ -932,7 +932,7 @@ let lastAnalyticsData = null;
 function parseSessionDate(startedAt) {
   if (!startedAt || typeof startedAt !== "string") return null;
   const d = new Date(startedAt);
-  return isNaN(d.getTime()) ? null : d;
+  return Number.isNaN(d.getTime()) ? null : d;
 }
 
 function filterAndSortSessions(sessions, search, period, sortKey) {
@@ -1322,11 +1322,9 @@ function focusTrapDetail(e) {
         e.preventDefault();
         last?.focus();
       }
-    } else {
-      if (document.activeElement === last) {
-        e.preventDefault();
-        first?.focus();
-      }
+    } else if (document.activeElement === last) {
+      e.preventDefault();
+      first?.focus();
     }
   }
 }
@@ -1569,7 +1567,7 @@ const SETTINGS_LABELS = {
 
 function renderSettings(data) {
   if (!data || typeof data !== "object") return "<p class=\"muted\">Нет данных.</p>";
-  const keys = Object.keys(SETTINGS_LABELS).filter((k) => Object.prototype.hasOwnProperty.call(data, k));
+  const keys = Object.keys(SETTINGS_LABELS).filter((k) => Object.hasOwn(data, k));
   if (keys.length === 0) {
     return "<p class=\"muted\">Нет настроек.</p>";
   }
@@ -1724,7 +1722,7 @@ function toggleClipboardHistoryPopover() {
       return `<button type="button" class="clipboard-history-item" data-index="${i}">${escapeHtml(preview)}</button>`;
     }).join("");
     listEl.querySelectorAll(".clipboard-history-item").forEach((el) => {
-      const idx = Number(el.getAttribute("data-index"), 10);
+      const idx = Number(el.dataset.index, 10);
       const text = entries[idx]?.t ?? "";
       el.addEventListener("click", () => {
         navigator.clipboard.writeText(text).then(() => {
@@ -1769,8 +1767,10 @@ const DOCS_QUICKSTART = "https://github.com/iurii-izman/voiceforge/blob/main/doc
 function parseDeepLinkSessionId(url) {
   if (!url || typeof url !== "string") return null;
   const u = url.trim();
-  const sessionMatch = u.match(/session\/(\d+)/i) || u.match(/\/session\/(\d+)/i);
-  if (sessionMatch) return Number.parseInt(sessionMatch[1], 10);
+  const re1 = /session\/(\d+)/i;
+  const re2 = /\/session\/(\d+)/i;
+  const m = re1.exec(u) || re2.exec(u);
+  if (m) return Number.parseInt(m[1], 10);
   return null;
 }
 
@@ -1979,7 +1979,7 @@ function exportSessionsList(format) {
   const header = "id,started_at,duration_sec\n";
   const rows = list.map((s) => {
     const id = s.id ?? s.session_id ?? "";
-    const start = (s.started_at ?? s.created_at ?? "").replace(/"/g, '""');
+    const start = (s.started_at ?? s.created_at ?? "").replaceAll('"', '""');
     const dur = s.duration_sec ?? "";
     return `${id},"${start}",${dur}`;
   });
@@ -2001,7 +2001,7 @@ function exportCostsReport() {
   });
   csv += "\nmodel,cost_usd,calls\n";
   byModel.forEach((r) => {
-    const model = (r.model ?? "").replace(/"/g, '""');
+    const model = (r.model ?? "").replaceAll('"', '""');
     csv += `"${model}",${r.cost_usd ?? r.cost ?? 0},${r.calls ?? r.count ?? ""}\n`;
   });
   const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
@@ -2194,7 +2194,6 @@ async function applyCompactMode(compact) {
     try {
       const raw = localStorage.getItem(COMPACT_WINDOW_STATE_KEY);
       if (raw) {
-        const s = JSON.parse(raw);
         const pos = await win.outerPosition();
         const size = await win.outerSize();
         localStorage.setItem(COMPACT_WINDOW_STATE_KEY, JSON.stringify({ x: pos.x, y: pos.y, width: size.width, height: size.height }));
@@ -2285,7 +2284,7 @@ function initDashboardWidgets() {
     up?.addEventListener("click", () => {
       const prev = widget.previousElementSibling;
       if (prev?.classList.contains("dashboard-widget")) {
-        container.insertBefore(widget, prev);
+        prev.before(widget);
         const newOrder = Array.from(container.querySelectorAll(".dashboard-widget")).map((w) => w.dataset.widgetId);
         saveDashboardOrder(newOrder);
       }
@@ -2293,7 +2292,7 @@ function initDashboardWidgets() {
     down?.addEventListener("click", () => {
       const next = widget.nextElementSibling;
       if (next?.classList.contains("dashboard-widget")) {
-        container.insertBefore(next, widget);
+        widget.before(next);
         const newOrder = Array.from(container.querySelectorAll(".dashboard-widget")).map((w) => w.dataset.widgetId);
         saveDashboardOrder(newOrder);
       }
