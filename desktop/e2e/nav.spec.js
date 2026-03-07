@@ -58,4 +58,13 @@ test.describe("Desktop UI navigation", () => {
     await expect(page.locator("#costs-30d")).toBeVisible();
     await expect(page.locator("#costs-export-btn")).toBeVisible();
   });
+
+  test("sessions tab shows search and filters", async ({ page }) => {
+    await page.getByRole("navigation").locator("[data-tab='sessions']").click();
+    await expect(page.locator("#tab-sessions.active")).toBeVisible();
+    await expect(page.locator("#sessions-search")).toBeVisible();
+    await expect(page.locator("#sessions-fts-search")).toBeVisible();
+    await expect(page.locator("#sessions-period")).toBeVisible();
+    await expect(page.locator("#sessions-export-btn")).toBeVisible();
+  });
 });
