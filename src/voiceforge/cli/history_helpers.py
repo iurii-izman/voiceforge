@@ -212,31 +212,36 @@ def render_sessions_table_lines(sessions: list[object]) -> list[str]:
 # --- History command result builders (return (kind, data) for main.history to echo) ---
 
 
+def _action_items_json_payload(items: list[Any]) -> dict:
+    """Build JSON payload for action items (S3776)."""
+    return {
+        "action_items": [
+            {
+                "session_id": r.session_id,
+                "idx": r.idx_in_analysis,
+                "description": r.description,
+                "assignee": r.assignee,
+                "deadline": r.deadline,
+                "status": r.status,
+            }
+            for r in items
+        ]
+    }
+
+
+def _action_items_lines(items: list[Any]) -> list[str]:
+    """Build text lines for action items (S3776)."""
+    return [f"  [{r.session_id}] #{r.idx_in_analysis} {r.status}: {r.description}{f' ({r.assignee})' if r.assignee else ''}" for r in items]
+
+
 def history_action_items_result(log_db: Any, output: str) -> tuple[str, Any]:
     """Return ("json", payload) | ("lines", list[str]) | ("message", i18n_key)."""
     items = log_db.get_action_items(limit=100)
     if output == "json":
-        payload = {
-            "action_items": [
-                {
-                    "session_id": r.session_id,
-                    "idx": r.idx_in_analysis,
-                    "description": r.description,
-                    "assignee": r.assignee,
-                    "deadline": r.deadline,
-                    "status": r.status,
-                }
-                for r in items
-            ]
-        }
-        return ("json", payload)
+        return ("json", _action_items_json_payload(items))
     if not items:
         return ("message", "history.no_action_items")
-    lines = []
-    for r in items:
-        assign = f" ({r.assignee})" if r.assignee else ""
-        lines.append(f"  [{r.session_id}] #{r.idx_in_analysis} {r.status}: {r.description}{assign}")
-    return ("lines", lines)
+    return ("lines", _action_items_lines(items))
 
 
 def history_search_result(log_db: Any, search: str, output: str) -> tuple[str, Any]:

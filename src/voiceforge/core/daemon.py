@@ -665,6 +665,22 @@ async def _cancel_purge_then_service_reraise(
         raise
 
 
+def _event_start_in_window(ev: dict, now: datetime, window_end: datetime) -> bool:
+    """True if event start time is in [now, window_end] (S3776)."""
+    start_iso = ev.get("start_iso") or ""
+    if not start_iso:
+        return False
+    try:
+        if start_iso.endswith("Z"):
+            start_iso = start_iso[:-1] + "+00:00"
+        event_start = datetime.fromisoformat(start_iso)
+        if event_start.tzinfo is None:
+            event_start = event_start.replace(tzinfo=UTC)
+        return now <= event_start <= window_end
+    except (ValueError, TypeError):
+        return False
+
+
 def _calendar_autostart_loop(daemon: VoiceForgeDaemon) -> None:
     """Block 78: every 60s, if an event starts within N minutes and not listening, start listen."""
     if not getattr(daemon._cfg, "calendar_autostart_enabled", False):
@@ -686,23 +702,30 @@ def _calendar_autostart_loop(daemon: VoiceForgeDaemon) -> None:
                 now = datetime.now(UTC)
                 window_end = now + timedelta(minutes=minutes_ahead)
                 for ev in events:
-                    start_iso = ev.get("start_iso") or ""
-                    if not start_iso:
-                        continue
-                    try:
-                        if start_iso.endswith("Z"):
-                            start_iso = start_iso[:-1] + "+00:00"
-                        event_start = datetime.fromisoformat(start_iso)
-                        if event_start.tzinfo is None:
-                            event_start = event_start.replace(tzinfo=UTC)
-                        if now <= event_start <= window_end:
-                            log.info("calendar_autostart.starting", summary=ev.get("summary", ""), start=start_iso)
-                            daemon.listen_start()
-                            break
-                    except (ValueError, TypeError):
-                        continue
+                    if _event_start_in_window(ev, now, window_end):
+                        log.info("calendar_autostart.starting", summary=ev.get("summary", ""), start=ev.get("start_iso", ""))
+                        daemon.listen_start()
+                        break
             except Exception as e:
                 log.debug("calendar_autostart.check_failed", error=str(e))
+
+
+async def _periodic_purge_task(daemon: VoiceForgeDaemon, stop_event: asyncio.Event) -> None:
+    """Run retention purge every 24h (S3776: extracted from _run_daemon_loop)."""
+    PURGE_INTERVAL_SEC = 86400  # 24h (#63)
+    while True:
+        with contextlib.suppress(TimeoutError):
+            await asyncio.wait_for(stop_event.wait(), timeout=PURGE_INTERVAL_SEC)
+        if stop_event.is_set():
+            return
+        try:
+            n, cutoff = await _run_one_retention_purge(daemon)
+            if n and cutoff is not None:
+                log.info("retention.purged_periodic", count=n, cutoff=cutoff.isoformat())
+        except asyncio.CancelledError:
+            raise
+        except Exception as e:
+            log.warning("retention.purge_failed", error=str(e))
 
 
 def _run_daemon_loop(
@@ -713,26 +736,10 @@ def _run_daemon_loop(
     loop_holder: list[asyncio.AbstractEventLoop | None],
 ) -> None:
     """Run asyncio loop with D-Bus service and periodic purge. S3776: extracted from run_daemon."""
-    PURGE_INTERVAL_SEC = 86400  # 24h (#63)
-
-    async def _periodic_purge() -> None:
-        while True:
-            with contextlib.suppress(TimeoutError):
-                await asyncio.wait_for(stop_event.wait(), timeout=PURGE_INTERVAL_SEC)
-            if stop_event.is_set():
-                return
-            try:
-                n, cutoff = await _run_one_retention_purge(daemon)
-                if n and cutoff is not None:
-                    log.info("retention.purged_periodic", count=n, cutoff=cutoff.isoformat())
-            except asyncio.CancelledError:
-                raise
-            except Exception as e:
-                log.warning("retention.purge_failed", error=str(e))
 
     async def _serve() -> None:
         service_task = asyncio.create_task(run_dbus_service(iface))
-        purge_task = asyncio.create_task(_periodic_purge())
+        purge_task = asyncio.create_task(_periodic_purge_task(daemon, stop_event))
         try:
             await stop_event.wait()
         finally:

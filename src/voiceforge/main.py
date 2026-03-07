@@ -1289,7 +1289,15 @@ def export_session(
     finally:
         log_db.close()
 
-    suffix = "pdf" if format == "pdf" else "docx" if format == "docx" else "txt" if format == "otter" else "md"
+    def _export_suffix(fmt: str) -> str:
+        if fmt == "pdf":
+            return "pdf"
+        if fmt == "docx":
+            return "docx"
+        if fmt == "otter":
+            return "txt"
+        return "md"
+    suffix = _export_suffix(format)
     out_path = output or Path(f"session_{session_id}.{suffix}")
     if format in ("md", "notion", "otter"):
         out_path.write_text(md_text, encoding="utf-8")

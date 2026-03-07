@@ -242,18 +242,26 @@ function applyUiLangDataAttrs() {
   });
 }
 
-function applyUiLangStatusElements() {
+function applyListenAndStatusBar() {
   const listenBtn = document.getElementById("listen-toggle");
   const listenLabel = document.getElementById("listen-label");
   if (listenBtn) listenBtn.textContent = listenState ? t("listen_btn_stop") : t("listen_btn_start");
   if (listenLabel) listenLabel.textContent = listenState ? t("listen_label_recording") : "";
   const statusBar = document.getElementById("status-bar");
   if (statusBar) statusBar.textContent = daemonOk ? t("status_daemon_ok") : t("status_daemon_off");
+}
+
+function applyBannerAndCompactStatus() {
   const banner = document.getElementById("daemon-off-banner");
   const bannerText = document.getElementById("daemon-off-banner-text");
   if (bannerText && banner?.style.display !== "none") bannerText.textContent = t("status_daemon_off");
   const compactStatus = document.getElementById("compact-status");
   if (compactStatus) compactStatus.textContent = daemonOk ? t("compact_daemon_ok") : t("compact_daemon_off");
+}
+
+function applyUiLangStatusElements() {
+  applyListenAndStatusBar();
+  applyBannerAndCompactStatus();
   const closeBtn = document.getElementById("session-detail-close");
   if (closeBtn) closeBtn.setAttribute("aria-label", t("close_btn"));
   const lang = localStorage.getItem(UI_LANG_KEY) || "ru";
@@ -659,29 +667,49 @@ function formatStartedShort(started) {
   return datePart + timePart;
 }
 
+function buildLastAnalysisActionsList(ana) {
+  const actions = Array.isArray(ana?.action_items) ? ana.action_items : [];
+  const n = actions.length;
+  if (n === 0) return "";
+  let html = "<ul class=\"last-analysis-list\">";
+  actions.slice(0, 3).forEach((ai) => {
+    const d = typeof ai === "object" ? (ai.description || "") : String(ai);
+    html += "<li>" + escapeHtml(d) + "</li>";
+  });
+  if (n > 3) html += "<li class=\"muted\">… ещё " + (n - 3) + "</li>";
+  return html + "</ul>";
+}
+
+function buildLastAnalysisQrLine(ana) {
+  if (!ana) return "";
+  const q = Array.isArray(ana.questions) ? ana.questions.length : 0;
+  const r = Array.isArray(ana.recommendations) ? ana.recommendations.length : 0;
+  return (q || r) ? "<p class=\"muted\">Вопросов: " + q + ", рекомендаций: " + r + "</p>" : "";
+}
+
 function buildLastAnalysisSummaryHtml(sessionId, session, detail) {
   const ana = detail?.analysis || null;
   const started = session?.started_at ?? session?.created_at ?? "";
   const startShort = formatStartedShort(started);
   let html = "<p class=\"muted\">Сессия " + escapeHtml(String(sessionId)) + (startShort ? " · " + escapeHtml(startShort) : "") + "</p>";
   if (ana) {
-    const actions = Array.isArray(ana.action_items) ? ana.action_items : [];
-    const n = actions.length;
-    if (n > 0) {
-      html += "<ul class=\"last-analysis-list\">";
-      actions.slice(0, 3).forEach((ai) => {
-        const d = typeof ai === "object" ? (ai.description || "") : String(ai);
-        html += "<li>" + escapeHtml(d) + "</li>";
-      });
-      if (n > 3) html += "<li class=\"muted\">… ещё " + (n - 3) + "</li>";
-      html += "</ul>";
-    } else {
-      const q = Array.isArray(ana.questions) ? ana.questions.length : 0;
-      const r = Array.isArray(ana.recommendations) ? ana.recommendations.length : 0;
-      if (q || r) html += "<p class=\"muted\">Вопросов: " + q + ", рекомендаций: " + r + "</p>";
-    }
+    html += buildLastAnalysisActionsList(ana);
+    const hasActions = Array.isArray(ana.action_items) && ana.action_items.length > 0;
+    if (!hasActions) html += buildLastAnalysisQrLine(ana);
   }
   return html;
+}
+
+function fillLastAnalysisWithDetail(el, sessionId, session, detailRaw) {
+  const denv = parseEnvelope(detailRaw);
+  const detail = denv?.data?.session_detail ?? denv?.session_detail ?? denv ?? {};
+  const summaryHtml = buildLastAnalysisSummaryHtml(sessionId, session, detail);
+  const btnHtml = "<button type=\"button\" class=\"btn small\" id=\"last-analysis-open-btn\">" + escapeHtml(t("last_analysis_open_btn")) + "</button>";
+  el.innerHTML = summaryHtml + btnHtml;
+  document.getElementById("last-analysis-open-btn")?.addEventListener("click", () => {
+    switchTab("sessions");
+    setTimeout(() => showSessionDetail(Number(sessionId), {}), 100);
+  });
 }
 
 function loadLastAnalysisWidget() {
@@ -700,18 +728,10 @@ function loadLastAnalysisWidget() {
       const sessionId = session?.id ?? session?.session_id;
       if (sessionId == null) {
         el.innerHTML = "<p class=\"muted\">" + escapeHtml(t("last_analysis_empty")) + "</p>";
-        return Promise.resolve(null);
+        return null;
       }
       return invoke("get_session_detail", { sessionId: Number(sessionId) }).then((detailRaw) => {
-        const denv = parseEnvelope(detailRaw);
-        const detail = denv?.data?.session_detail ?? denv?.session_detail ?? denv ?? {};
-        const summaryHtml = buildLastAnalysisSummaryHtml(sessionId, session, detail);
-        const btnHtml = "<button type=\"button\" class=\"btn small\" id=\"last-analysis-open-btn\">" + escapeHtml(t("last_analysis_open_btn")) + "</button>";
-        el.innerHTML = summaryHtml + btnHtml;
-        document.getElementById("last-analysis-open-btn")?.addEventListener("click", () => {
-          switchTab("sessions");
-          setTimeout(() => showSessionDetail(Number(sessionId), {}), 100);
-        });
+        fillLastAnalysisWithDetail(el, sessionId, session, detailRaw);
         return sessionId;
       });
     })
@@ -764,33 +784,35 @@ async function toggleListen() {
 
 document.getElementById("listen-toggle").addEventListener("click", toggleListen);
 
+async function runQuickAnalyze60() {
+  if (!daemonOk) return;
+  const secInput = document.getElementById("analyze-seconds");
+  const templateInput = document.getElementById("analyze-template");
+  if (secInput) secInput.value = "60";
+  const template = templateInput?.value || null;
+  const statusEl = document.getElementById("analyze-status");
+  const btn = document.getElementById("analyze-btn");
+  if (btn) btn.disabled = true;
+  if (statusEl) statusEl.textContent = "Анализ 60 сек…";
+  try {
+    const raw = await invoke("analyze", { seconds: 60, template });
+    const env = parseEnvelope(raw);
+    if (env?.ok && env?.data?.text) {
+      if (statusEl) statusEl.textContent = "Готово.";
+      loadSessions();
+      notify("VoiceForge", "Анализ завершён.");
+    } else if (statusEl) {
+      statusEl.textContent = errorMessage(env);
+    }
+  } catch (e) {
+    if (statusEl) statusEl.textContent = t("error_prefix") + (e?.message ?? String(e ?? ""));
+  }
+  if (btn) btn.disabled = false;
+}
+
 function initQuickActions() {
   document.getElementById("quick-listen")?.addEventListener("click", () => { if (daemonOk) toggleListen(); });
-  document.getElementById("quick-analyze-60")?.addEventListener("click", async () => {
-    if (!daemonOk) return;
-    const secInput = document.getElementById("analyze-seconds");
-    const templateInput = document.getElementById("analyze-template");
-    if (secInput) secInput.value = "60";
-    const template = templateInput?.value || null;
-    const statusEl = document.getElementById("analyze-status");
-    const btn = document.getElementById("analyze-btn");
-    if (btn) btn.disabled = true;
-    if (statusEl) statusEl.textContent = "Анализ 60 сек…";
-    try {
-      const raw = await invoke("analyze", { seconds: 60, template });
-      const env = parseEnvelope(raw);
-      if (env?.ok && env?.data?.text) {
-        if (statusEl) statusEl.textContent = "Готово.";
-        loadSessions();
-        notify("VoiceForge", "Анализ завершён.");
-      } else if (statusEl) {
-        statusEl.textContent = errorMessage(env);
-      }
-    } catch (e) {
-      if (statusEl) statusEl.textContent = t("error_prefix") + (e?.message ?? String(e ?? ""));
-    }
-    if (btn) btn.disabled = false;
-  });
+  document.getElementById("quick-analyze-60")?.addEventListener("click", () => runQuickAnalyze60());
 }
 
 async function runDefaultAnalyze() {
@@ -1255,6 +1277,32 @@ function renderSessionDetail(detail, highlightQuery) {
   return html || "<p class=\"muted\">Нет анализа.</p>";
 }
 
+function bindSegmentCopyButtons(container) {
+  container.querySelectorAll(".segment-copy").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const li = btn.closest("li");
+      const idx = Number.parseInt(li?.dataset?.segmentIndex, 10);
+      if (lastSessionDetail?.segments?.[idx] != null) {
+        const text = lastSessionDetail.segments[idx].text || "";
+        navigator.clipboard.writeText(text).then(() => {
+          pushClipboardHistory(text);
+          notify("VoiceForge", "Сегмент скопирован.");
+        }).catch(() => {});
+      }
+    });
+  });
+}
+
+function bindMinimapSegmentButtons(container) {
+  container.querySelectorAll(".minimap-segment-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const idx = btn.dataset.segmentIdx;
+      const el = idx != null ? document.getElementById("segment-" + idx) : null;
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  });
+}
+
 function escapeHtml(text) {
   const div = document.createElement("div");
   div.textContent = text == null ? "" : String(text);
@@ -1422,26 +1470,8 @@ function showSessionDetail(id, opts) {
       }
       lastSessionDetail = detail;
       bodyEl.innerHTML = renderSessionDetail(detail, highlightQuery);
-      bodyEl.querySelectorAll(".segment-copy").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const li = btn.closest("li");
-          const idx = Number.parseInt(li?.dataset?.segmentIndex, 10);
-          if (lastSessionDetail?.segments?.[idx] != null) {
-            const text = lastSessionDetail.segments[idx].text || "";
-            navigator.clipboard.writeText(text).then(() => {
-              pushClipboardHistory(text);
-              notify("VoiceForge", "Сегмент скопирован.");
-            }).catch(() => {});
-          }
-        });
-      });
-      bodyEl.querySelectorAll(".minimap-segment-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const idx = btn.dataset.segmentIdx;
-          const el = idx != null ? document.getElementById("segment-" + idx) : null;
-          if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-        });
-      });
+      bindSegmentCopyButtons(bodyEl);
+      bindMinimapSegmentButtons(bodyEl);
     })
     .catch((e) => {
       bodyEl.innerHTML = "<p class=\"muted\">" + t("error_prefix") + escapeHtml(e?.message || e) + "</p><button type=\"button\" class=\"btn small\" id=\"detail-retry\">" + t("retry_btn") + "</button>";
@@ -2046,6 +2076,44 @@ function exportCostsReport() {
   downloadBlob(blob, "voiceforge-costs-report.csv");
 }
 
+async function handleFtsSearch(q, listEl, resultsEl) {
+  if (!daemonOk) return;
+  try {
+    const raw = await invoke("search_transcripts", { query: q, limit: 25 });
+    const env = parseEnvelope(raw);
+    const hits = env?.data?.hits ?? env?.hits ?? [];
+    if (!Array.isArray(hits) || hits.length === 0) {
+      if (resultsEl) {
+        resultsEl.innerHTML = "<p class=\"muted\">Ничего не найдено.</p>";
+        resultsEl.style.display = "block";
+      }
+      if (listEl) listEl.style.display = "none";
+      return;
+    }
+    let html = "<p class=\"muted\">Найдено по тексту:</p><ul class=\"fts-hits-list\">";
+    hits.forEach((h) => {
+      const sid = h.session_id ?? "—";
+      const snip = escapeHtml((h.snippet ?? h.text ?? "").trim() || "—");
+      html += `<li><button type="button" class="btn-link fts-hit" data-session-id="${sid}">Сессия ${sid}</button>: ${snip}</li>`;
+    });
+    html += "</ul>";
+    if (resultsEl) {
+      resultsEl.innerHTML = html;
+      resultsEl.style.display = "block";
+      resultsEl.querySelectorAll(".fts-hit").forEach((btn) => {
+        btn.addEventListener("click", () => showSessionDetail(Number(btn.dataset.sessionId)));
+      });
+    }
+    if (listEl) listEl.style.display = "none";
+  } catch (e) {
+    if (resultsEl) {
+      resultsEl.innerHTML = "<p class=\"muted\">" + t("error_prefix") + escapeHtml(e?.message || e) + "</p>";
+      resultsEl.style.display = "block";
+    }
+    if (listEl) listEl.style.display = "none";
+  }
+}
+
 function initSessionsToolbar() {
   document.getElementById("sessions-search")?.addEventListener("input", () => applySessionsFilter());
   document.getElementById("sessions-period")?.addEventListener("change", () => applySessionsFilter());
@@ -2067,43 +2135,9 @@ function initSessionsToolbar() {
       return;
     }
     if (ftsSearchTimeout) clearTimeout(ftsSearchTimeout);
-    ftsSearchTimeout = setTimeout(async () => {
+    ftsSearchTimeout = setTimeout(() => {
       ftsSearchTimeout = null;
-      if (!daemonOk) return;
-      try {
-        const raw = await invoke("search_transcripts", { query: q, limit: 25 });
-        const env = parseEnvelope(raw);
-        const hits = env?.data?.hits ?? env?.hits ?? [];
-        if (!Array.isArray(hits) || hits.length === 0) {
-          if (resultsEl) {
-            resultsEl.innerHTML = "<p class=\"muted\">Ничего не найдено.</p>";
-            resultsEl.style.display = "block";
-          }
-          if (listEl) listEl.style.display = "none";
-          return;
-        }
-        let html = "<p class=\"muted\">Найдено по тексту:</p><ul class=\"fts-hits-list\">";
-        hits.forEach((h) => {
-          const sid = h.session_id ?? "—";
-          const snip = escapeHtml((h.snippet ?? h.text ?? "").trim() || "—");
-          html += `<li><button type="button" class="btn-link fts-hit" data-session-id="${sid}">Сессия ${sid}</button>: ${snip}</li>`;
-        });
-        html += "</ul>";
-        if (resultsEl) {
-          resultsEl.innerHTML = html;
-          resultsEl.style.display = "block";
-          resultsEl.querySelectorAll(".fts-hit").forEach((btn) => {
-            btn.addEventListener("click", () => showSessionDetail(Number(btn.dataset.sessionId)));
-          });
-        }
-        if (listEl) listEl.style.display = "none";
-      } catch (e) {
-        if (resultsEl) {
-          resultsEl.innerHTML = "<p class=\"muted\">" + t("error_prefix") + escapeHtml(e?.message || e) + "</p>";
-          resultsEl.style.display = "block";
-        }
-        if (listEl) listEl.style.display = "none";
-      }
+      void handleFtsSearch(q, listEl, resultsEl);
     }, 350);
   });
   document.getElementById("sessions-export-btn")?.addEventListener("click", () => {
@@ -2112,27 +2146,37 @@ function initSessionsToolbar() {
   });
 }
 
-async function checkForUpdate(silentIfNone = false) {
+function setUpdateStatus(text) {
   const statusEl = document.getElementById("updater-status");
+  if (statusEl) statusEl.textContent = text;
+}
+
+async function handleUpdateFound(update, silentIfNone) {
+  if (silentIfNone) {
+    setUpdateStatus("Доступна версия " + update.version + ". Нажмите «Проверить сейчас» для установки.");
+    return;
+  }
+  setUpdateStatus("Найдено обновление " + update.version + "…");
+  const install = confirm("Доступна версия " + update.version + ".\n\n" + (update.body || "") + "\n\nУстановить сейчас?");
+  if (install) {
+    setUpdateStatus("Установка…");
+    await update.downloadAndInstall();
+    await relaunch();
+  } else {
+    setUpdateStatus("Обновление отложено.");
+  }
+}
+
+async function checkForUpdate(silentIfNone = false) {
   try {
     const update = await updaterCheck();
     if (update) {
-      if (silentIfNone) {
-        if (statusEl) statusEl.textContent = "Доступна версия " + update.version + ". Нажмите «Проверить сейчас» для установки.";
-        return;
-      }
-      if (statusEl) statusEl.textContent = "Найдено обновление " + update.version + "…";
-      const install = confirm("Доступна версия " + update.version + ".\n\n" + (update.body || "") + "\n\nУстановить сейчас?");
-      if (install) {
-        if (statusEl) statusEl.textContent = "Установка…";
-        await update.downloadAndInstall();
-        await relaunch();
-      } else if (statusEl) statusEl.textContent = "Обновление отложено.";
+      await handleUpdateFound(update, silentIfNone);
       return;
     }
-    if (statusEl) statusEl.textContent = silentIfNone ? "" : "Обновлений нет.";
+    setUpdateStatus(silentIfNone ? "" : "Обновлений нет.");
   } catch (e) {
-    if (statusEl) statusEl.textContent = "Обновления отключены или недоступны.";
+    setUpdateStatus("Обновления отключены или недоступны.");
     if (!silentIfNone && e != null) console.debug("updater check", e);
   }
 }
@@ -2185,61 +2229,78 @@ function initSoundOnRecordCard() {
   });
 }
 
+async function applyCompactModeOn(win) {
+  try {
+    const pos = await win.innerPosition();
+    const size = await win.innerSize();
+    localStorage.setItem(WINDOW_STATE_KEY, JSON.stringify({ x: pos.x, y: pos.y, width: size.width, height: size.height }));
+  } catch (e) {
+    console.debug("applyCompactMode save state", e);
+  }
+  const appRoot = document.getElementById("app-root");
+  const compactBar = document.getElementById("compact-bar");
+  const fullContent = document.getElementById("full-content");
+  appRoot.classList.add("compact-mode");
+  compactBar.style.display = "flex";
+  fullContent.style.display = "none";
+  try {
+    const raw = localStorage.getItem(COMPACT_WINDOW_STATE_KEY);
+    let w = COMPACT_DEFAULT_WIDTH;
+    let h = COMPACT_DEFAULT_HEIGHT;
+    let x = null;
+    let y = null;
+    if (raw) {
+      try {
+        const s = JSON.parse(raw);
+        if (typeof s.width === "number") w = s.width;
+        if (typeof s.height === "number") h = s.height;
+        if (typeof s.x === "number") x = s.x;
+        if (typeof s.y === "number") y = s.y;
+      } catch (e) {
+        console.debug("applyCompactMode parse compact state", e);
+      }
+    }
+    await win.setSize(new LogicalSize(w, h));
+    if (x != null && y != null) await win.setPosition(new LogicalPosition(x, y));
+  } catch (e) {
+    if (e != null) console.debug("applyCompactMode setSize", e);
+  }
+  const compactStatus = document.getElementById("compact-status");
+  if (compactStatus) {
+    compactStatus.textContent = daemonOk ? "Демон ок" : "Демон выкл";
+    compactStatus.className = "status " + (daemonOk ? "daemon-ok" : "daemon-off");
+  }
+}
+
+async function applyCompactModeOff(win) {
+  const appRoot = document.getElementById("app-root");
+  const compactBar = document.getElementById("compact-bar");
+  const fullContent = document.getElementById("full-content");
+  appRoot.classList.remove("compact-mode");
+  compactBar.style.display = "none";
+  fullContent.style.display = "block";
+  try {
+    const raw = localStorage.getItem(COMPACT_WINDOW_STATE_KEY);
+    if (raw) {
+      const pos = await win.outerPosition();
+      const size = await win.outerSize();
+      localStorage.setItem(COMPACT_WINDOW_STATE_KEY, JSON.stringify({ x: pos.x, y: pos.y, width: size.width, height: size.height }));
+    }
+    await restoreWindowState();
+  } catch (e) {
+    if (e != null) console.debug("applyCompactMode restore", e);
+  }
+}
+
 async function applyCompactMode(compact) {
   const appRoot = document.getElementById("app-root");
   const compactBar = document.getElementById("compact-bar");
   const fullContent = document.getElementById("full-content");
   const win = getCurrentWindow();
   if (compact) {
-    try {
-      const pos = await win.innerPosition();
-      const size = await win.innerSize();
-      localStorage.setItem(WINDOW_STATE_KEY, JSON.stringify({ x: pos.x, y: pos.y, width: size.width, height: size.height }));
-    } catch (e) {
-      console.debug("applyCompactMode save state", e);
-    }
-    appRoot.classList.add("compact-mode");
-    compactBar.style.display = "flex";
-    fullContent.style.display = "none";
-    try {
-      const raw = localStorage.getItem(COMPACT_WINDOW_STATE_KEY);
-      let w = COMPACT_DEFAULT_WIDTH;
-      let h = COMPACT_DEFAULT_HEIGHT;
-      let x = null;
-      let y = null;
-      if (raw) {
-        try {
-          const s = JSON.parse(raw);
-          if (typeof s.width === "number") w = s.width;
-          if (typeof s.height === "number") h = s.height;
-          if (typeof s.x === "number") x = s.x;
-          if (typeof s.y === "number") y = s.y;
-        } catch (e) {
-          console.debug("applyCompactMode parse compact state", e);
-        }
-      }
-      await win.setSize(new LogicalSize(w, h));
-      if (x != null && y != null) await win.setPosition(new LogicalPosition(x, y));
-    } catch (e) {
-      if (e != null) console.debug("applyCompactMode setSize", e);
-    }
-    document.getElementById("compact-status").textContent = daemonOk ? "Демон ок" : "Демон выкл";
-    document.getElementById("compact-status").className = "status " + (daemonOk ? "daemon-ok" : "daemon-off");
+    await applyCompactModeOn(win);
   } else {
-    appRoot.classList.remove("compact-mode");
-    compactBar.style.display = "none";
-    fullContent.style.display = "block";
-    try {
-      const raw = localStorage.getItem(COMPACT_WINDOW_STATE_KEY);
-      if (raw) {
-        const pos = await win.outerPosition();
-        const size = await win.outerSize();
-        localStorage.setItem(COMPACT_WINDOW_STATE_KEY, JSON.stringify({ x: pos.x, y: pos.y, width: size.width, height: size.height }));
-      }
-      await restoreWindowState();
-    } catch (e) {
-      if (e != null) console.debug("applyCompactMode restore", e);
-    }
+    await applyCompactModeOff(win);
   }
 }
 
