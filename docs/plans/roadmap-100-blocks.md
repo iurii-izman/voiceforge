@@ -232,6 +232,8 @@
 - **87** — Тесты a11y в CI: job desktop-a11y (build frontend, vite preview, pa11y на localhost), continue-on-error.
 - **98** — a11y: явный role="main" и aria-label на main, существующие aria-label сохранены.
 - **99** — AppImage в CI: артефакт desktop-appimage (bundle/appimage/) в job desktop-build.
+- **48** — Экспорт календаря в iCal: команда `voiceforge calendar export-ical --output file.ics` (--hours), запись ближайших событий CalDAV в .ics.
+- **60** — analyze --dry-run: флаг --dry-run, run_analyze_pipeline(dry_run=True) без вызова LLM; вывод «что будет проанализировано» (сегменты, длина транскрипта).
 - **84** — E2E десктопа: Playwright (e2e/nav.spec.js) против vite preview; проверка загрузки, активной вкладки, переключения вкладок; job desktop-e2e в CI; онбординг скрыт в тестах через localStorage.
 - **97** — Английская локализация (задел): выбор языка в настройках (ru/en), ключ voiceforge_ui_lang в Store, t() и applyUiLang(); навигация, заголовки вкладок (Главная/Сессии/Затраты/Настройки) и карточка языка из I18N.
 - **100** — Flatpak: манифест desktop/flatpak/com.voiceforge.app.yaml, job в release.yml (сборка и загрузка .flatpak в Release); подача в Flathub — ручной шаг.

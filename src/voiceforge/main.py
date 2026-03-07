@@ -277,6 +277,7 @@ def _build_analysis_for_log_default(llm_result: Any, cfg: Any, cost_usd: float) 
 def run_analyze_pipeline(
     seconds: int,
     template: str | None = None,
+    dry_run: bool = False,
 ) -> tuple[str, list[dict[str, Any]], dict[str, Any]]:
     """Run core analyze pipeline and return (display_text, segments_for_log, analysis_for_log)."""
     bind_trace_id()  # one trace_id per pipeline run (CLI or daemon worker)
@@ -309,6 +310,13 @@ def run_analyze_pipeline(
         }
         for s in segments
     ]
+
+    if dry_run:
+        msg = (
+            f"Dry-run: would analyze last {seconds}s, template={template or 'default'}, "
+            f"{len(segments)} segments, transcript ~{len(transcript or '')} chars. No LLM call."
+        )
+        return (msg, segments_for_log, {})
 
     try:
         from voiceforge.llm.router import analyze_meeting
@@ -579,12 +587,19 @@ def analyze(
         "--template",
         help="Шаблон встречи: standup, sprint_review, one_on_one, brainstorm, interview",
     ),
+    dry_run: bool = typer.Option(
+        False,
+        "--dry-run",
+        help="Показать, что будет проанализировано (транскрипт, сегменты), без вызова LLM (блок 60).",
+    ),
 ) -> None:
     """Analyze ring-buffer fragment: transcribe -> diarize -> rag -> llm."""
     if template is not None and template not in _TEMPLATE_CHOICES:
         typer.echo(t("analyze.unknown_template", template=template, choices=", ".join(_TEMPLATE_CHOICES)), err=True)
         raise SystemExit(1)
-    display_text, segments_for_log, analysis_for_log = run_analyze_pipeline(seconds, template=template)
+    display_text, segments_for_log, analysis_for_log = run_analyze_pipeline(
+        seconds, template=template, dry_run=dry_run
+    )
     error_message = _extract_error_message(display_text)
     if error_message is not None:
         if output == "json":
@@ -592,6 +607,20 @@ def analyze(
         else:
             typer.echo(error_message, err=True)
         raise SystemExit(1)
+
+    if dry_run:
+        if output == "json":
+            typer.echo(
+                json.dumps(
+                    _cli_success_payload(
+                        {"dry_run": True, "message": display_text, "segments_count": len(segments_for_log)}
+                    ),
+                    ensure_ascii=False,
+                )
+            )
+        else:
+            typer.echo(display_text)
+        return
 
     session_id: int | None = None
     try:
@@ -1510,6 +1539,60 @@ def calendar_list(
         return
     for cal in calendars:
         typer.echo(f"  {cal.get('name', '(no name)')} — {cal.get('url', '')}")
+
+
+@calendar_app.command("export-ical")
+def calendar_export_ical(
+    output: Path = typer.Option(..., "--output", "-o", path_type=Path, help="Output .ics file (block 48)"),
+    hours: int = typer.Option(48, "--hours", "-H", help="Hours ahead to fetch"),
+) -> None:
+    """Export upcoming calendar events to iCalendar .ics (block 48)."""
+    from datetime import datetime as dt_class, timezone
+
+    from voiceforge.calendar import get_upcoming_events
+
+    events, err = get_upcoming_events(hours_ahead=hours)
+    if err:
+        typer.echo(t("calendar.poll_error", msg=err), err=True)
+        hint = _hint_for_error(err)
+        if hint:
+            typer.echo(hint, err=True)
+        raise SystemExit(1)
+
+    def _iso_to_ical_utc(iso_str: str) -> str:
+        if not iso_str:
+            return ""
+        try:
+            s = iso_str.strip().replace("Z", "+00:00")
+            dt = dt_class.fromisoformat(s)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            else:
+                dt = dt.astimezone(timezone.utc)
+            return dt.strftime("%Y%m%dT%H%M%SZ")
+        except (ValueError, TypeError):
+            return ""
+
+    lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//VoiceForge//calendar-upcoming//EN"]
+    for i, ev in enumerate(events):
+        start_ical = _iso_to_ical_utc(ev.get("start_iso") or "")
+        if not start_ical:
+            continue
+        end_ical = _iso_to_ical_utc(ev.get("end_iso") or "")
+        if not end_ical:
+            end_ical = start_ical
+        summary = (ev.get("summary") or "(no title)").replace("\r", "").replace("\n", " ")
+        uid = f"voiceforge-upcoming-{i}-{hash(ev.get('start_iso', '')) & 0x7FFFFFFF}@voiceforge"
+        lines.append("BEGIN:VEVENT")
+        lines.append(f"UID:{uid}")
+        lines.append(f"DTSTART:{start_ical}")
+        lines.append(f"DTEND:{end_ical}")
+        lines.append(f"SUMMARY:{summary}")
+        lines.append("END:VEVENT")
+    lines.append("END:VCALENDAR")
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text("\r\n".join(lines), encoding="utf-8")
+    typer.echo(f"Exported {len(events)} upcoming events to {output}")
 
 
 @calendar_app.command("poll")

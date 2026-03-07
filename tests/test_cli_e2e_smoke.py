@@ -51,7 +51,9 @@ def test_cli_pipeline_listen_analyze_history(monkeypatch, tmp_path) -> None:
     listen_result = runner.invoke(main_mod.app, ["listen", "--duration", "1"])
     assert listen_result.exit_code == 0, listen_result.stdout
 
-    def fake_pipeline(seconds: int, template: str | None = None) -> tuple[str, list[dict[str, object]], dict[str, object]]:
+    def fake_pipeline(
+        seconds: int, template: str | None = None, dry_run: bool = False
+    ) -> tuple[str, list[dict[str, object]], dict[str, object]]:
         return (
             f"analysis-ok-{seconds}",
             [{"start_sec": 0.0, "end_sec": 1.0, "speaker": "S1", "text": "hello"}],
@@ -315,7 +317,9 @@ def test_cli_export_md_smoke(monkeypatch, tmp_path) -> None:
     monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "runtime"))
     monkeypatch.setenv("VOICEFORGE_LANGUAGE", "ru")  # asserts Russian headings in export md
 
-    def fake_pipeline(seconds: int, template: str | None = None) -> tuple[str, list[dict[str, object]], dict[str, object]]:
+    def fake_pipeline(
+        seconds: int, template: str | None = None, dry_run: bool = False
+    ) -> tuple[str, list[dict[str, object]], dict[str, object]]:
         return (
             "ok",
             [{"start_sec": 0.0, "end_sec": 1.0, "speaker": "S1", "text": "hello"}],
@@ -353,7 +357,9 @@ def test_cli_analyze_template_standup_smoke(monkeypatch, tmp_path) -> None:
     monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
     monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "runtime"))
 
-    def fake_pipeline(seconds: int, template: str | None = None) -> tuple[str, list[dict[str, object]], dict[str, object]]:
+    def fake_pipeline(
+        seconds: int, template: str | None = None, dry_run: bool = False
+    ) -> tuple[str, list[dict[str, object]], dict[str, object]]:
         return (
             "--- Сделано ---\n  • x\n--- Планы ---\n  • y\n--- Блокеры ---\n  • z",
             [{"start_sec": 0.0, "end_sec": 1.0, "speaker": "S1", "text": "hi"}],
@@ -379,12 +385,55 @@ def test_cli_analyze_template_standup_smoke(monkeypatch, tmp_path) -> None:
     assert "answers" in analysis
 
 
+def test_cli_analyze_dry_run_smoke(monkeypatch, tmp_path) -> None:
+    """E2E (block 60): analyze --dry-run prints what would be analyzed, no LLM call, no session logged."""
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
+    monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "runtime"))
+
+    def fake_pipeline(
+        seconds: int, template: str | None = None, dry_run: bool = False
+    ) -> tuple[str, list[dict[str, object]], dict[str, object]]:
+        if dry_run:
+            return (
+                f"Dry-run: would analyze last {seconds}s, template={template or 'default'}, "
+                "2 segments, transcript ~50 chars. No LLM call.",
+                [
+                    {"start_sec": 0.0, "end_sec": 1.0, "speaker": "S1", "text": "a"},
+                    {"start_sec": 1.0, "end_sec": 2.0, "speaker": "S2", "text": "b"},
+                ],
+                {},
+            )
+        return (
+            "ok",
+            [{"start_sec": 0.0, "end_sec": 1.0, "speaker": "S1", "text": "x"}],
+            {"model": "test", "cost_usd": 0.0},
+        )
+
+    monkeypatch.setattr(main_mod, "run_analyze_pipeline", fake_pipeline)
+
+    result = runner.invoke(main_mod.app, ["analyze", "--seconds", "30", "--dry-run", "--output", "json"])
+    assert result.exit_code == 0, result.stdout
+    payload = _last_json_line(result.stdout)
+    assert payload.get("ok") is True
+    data = payload.get("data") or {}
+    assert data.get("dry_run") is True
+    assert "segments_count" in data
+    assert data["segments_count"] == 2
+
+    result_text = runner.invoke(main_mod.app, ["analyze", "--seconds", "15", "--dry-run"])
+    assert result_text.exit_code == 0, result_text.stdout
+    assert "Dry-run" in result_text.stdout
+    assert "No LLM call" in result_text.stdout
+
+
 def test_cli_action_items_update_smoke(monkeypatch, tmp_path) -> None:
     """E2E: action-items update --from-session A --next-session B with mocked LLM."""
     monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
     monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "runtime"))
 
-    def fake_pipeline(seconds: int, template: str | None = None) -> tuple[str, list[dict[str, object]], dict[str, object]]:
+    def fake_pipeline(
+        seconds: int, template: str | None = None, dry_run: bool = False
+    ) -> tuple[str, list[dict[str, object]], dict[str, object]]:
         return (
             "ok",
             [{"start_sec": 0.0, "end_sec": 1.0, "speaker": "S1", "text": "we did the task"}],
@@ -431,7 +480,9 @@ def test_cli_history_output_md_smoke(monkeypatch, tmp_path) -> None:
     monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "runtime"))
     monkeypatch.setenv("VOICEFORGE_LANGUAGE", "ru")  # asserts Russian section headings
 
-    def fake_pipeline(seconds: int, template: str | None = None) -> tuple[str, list[dict[str, object]], dict[str, object]]:
+    def fake_pipeline(
+        seconds: int, template: str | None = None, dry_run: bool = False
+    ) -> tuple[str, list[dict[str, object]], dict[str, object]]:
         return (
             "ok",
             [{"start_sec": 0.0, "end_sec": 1.0, "speaker": "S1", "text": "hello"}],
