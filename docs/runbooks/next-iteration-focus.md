@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-07 (prompt caching расширен для status_update; заметки по #91/#93 в backlog)
+**Обновлено:** 2026-03-07 (реализованы #91, #93, Sonar S2737/S7721/S3776/S7735)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Расширен prompt caching на `update_action_item_statuses` для Claude в router.py (Refs #90). В backlog-and-actions добавлены заметки по реализации #91 (streaming LLM в UI) и #93 (Whisper API). Sonar fetch в toolbox 43: остаток — S7721, S2737, S3776 (daemon/main), S7735 (desktop main.js).
+**Сделано в сессии:** Реализованы #91 (streaming LLM: stream_completion, analyze_meeting_stream, run_analyze_pipeline(stream_callback), D-Bus StreamingAnalysisChunk, POST /api/analyze/stream SSE) и #93 (stt_backend local|openai, OpenAI Whisper API фасад, get_transcriber_for_config). Исправлены Sonar S2737, S7721, S3776, S7735. Коммит 9b92a46, пуш в main.
 
-**Следующий шаг:** Реализовать #91 (streaming LLM в UI: бэкенд stream + D-Bus/HTTP + UI подписка) или #93 (Whisper API: конфиг stt_backend, фасад в stt/) по [backlog-and-actions.md](../plans/backlog-and-actions.md); либо доработать оставшиеся замечания Sonar (S7721, S2737, S3776, S7735). Pre-commit — в toolbox 43: `toolbox run -c fedora-toolbox-43 bash -c 'cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files'`.
+**Следующий шаг:** Подключить подписку на стрим в desktop UI (D-Bus StreamingAnalysisChunk → Tauri event → вывод в деталях сессии или модалке анализа); либо следующая задача по [backlog-and-actions.md](../plans/backlog-and-actions.md) / roadmap. Pre-commit в toolbox 43: `toolbox run -c fedora-toolbox-43 bash -c 'cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files'`.
 
 ---
 
@@ -30,7 +30,7 @@
 - **PR #81, #79:** закрыты с комментарием «Applied in main» (2026-03-07).
 - **Открытые issues:** #65 (CVE — ждём upstream), #50 (macOS/WSL2 — p2/backlog).
 
-**Sonar:** Остаток (sonar_fetch_issues.py в toolbox 43): S7721 (openSessionFromWidget), S2737/S3776 (daemon.py), S3776 (main.py 1119/1585), S7735 (main.js negated condition). #86 закрыт ранее. **Mypy:** в scope verify_pr — 0 ошибок. **verify_pr:** Ruff + Mypy OK; bandit — зелёный (nosec B310/B608). **Gitleaks:** allowlist .hypothesis/ + .gitignore; шаг [8/8] в CI проходит (workflow Gitleaks зелёный после 270b7e2/42f904c).
+**Sonar:** S7721, S2737, S3776, S7735 закрыты в 9b92a46. Проверить остаток: `uv run python scripts/sonar_fetch_issues.py` в toolbox 43. **Mypy:** в scope verify_pr — 0 ошибок. **verify_pr:** Ruff + Mypy OK; bandit — зелёный (nosec B310/B608). **Gitleaks:** allowlist .hypothesis/ + .gitignore; шаг [8/8] в CI проходит (workflow Gitleaks зелёный после 270b7e2/42f904c).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
