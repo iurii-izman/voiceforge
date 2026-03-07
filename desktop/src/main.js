@@ -1189,6 +1189,59 @@ function loadSessions() {
     });
 }
 
+function renderSessionDetailTranscript(segs, highlightQuery) {
+  const fullText = segs.map((s) => s.text || "").join(" ");
+  const totalChars = fullText.length;
+  const totalWords = fullText.trim() ? fullText.trim().split(/\s+/).length : 0;
+  let html = "<div class=\"detail-section\"><h4>Транскрипт</h4><p class=\"muted detail-stats\">Слов: " + totalWords + ", символов: " + totalChars + "</p>";
+  html += "<div class=\"detail-segment-minimap\" role=\"navigation\" aria-label=\"Навигация по сегментам\">";
+  segs.forEach((s, idx) => {
+    const t = s.start_sec != null ? Math.floor(Number(s.start_sec) / 60) + ":" + String(Math.floor(Number(s.start_sec) % 60)).padStart(2, "0") : String(idx + 1);
+    html += `<button type="button" class="minimap-segment-btn" data-segment-idx="${idx}" title="Сегмент ${idx + 1}">${escapeHtml(t)}</button>`;
+  });
+  html += "</div><ul class=\"segment-list\">";
+  segs.forEach((s, idx) => {
+    const speaker = s.speaker ? `[${s.speaker}] ` : "";
+    const time = (s.start_sec != null && s.end_sec != null) ? `${Number(s.start_sec).toFixed(1)}–${Number(s.end_sec).toFixed(1)} с ` : "";
+    const textHtml = highlightQuery ? highlightSegmentText(s.text || "", highlightQuery) : escapeHtml(s.text || "");
+    html += `<li id="segment-${idx}" data-segment-index="${idx}"><span class="segment-meta">${time}${speaker}</span>${textHtml} <button type="button" class="btn small segment-copy" aria-label="${t("segment_copy")}">${t("segment_copy")}</button></li>`;
+  });
+  html += "</ul></div>";
+  return html;
+}
+
+function renderSessionDetailAnalysis(ana) {
+  let html = "<div class=\"detail-section\"><h4>Анализ</h4>";
+  if (ana.model) html += `<p class="muted">Модель: ${escapeHtml(ana.model)}</p>`;
+  if (ana.questions?.length) {
+    html += "<p><strong>Вопросы</strong></p><ul>";
+    ana.questions.forEach((q) => { html += "<li>" + escapeHtml(String(q)) + "</li>"; });
+    html += "</ul>";
+  }
+  if (ana.answers?.length) {
+    html += "<p><strong>Ответы / выводы</strong></p><ul>";
+    ana.answers.forEach((a) => { html += "<li>" + escapeHtml(String(a)) + "</li>"; });
+    html += "</ul>";
+  }
+  if (ana.recommendations?.length) {
+    html += "<p><strong>Рекомендации</strong></p><ul>";
+    ana.recommendations.forEach((r) => { html += "<li>" + escapeHtml(String(r)) + "</li>"; });
+    html += "</ul>";
+  }
+  if (ana.action_items?.length) {
+    html += "<p><strong>Действия</strong></p><ul>";
+    ana.action_items.forEach((ai) => {
+      const d = typeof ai === "object" ? (ai.description || "") : String(ai);
+      const who = typeof ai === "object" ? ai.assignee : "";
+      html += "<li>" + escapeHtml(d) + (who ? " <span class=\"muted\">(" + escapeHtml(who) + ")</span>" : "") + "</li>";
+    });
+    html += "</ul>";
+  }
+  if (ana.cost_usd != null) html += "<p class=\"muted\">Стоимость: $" + Number(ana.cost_usd).toFixed(4) + "</p>";
+  html += "</div>";
+  return html;
+}
+
 function renderSessionDetail(detail, highlightQuery) {
   if (!detail || (typeof detail === "object" && !detail.segments && !detail.analysis)) {
     return "<p class=\"muted\">Нет данных.</p>";
@@ -1196,55 +1249,9 @@ function renderSessionDetail(detail, highlightQuery) {
   const segs = Array.isArray(detail.segments) ? detail.segments : [];
   const ana = detail.analysis || null;
   let html = "";
-  if (segs.length > 0) {
-    const fullText = segs.map((s) => s.text || "").join(" ");
-    const totalChars = fullText.length;
-    const totalWords = fullText.trim() ? fullText.trim().split(/\s+/).length : 0;
-    html += "<div class=\"detail-section\"><h4>Транскрипт</h4><p class=\"muted detail-stats\">Слов: " + totalWords + ", символов: " + totalChars + "</p>";
-    html += "<div class=\"detail-segment-minimap\" role=\"navigation\" aria-label=\"Навигация по сегментам\">";
-    segs.forEach((s, idx) => {
-      const t = s.start_sec != null ? Math.floor(Number(s.start_sec) / 60) + ":" + String(Math.floor(Number(s.start_sec) % 60)).padStart(2, "0") : String(idx + 1);
-      html += `<button type="button" class="minimap-segment-btn" data-segment-idx="${idx}" title="Сегмент ${idx + 1}">${escapeHtml(t)}</button>`;
-    });
-    html += "</div><ul class=\"segment-list\">";
-    segs.forEach((s, idx) => {
-      const speaker = s.speaker ? `[${s.speaker}] ` : "";
-      const time = (s.start_sec != null && s.end_sec != null) ? `${Number(s.start_sec).toFixed(1)}–${Number(s.end_sec).toFixed(1)} с ` : "";
-      const textHtml = highlightQuery ? highlightSegmentText(s.text || "", highlightQuery) : escapeHtml(s.text || "");
-      html += `<li id="segment-${idx}" data-segment-index="${idx}"><span class="segment-meta">${time}${speaker}</span>${textHtml} <button type="button" class="btn small segment-copy" aria-label="${t("segment_copy")}">${t("segment_copy")}</button></li>`;
-    });
-    html += "</ul></div>";
-  }
-  if (ana && (ana.questions?.length || ana.answers?.length || ana.recommendations?.length || ana.action_items?.length)) {
-    html += "<div class=\"detail-section\"><h4>Анализ</h4>";
-    if (ana.model) html += `<p class="muted">Модель: ${escapeHtml(ana.model)}</p>`;
-    if (ana.questions?.length) {
-      html += "<p><strong>Вопросы</strong></p><ul>";
-      ana.questions.forEach((q) => { html += "<li>" + escapeHtml(String(q)) + "</li>"; });
-      html += "</ul>";
-    }
-    if (ana.answers?.length) {
-      html += "<p><strong>Ответы / выводы</strong></p><ul>";
-      ana.answers.forEach((a) => { html += "<li>" + escapeHtml(String(a)) + "</li>"; });
-      html += "</ul>";
-    }
-    if (ana.recommendations?.length) {
-      html += "<p><strong>Рекомендации</strong></p><ul>";
-      ana.recommendations.forEach((r) => { html += "<li>" + escapeHtml(String(r)) + "</li>"; });
-      html += "</ul>";
-    }
-    if (ana.action_items?.length) {
-      html += "<p><strong>Действия</strong></p><ul>";
-      ana.action_items.forEach((ai) => {
-        const d = typeof ai === "object" ? (ai.description || "") : String(ai);
-        const who = typeof ai === "object" ? ai.assignee : "";
-        html += "<li>" + escapeHtml(d) + (who ? " <span class=\"muted\">(" + escapeHtml(who) + ")</span>" : "") + "</li>";
-      });
-      html += "</ul>";
-    }
-    if (ana.cost_usd != null) html += "<p class=\"muted\">Стоимость: $" + Number(ana.cost_usd).toFixed(4) + "</p>";
-    html += "</div>";
-  }
+  if (segs.length > 0) html += renderSessionDetailTranscript(segs, highlightQuery);
+  const hasAnalysis = ana && (ana.questions?.length || ana.answers?.length || ana.recommendations?.length || ana.action_items?.length);
+  if (hasAnalysis) html += renderSessionDetailAnalysis(ana);
   return html || "<p class=\"muted\">Нет анализа.</p>";
 }
 
