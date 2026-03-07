@@ -38,6 +38,10 @@
 
 **D3 (#48):** контекст следующего события календаря в анализ. При `calendar_context_enabled: true` в конфиге (или `VOICEFORGE_CALENDAR_CONTEXT_ENABLED=true`) пайплайн `analyze` подставляет в контекст LLM строку вида «Next meeting: Название — start_iso — end_iso» (следующее событие в ближайшие 24 ч). Данные берутся из CalDAV (те же ключи keyring). Опция по умолчанию выключена.
 
+**Экспорт в iCal (блок 48):** команда `voiceforge calendar export-ical -o file.ics` записывает ближайшие события CalDAV в .ics для импорта в другой календарь.
+
+**Блок 79 (будущее):** создание события в календаре из сессии — после анализа кнопка «Добавить в календарь»: создать CalDAV-событие с summary/description по action items и дате сессии. Требует CalDAV PUT/POST; в roadmap как следующий шаг после export-ical.
+
 ## См. также
 
 - [keyring-keys-reference.md](keyring-keys-reference.md) — имена ключей для новых учётных данных (caldav_url, caldav_password и т.д. при добавлении).
