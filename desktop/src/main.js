@@ -90,6 +90,8 @@ const I18N = {
     detail_copy_transcript: "Копировать транскрипт",
     detail_copy_actions: "Копировать action items",
     detail_print: "Печать",
+    detail_add_to_calendar: "Добавить в календарь",
+    calendar_event_created: "Событие создано",
     close_btn: "Закрыть",
     segment_copy: "Копировать",
     error_prefix: "Ошибка: ",
@@ -188,6 +190,8 @@ const I18N = {
     detail_copy_transcript: "Copy transcript",
     detail_copy_actions: "Copy action items",
     detail_print: "Print",
+    detail_add_to_calendar: "Add to calendar",
+    calendar_event_created: "Event created",
     close_btn: "Close",
     segment_copy: "Copy",
     error_prefix: "Error: ",
@@ -1465,6 +1469,7 @@ function showSessionDetail(id, opts) {
   document.getElementById("copy-transcript").onclick = copyTranscriptToClipboard;
   document.getElementById("copy-action-items").onclick = copyActionItemsToClipboard;
   document.getElementById("session-detail-print").onclick = () => globalThis.print();
+  document.getElementById("add-to-calendar").onclick = () => addSessionToCalendar(id);
   const histPopover = document.getElementById("clipboard-history-popover");
   if (histPopover) histPopover.hidden = true;
   const histBtn = document.getElementById("clipboard-history-btn");
@@ -1519,6 +1524,33 @@ async function exportSession(id, format) {
     alert("Экспорт: " + (out || "выполнен"));
   } catch (e) {
     alert(t("export_error_prefix") + (e?.message || e));
+  }
+}
+
+/** Block 79 / #95: create CalDAV event from session; show notification or error. */
+async function addSessionToCalendar(sessionId) {
+  try {
+    const raw = await invoke("create_event_from_session", {
+      sessionId: Number(sessionId),
+      calendarUrl: null,
+    });
+    const env = parseEnvelope(raw);
+    if (env?.ok && env?.data?.event_uid) {
+      const uid = env.data.event_uid;
+      if (await isPermissionGranted()) {
+        sendNotification({
+          title: t("detail_add_to_calendar"),
+          body: uid ? `${t("calendar_event_created")} (${uid})` : t("calendar_event_created"),
+        });
+      } else {
+        alert(uid ? `${t("calendar_event_created")}: ${uid}` : t("calendar_event_created"));
+      }
+    } else {
+      const msg = errorMessage(env) || raw || t("error_generic");
+      alert(t("error_prefix") + msg);
+    }
+  } catch (e) {
+    alert(t("error_prefix") + (e?.message || e));
   }
 }
 
