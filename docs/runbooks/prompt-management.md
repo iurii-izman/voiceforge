@@ -31,6 +31,12 @@
 - **Хэши:** `get_prompt_hashes()` в `prompt_loader` возвращает SHA256 по каждому промпту (для скриптов/CI).
 - **CI:** тест `test_prompt_content_snapshot` в `tests/test_prompt_loader.py` проверяет совпадение хэшей с эталоном; при изменении промптов нужно обновить словарь `expected` в этом тесте.
 
+## Prompt caching (block 66, #90)
+
+**Текущее состояние:** для моделей Claude в `router.py` при формировании сообщений используется `cache_control: {"type": "ephemeral"}` (system-контент) в `_build_analysis_messages`, `analyze_live_summary` и `update_action_item_statuses`. Это снижает стоимость и задержки при повторных вызовах с тем же системным промптом.
+
+**Не-Claude (Ollama, OpenAI и др.):** параметры кэширования зависят от провайдера и LiteLLM. Для расширения на другие модели нужно смотреть документацию LiteLLM и конкретного провайдера (например [Anthropic prompt caching](https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching), аналоги для других API) и при необходимости добавлять соответствующие поля в сообщения или опции вызова в `router.py`.
+
 ## Custom templates (Phase D #72)
 
 Шаблоны встреч можно переопределить пользовательскими: положите `template_<name>.txt` в `~/.config/voiceforge/templates/` (или в `$XDG_CONFIG_HOME/voiceforge/templates/`). При вызове `analyze`, `eval` и `make eval-ab` загрузка идёт через `load_prompt()` — сначала проверяется пользовательский каталог, затем встроенные файлы в `prompts/`. Таким образом, **eval и eval-ab используют custom-шаблоны**, когда они присутствуют.

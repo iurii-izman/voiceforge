@@ -28,7 +28,7 @@
 ## 3. Что осталось реализовать (кодом)
 
 - **По приоритету (на усмотрение):**
-  - Блок 66: доработка prompt caching для не-Claude (LiteLLM/провайдеры) — по документации API.
+  - Блок 66: prompt caching для Claude реализован (cache_control в router); для не-Claude документировано в prompt-management.md, доработка по API провайдеров.
   - ~~Блок 69~~: реализовано — retry с backoff в circuit_breaker. ~~Блок 72~~: уже было — подсказка «Analyzing… (≈ N–M s)» в CLI.
   - Phase D: ~~#70~~ (A/B), ~~#71~~ (OTel: core/otel.py + observability-alerts.md), ~~#72~~ (custom templates), ~~#73~~ (packaging: offline-package.md, make flatpak-build) — реализованы.
 - **Из roadmap-100 списка:** часть пунктов (45, 50, 51–54, 57–65, 67, 70, 73–78, 80–100) уже есть в коде или в доке; остальное — по приоритету из планов и backlog.

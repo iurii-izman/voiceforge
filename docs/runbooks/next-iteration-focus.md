@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Phase D (#70–#73) отмечен закрытым в планах: #71 (OTel — core/otel.py + observability-alerts.md), #73 (packaging — offline-package.md, make flatpak-build). Обновлены plans.md, PROJECT-STATUS-SUMMARY, next-iteration-focus (следующий шаг — блок 66, ручные шаги, Sonar).
+**Сделано в сессии:** Блок 66 (prompt caching): в prompt-management.md добавлена секция «Prompt caching (block 66)» (Claude — cache_control в router; не-Claude — по API). Обновлены backlog-and-actions, PROJECT-STATUS-SUMMARY, next-iteration-focus.
 
-**Следующий шаг:** Phase D (#70–#73) закрыт. Дальше: блок 66 (доработка prompt caching для не-Claude), ручные шаги из [MANUAL-AND-CANNOT-DO.md](../plans/MANUAL-AND-CANNOT-DO.md), стабилизация (Sonar S3776 и др.) или новые фичи по backlog. verify_pr: при отсутствии hypothesis — `pytest tests/ --ignore=tests/test_rag_parsers_hypothesis.py`. Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
+**Следующий шаг:** Блок 66 задокументирован (prompt-management § Prompt caching). Дальше: ручные шаги из [MANUAL-AND-CANNOT-DO.md](../plans/MANUAL-AND-CANNOT-DO.md), стабилизация (Sonar S3776 и др.) или новые фичи по backlog. verify_pr: при отсутствии hypothesis — `pytest tests/ --ignore=tests/test_rag_parsers_hypothesis.py`. Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
 
 ---
 

@@ -29,7 +29,7 @@
 | ~~44~~ | ~~История буфера обмена~~ | Реализовано (#88): voiceforge_clipboard_history, кнопка «История копирований», поповер в деталях сессии. |
 | ~~46~~ | ~~Слайд-панель настроек~~ | Реализовано (#89): voiceforge_settings_as_panel, settings-slide-panel, чекбокс в настройках. |
 | ~~49~~ | ~~Виджет «Последний анализ»~~ | Реализовано (#92): карточка last-analysis на главной, get_sessions + get_session_detail, кнопка «Открыть». |
-| 66 | Prompt caching | В router.py уже есть cache_control (ephemeral) для Claude; остальное — по документации API. |
+| 66 | Prompt caching | В router.py cache_control (ephemeral) для Claude; для не-Claude — по API провайдера. Документация: [prompt-management.md](../runbooks/prompt-management.md) § Prompt caching (block 66). |
 | ~~68~~ | ~~Streaming LLM в UI~~ | Реализовано (#91): stream_completion, analyze_meeting_stream, D-Bus StreamingAnalysisChunk, UI #analyze-streaming-output. |
 | ~~71~~ | ~~Whisper API (OpenAI)~~ | Реализовано (#93): stt_backend local\|openai, OpenAIWhisperTranscriber, pipeline и демон по конфигу. |
 | ~~75~~ | ~~Поиск по RAG из UI~~ | Реализовано: search_rag в демоне, D-Bus SearchRag, поле и результаты в UI (#94). |
@@ -38,7 +38,7 @@
 Под-issues созданы и добавлены на доску: #87 (35), #88 (44), #89 (46), #92 (49), #90 (66), #91 (68), #93 (71), #94 (75), #95 (79). Приоритет и порядок реализации — на усмотрение maintainer; агент может реализовывать по расстановке.
 
 **Заметки по реализации (2026-03-07, обновлено 2026-03-07):**
-- **#90 (66 prompt caching):** В `router.py` уже есть cache_control для Claude в `analyze_meeting`, `analyze_live_summary`, `_analysis_prompt`. Дополнительно добавлен cache для `update_action_item_statuses` при Claude. Остальное (LiteLLM/провайдеры) — по документации API.
+- **#90 (66 prompt caching):** В `router.py` cache_control для Claude в `analyze_meeting`, `analyze_live_summary`, `_analysis_prompt`, `update_action_item_statuses`. Документация в prompt-management.md § Prompt caching (block 66); для не-Claude — по документации LiteLLM/провайдеров.
 - **#91 (68 streaming LLM в UI):** Реализовано. Бэкенд: `stream_completion()` в router, `analyze_meeting_stream(stream_callback)`; демон передаёт delta в D-Bus `StreamingAnalysisChunk`; UI подписан на `streaming-analysis-chunk`, выводит в `#analyze-streaming-output`.
 - **#93 (71 Whisper API):** Реализовано. Конфиг `stt_backend: local | openai`, ключ `openai` в keyring; `stt/openai_whisper.py` — `OpenAIWhisperTranscriber`; `get_transcriber_for_config` и `pipeline._step1_stt` выбирают по конфигу.
 - **Блок 69 (retry LLM):** Реализовано. В `llm/circuit_breaker.py`: до 3 попыток (1 + _LLM_RETRY_MAX) с экспоненциальной задержкой (1s, 2s); после исчерпания — record_failure и открытие circuit.
