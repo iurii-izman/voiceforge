@@ -15,6 +15,11 @@ test.describe("Desktop UI navigation", () => {
     await expect(page.locator("#app-root")).toBeVisible();
   });
 
+  test("main content has role main (block 98 a11y)", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByRole("main")).toBeVisible();
+  });
+
   test("home tab is active by default", async ({ page }) => {
     await page.goto("/");
     const homePanel = page.locator("#tab-home");

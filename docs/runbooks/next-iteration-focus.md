@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-07 (автопилот: E2E home quick actions)
+**Обновлено:** 2026-03-07 (автопилот: E2E a11y role=main)
 
 ---
 
@@ -17,7 +17,7 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** E2E: добавлен тест «home tab shows quick actions (block 37)» — проверка видимости #listen-toggle и #quick-analyze-60 на главной; обновлён пункт 84 в roadmap и next-iteration-focus.
+**Сделано в сессии:** E2E: добавлен тест «main content has role main (block 98 a11y)»; в roadmap обновлён пункт 98 (упоминание E2E в nav.spec.js).
 
 **Следующий шаг:** Ручная проверка десктопа/сборки; оставшиеся блоки — см. раздел «Не реализовано (отложено)» в roadmap-100-blocks.md.
 

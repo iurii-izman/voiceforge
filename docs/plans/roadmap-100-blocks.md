@@ -231,7 +231,7 @@
 - **95** — Job desktop-audit в CI: npm audit, cargo audit для desktop/.
 - **96** — Шифрование БД (опция): подраздел в security-and-dependencies.md (текущее состояние, возможные направления: SQLCipher, зашифрованный каталог).
 - **87** — Тесты a11y в CI: job desktop-a11y (build frontend, vite preview, pa11y на localhost), continue-on-error.
-- **98** — a11y: явный role="main" и aria-label на main, существующие aria-label сохранены.
+- **98** — a11y: явный role="main" и aria-label на main, существующие aria-label сохранены; E2E проверка getByRole("main") в nav.spec.js.
 - **99** — AppImage в CI: артефакт desktop-appimage (bundle/appimage/) в job desktop-build.
 - **48** — Экспорт календаря в iCal: команда `voiceforge calendar export-ical --output file.ics` (--hours), запись ближайших событий CalDAV в .ics.
 - **57** — Индикатор прогресса в TTY: при выводе в текст и TTY — «Analyzing…» / «Exporting…» в stderr перед длительной операцией (analyze, export).
