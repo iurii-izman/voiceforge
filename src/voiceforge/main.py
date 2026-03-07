@@ -1257,6 +1257,30 @@ def calendar_upcoming(
         typer.echo(t("calendar.poll_line", summary=ev.get("summary", ""), start_iso=ev.get("start_iso", "")))
 
 
+@calendar_app.command("list")
+def calendar_list(
+    output: str = typer.Option("text", "--output", help=_HELP_OUTPUT_TEXT_JSON),
+) -> None:
+    """List CalDAV calendars (names and URLs). Block 58."""
+    from voiceforge.calendar import list_calendars
+
+    calendars, err = list_calendars()
+    if err:
+        if output == "json":
+            typer.echo(json.dumps(_cli_error_payload("CALDAV_LIST_FAILED", err), ensure_ascii=False))
+        else:
+            typer.echo(t("calendar.poll_error", msg=err), err=True)
+            hint = _hint_for_error(err)
+            if hint:
+                typer.echo(hint, err=True)
+        raise SystemExit(1)
+    if output == "json":
+        typer.echo(json.dumps(_cli_success_payload({"calendars": calendars}), ensure_ascii=False))
+        return
+    for cal in calendars:
+        typer.echo(f"  {cal.get('name', '(no name)')} — {cal.get('url', '')}")
+
+
 @calendar_app.command("poll")
 def calendar_poll(
     minutes: int = typer.Option(5, "--minutes", "-m", help="События, начавшиеся за последние N минут"),

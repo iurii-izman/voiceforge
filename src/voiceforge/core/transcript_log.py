@@ -299,8 +299,8 @@ class TranscriptLog:
         log.info("transcript_log.log_session", session_id=session_id, segments=len(segments))
         return session_id
 
-    def get_sessions(self, last_n: int = 10) -> list[SessionSummary]:
-        """Return last N sessions (newest first)."""
+    def get_sessions(self, last_n: int = 10, offset: int = 0) -> list[SessionSummary]:
+        """Return last N sessions (newest first), with optional offset (block 51 pagination)."""
         conn = self._get_conn()
         cursor = conn.cursor()
         cursor.execute(
@@ -309,9 +309,9 @@ class TranscriptLog:
                    (SELECT COUNT(*) FROM segments WHERE session_id = s.id) AS segments_count
             FROM sessions s
             ORDER BY s.id DESC
-            LIMIT ?
+            LIMIT ? OFFSET ?
             """,
-            (last_n,),
+            (last_n, max(0, offset)),
         )
         return [
             SessionSummary(
@@ -557,6 +557,18 @@ class TranscriptLog:
                 )
                 for row in cursor.fetchall()
             ]
+        except sqlite3.OperationalError as e:
+            if _SCHEMA_ERROR_NO_SUCH_TABLE in str(e).lower():
+                return []
+            raise
+
+    def get_session_ids_with_action_items(self) -> list[int]:
+        """Return distinct session_id that have at least one action item (for filter UI)."""
+        try:
+            conn = self._get_conn()
+            cursor = conn.cursor()
+            cursor.execute("SELECT DISTINCT session_id FROM action_items ORDER BY session_id DESC")
+            return [row["session_id"] for row in cursor.fetchall()]
         except sqlite3.OperationalError as e:
             if _SCHEMA_ERROR_NO_SUCH_TABLE in str(e).lower():
                 return []

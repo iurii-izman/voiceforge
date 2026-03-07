@@ -103,6 +103,31 @@ def poll_events_started_in_last(minutes: int = 5) -> tuple[list[dict[str, Any]],
     return out, None
 
 
+def list_calendars() -> tuple[list[dict[str, Any]], str | None]:
+    """List CalDAV calendar names (block 58). Returns (list of {name, url}, error)."""
+    url = get_api_key(_CALDAV_URL)
+    username = get_api_key(_CALDAV_USERNAME)
+    password = get_api_key(_CALDAV_PASSWORD)
+    if not url or not username or not password:
+        missing = [k for k, v in [(_CALDAV_URL, url), (_CALDAV_USERNAME, username), (_CALDAV_PASSWORD, password)] if not v]
+        return [], f"Missing keyring keys: {', '.join(missing)}. Set: keyring set voiceforge <key>"
+
+    try:
+        import caldav
+    except ImportError:
+        return [], "Install calendar deps: uv sync --extra calendar"
+
+    try:
+        client = caldav.DAVClient(url=url, username=username, password=password)
+        principal = client.principal()
+        calendars = principal.calendars()
+        out = [{"name": getattr(cal, "name", None) or "(no name)", "url": getattr(cal, "url", "") or ""} for cal in calendars]
+        return out, None
+    except Exception as e:
+        log.warning("caldav.list_calendars_failed", error=str(e))
+        return [], str(e)
+
+
 def _candidates_from_calendars(client: Any, now: datetime, end_range: datetime) -> list[tuple[datetime, dict[str, Any]]]:
     """Collect (start_dt, event_dict) from all calendars in range."""
     candidates: list[tuple[datetime, dict[str, Any]]] = []
@@ -127,6 +152,35 @@ def _candidates_from_calendars(client: Any, now: datetime, end_range: datetime) 
             end_dt = _dt_to_aware(comp.get("DTEND"))
             candidates.append((start_dt, _event_dict(comp, cal_name, start_dt, end_dt)))
     return candidates
+
+
+def get_upcoming_events(hours_ahead: int = 48) -> tuple[list[dict[str, Any]], str | None]:
+    """Fetch events that start from now until now+hours_ahead (for dashboard widget).
+
+    Returns (list of event dicts with summary, start_iso, end_iso, calendar_name), or error message.
+    """
+    url = get_api_key(_CALDAV_URL)
+    username = get_api_key(_CALDAV_USERNAME)
+    password = get_api_key(_CALDAV_PASSWORD)
+    if not url or not username or not password:
+        missing = [k for k, v in [(_CALDAV_URL, url), (_CALDAV_USERNAME, username), (_CALDAV_PASSWORD, password)] if not v]
+        return [], f"Missing keyring keys: {', '.join(missing)}. Set: keyring set voiceforge <key>"
+
+    try:
+        import caldav
+    except ImportError:
+        return [], "Install calendar deps: uv sync --extra calendar"
+
+    now = datetime.now(UTC)
+    end_range = now + timedelta(hours=hours_ahead)
+    try:
+        client = caldav.DAVClient(url=url, username=username, password=password)
+        candidates = _candidates_from_calendars(client, now, end_range)
+        candidates.sort(key=lambda x: x[0])
+        return [ev for _, ev in candidates], None
+    except Exception as e:
+        log.warning("caldav.upcoming_failed", error=str(e))
+        return [], str(e)
 
 
 def get_next_meeting_context(hours_ahead: int = 24) -> tuple[str, str | None]:

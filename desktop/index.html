@@ -171,6 +171,12 @@
                 <option value="favorites">Только избранные</option>
               </select>
             </label>
+            <label>Action items
+              <select id="sessions-action-items-filter" aria-label="Action items">
+                <option value="all">Все</option>
+                <option value="with-actions">Только с action items</option>
+              </select>
+            </label>
             <button type="button" class="btn small" id="sessions-export-btn" title="CSV или JSON">Экспорт списка</button>
           </div>
           <div id="sessions-fts-results" class="sessions-fts-results" style="display:none"></div>
@@ -223,11 +229,9 @@
         </div>
         <div class="card">
           <h2>Горячие клавиши</h2>
-          <p class="muted">Глобальные комбинации работают, когда окно в фоне.</p>
-          <ul class="hotkeys-list">
-            <li><kbd>Ctrl+Shift+R</kbd> — старт/стоп записи</li>
-            <li><kbd>Ctrl+Shift+A</kbd> — запуск анализа (30 сек, по умолчанию)</li>
-          </ul>
+          <p class="muted">Глобальные комбинации работают, когда окно в фоне. Формат: Ctrl+Shift+R (на macOS — Cmd).</p>
+          <label class="hotkey-row">Запись: <input type="text" id="hotkey-record" value="CommandOrControl+Shift+R" placeholder="CommandOrControl+Shift+R" class="hotkey-input" aria-label="Горячая клавиша записи" /></label>
+          <label class="hotkey-row">Анализ: <input type="text" id="hotkey-analyze" value="CommandOrControl+Shift+A" placeholder="CommandOrControl+Shift+A" class="hotkey-input" aria-label="Горячая клавиша анализа" /></label>
           <label class="hotkeys-toggle">
             <input type="checkbox" id="hotkeys-enabled" checked />
             Включить глобальные горячие клавиши

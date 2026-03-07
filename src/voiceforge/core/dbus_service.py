@@ -148,13 +148,16 @@ class VoiceForgeAppInterface(ServiceInterface):
 class _DaemonOptionalCallbacks(TypedDict, total=False):
     get_sessions_fn: Callable[[int], str]
     get_session_detail_fn: Callable[[int], str]
+    search_transcripts_fn: Callable[[str, int], str]
     get_settings_fn: Callable[[], str]
     get_indexed_paths_fn: Callable[[], str]
+    get_session_ids_with_action_items_fn: Callable[[], str]
     get_streaming_transcript_fn: Callable[[], str]
     swap_model_fn: Callable[[str, str], str]
     ping_fn: Callable[[], str]
     get_analytics_fn: Callable[[str], str]
     get_api_version_fn: Callable[[], str]
+    get_version_fn: Callable[[], str]
     get_capabilities_fn: Callable[[], str]
 
 
@@ -181,11 +184,13 @@ class DaemonVoiceForgeInterface(ServiceInterface):
         self._get_session_detail = o.get("get_session_detail_fn")
         self._get_settings = o.get("get_settings_fn")
         self._get_indexed_paths = o.get("get_indexed_paths_fn")
+        self._get_session_ids_with_action_items = o.get("get_session_ids_with_action_items_fn")
         self._get_streaming_transcript = o.get("get_streaming_transcript_fn")
         self._swap_model = o.get("swap_model_fn")
         self._ping = o.get("ping_fn")
         self._get_analytics = o.get("get_analytics_fn")
         self._get_api_version = o.get("get_api_version_fn")
+        self._get_version = o.get("get_version_fn")
         self._get_capabilities = o.get("get_capabilities_fn")
         self._analyze_sem = asyncio.Semaphore(1)
 
@@ -271,6 +276,16 @@ class DaemonVoiceForgeInterface(ServiceInterface):
         return payload
 
     @dbus_method()
+    def SearchTranscripts(self, query: DBusStr, limit: DBusUint32) -> DBusStr:
+        """Return JSON array of FTS hits: session_id, text, start_sec, end_sec, snippet."""
+        if self._search_transcripts is None:
+            return _wrap_envelope_with_json_key("hits", "[]") if _uses_ipc_envelope() else "[]"
+        payload = self._search_transcripts(query, limit)
+        if _uses_ipc_envelope():
+            return _wrap_envelope_with_json_key("hits", payload)
+        return payload
+
+    @dbus_method()
     def GetSettings(self) -> DBusStr:
         """Return JSON object with model_size, default_llm, budget_limit_usd, smart_trigger."""
         if self._get_settings is None:
@@ -290,6 +305,17 @@ class DaemonVoiceForgeInterface(ServiceInterface):
             payload = self._get_indexed_paths()
         if _uses_ipc_envelope():
             return _wrap_envelope_with_json_key("indexed_paths", payload)
+        return payload
+
+    @dbus_method()
+    def GetSessionIdsWithActionItems(self) -> DBusStr:
+        """Return JSON array of session_id that have at least one action item (block 47)."""
+        if self._get_session_ids_with_action_items is None:
+            payload = "[]"
+        else:
+            payload = self._get_session_ids_with_action_items()
+        if _uses_ipc_envelope():
+            return _wrap_envelope_with_json_key("session_ids", payload)
         return payload
 
     @dbus_method()
@@ -334,6 +360,13 @@ class DaemonVoiceForgeInterface(ServiceInterface):
         if self._get_api_version is None:
             return "1.0"
         return self._get_api_version()
+
+    @dbus_method()
+    def GetVersion(self) -> DBusStr:
+        """Return application version (e.g. from importlib.metadata) for UI/daemon sync."""
+        if self._get_version is None:
+            return "0.0.0"
+        return self._get_version()
 
     @dbus_method()
     def GetCapabilities(self) -> DBusStr:

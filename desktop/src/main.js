@@ -20,6 +20,8 @@ const STORE_KEYS = [
   "voiceforge_dashboard_order",
   "voiceforge_dashboard_collapsed",
   "voiceforge_favorites",
+  "voiceforge_shortcut_record",
+  "voiceforge_shortcut_analyze",
 ];
 
 async function loadStoreAndMigrate() {
@@ -396,11 +398,14 @@ async function runDefaultAnalyze() {
 async function setupGlobalShortcuts() {
   const enabled = localStorage.getItem(HOTKEYS_ENABLED_KEY) !== "false";
   if (!enabled) return;
+  const [shortcutRecord, shortcutAnalyze] = getShortcuts();
+  currentShortcuts = [shortcutRecord, shortcutAnalyze].filter((s) => s);
+  if (currentShortcuts.length === 0) return;
   try {
-    await registerShortcut(GLOBAL_SHORTCUTS, (event) => {
+    await registerShortcut(currentShortcuts, (event) => {
       if (event.state !== "Pressed") return;
-      if (event.shortcut === SHORTCUT_RECORD && daemonOk) toggleListen();
-      else if (event.shortcut === SHORTCUT_ANALYZE) runDefaultAnalyze();
+      if (event.shortcut === shortcutRecord && daemonOk) toggleListen();
+      else if (event.shortcut === shortcutAnalyze) runDefaultAnalyze();
     });
   } catch (e) {
     if (e != null) console.debug("setupGlobalShortcuts", e);
@@ -408,8 +413,10 @@ async function setupGlobalShortcuts() {
 }
 
 async function teardownGlobalShortcuts() {
+  if (currentShortcuts.length === 0) return;
   try {
-    await unregisterShortcut(GLOBAL_SHORTCUTS);
+    await unregisterShortcut(currentShortcuts);
+    currentShortcuts = [];
   } catch (e) {
     if (e != null) console.debug("teardownGlobalShortcuts", e);
   }
@@ -519,6 +526,7 @@ document.getElementById("analyze-btn").addEventListener("click", async () => {
 
 let sessionsCache = [];
 let lastFilteredSessions = [];
+let sessionIdsWithActionItemsCache = null;
 let lastAnalyticsData = null;
 
 function parseSessionDate(startedAt) {
@@ -679,10 +687,35 @@ function applySessionsFilter() {
   const period = document.getElementById("sessions-period")?.value ?? "all";
   const sortKey = document.getElementById("sessions-sort")?.value ?? "date-desc";
   const favoritesOnly = document.getElementById("sessions-favorites-filter")?.value === "favorites";
+  const actionItemsOnly = document.getElementById("sessions-action-items-filter")?.value === "with-actions";
   lastFilteredSessions = filterAndSortSessions(sessionsCache, search, period, sortKey);
   if (favoritesOnly) {
     const fav = getFavorites();
     lastFilteredSessions = lastFilteredSessions.filter((s) => fav.has(Number(s.id ?? s.session_id)));
+  }
+  if (actionItemsOnly) {
+    if (sessionIdsWithActionItemsCache === null) {
+      invoke("get_session_ids_with_action_items")
+        .then((raw) => {
+          const env = parseEnvelope(raw);
+          const ids = env?.data?.session_ids ?? env?.session_ids ?? [];
+          sessionIdsWithActionItemsCache = new Set(Array.isArray(ids) ? ids.map(Number) : []);
+          lastFilteredSessions = lastFilteredSessions.filter((s) =>
+            sessionIdsWithActionItemsCache.has(Number(s.id ?? s.session_id))
+          );
+          renderSessionsTable(lastFilteredSessions);
+        })
+        .catch(() => {
+          sessionIdsWithActionItemsCache = new Set();
+          renderSessionsTable(lastFilteredSessions);
+        });
+      return;
+    }
+    lastFilteredSessions = lastFilteredSessions.filter((s) =>
+      sessionIdsWithActionItemsCache.has(Number(s.id ?? s.session_id))
+    );
+  } else {
+    sessionIdsWithActionItemsCache = null;
   }
   renderSessionsTable(lastFilteredSessions);
 }
@@ -702,6 +735,7 @@ function loadSessions() {
       const env = parseEnvelope(raw);
       const sessions = env?.data?.sessions ?? env?.sessions ?? [];
       sessionsCache = Array.isArray(sessions) ? sessions : [];
+      sessionIdsWithActionItemsCache = null;
       if (sessionsCache.length === 0) {
         container.innerHTML = emptyStateHtml("📋", "Сессий пока нет", "Запустите запись и анализ на главной.", DOCS_QUICKSTART);
         return;
@@ -726,11 +760,17 @@ function renderSessionDetail(detail) {
     const fullText = segs.map((s) => s.text || "").join(" ");
     const totalChars = fullText.length;
     const totalWords = fullText.trim() ? fullText.trim().split(/\s+/).length : 0;
-    html += "<div class=\"detail-section\"><h4>Транскрипт</h4><p class=\"muted detail-stats\">Слов: " + totalWords + ", символов: " + totalChars + "</p><ul class=\"segment-list\">";
+    html += "<div class=\"detail-section\"><h4>Транскрипт</h4><p class=\"muted detail-stats\">Слов: " + totalWords + ", символов: " + totalChars + "</p>";
+    html += "<div class=\"detail-segment-minimap\" role=\"navigation\" aria-label=\"Навигация по сегментам\">";
+    segs.forEach((s, idx) => {
+      const t = s.start_sec != null ? Math.floor(Number(s.start_sec) / 60) + ":" + String(Math.floor(Number(s.start_sec) % 60)).padStart(2, "0") : String(idx + 1);
+      html += `<button type="button" class="minimap-segment-btn" data-segment-idx="${idx}" title="Сегмент ${idx + 1}">${escapeHtml(t)}</button>`;
+    });
+    html += "</div><ul class=\"segment-list\">";
     segs.forEach((s, idx) => {
       const speaker = s.speaker ? `[${s.speaker}] ` : "";
       const time = (s.start_sec != null && s.end_sec != null) ? `${Number(s.start_sec).toFixed(1)}–${Number(s.end_sec).toFixed(1)} с ` : "";
-      html += `<li data-segment-index="${idx}"><span class="segment-meta">${time}${speaker}</span>${escapeHtml(s.text || "")} <button type="button" class="btn small segment-copy" aria-label="Копировать сегмент">Копировать</button></li>`;
+      html += `<li id="segment-${idx}" data-segment-index="${idx}"><span class="segment-meta">${time}${speaker}</span>${escapeHtml(s.text || "")} <button type="button" class="btn small segment-copy" aria-label="Копировать сегмент">Копировать</button></li>`;
     });
     html += "</ul></div>";
   }
@@ -897,6 +937,13 @@ function showSessionDetail(id) {
             const text = lastSessionDetail.segments[idx].text || "";
             navigator.clipboard.writeText(text).then(() => notify("VoiceForge", "Сегмент скопирован.")).catch(() => {});
           }
+        });
+      });
+      bodyEl.querySelectorAll(".minimap-segment-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const idx = btn.getAttribute("data-segment-idx");
+          const el = idx != null ? document.getElementById("segment-" + idx) : null;
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
         });
       });
     })
@@ -1173,9 +1220,16 @@ function handleDeepLinkUrls(urls) {
     }
   }
 }
-const SHORTCUT_RECORD = "CommandOrControl+Shift+R";
-const SHORTCUT_ANALYZE = "CommandOrControl+Shift+A";
-const GLOBAL_SHORTCUTS = [SHORTCUT_RECORD, SHORTCUT_ANALYZE];
+const SHORTCUT_RECORD_DEFAULT = "CommandOrControl+Shift+R";
+const SHORTCUT_ANALYZE_DEFAULT = "CommandOrControl+Shift+A";
+
+function getShortcuts() {
+  const r = localStorage.getItem("voiceforge_shortcut_record") || SHORTCUT_RECORD_DEFAULT;
+  const a = localStorage.getItem("voiceforge_shortcut_analyze") || SHORTCUT_ANALYZE_DEFAULT;
+  return [r.trim() || SHORTCUT_RECORD_DEFAULT, a.trim() || SHORTCUT_ANALYZE_DEFAULT];
+}
+
+let currentShortcuts = [];
 let windowStateSaveTimeout = null;
 
 async function restoreWindowState() {
@@ -1275,14 +1329,35 @@ function initTheme() {
 
 function initHotkeysCard() {
   const cb = document.getElementById("hotkeys-enabled");
-  if (!cb) return;
-  cb.checked = localStorage.getItem(HOTKEYS_ENABLED_KEY) !== "false";
-  cb.addEventListener("change", async () => {
-    const enabled = cb.checked;
-    setStored(HOTKEYS_ENABLED_KEY, enabled ? "true" : "false");
-    if (enabled) await setupGlobalShortcuts();
-    else await teardownGlobalShortcuts();
-  });
+  const inputRecord = document.getElementById("hotkey-record");
+  const inputAnalyze = document.getElementById("hotkey-analyze");
+  if (cb) {
+    cb.checked = localStorage.getItem(HOTKEYS_ENABLED_KEY) !== "false";
+    cb.addEventListener("change", async () => {
+      const enabled = cb.checked;
+      setStored(HOTKEYS_ENABLED_KEY, enabled ? "true" : "false");
+      if (enabled) await setupGlobalShortcuts();
+      else await teardownGlobalShortcuts();
+    });
+  }
+  if (inputRecord) {
+    inputRecord.value = localStorage.getItem("voiceforge_shortcut_record") || SHORTCUT_RECORD_DEFAULT;
+    inputRecord.addEventListener("change", async () => {
+      const v = (inputRecord.value || "").trim() || SHORTCUT_RECORD_DEFAULT;
+      setStored("voiceforge_shortcut_record", v);
+      await teardownGlobalShortcuts();
+      if (localStorage.getItem(HOTKEYS_ENABLED_KEY) !== "false") await setupGlobalShortcuts();
+    });
+  }
+  if (inputAnalyze) {
+    inputAnalyze.value = localStorage.getItem("voiceforge_shortcut_analyze") || SHORTCUT_ANALYZE_DEFAULT;
+    inputAnalyze.addEventListener("change", async () => {
+      const v = (inputAnalyze.value || "").trim() || SHORTCUT_ANALYZE_DEFAULT;
+      setStored("voiceforge_shortcut_analyze", v);
+      await teardownGlobalShortcuts();
+      if (localStorage.getItem(HOTKEYS_ENABLED_KEY) !== "false") await setupGlobalShortcuts();
+    });
+  }
 }
 
 function downloadBlob(blob, filename) {
@@ -1347,6 +1422,7 @@ function initSessionsToolbar() {
   document.getElementById("sessions-period")?.addEventListener("change", () => applySessionsFilter());
   document.getElementById("sessions-sort")?.addEventListener("change", () => applySessionsFilter());
   document.getElementById("sessions-favorites-filter")?.addEventListener("change", () => applySessionsFilter());
+  document.getElementById("sessions-action-items-filter")?.addEventListener("change", () => applySessionsFilter());
   let ftsSearchTimeout = null;
   document.getElementById("sessions-fts-search")?.addEventListener("input", () => {
     const input = document.getElementById("sessions-fts-search");

@@ -178,15 +178,20 @@
 
 ## Реализовано (автопилот)
 
+- **31** — Настраиваемые горячие клавиши: поля «Запись»/«Анализ» в настройках, сохранение в Store (voiceforge_shortcut_record/analyze), getShortcuts(), teardown/setup при смене.
+- **32** — Мини-карта сессии: кнопки по сегментам (время или №), scroll to segment в деталях сессии (detail-segment-minimap).
 - **36** — Версия демона в настройках (get_daemon_version, строка под настройками).
 - **37** — Панель быстрых действий на главной: кнопки «Запись», «Анализ 60 сек» (quick-actions, initQuickActions).
+- **47** — Поиск по action items: фильтр «Только с action items», get_session_ids_with_action_items (TranscriptLog, D-Bus, Tauri), кэш в UI.
 - **40** — Кнопка «Печать» в деталях сессии, @media print в styles.css.
 - **42** — Счётчик слов и символов в блоке «Транскрипт» (detail-stats).
 - **43** — Копирование одного сегмента: кнопка «Копировать» у каждого сегмента в деталях сессии.
 - **45** — Группировка сессий по дате: «Сегодня», «Вчера», «На этой неделе», «Ранее».
 - **50** — Офлайн-индикатор: баннер «Демон отключён» с кнопкой «Повторить подключение» (daemon-off-banner).
 - **51** — history --offset для пагинации (ранее —last; добавлен offset в get_sessions и CLI).
+- **52** — status --output json уже был (get_status_data, doctor в JSON).
 - **54** — `daemon --foreground` / `-f`: логи в stdout (structlog ConsoleRenderer(stream=sys.stdout)).
+- **58** — calendar list: list_calendars() в caldav_poll, команда voiceforge calendar list (--output text|json).
 - **55** — Команда `voiceforge version`.
 - **56** — Подсказки при типовых ошибках (_hint_for_error: keyring, audio, daemon).
 - **59** — Документация VOICEFORGE_*: индекс в config-env-contract.md, добавлен VOICEFORGE_WEB_ASYNC.

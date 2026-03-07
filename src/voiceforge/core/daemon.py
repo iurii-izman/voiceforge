@@ -258,6 +258,33 @@ class VoiceForgeDaemon:
             log.warning("daemon.get_session_detail_failed", session_id=session_id, error=str(e))
             return "{}"
 
+    def search_transcripts(self, query: str, limit: int = 20) -> str:
+        """Return JSON array of FTS hits: session_id, text, start_sec, end_sec, snippet."""
+        if not query or not query.strip():
+            return "[]"
+        try:
+            from voiceforge.core.transcript_log import TranscriptLog
+
+            log_db = TranscriptLog()
+            try:
+                hits = log_db.search_transcripts(query.strip(), limit=min(limit, 50))
+                out = [
+                    {
+                        "session_id": h[0],
+                        "text": h[1],
+                        "start_sec": h[2],
+                        "end_sec": h[3],
+                        "snippet": h[4],
+                    }
+                    for h in hits
+                ]
+                return json.dumps(out, ensure_ascii=False)
+            finally:
+                log_db.close()
+        except Exception as e:
+            log.warning("daemon.search_transcripts_failed", error=str(e))
+            return "[]"
+
     def get_settings(self) -> str:
         """Return JSON with current settings for UI. privacy_mode is alias for pii_mode (W4)."""
         c = self._cfg
@@ -295,6 +322,21 @@ class VoiceForgeDaemon:
             log.warning("daemon.get_indexed_paths_failed", error=str(e))
             return "[]"
 
+    def get_session_ids_with_action_items(self) -> str:
+        """Return JSON array of session_id that have at least one action item (block 47)."""
+        try:
+            from voiceforge.core.transcript_log import TranscriptLog
+
+            log_db = TranscriptLog()
+            try:
+                ids = log_db.get_session_ids_with_action_items()
+                return json.dumps(ids, ensure_ascii=False)
+            finally:
+                log_db.close()
+        except Exception as e:
+            log.warning("daemon.get_session_ids_with_action_items_failed", error=str(e))
+            return "[]"
+
     def get_analytics(self, last: str) -> str:
         """Return JSON analytics for period (e.g. last='7d' or '30d'). Block 11.5."""
         days = 30
@@ -316,6 +358,14 @@ class VoiceForgeDaemon:
     def get_api_version(self) -> str:
         """D-Bus API contract version."""
         return "1.0"
+
+    def get_version(self) -> str:
+        """Application version for UI/daemon sync (block 61)."""
+        try:
+            from importlib.metadata import version
+            return version("voiceforge")
+        except Exception:
+            return "0.2.0-alpha.1"
 
     def get_capabilities(self) -> str:
         """Return capabilities supported by this daemon build."""
@@ -516,13 +566,16 @@ def _wire_daemon_iface(iface: DaemonVoiceForgeInterface, daemon: VoiceForgeDaemo
     iface._is_listening = daemon.is_listening
     iface._get_sessions = daemon.get_sessions
     iface._get_session_detail = daemon.get_session_detail
+    iface._search_transcripts = daemon.search_transcripts
     iface._get_settings = daemon.get_settings
     iface._get_indexed_paths = daemon.get_indexed_paths
+    iface._get_session_ids_with_action_items = daemon.get_session_ids_with_action_items
     iface._get_streaming_transcript = daemon.get_streaming_transcript
     iface._swap_model = daemon.swap_model
     iface._ping = lambda: "pong"
     iface._get_analytics = daemon.get_analytics
     iface._get_api_version = daemon.get_api_version
+    iface._get_version = daemon.get_version
     iface._get_capabilities = daemon.get_capabilities
 
 
