@@ -415,6 +415,57 @@ class VoiceForgeDaemon:
             log.warning("daemon.get_upcoming_events_failed", error=str(e))
             return "[]"
 
+    def create_event_from_session(self, session_id: int, calendar_url: str | None = None) -> str:
+        """Create CalDAV event from session (block 79, #95). Returns JSON envelope with event_uid or error."""
+        from voiceforge.calendar import create_event
+        from voiceforge.core.contracts import build_cli_error_payload, build_cli_success_payload
+        from voiceforge.core.transcript_log import TranscriptLog
+
+        try:
+            log_db = TranscriptLog()
+            try:
+                meta = log_db.get_session_meta(session_id)
+                if not meta:
+                    return json.dumps(
+                        build_cli_error_payload("SESSION_NOT_FOUND", f"Session {session_id} not found"),
+                        ensure_ascii=False,
+                    )
+                started_at, ended_at, _ = meta
+                detail = log_db.get_session_detail(session_id)
+                summary = f"VoiceForge session {session_id}"
+                description_parts: list[str] = []
+                if detail:
+                    _segments, analysis = detail
+                    if analysis and analysis.action_items:
+                        for ai in analysis.action_items:
+                            desc = (ai.get("description") or ai.get("text") or "").strip()
+                            if desc:
+                                assignee = (ai.get("assignee") or "").strip()
+                                deadline = (ai.get("deadline") or "").strip()
+                                if assignee or deadline:
+                                    desc = f"{desc} ({', '.join(x for x in [assignee, deadline] if x)})"
+                                description_parts.append(f"- {desc}")
+                description = "\n".join(description_parts) if description_parts else f"Session {session_id} (VoiceForge)"
+            finally:
+                log_db.close()
+            cal_url = (calendar_url or "").strip() or None
+            event_uid, err = create_event(
+                start_iso=started_at,
+                end_iso=ended_at,
+                summary=summary,
+                description=description,
+                calendar_url=cal_url,
+            )
+            if err:
+                return json.dumps(build_cli_error_payload("CALDAV_CREATE_EVENT_FAILED", err), ensure_ascii=False)
+            return json.dumps(build_cli_success_payload({"event_uid": event_uid}), ensure_ascii=False)
+        except Exception as e:
+            log.warning("daemon.create_event_from_session_failed", session_id=session_id, error=str(e))
+            return json.dumps(
+                build_cli_error_payload("CALDAV_CREATE_EVENT_FAILED", str(e)),
+                ensure_ascii=False,
+            )
+
     def get_analytics(self, last: str) -> str:
         """Return JSON analytics for period (e.g. last='7d' or '30d'). Block 11.5."""
         days = 30
@@ -658,6 +709,9 @@ def _wire_daemon_iface(iface: DaemonVoiceForgeInterface, daemon: VoiceForgeDaemo
     iface._get_indexed_paths = daemon.get_indexed_paths
     iface._get_session_ids_with_action_items = daemon.get_session_ids_with_action_items
     iface._get_upcoming_events = lambda: daemon.get_upcoming_events(48)
+    iface._create_event_from_session = lambda session_id, calendar_url: daemon.create_event_from_session(
+        session_id, (calendar_url or "").strip() or None
+    )
     iface._get_streaming_transcript = daemon.get_streaming_transcript
     iface._swap_model = daemon.swap_model
     iface._ping = lambda: "pong"

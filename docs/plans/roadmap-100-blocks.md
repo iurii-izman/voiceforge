@@ -242,7 +242,7 @@
 - **73** — Индексация RAG по расписанию: раздел в rag-formats.md (cron, systemd timer), пример crontab для `voiceforge index`.
 - **77** — Экспорт RAG-индекса: команда `voiceforge rag-export --output <file>` (метаданные источников и чанков, опция --content).
 - **78** — Автостарт записи по календарю: calendar_autostart_enabled, calendar_autostart_minutes в config; поток _calendar_autostart_loop в демоне (get_upcoming_events, старт listen за N мин до события).
-- **79** — (не реализовано в этой сессии)
+- **79** — Создание события из сессии: create_event в calendar (CalDAV POST), CLI `calendar create-from-session`, демон create_event_from_session, D-Bus CreateEventFromSession, Tauri create_event_from_session (#95).
 - **80** — Заглушка видеовстреч: [video-meetings-integration.md](video-meetings-integration.md), запись в DOCS-INDEX.
 - **81** — Экспорт в DOCX: export --format docx (pandoc), кнопка DOCX в десктопе, Tauri export_session(docx).
 - **82** — Еженедельный отчёт: команда weekly-report (--days, --output, --format text|json|md), сессии + затраты + action items за период.
@@ -284,8 +284,8 @@
 | --- | -------------------------- | ------------------------------------------------- |
 | 66  | Prompt caching             | API Claude/провайдеров; бэкенд                    |
 | 68  | Streaming LLM в UI         | Пошаговый вывод; бэкенд + фронт                   |
-| 71  | Whisper API (OpenAI)       | Опция STT; бэкенд                                 |
-| 79  | Создание события из сессии | «Добавить в календарь» после анализа; CalDAV POST |
+| 71  | Whisper API (OpenAI)       | Опция STT; бэкенд (реализовано #93)              |
+| 79  | Создание события из сессии | Реализовано (#95): create_event, CLI, D-Bus, Tauri |
 
 
 ---

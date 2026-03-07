@@ -280,3 +280,93 @@ def test_candidates_from_calendars_one_event() -> None:
     assert len(out) == 1
     assert out[0][0] == start_dt
     assert out[0][1]["summary"] == "Sync"
+
+
+# --- create_event (block 79, #95) ---
+
+
+def test_iso_to_ical_utc_valid() -> None:
+    """_iso_to_ical_utc converts ISO string to YYYYMMDDTHHMMSSZ."""
+    from voiceforge.calendar.caldav_poll import _iso_to_ical_utc
+
+    assert _iso_to_ical_utc("2025-03-07T10:00:00+00:00") == "20250307T100000Z"
+    assert _iso_to_ical_utc("2025-03-07T10:00:00Z") == "20250307T100000Z"
+
+
+def test_iso_to_ical_utc_invalid() -> None:
+    """_iso_to_ical_utc returns '' for invalid or empty input."""
+    from voiceforge.calendar.caldav_poll import _iso_to_ical_utc
+
+    assert _iso_to_ical_utc("") == ""
+    assert _iso_to_ical_utc("not-a-date") == ""
+
+
+def test_ical_escape() -> None:
+    """_ical_escape escapes backslash, semicolon, comma, newline."""
+    from voiceforge.calendar.caldav_poll import _ical_escape
+
+    assert _ical_escape("a;b,c") == "a\\;b\\,c"
+    assert _ical_escape("a\nb") == "a\\nb"
+    assert _ical_escape("a\\b") == "a\\\\b"
+
+
+def test_create_event_missing_keyring(monkeypatch: pytest.MonkeyPatch) -> None:
+    """create_event returns (None, error) when keyring keys missing (#95)."""
+    from voiceforge.calendar.caldav_poll import create_event
+
+    monkeypatch.setattr("voiceforge.calendar.caldav_poll.get_api_key", lambda name: None)
+    uid, err = create_event("2025-03-07T10:00:00Z", "2025-03-07T11:00:00Z", "Test", "")
+    assert uid is None
+    assert err is not None
+    assert "keyring" in err.lower() or "missing" in err.lower()
+
+
+def test_create_event_invalid_dates(monkeypatch: pytest.MonkeyPatch) -> None:
+    """create_event returns (None, error) for invalid start/end ISO."""
+    from voiceforge.calendar.caldav_poll import create_event
+
+    monkeypatch.setattr(
+        "voiceforge.calendar.caldav_poll.get_api_key",
+        lambda n: "x" if n in ("caldav_url", "caldav_username", "caldav_password") else None,
+    )
+    uid, err = create_event("", "2025-03-07T11:00:00Z", "Test", "")
+    assert uid is None
+    assert err is not None
+    assert "invalid" in err.lower() or "start" in err.lower() or "end" in err.lower()
+
+
+def test_create_event_success_mocked(monkeypatch: pytest.MonkeyPatch) -> None:
+    """create_event returns (uid, None) when cal.add_event succeeds (#95)."""
+    pytest.importorskip("caldav")
+    from voiceforge.calendar.caldav_poll import create_event
+
+    def fake_key(name: str) -> str | None:
+        return "https://cal.example.com" if name == "caldav_url" else "user" if name == "caldav_username" else "secret"
+
+    monkeypatch.setattr("voiceforge.calendar.caldav_poll.get_api_key", fake_key)
+    mock_cal = MagicMock()
+    mock_principal = MagicMock()
+    mock_principal.calendars = MagicMock(return_value=[mock_cal])
+    mock_principal.calendar = MagicMock(return_value=mock_cal)
+    mock_client = MagicMock()
+    mock_client.principal = MagicMock(return_value=mock_principal)
+
+    def fake_dav_client(*args: object, **kwargs: object) -> MagicMock:
+        return mock_client
+
+    with patch("caldav.DAVClient", fake_dav_client):
+        uid, err = create_event(
+            "2025-03-07T10:00:00Z",
+            "2025-03-07T11:00:00Z",
+            "VoiceForge session 1",
+            "Action items here",
+        )
+    assert err is None
+    assert uid is not None
+    assert "voiceforge-" in uid and "@voiceforge" in uid
+    mock_cal.add_event.assert_called_once()
+    call_ical = mock_cal.add_event.call_args[0][0]
+    assert "BEGIN:VEVENT" in call_ical
+    assert "DTSTART:20250307T100000Z" in call_ical
+    assert "SUMMARY:" in call_ical
+    assert "DESCRIPTION:" in call_ical

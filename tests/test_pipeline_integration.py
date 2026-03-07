@@ -279,6 +279,7 @@ def test_pipeline_run_returns_result_with_mocked_stt(
         sample_rate: int,
         model_size: str,
         language_hint: str | None = None,
+        cfg: object = None,
     ) -> tuple[list, str]:
         return ([FakeSegment("mocked")], "mocked transcript")
 

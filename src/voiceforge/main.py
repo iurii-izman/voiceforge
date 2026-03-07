@@ -1676,6 +1676,66 @@ def calendar_poll(
         typer.echo(t("calendar.poll_line", summary=ev.get("summary", ""), start_iso=ev.get("start_iso", "")))
 
 
+@calendar_app.command("create-from-session")
+def calendar_create_from_session(
+    session_id: int = typer.Argument(..., help="Session ID to create calendar event from (block 79, #95)."),
+    calendar_url: str | None = typer.Option(None, "--calendar-url", "-c", help="CalDAV calendar URL (default: first calendar)."),
+    output: str = typer.Option("text", "--output", help=_HELP_OUTPUT_TEXT_JSON),
+) -> None:
+    """Create a CalDAV event from a VoiceForge session (summary + action items in description)."""
+    from voiceforge.calendar import create_event
+    from voiceforge.core.transcript_log import TranscriptLog
+
+    log_db = TranscriptLog()
+    try:
+        meta = log_db.get_session_meta(session_id)
+        if not meta:
+            if output == "json":
+                typer.echo(json.dumps(_cli_error_payload("SESSION_NOT_FOUND", f"Session {session_id} not found"), ensure_ascii=False))
+            else:
+                typer.echo(session_not_found_message(session_id), err=True)
+            raise SystemExit(1)
+        started_at, ended_at, _duration_sec = meta
+        detail = log_db.get_session_detail(session_id)
+        summary = f"VoiceForge session {session_id}"
+        description_parts: list[str] = []
+        if detail:
+            _segments, analysis = detail
+            if analysis and analysis.action_items:
+                for ai in analysis.action_items:
+                    desc = (ai.get("description") or ai.get("text") or "").strip()
+                    if desc:
+                        assignee = (ai.get("assignee") or "").strip()
+                        deadline = (ai.get("deadline") or "").strip()
+                        if assignee or deadline:
+                            desc = f"{desc} ({', '.join(x for x in [assignee, deadline] if x)})"
+                        description_parts.append(f"- {desc}")
+        description = "\n".join(description_parts) if description_parts else f"Session {session_id} (VoiceForge)"
+    finally:
+        log_db.close()
+
+    event_uid, err = create_event(
+        start_iso=started_at,
+        end_iso=ended_at,
+        summary=summary,
+        description=description,
+        calendar_url=calendar_url,
+    )
+    if err is not None:
+        if output == "json":
+            typer.echo(json.dumps(_cli_error_payload("CALDAV_CREATE_EVENT_FAILED", err), ensure_ascii=False))
+        else:
+            typer.echo(t(_I18N_CALENDAR_POLL_ERROR, msg=err), err=True)
+            hint = _hint_for_error(err)
+            if hint:
+                typer.echo(hint, err=True)
+        raise SystemExit(1)
+    if output == "json":
+        typer.echo(json.dumps(_cli_success_payload({"event_uid": event_uid}), ensure_ascii=False))
+    else:
+        typer.echo(f"Created calendar event: {event_uid}")
+
+
 def main() -> None:
     structlog.configure(
         processors=[

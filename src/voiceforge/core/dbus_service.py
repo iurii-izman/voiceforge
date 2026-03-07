@@ -154,6 +154,7 @@ class _DaemonOptionalCallbacks(TypedDict, total=False):
     get_indexed_paths_fn: Callable[[], str]
     get_session_ids_with_action_items_fn: Callable[[], str]
     get_upcoming_events_fn: Callable[[], str]
+    create_event_from_session_fn: Callable[[int, str], str]
     get_streaming_transcript_fn: Callable[[], str]
     swap_model_fn: Callable[[str, str], str]
     ping_fn: Callable[[], str]
@@ -190,6 +191,7 @@ class DaemonVoiceForgeInterface(ServiceInterface):
         self._get_indexed_paths = o.get("get_indexed_paths_fn")
         self._get_session_ids_with_action_items = o.get("get_session_ids_with_action_items_fn")
         self._get_upcoming_events = o.get("get_upcoming_events_fn")
+        self._create_event_from_session = o.get("create_event_from_session_fn")
         self._get_streaming_transcript = o.get("get_streaming_transcript_fn")
         self._swap_model = o.get("swap_model_fn")
         self._ping = o.get("ping_fn")
@@ -347,6 +349,14 @@ class DaemonVoiceForgeInterface(ServiceInterface):
         if _uses_ipc_envelope():
             return _wrap_envelope_with_json_key("events", payload)
         return payload
+
+    @dbus_method()
+    def CreateEventFromSession(self, session_id: DBusUint32, calendar_url: DBusStr) -> DBusStr:
+        """Create CalDAV event from session (block 79, #95). calendar_url empty = first calendar. Returns JSON envelope."""
+        if self._create_event_from_session is None:
+            return '{"ok":false,"error":"create_event_from_session not available"}'
+        cal_url = (calendar_url or "").strip() or None
+        return self._create_event_from_session(session_id, cal_url or "")
 
     @dbus_method()
     def GetStreamingTranscript(self) -> DBusStr:

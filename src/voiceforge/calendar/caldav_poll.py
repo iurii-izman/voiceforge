@@ -1,7 +1,8 @@
-"""CalDAV poll: events that started in the last N minutes (keyring: caldav_*)."""
+"""CalDAV poll: events that started in the last N minutes (keyring: caldav_*). Block 79: create event from session (#95)."""
 
 from __future__ import annotations
 
+import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -10,6 +11,9 @@ import structlog
 from voiceforge.core.secrets import get_api_key
 
 log = structlog.get_logger()
+
+_ICAL_DT_FORMAT = "%Y%m%dT%H%M%SZ"
+_ISO_UTC_SUFFIX = "+00:00"
 
 # Keyring key names (see keyring-keys-reference.md)
 _CALDAV_URL = "caldav_url"
@@ -217,3 +221,93 @@ def get_next_meeting_context(hours_ahead: int = 24) -> tuple[str, str | None]:
     except Exception as e:
         log.warning("caldav.next_meeting_failed", error=str(e))
         return "", str(e)
+
+
+def _iso_to_ical_utc(iso_str: str) -> str:
+    """Convert ISO datetime string to iCal format YYYYMMDDTHHMMSSZ (UTC)."""
+    if not iso_str or not iso_str.strip():
+        return ""
+    try:
+        s = iso_str.strip().replace("Z", _ISO_UTC_SUFFIX)
+        dt = datetime.fromisoformat(s)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=UTC)
+        else:
+            dt = dt.astimezone(UTC)
+        return dt.strftime(_ICAL_DT_FORMAT)
+    except (ValueError, TypeError):
+        return ""
+
+
+def _ical_escape(text: str) -> str:
+    """Escape SUMMARY/DESCRIPTION for iCal: backslash, semicolon, comma, newline."""
+    if not text:
+        return ""
+    return text.replace("\\", "\\\\").replace(";", "\\;").replace(",", "\\,").replace("\n", "\\n")
+
+
+def create_event(
+    start_iso: str,
+    end_iso: str,
+    summary: str,
+    description: str = "",
+    calendar_url: str | None = None,
+) -> tuple[str | None, str | None]:
+    """Create a CalDAV event (block 79, #95). Returns (event_uid, error).
+
+    Uses keyring caldav_url, caldav_username, caldav_password. If calendar_url is given,
+    uses that calendar; otherwise uses the first calendar from principal.
+    """
+    url = get_api_key(_CALDAV_URL)
+    username = get_api_key(_CALDAV_USERNAME)
+    password = get_api_key(_CALDAV_PASSWORD)
+    if not url or not username or not password:
+        missing = [k for k, v in [(_CALDAV_URL, url), (_CALDAV_USERNAME, username), (_CALDAV_PASSWORD, password)] if not v]
+        return None, f"Missing keyring keys: {', '.join(missing)}. Set: keyring set voiceforge <key>"
+
+    try:
+        import caldav
+    except ImportError:
+        return None, _CALENDAR_DEPS_HINT
+
+    start_ical = _iso_to_ical_utc(start_iso)
+    end_ical = _iso_to_ical_utc(end_iso)
+    if not start_ical or not end_ical:
+        return None, "Invalid start_iso or end_iso (expected ISO 8601 datetime)"
+
+    uid = f"voiceforge-{uuid.uuid4().hex}@voiceforge"
+    summary_esc = _ical_escape((summary or "").strip() or "VoiceForge session")
+    desc_esc = _ical_escape((description or "").strip())
+
+    lines = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//VoiceForge//create-event//EN",
+        "BEGIN:VEVENT",
+        f"UID:{uid}",
+        f"DTSTAMP:{start_ical}",
+        f"DTSTART:{start_ical}",
+        f"DTEND:{end_ical}",
+        f"SUMMARY:{summary_esc}",
+    ]
+    if desc_esc:
+        lines.append(f"DESCRIPTION:{desc_esc}")
+    lines.extend(["END:VEVENT", "END:VCALENDAR"])
+    ical_str = "\r\n".join(lines)
+
+    try:
+        client = caldav.DAVClient(url=url, username=username, password=password)
+        principal = client.principal()
+        if calendar_url:
+            cal = principal.calendar(cal_url=calendar_url)
+        else:
+            calendars = principal.calendars()
+            if not calendars:
+                return None, "No CalDAV calendars found"
+            cal = calendars[0]
+        cal.add_event(ical_str)
+        log.info("caldav.create_event", uid=uid, summary=summary_esc[:80])
+        return uid, None
+    except Exception as e:
+        log.warning("caldav.create_event_failed", error=str(e))
+        return None, str(e)

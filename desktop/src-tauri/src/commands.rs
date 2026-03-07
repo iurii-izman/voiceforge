@@ -188,6 +188,25 @@ pub async fn get_upcoming_calendar_events() -> Result<String, String> {
     call_method0(&conn, "GetUpcomingEvents").await
 }
 
+/// Create a CalDAV event from a VoiceForge session (block 79, #95). calendar_url empty = first calendar.
+#[tauri::command]
+pub async fn create_event_from_session(session_id: u32, calendar_url: Option<String>) -> Result<String, String> {
+    let conn = connection().await?;
+    let url = calendar_url.unwrap_or_default();
+    let reply = conn
+        .call_method(
+            Some(crate::DBUS_NAME),
+            crate::DBUS_PATH,
+            Some(crate::DBUS_INTERFACE),
+            "CreateEventFromSession",
+            &(session_id, url.as_str()),
+        )
+        .await
+        .map_err(|e| e.to_string())?;
+    let body: String = reply.body().deserialize().map_err(|e| e.to_string())?;
+    Ok(body)
+}
+
 #[tauri::command]
 pub async fn set_tray_theme(app: tauri::AppHandle, is_dark: bool) -> Result<(), String> {
     crate::tray::set_tray_theme(&app, is_dark).map_err(|e| e.to_string())
