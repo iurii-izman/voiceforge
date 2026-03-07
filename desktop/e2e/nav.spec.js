@@ -22,6 +22,13 @@ test.describe("Desktop UI navigation", () => {
     await expect(homePanel).toHaveClass(/active/);
   });
 
+  test("home tab shows quick actions (block 37)", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("#tab-home.active")).toBeVisible();
+    await expect(page.locator("#listen-toggle")).toBeVisible();
+    await expect(page.locator("#quick-analyze-60")).toBeVisible();
+  });
+
   test("switching tabs updates visible panel", async ({ page }) => {
     await expect(page.locator("#tab-home")).toBeVisible();
 
