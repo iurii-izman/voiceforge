@@ -13,9 +13,15 @@ const ID_OPEN: &str = "tray-open";
 const ID_TOGGLE: &str = "tray-toggle-record";
 const ID_QUIT: &str = "tray-quit";
 
-/// Light theme tray icon (default). Dark icon: add icons/icon-dark.png and use in set_tray_theme.
+/// Light theme tray icon (default).
 fn tray_icon_light() -> Result<Image<'static>, Box<dyn std::error::Error + Send + Sync>> {
     let bytes = include_bytes!("../icons/icon.png");
+    Image::from_bytes(bytes).map_err(|e| e.into())
+}
+
+/// Dark theme tray icon (visible on dark system themes). icons/icon-dark.png.
+fn tray_icon_dark() -> Result<Image<'static>, Box<dyn std::error::Error + Send + Sync>> {
+    let bytes = include_bytes!("../icons/icon-dark.png");
     Image::from_bytes(bytes).map_err(|e| e.into())
 }
 
@@ -62,7 +68,6 @@ pub fn setup_tray<R: Runtime>(app: &tauri::App<R>) -> Result<(), Box<dyn std::er
 }
 
 /// Set tray icon by theme (light/dark). Call from frontend when theme changes (#87).
-/// If icons/icon-dark.png exists, it is used for dark theme; otherwise same as light.
 pub fn set_tray_theme<R: Runtime>(
     app: &tauri::AppHandle<R>,
     is_dark: bool,
@@ -71,20 +76,7 @@ pub fn set_tray_theme<R: Runtime>(
         return Ok(());
     };
     let icon = if is_dark {
-        if let Ok(res_dir) = app.path().resource_dir() {
-            let dark_path = res_dir.join("icons").join("icon-dark.png");
-            if dark_path.exists() {
-                if let Ok(img) = Image::from_path(&dark_path) {
-                    img.to_owned()
-                } else {
-                    tray_icon_light()?
-                }
-            } else {
-                tray_icon_light()?
-            }
-        } else {
-            tray_icon_light()?
-        }
+        tray_icon_dark().or_else(|_| tray_icon_light())?
     } else {
         tray_icon_light()?
     };
