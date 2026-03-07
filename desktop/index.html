@@ -187,25 +187,25 @@
           <div id="sessions-fts-results" class="sessions-fts-results" style="display:none"></div>
           <div id="sessions-list"></div>
           <div id="session-context-menu" class="context-menu" role="menu" aria-hidden="true" style="display:none">
-            <button type="button" class="context-menu-item" data-action="open">Открыть</button>
-            <button type="button" class="context-menu-item" data-action="copy-link">Копировать ссылку</button>
-            <button type="button" class="context-menu-item" data-action="favorite">В избранное</button>
-            <button type="button" class="context-menu-item" data-action="export-md">Экспорт Markdown</button>
-            <button type="button" class="context-menu-item" data-action="export-pdf">Экспорт PDF</button>
+            <button type="button" class="context-menu-item" data-action="open" data-i18n="ctx_open">Открыть</button>
+            <button type="button" class="context-menu-item" data-action="copy-link" data-i18n="ctx_copy_link">Копировать ссылку</button>
+            <button type="button" class="context-menu-item" data-action="favorite" data-i18n="ctx_favorite">В избранное</button>
+            <button type="button" class="context-menu-item" data-action="export-md" data-i18n="ctx_export_md">Экспорт Markdown</button>
+            <button type="button" class="context-menu-item" data-action="export-pdf" data-i18n="ctx_export_pdf">Экспорт PDF</button>
           </div>
           <div id="session-detail" class="session-detail-modal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="session-detail-title" tabindex="-1">
             <div class="session-detail-header">
-              <h3 id="session-detail-title">Детали сессии <span id="detail-id"></span></h3>
+              <h3 id="session-detail-title"><span data-i18n="detail_title">Детали сессии</span> <span id="detail-id"></span></h3>
               <button type="button" class="btn small" id="session-detail-close" aria-label="Закрыть">×</button>
             </div>
-            <button type="button" class="btn small" id="export-md">Экспорт Markdown</button>
-            <button type="button" class="btn small" id="export-pdf">Экспорт PDF</button>
+            <button type="button" class="btn small" id="export-md" data-i18n="detail_export_md">Экспорт Markdown</button>
+            <button type="button" class="btn small" id="export-pdf" data-i18n="detail_export_pdf">Экспорт PDF</button>
             <button type="button" class="btn small" id="export-docx" title="Экспорт в Word">DOCX</button>
             <button type="button" class="btn small" id="export-notion" title="Формат для вставки в Notion">Notion</button>
             <button type="button" class="btn small" id="export-otter" title="Формат Otter">Otter</button>
-            <button type="button" class="btn small" id="copy-transcript">Копировать транскрипт</button>
-            <button type="button" class="btn small" id="copy-action-items">Копировать action items</button>
-            <button type="button" class="btn small" id="session-detail-print" aria-label="Печать">Печать</button>
+            <button type="button" class="btn small" id="copy-transcript" data-i18n="detail_copy_transcript">Копировать транскрипт</button>
+            <button type="button" class="btn small" id="copy-action-items" data-i18n="detail_copy_actions">Копировать action items</button>
+            <button type="button" class="btn small" id="session-detail-print" aria-label="Печать" data-i18n="detail_print">Печать</button>
             <div id="session-detail-tags" class="detail-tags-row" style="display:none">Теги: <input type="text" id="session-detail-tags-input" placeholder="тег1, тег2" aria-label="Теги сессии" /></div>
             <div id="session-detail-body"></div>
           </div>

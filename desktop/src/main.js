@@ -72,6 +72,23 @@ const I18N = {
     costs_30d: "30 дней",
     costs_export_btn: "Экспорт отчёта",
     sessions_export_btn: "Экспорт списка",
+    detail_title: "Детали сессии",
+    ctx_open: "Открыть",
+    ctx_copy_link: "Копировать ссылку",
+    ctx_favorite: "В избранное",
+    ctx_export_md: "Экспорт Markdown",
+    ctx_export_pdf: "Экспорт PDF",
+    detail_export_md: "Экспорт Markdown",
+    detail_export_pdf: "Экспорт PDF",
+    detail_copy_transcript: "Копировать транскрипт",
+    detail_copy_actions: "Копировать action items",
+    detail_print: "Печать",
+    close_btn: "Закрыть",
+    segment_copy: "Копировать",
+    error_prefix: "Ошибка: ",
+    error_generic: "Ошибка",
+    error_status: "Ошибка.",
+    export_error_prefix: "Ошибка экспорта: ",
   },
   en: {
     nav: { home: "Home", sessions: "Sessions", costs: "Costs", settings: "Settings" },
@@ -114,6 +131,23 @@ const I18N = {
     costs_30d: "30 days",
     costs_export_btn: "Export report",
     sessions_export_btn: "Export list",
+    detail_title: "Session details",
+    ctx_open: "Open",
+    ctx_copy_link: "Copy link",
+    ctx_favorite: "Add to favorites",
+    ctx_export_md: "Export Markdown",
+    ctx_export_pdf: "Export PDF",
+    detail_export_md: "Export Markdown",
+    detail_export_pdf: "Export PDF",
+    detail_copy_transcript: "Copy transcript",
+    detail_copy_actions: "Copy action items",
+    detail_print: "Print",
+    close_btn: "Close",
+    segment_copy: "Copy",
+    error_prefix: "Error: ",
+    error_generic: "Error",
+    error_status: "Error.",
+    export_error_prefix: "Export error: ",
   },
 };
 
@@ -143,6 +177,8 @@ function applyUiLang() {
   if (statusBar) statusBar.textContent = daemonOk ? t("status_daemon_ok") : t("status_daemon_off");
   if (bannerText && document.getElementById("daemon-off-banner").style.display !== "none") bannerText.textContent = t("status_daemon_off");
   if (compactStatus) compactStatus.textContent = daemonOk ? t("compact_daemon_ok") : t("compact_daemon_off");
+  const closeBtn = document.getElementById("session-detail-close");
+  if (closeBtn) closeBtn.setAttribute("aria-label", t("close_btn"));
   const lang = localStorage.getItem(UI_LANG_KEY) || "ru";
   document.documentElement.lang = lang === "en" ? "en" : "ru";
 }
@@ -224,7 +260,7 @@ function parseEnvelope(raw) {
 function errorMessage(envelope) {
   if (envelope?.error?.message) return envelope.error.message;
   if (!envelope?.ok && envelope?.error) return JSON.stringify(envelope.error);
-  return "Ошибка";
+  return t("error_generic");
 }
 
 const INVOKE_DEFAULT_TIMEOUT_MS = 10000;
@@ -427,7 +463,7 @@ function loadRecentSessions() {
       });
     })
     .catch((e) => {
-      el.textContent = "Ошибка: " + (e?.message || e);
+      el.textContent = t("error_prefix") + (e?.message || e);
     });
 }
 
@@ -498,7 +534,7 @@ async function toggleListen() {
     await updateListenState();
   } catch (e) {
     const label = document.getElementById("listen-label");
-    if (label) label.textContent = "Ошибка: " + (e?.message || e);
+    if (label) label.textContent = t("error_prefix") + (e?.message || e);
   }
   if (btn) btn.disabled = false;
 }
@@ -528,7 +564,7 @@ function initQuickActions() {
         if (statusEl) statusEl.textContent = errorMessage(env);
       }
     } catch (e) {
-      if (statusEl) statusEl.textContent = "Ошибка: " + (e?.message ?? String(e ?? ""));
+      if (statusEl) statusEl.textContent = t("error_prefix") + (e?.message ?? String(e ?? ""));
     }
     if (btn) btn.disabled = false;
   });
@@ -551,7 +587,7 @@ async function runDefaultAnalyze() {
       if (statusEl) statusEl.textContent = errorMessage(env);
     }
   } catch (e) {
-    if (statusEl) statusEl.textContent = "Ошибка: " + (e?.message ?? String(e ?? ""));
+    if (statusEl) statusEl.textContent = t("error_prefix") + (e?.message ?? String(e ?? ""));
   }
   if (btn) btn.disabled = false;
 }
@@ -606,7 +642,7 @@ listen("analysis-done", (e) => {
   if (statusEl) {
     let msg;
     if (status === "ok") msg = "Готово.";
-    else if (status === "error") msg = "Ошибка.";
+    else if (status === "error") msg = t("error_status");
     else msg = String(status ?? "");
     statusEl.textContent = msg;
   }
@@ -688,7 +724,7 @@ document.getElementById("analyze-btn").addEventListener("click", async () => {
       statusEl.textContent = errorMessage(env);
     }
   } catch (e) {
-    statusEl.textContent = "Ошибка: " + (e?.message ?? String(e ?? ""));
+    statusEl.textContent = t("error_prefix") + (e?.message ?? String(e ?? ""));
   }
   btn.disabled = false;
 });
@@ -921,7 +957,7 @@ function loadSessions() {
       applySessionsFilter();
     })
     .catch((e) => {
-      container.innerHTML = "<p class=\"muted\">Ошибка: " + (e?.message || e) + "</p><button type=\"button\" class=\"btn small\" id=\"sessions-retry\">Повторить</button>";
+      container.innerHTML = "<p class=\"muted\">" + t("error_prefix") + (e?.message || e) + "</p><button type=\"button\" class=\"btn small\" id=\"sessions-retry\">" + t("retry_btn") + "</button>";
       document.getElementById("sessions-retry")?.addEventListener("click", () => loadSessions());
       sessionsCache = [];
     });
@@ -949,7 +985,7 @@ function renderSessionDetail(detail, highlightQuery) {
       const speaker = s.speaker ? `[${s.speaker}] ` : "";
       const time = (s.start_sec != null && s.end_sec != null) ? `${Number(s.start_sec).toFixed(1)}–${Number(s.end_sec).toFixed(1)} с ` : "";
       const textHtml = highlightQuery ? highlightSegmentText(s.text || "", highlightQuery) : escapeHtml(s.text || "");
-      html += `<li id="segment-${idx}" data-segment-index="${idx}"><span class="segment-meta">${time}${speaker}</span>${textHtml} <button type="button" class="btn small segment-copy" aria-label="Копировать сегмент">Копировать</button></li>`;
+      html += `<li id="segment-${idx}" data-segment-index="${idx}"><span class="segment-meta">${time}${speaker}</span>${textHtml} <button type="button" class="btn small segment-copy" aria-label="${t("segment_copy")}">${t("segment_copy")}</button></li>`;
     });
     html += "</ul></div>";
   }
@@ -1164,7 +1200,7 @@ function showSessionDetail(id, opts) {
       });
     })
     .catch((e) => {
-      bodyEl.innerHTML = "<p class=\"muted\">Ошибка: " + escapeHtml(e?.message || e) + "</p><button type=\"button\" class=\"btn small\" id=\"detail-retry\">Повторить</button>";
+      bodyEl.innerHTML = "<p class=\"muted\">" + t("error_prefix") + escapeHtml(e?.message || e) + "</p><button type=\"button\" class=\"btn small\" id=\"detail-retry\">" + t("retry_btn") + "</button>";
       document.getElementById("detail-retry")?.addEventListener("click", () => showSessionDetail(id, opts));
     });
 }
@@ -1174,7 +1210,7 @@ async function exportSession(id, format) {
     const out = await invoke("export_session", { sessionId: id, format });
     alert("Экспорт: " + (out || "выполнен"));
   } catch (e) {
-    alert("Ошибка экспорта: " + (e?.message || e));
+    alert(t("export_error_prefix") + (e?.message || e));
   }
 }
 
@@ -1306,7 +1342,7 @@ function loadAnalytics(period) {
       container.innerHTML = renderAnalytics(data, period);
     })
     .catch((e) => {
-      container.innerHTML = "<p class=\"muted\">Ошибка: " + (e?.message || e) + "</p><button type=\"button\" class=\"btn small\" id=\"analytics-retry\">Повторить</button>";
+      container.innerHTML = "<p class=\"muted\">" + t("error_prefix") + (e?.message || e) + "</p><button type=\"button\" class=\"btn small\" id=\"analytics-retry\">" + t("retry_btn") + "</button>";
       document.getElementById("analytics-retry")?.addEventListener("click", () => loadAnalytics(period));
     });
 }
@@ -1371,7 +1407,7 @@ function loadSettings() {
         });
     })
     .catch((e) => {
-      container.innerHTML = "<p class=\"muted\">Ошибка: " + escapeHtml(e?.message || e) + "</p><button type=\"button\" class=\"btn small\" id=\"settings-retry\">Повторить</button>";
+      container.innerHTML = "<p class=\"muted\">" + t("error_prefix") + escapeHtml(e?.message || e) + "</p><button type=\"button\" class=\"btn small\" id=\"settings-retry\">" + t("retry_btn") + "</button>";
       document.getElementById("settings-retry")?.addEventListener("click", () => loadSettings());
     });
 }
@@ -1734,7 +1770,7 @@ function initSessionsToolbar() {
         if (listEl) listEl.style.display = "none";
       } catch (e) {
         if (resultsEl) {
-          resultsEl.innerHTML = "<p class=\"muted\">Ошибка: " + escapeHtml(e?.message || e) + "</p>";
+          resultsEl.innerHTML = "<p class=\"muted\">" + t("error_prefix") + escapeHtml(e?.message || e) + "</p>";
           resultsEl.style.display = "block";
         }
         if (listEl) listEl.style.display = "none";
