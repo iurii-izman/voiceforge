@@ -54,6 +54,11 @@ const I18N = {
     settings_sound_title: "Звук",
     settings_window_title: "Окно",
     settings_compact_title: "Режим окна",
+    sessions_search_placeholder: "Поиск по ID или дате…",
+    sessions_fts_placeholder: "Поиск по тексту транскрипта…",
+    listen_btn_start: "Старт записи",
+    listen_btn_stop: "Стоп записи",
+    listen_label_recording: "Запись идёт",
   },
   en: {
     nav: { home: "Home", sessions: "Sessions", costs: "Costs", settings: "Settings" },
@@ -78,6 +83,11 @@ const I18N = {
     settings_sound_title: "Sound",
     settings_window_title: "Window",
     settings_compact_title: "Window mode",
+    sessions_search_placeholder: "Search by ID or date…",
+    sessions_fts_placeholder: "Search transcript text…",
+    listen_btn_start: "Start recording",
+    listen_btn_stop: "Stop recording",
+    listen_label_recording: "Recording…",
   },
 };
 
@@ -93,6 +103,14 @@ function applyUiLang() {
     const k = el.getAttribute("data-i18n");
     if (k) el.textContent = t(k);
   });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+    const k = el.getAttribute("data-i18n-placeholder");
+    if (k) el.placeholder = t(k);
+  });
+  const listenBtn = document.getElementById("listen-toggle");
+  const listenLabel = document.getElementById("listen-label");
+  if (listenBtn) listenBtn.textContent = listenState ? t("listen_btn_stop") : t("listen_btn_start");
+  if (listenLabel) listenLabel.textContent = listenState ? t("listen_label_recording") : "";
   const lang = localStorage.getItem(UI_LANG_KEY) || "ru";
   document.documentElement.lang = lang === "en" ? "en" : "ru";
 }
@@ -260,8 +278,8 @@ function applyListenState(isListening) {
   listenState = isListening;
   const btn = document.getElementById("listen-toggle");
   const label = document.getElementById("listen-label");
-  btn.textContent = listenState ? "Стоп записи" : "Старт записи";
-  label.textContent = listenState ? "Запись идёт" : "";
+  btn.textContent = listenState ? t("listen_btn_stop") : t("listen_btn_start");
+  label.textContent = listenState ? t("listen_label_recording") : "";
   const streamingCard = document.getElementById("streaming-card");
   if (listenState) {
     streamingCard.style.display = "block";
