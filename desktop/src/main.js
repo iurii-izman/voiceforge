@@ -59,6 +59,8 @@ const I18N = {
     listen_btn_start: "Старт записи",
     listen_btn_stop: "Стоп записи",
     listen_label_recording: "Запись идёт",
+    analyze_btn_run: "Запустить анализ",
+    loading: "Загрузка…",
   },
   en: {
     nav: { home: "Home", sessions: "Sessions", costs: "Costs", settings: "Settings" },
@@ -88,6 +90,8 @@ const I18N = {
     listen_btn_start: "Start recording",
     listen_btn_stop: "Stop recording",
     listen_label_recording: "Recording…",
+    analyze_btn_run: "Run analysis",
+    loading: "Loading…",
   },
 };
 
@@ -404,7 +408,7 @@ const DOCS_CALENDAR = "https://github.com/iurii-izman/voiceforge/blob/main/docs/
 function loadUpcomingEvents() {
   const el = document.getElementById("upcoming-events-content");
   if (!el) return;
-  el.textContent = "Загрузка…";
+  el.textContent = t("loading");
   invoke("get_upcoming_calendar_events")
     .then((raw) => {
       const env = parseEnvelope(raw);
@@ -875,7 +879,7 @@ function loadSessions() {
     sessionsCache = [];
     return;
   }
-  container.innerHTML = "<p class=\"muted\">Загрузка…</p>";
+  container.innerHTML = "<p class=\"muted\">" + t("loading") + "</p>";
   invoke("get_sessions", { limit: 200 })
     .then((raw) => {
       const env = parseEnvelope(raw);
@@ -1069,7 +1073,7 @@ function showSessionDetail(id, opts) {
   const idEl = document.getElementById("detail-id");
   idEl.textContent = id;
   detailBlock.style.display = "block";
-  bodyEl.innerHTML = "<p class=\"muted\">Загрузка…</p>";
+  bodyEl.innerHTML = "<p class=\"muted\">" + t("loading") + "</p>";
   document.getElementById("export-md").onclick = () => exportSession(id, "md");
   document.getElementById("export-pdf").onclick = () => exportSession(id, "pdf");
   document.getElementById("export-docx").onclick = () => exportSession(id, "docx");
@@ -1256,7 +1260,7 @@ function loadAnalytics(period) {
     container.innerHTML = emptyStateHtml("⚠️", "Демон не запущен", "Запустите: voiceforge daemon", DOCS_QUICKSTART);
     return;
   }
-  container.innerHTML = "<p class=\"muted\">Загрузка…</p>";
+  container.innerHTML = "<p class=\"muted\">" + t("loading") + "</p>";
   invoke("get_analytics", { period })
     .then((raw) => {
       const env = parseEnvelope(raw);
