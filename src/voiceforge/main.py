@@ -58,6 +58,7 @@ def _get_app_version() -> str:
     """Return VoiceForge package version (block 55)."""
     try:
         from importlib.metadata import version
+
         return version("voiceforge")
     except Exception:
         return "0.2.0-alpha.1"
@@ -632,9 +633,7 @@ def analyze(
         est_lo = max(10, seconds // 5 + 5)
         est_hi = min(120, max(20, seconds // 2 + 30))
         typer.echo(f"Analyzing… (≈ {est_lo}–{est_hi} s)", err=True)
-    display_text, segments_for_log, analysis_for_log = run_analyze_pipeline(
-        seconds, template=template, dry_run=dry_run
-    )
+    display_text, segments_for_log, analysis_for_log = run_analyze_pipeline(seconds, template=template, dry_run=dry_run)
     error_message = _extract_error_message(display_text)
     if error_message is not None:
         if output == "json":
@@ -647,9 +646,7 @@ def analyze(
         if output == "json":
             typer.echo(
                 json.dumps(
-                    _cli_success_payload(
-                        {"dry_run": True, "message": display_text, "segments_count": len(segments_for_log)}
-                    ),
+                    _cli_success_payload({"dry_run": True, "message": display_text, "segments_count": len(segments_for_log)}),
                     ensure_ascii=False,
                 )
             )
@@ -821,9 +818,7 @@ def action_items_update(
     _action_items_update_echo(output, from_session, next_session, updates, cost_usd, save)
 
 
-def _index_directory(
-    indexer: Any, p: Path, exclude_patterns: list[str] | None = None
-) -> tuple[int, set[str]]:
+def _index_directory(indexer: Any, p: Path, exclude_patterns: list[str] | None = None) -> tuple[int, set[str]]:
     """Index all supported files under directory p. Block 74: skip paths matching rag_exclude_patterns."""
     import fnmatch
 
@@ -835,10 +830,7 @@ def _index_directory(
             if not f.is_file():
                 continue
             path_str = str(f.resolve())
-            if any(
-                fnmatch.fnmatch(path_str, pat) or fnmatch.fnmatch(f.name, pat)
-                for pat in patterns
-            ):
+            if any(fnmatch.fnmatch(path_str, pat) or fnmatch.fnmatch(f.name, pat) for pat in patterns):
                 continue
             try:
                 total += indexer.add_file(f)
@@ -877,9 +869,7 @@ def index(
             typer.echo(t("index.chunks_added", n=added))
             return
         if p.is_dir():
-            total, indexed_paths = _index_directory(
-                indexer, p, getattr(cfg, "rag_exclude_patterns", None) or []
-            )
+            total, indexed_paths = _index_directory(indexer, p, getattr(cfg, "rag_exclude_patterns", None) or [])
             pruned = indexer.prune_sources_not_in(indexed_paths, only_under_prefix=str(p.resolve()))
             if pruned:
                 typer.echo(t("index.chunks_pruned", n=pruned))
@@ -967,12 +957,8 @@ class _Tee:
 
 @app.command()
 def daemon(
-    foreground: bool = typer.Option(
-        False, "--foreground", "-f", help="Run in foreground, log to stdout"
-    ),
-    log_file: Path | None = typer.Option(
-        None, "--log-file", path_type=Path, help="Append daemon logs to this file"
-    ),
+    foreground: bool = typer.Option(False, "--foreground", "-f", help="Run in foreground, log to stdout"),
+    log_file: Path | None = typer.Option(None, "--log-file", path_type=Path, help="Append daemon logs to this file"),
 ) -> None:
     """Run D-Bus daemon backend."""
     from voiceforge.core.daemon import run_daemon
@@ -1165,9 +1151,7 @@ def sessions_to_ical(
         if not start_ical:
             return []
         dur_sec = float(getattr(session, "duration_sec", 0) or 0)
-        end_dt = dt_class.fromisoformat(
-            (getattr(session, "started_at", "") or "").replace("Z", _ISO_UTC_SUFFIX)
-        )
+        end_dt = dt_class.fromisoformat((getattr(session, "started_at", "") or "").replace("Z", _ISO_UTC_SUFFIX))
         if end_dt.tzinfo is None:
             end_dt = end_dt.replace(tzinfo=UTC)
         end_dt = end_dt + timedelta(seconds=dur_sec)
@@ -1228,10 +1212,7 @@ def weekly_report(
             "sessions_count": len(sessions),
             "total_cost_usd": total_cost,
             "action_items_count": len(week_items),
-            "action_items": [
-                {"session_id": r.session_id, "description": r.description, "status": r.status}
-                for r in week_items
-            ],
+            "action_items": [{"session_id": r.session_id, "description": r.description, "status": r.status} for r in week_items],
         }
         out = json.dumps(payload, ensure_ascii=False, indent=2)
     elif format == "md":
@@ -1313,6 +1294,7 @@ def export_session(
         if fmt == "otter":
             return "txt"
         return "md"
+
     suffix = _export_suffix(format)
     out_path = output or Path(f"session_{session_id}.{suffix}")
     if format in ("md", "notion", "otter"):
@@ -1521,11 +1503,13 @@ def web_serve(
     if web_async or use_async_env:
         try:
             from voiceforge.web.server_async import run_async_server
+
             run_async_server(host=host, port=port)
             return
         except ImportError:
             log.warning("web.async_fallback", reason="starlette/uvicorn not installed", hint="uv sync --extra web-async")
     from voiceforge.web.server import run_server
+
     run_server(host=host, port=port)
 
 

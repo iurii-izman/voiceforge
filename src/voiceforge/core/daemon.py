@@ -403,6 +403,7 @@ class VoiceForgeDaemon:
         """Application version for UI/daemon sync (block 61)."""
         try:
             from importlib.metadata import version
+
             return version("voiceforge")
         except Exception:
             return "0.2.0-alpha.1"
@@ -718,6 +719,7 @@ def _calendar_autostart_loop(daemon: VoiceForgeDaemon) -> None:
     while True:
         try:
             import time
+
             time.sleep(interval_sec)
         except Exception:
             break

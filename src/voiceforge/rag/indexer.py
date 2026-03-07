@@ -6,6 +6,7 @@ import sqlite3
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import structlog
@@ -121,7 +122,7 @@ def _add_texts_legacy_reindex(
     conn: sqlite3.Connection,
     source: str,
     new_chunks: list,
-    embedder: object,
+    embedder: Any,
     ts: str,
     dup_threshold: float,
 ) -> tuple[int, int, int]:

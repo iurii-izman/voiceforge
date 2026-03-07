@@ -55,8 +55,8 @@ def _read_webhook_body(self: Any) -> bytes:
 # POST path -> handler(self) (W17/S3776).
 _POST_ROUTES: dict[str, Any] = {
     "/api/telegram/webhook": lambda s: s._handle_telegram_webhook(_read_webhook_body(s)),
-    "/api/analyze": lambda s: (s._handle_post_analyze(d) if (d := s._read_post_json()) is not None else None),
-    "/api/action-items/update": lambda s: (s._handle_action_items_update(d) if (d := s._read_post_json()) is not None else None),
+    "/api/analyze": lambda s: s._handle_post_analyze(d) if (d := s._read_post_json()) is not None else None,
+    "/api/action-items/update": lambda s: s._handle_action_items_update(d) if (d := s._read_post_json()) is not None else None,
 }
 
 

@@ -236,7 +236,10 @@ def _action_items_json_payload(items: list[Any]) -> dict:
 
 def _action_items_lines(items: list[Any]) -> list[str]:
     """Build text lines for action items (S3776)."""
-    return [f"  [{r.session_id}] #{r.idx_in_analysis} {r.status}: {r.description}{f' ({r.assignee})' if r.assignee else ''}" for r in items]
+    return [
+        f"  [{r.session_id}] #{r.idx_in_analysis} {r.status}: {r.description}{f' ({r.assignee})' if r.assignee else ''}"
+        for r in items
+    ]
 
 
 def history_action_items_result(log_db: Any, output: str) -> tuple[str, Any]:

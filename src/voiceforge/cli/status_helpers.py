@@ -173,9 +173,7 @@ def _doctor_check_rag_ring(cfg: Any, t: Any) -> list[tuple[bool, str, str]]:
         if rag_stats is not None:
             n_src = rag_stats.get("indexed_sources_count", 0)
             n_chunks = rag_stats.get("chunks_count", 0)
-            out.append(
-                (True, f"RAG: {n_src} sources, {n_chunks} chunks", "doctor.rag_stats")
-            )
+            out.append((True, f"RAG: {n_src} sources, {n_chunks} chunks", "doctor.rag_stats"))
     else:
         out.append((True, t("doctor.rag_optional"), "doctor.rag_optional"))
     if Path(cfg.get_ring_file_path()).exists():

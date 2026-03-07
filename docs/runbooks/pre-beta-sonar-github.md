@@ -12,8 +12,8 @@
 
 **Перед бета-релизом:**
 
-1. **Получить список открытых замечаний:**  
-   `uv run python scripts/sonar_fetch_issues.py`  
+1. **Получить список открытых замечаний:**
+   `uv run python scripts/sonar_fetch_issues.py`
    (Токен: keyring `voiceforge` / `sonar_token`. Без токена — пропустить шаг.)
 
 2. **Исправить или задокументировать:** Критичные и блокирующие — починить; остальные — либо править, либо зафиксировать в next-iteration-focus как «принять по решению команды».
@@ -36,7 +36,7 @@
 | **Dependabot (CVE #65)** | Фикса upstream нет. Dismiss с комментарием: «No fix yet. See docs/runbooks/security-and-dependencies.md. Revisit when upstream fixes.» Либо скрипт: `uv run python scripts/dependabot_dismiss_moderate.py` (нужен `github_token` с правом security_events). |
 | **pre-commit-ci** | Мержить после проверки или закрыть, если не нужен автоапдейт. |
 
-**Очистка устаревших PR (опционально):**  
+**Очистка устаревших PR (опционально):**
 `uv run python scripts/cleanup_github_pr_sonar.py [--dry-run] [--days 90]` — закрывает PR без активности N+ дней и удаляет ветку; затем выводит список веток в Sonar.
 
 **Команды:**

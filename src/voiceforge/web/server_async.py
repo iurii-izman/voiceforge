@@ -30,12 +30,14 @@ def _err(status: int, message: str) -> tuple[int, str, bytes]:
 
 def _sync_index() -> tuple[int, str, bytes]:
     from voiceforge.web.server import _html_index
+
     return (200, "text/html; charset=utf-8", _html_index().encode("utf-8"))
 
 
 def _sync_status() -> tuple[int, str, bytes]:
     try:
         from voiceforge.cli.status_helpers import get_status_data
+
         body = json.dumps(get_status_data(), ensure_ascii=False).encode("utf-8")
         return (200, _CONTENT_TYPE_JSON, body)
     except Exception as e:
@@ -46,6 +48,7 @@ def _sync_sessions() -> tuple[int, str, bytes]:
     try:
         from voiceforge.cli.history_helpers import build_sessions_payload
         from voiceforge.core.transcript_log import TranscriptLog
+
         log_db = TranscriptLog()
         try:
             sessions = log_db.get_sessions(last_n=50)
@@ -62,6 +65,7 @@ def _sync_session_by_id(sid: str) -> tuple[int, str, bytes]:
     try:
         from voiceforge.cli.history_helpers import build_session_detail_payload, session_not_found_message
         from voiceforge.core.transcript_log import TranscriptLog
+
         if not sid.isdigit():
             return _err(400, "invalid session id")
         log_db = TranscriptLog()
@@ -84,6 +88,7 @@ def _sync_cost(days_str: str, from_str: str, to_str: str) -> tuple[int, str, byt
         from datetime import date
 
         from voiceforge.core.metrics import get_stats, get_stats_range
+
         if from_str and to_str:
             fd = date.fromisoformat(from_str)
             td = date.fromisoformat(to_str)
@@ -114,6 +119,7 @@ def _sync_health() -> tuple[int, str, bytes]:
 def _sync_ready() -> tuple[int, str, bytes]:
     try:
         from voiceforge.core.transcript_log import TranscriptLog
+
         log_db = TranscriptLog()
         try:
             log_db.get_sessions(last_n=1)
@@ -129,9 +135,11 @@ def _sync_ready() -> tuple[int, str, bytes]:
 def _sync_metrics() -> tuple[int, str, bytes]:
     try:
         from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
+
         try:
             from voiceforge.core.observability import set_circuit_breaker_states
             from voiceforge.llm.circuit_breaker import get_circuit_breaker
+
             set_circuit_breaker_states(get_circuit_breaker().get_all_states())
         except ImportError:
             pass
@@ -150,6 +158,7 @@ def _sync_export(sid_str: str, fmt: str) -> tuple[int, str, bytes]:
     try:
         from voiceforge.cli.history_helpers import build_session_markdown, session_not_found_message
         from voiceforge.core.transcript_log import TranscriptLog
+
         log_db = TranscriptLog()
         try:
             detail = log_db.get_session_detail(session_id)
@@ -170,6 +179,7 @@ def _sync_export(sid_str: str, fmt: str) -> tuple[int, str, bytes]:
     import os as _os
     import subprocess  # nosec B404
     import tempfile
+
     with tempfile.NamedTemporaryFile(suffix=".md", delete=False) as tmp:
         tmp.write(md_text.encode("utf-8"))
         tmp_md = tmp.name
@@ -207,9 +217,11 @@ def _sync_analyze(data: dict[str, Any]) -> tuple[int, str, bytes]:
     try:
         from voiceforge.core.transcript_log import TranscriptLog
         from voiceforge.main import run_analyze_pipeline
+
         display_text, segments_for_log, analysis_for_log = run_analyze_pipeline(seconds, template=template)
         try:
             from voiceforge.core.contracts import extract_error_message
+
             err_msg = extract_error_message(display_text, legacy_prefix="Ошибка:")
             if err_msg:
                 return _err(422, err_msg)
@@ -300,6 +312,7 @@ def _sync_action_items_update(data: dict) -> tuple[int, str, bytes]:
 
 def _sync_telegram_webhook(body_bytes: bytes) -> tuple[int, str, bytes]:
     from voiceforge.core.secrets import get_api_key
+
     token = get_api_key("webhook_telegram")
     if not token:
         return (503, _CONTENT_TYPE_JSON, b'{"ok":false,"error":"webhook_telegram not in keyring"}')
@@ -308,6 +321,7 @@ def _sync_telegram_webhook(body_bytes: bytes) -> tuple[int, str, bytes]:
     except json.JSONDecodeError:
         return _err(400, _ERR_INVALID_JSON)
     from voiceforge.web.server import _telegram_send_message, _telegram_webhook_reply
+
     message = (data or {}).get("message") or {}
     chat = message.get("chat") or {}
     chat_id = chat.get("id")
@@ -316,6 +330,7 @@ def _sync_telegram_webhook(body_bytes: bytes) -> tuple[int, str, bytes]:
         return (200, _CONTENT_TYPE_JSON, b'{"ok":true}')
     if text == "/subscribe":
         from voiceforge.core.telegram_notify import set_telegram_chat_id
+
         set_telegram_chat_id(chat_id)
         reply = "Push notifications enabled. You'll get a message when analyze completes."
     else:
@@ -444,6 +459,7 @@ def _build_app():
 
 def run_async_server(host: str = "127.0.0.1", port: int = 8765) -> None:
     import uvicorn
+
     app = _build_app()
     print(f"VoiceForge Web UI (async): http://{host}:{port}")
     uvicorn.run(app, host=host, port=port, log_level="warning")
