@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-07 (gitleaks: allowlist .hypothesis, .gitignore; коммит 270b7e2)
+**Обновлено:** 2026-03-07 (gitleaks CI OK; блок #87 тёмная тема трея; Python 3.12/3.14 toolbox-43; коммит e972ba0)
 
 ---
 
