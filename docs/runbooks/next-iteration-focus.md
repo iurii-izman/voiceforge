@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Карточка #86 (Backlog E) переведена в In Progress. Sonar S3776: вынесены applyUiLangDataAttrs(), applyUiLangStatusElements() из applyUiLang; getValueToSetInStore() из loadStoreAndMigrate. Refs #86.
+**Сделано в сессии:** Sonar S3776 в renderSessionDetail: вынесены renderSessionDetailTranscript() и renderSessionDetailAnalysis(); основная функция только собирает результат. Refs #86.
 
-**Следующий шаг:** Продолжить Sonar (S3776/S2004 в renderSessionDetail и др.) в рамках #86 или блоки roadmap (#90, #91, #93). Либо audit.
+**Следующий шаг:** Продолжить Sonar в рамках #86 (остальные S3776/S2004 в desktop/main/daemon) или блоки roadmap (#90, #91, #93). В конце сессии: тесты, коммит, пуш, next-iteration-focus.
 
 ---
 
