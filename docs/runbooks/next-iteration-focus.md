@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-07 (автопилот: блоки 39, 41, 63 roadmap-100)
+**Обновлено:** 2026-03-07 (автопилот: блоки 62, 64, 65 roadmap-100)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Реализованы блоки 39, 41, 63: экспорт Notion/Otter (build_session_export_notion/otter, export --format notion|otter, кнопки в десктопе), звук при старте/стопе записи (playBeep, карточка «Звук» в настройках), таймаут и retry для invoke (invokeWithRetry в checkDaemon). Roadmap обновлён.
+**Сделано в сессии:** Реализованы блоки 62, 64, 65: сигнал SessionCreated (демон сохраняет сессию в Analyze, возвращает (text, session_id), D-Bus SessionCreated, UI session-created → loadSessions + открытие сессии); GetUpcomingEvents в демоне (daemon.get_upcoming_events, D-Bus GetUpcomingEvents, Tauri через D-Bus); логи демона в файл (daemon --log-file, _Tee). Roadmap обновлён.
 
-**Следующий шаг:** Продолжить roadmap-100: блоки 62 (SessionCreated), 64 (GetUpcomingEvents в демоне), 65 (логи демона в файл) или ручная проверка десктопа.
+**Следующий шаг:** Продолжить roadmap-100: блоки 66–72 (STT/LLM/пайплайн), 73–77 (RAG), 78–80 (календарь) или ручная проверка десктопа/сборки.
 
 ---
 

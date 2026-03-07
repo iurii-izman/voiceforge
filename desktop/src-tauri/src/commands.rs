@@ -167,16 +167,8 @@ pub async fn get_streaming_transcript() -> Result<String, String> {
 
 #[tauri::command]
 pub async fn get_upcoming_calendar_events() -> Result<String, String> {
-    let output = std::process::Command::new("voiceforge")
-        .args(["calendar", "upcoming", "--output", "json", "--hours", "48"])
-        .output()
-        .map_err(|e| e.to_string())?;
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        return Err(stderr.to_string());
-    }
-    Ok(stdout.trim().to_string())
+    let conn = connection().await?;
+    call_method0(&conn, "GetUpcomingEvents").await
 }
 
 #[tauri::command]

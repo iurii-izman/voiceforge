@@ -182,8 +182,8 @@ def test_daemon_analyze_timeout_returns_error(tmp_path, monkeypatch) -> None:
             from voiceforge.core.daemon import VoiceForgeDaemon
 
             daemon = VoiceForgeDaemon(iface=None)
-            result = daemon.analyze(30)
-    data = json.loads(result)
+            text, _sid = daemon.analyze(30)
+    data = json.loads(text)
     assert "error" in data
     assert data["error"]["code"] == "ANALYZE_TIMEOUT"
     assert data["error"].get("retryable") is True

@@ -100,28 +100,52 @@ class VoiceForgeDaemon:
                 log.error("dbus.emitter.failed", error=str(e))
         log.info("dbus.emitter.stopped")
 
-    def analyze(self, seconds: int, template: str | None = None) -> str:
-        """Run full pipeline, return formatted text. Lazy-loads models on first call.
-        template: optional meeting template (standup, sprint_review, one_on_one, brainstorm, interview).
-        Respects analyze_timeout_sec (#39); on timeout returns JSON error for IPC envelope."""
+    def analyze(self, seconds: int, template: str | None = None) -> tuple[str, int | None]:
+        """Run full pipeline, save session, return (formatted text, session_id). Block 62: session_id for SessionCreated.
+        template: optional meeting template. Respects analyze_timeout_sec (#39)."""
         from voiceforge.main import run_analyze_pipeline
+
+        from voiceforge.core.transcript_log import TranscriptLog
 
         timeout_sec = max(1.0, float(getattr(self._cfg, "analyze_timeout_sec", 120.0)))
         with ThreadPoolExecutor(max_workers=1) as ex:
             future = ex.submit(run_analyze_pipeline, seconds, template=template)
             try:
-                text, _segments, _analysis = future.result(timeout=timeout_sec)
-                return text
+                text, segments_for_log, analysis_for_log = future.result(timeout=timeout_sec)
             except FuturesTimeoutError:
-                return json.dumps(
-                    {
-                        "error": {
-                            "code": "ANALYZE_TIMEOUT",
-                            "message": "Analysis timed out",
-                            "retryable": True,
+                return (
+                    json.dumps(
+                        {
+                            "error": {
+                                "code": "ANALYZE_TIMEOUT",
+                                "message": "Analysis timed out",
+                                "retryable": True,
+                            }
                         }
-                    }
+                    ),
+                    None,
                 )
+        session_id = None
+        if segments_for_log is not None and analysis_for_log is not None:
+            try:
+                log_db = TranscriptLog()
+                try:
+                    session_id = log_db.log_session(
+                        segments=segments_for_log,
+                        duration_sec=float(seconds),
+                        model=analysis_for_log.get("model", ""),
+                        questions=analysis_for_log.get("questions"),
+                        answers=analysis_for_log.get("answers"),
+                        recommendations=analysis_for_log.get("recommendations"),
+                        action_items=analysis_for_log.get("action_items"),
+                        cost_usd=analysis_for_log.get("cost_usd", 0.0),
+                        template=analysis_for_log.get("template"),
+                    )
+                finally:
+                    log_db.close()
+            except Exception as e:
+                log.warning("daemon.analyze.log_failed", error=str(e))
+        return (text, session_id)
 
     def status(self) -> str:
         """Return RAM + cost string."""
@@ -335,6 +359,20 @@ class VoiceForgeDaemon:
                 log_db.close()
         except Exception as e:
             log.warning("daemon.get_session_ids_with_action_items_failed", error=str(e))
+            return "[]"
+
+    def get_upcoming_events(self, hours_ahead: int = 48) -> str:
+        """Return JSON array of upcoming calendar events (block 64)."""
+        try:
+            from voiceforge.calendar import get_upcoming_events as cal_get_upcoming
+
+            events, err = cal_get_upcoming(hours_ahead=hours_ahead)
+            if err:
+                log.debug("daemon.get_upcoming_events_skipped", error=err)
+                return "[]"
+            return json.dumps(events, ensure_ascii=False)
+        except Exception as e:
+            log.warning("daemon.get_upcoming_events_failed", error=str(e))
             return "[]"
 
     def get_analytics(self, last: str) -> str:
@@ -570,6 +608,7 @@ def _wire_daemon_iface(iface: DaemonVoiceForgeInterface, daemon: VoiceForgeDaemo
     iface._get_settings = daemon.get_settings
     iface._get_indexed_paths = daemon.get_indexed_paths
     iface._get_session_ids_with_action_items = daemon.get_session_ids_with_action_items
+    iface._get_upcoming_events = lambda: daemon.get_upcoming_events(48)
     iface._get_streaming_transcript = daemon.get_streaming_transcript
     iface._swap_model = daemon.swap_model
     iface._ping = lambda: "pong"
@@ -676,8 +715,8 @@ def run_daemon() -> None:
     pid_path = _pid_path()
     pid_path.parent.mkdir(parents=True, exist_ok=True)
 
-    def _dummy_analyze(seconds: int, template: str | None = None) -> str:
-        return ""
+    def _dummy_analyze(seconds: int, template: str | None = None) -> tuple[str, int | None]:
+        return ("", None)
 
     iface = DaemonVoiceForgeInterface(
         analyze_fn=_dummy_analyze,

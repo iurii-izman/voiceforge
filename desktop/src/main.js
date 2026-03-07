@@ -508,6 +508,14 @@ listen("transcript-chunk", (e) => {
 listen("transcript-updated", () => {
   if (daemonOk) loadSessions();
 });
+listen("session-created", (e) => {
+  if (daemonOk) loadSessions();
+  const id = e.payload?.session_id;
+  if (id != null) {
+    switchTab("sessions");
+    setTimeout(() => showSessionDetail(id), 150);
+  }
+});
 
 listen("second-instance", async (e) => {
   const win = getCurrentWindow();

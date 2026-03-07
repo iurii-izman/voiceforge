@@ -9,6 +9,7 @@ use crate::{connection, DBUS_INTERFACE, DBUS_NAME, DBUS_PATH};
 
 const EVENT_LISTEN_STATE: &str = "listen-state-changed";
 const EVENT_ANALYSIS_DONE: &str = "analysis-done";
+const EVENT_SESSION_CREATED: &str = "session-created";
 const EVENT_TRANSCRIPT_CHUNK: &str = "transcript-chunk";
 const EVENT_TRANSCRIPT_UPDATED: &str = "transcript-updated";
 
@@ -39,6 +40,16 @@ fn rule_transcript_chunk() -> Result<MatchRule<'static>, zbus::Error> {
         .path(DBUS_PATH)?
         .interface(DBUS_INTERFACE)?
         .member("TranscriptChunk")?
+        .build())
+}
+
+fn rule_session_created() -> Result<MatchRule<'static>, zbus::Error> {
+    Ok(MatchRule::builder()
+        .msg_type(Type::Signal)
+        .sender(DBUS_NAME)?
+        .path(DBUS_PATH)?
+        .interface(DBUS_INTERFACE)?
+        .member("SessionCreated")?
         .build())
 }
 
@@ -104,6 +115,20 @@ pub fn spawn_signal_listener(app: AppHandle) {
             }
         };
 
+        let stream_session_created = match MessageStream::for_match_rule(
+            rule_session_created().expect("SessionCreated rule"),
+            &conn,
+            Some(8),
+        )
+        .await
+        {
+            Ok(s) => s,
+            Err(e) => {
+                eprintln!("dbus_signals: SessionCreated stream: {}", e);
+                return;
+            }
+        };
+
         let stream_transcript_updated = match MessageStream::for_match_rule(
             rule_transcript_updated().expect("TranscriptUpdated rule"),
             &conn,
@@ -120,6 +145,7 @@ pub fn spawn_signal_listener(app: AppHandle) {
 
         let app_listen = app.clone();
         let app_analysis = app.clone();
+        let app_session_created = app.clone();
         let app_chunk = app.clone();
         let app_updated = app.clone();
 
@@ -140,6 +166,20 @@ pub fn spawn_signal_listener(app: AppHandle) {
                 if let Ok(msg) = res {
                     if let Ok((status,)) = msg.body().deserialize::<(String,)>() {
                         let _ = app_analysis.emit(EVENT_ANALYSIS_DONE, serde_json::json!({ "status": status }));
+                    }
+                }
+            }
+        });
+
+        tauri::async_runtime::spawn(async move {
+            let mut stream = stream_session_created;
+            while let Some(res) = stream.next().await {
+                if let Ok(msg) = res {
+                    if let Ok((session_id,)) = msg.body().deserialize::<(u32,)>() {
+                        let _ = app_session_created.emit(
+                            EVENT_SESSION_CREATED,
+                            serde_json::json!({ "session_id": session_id }),
+                        );
                     }
                 }
             }

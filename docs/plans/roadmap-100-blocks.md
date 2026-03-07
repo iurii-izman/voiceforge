@@ -202,7 +202,10 @@
 - **56** — Подсказки при типовых ошибках (_hint_for_error: keyring, audio, daemon).
 - **59** — Документация VOICEFORGE_*: индекс в config-env-contract.md, добавлен VOICEFORGE_WEB_ASYNC.
 - **61** — D-Bus GetVersion, daemon.get_version(), get_daemon_version в десктопе.
+- **62** — Сигнал SessionCreated: демон сохраняет сессию в Analyze и возвращает (text, session_id); D-Bus SessionCreated(session_id); UI подписка session-created → loadSessions + открытие сессии.
 - **63** — Таймаут и retry для invoke: invokeWithRetry (timeout 5s для ping, 1 retry) в checkDaemon.
+- **64** — GetUpcomingEvents в демоне: daemon.get_upcoming_events(48), D-Bus GetUpcomingEvents(), Tauri вызывает D-Bus вместо CLI.
+- **65** — Логи демона в файл: daemon --log-file <path>, _Tee(stderr, file), создание директорий при необходимости.
 - **76** — Статистика RAG в status/doctor: _get_rag_stats(), rag.indexed_sources_count/chunks_count в get_status_data(), doctor.rag_stats.
 - **92** — Runbook [desktop-updater.md](../runbooks/desktop-updater.md).
 - **93** — Секция «Ключевые решения» в docs/architecture/README.md со ссылками на ADR.

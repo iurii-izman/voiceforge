@@ -855,10 +855,29 @@ def watch(
         raise SystemExit(1) from None
 
 
+class _Tee:
+    """Write to multiple files (block 65: daemon log to file)."""
+
+    def __init__(self, *files):
+        self._files = files
+
+    def write(self, data):
+        for f in self._files:
+            f.write(data)
+            f.flush()
+
+    def flush(self):
+        for f in self._files:
+            f.flush()
+
+
 @app.command()
 def daemon(
     foreground: bool = typer.Option(
         False, "--foreground", "-f", help="Run in foreground, log to stdout"
+    ),
+    log_file: Path | None = typer.Option(
+        None, "--log-file", path_type=Path, help="Append daemon logs to this file"
     ),
 ) -> None:
     """Run D-Bus daemon backend."""
@@ -872,7 +891,17 @@ def daemon(
                 structlog.dev.ConsoleRenderer(stream=sys.stdout),
             ]
         )
-    run_daemon()
+    log_file_handle = None
+    if log_file is not None:
+        log_file.parent.mkdir(parents=True, exist_ok=True)
+        log_file_handle = log_file.open("a", encoding="utf-8")
+        sys.stderr = _Tee(sys.stderr, log_file_handle)
+    try:
+        run_daemon()
+    finally:
+        if log_file_handle is not None:
+            sys.stderr = sys.__stderr__
+            log_file_handle.close()
 
 
 def _service_unit_path() -> Path:

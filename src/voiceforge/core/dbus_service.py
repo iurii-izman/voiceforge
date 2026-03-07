@@ -152,6 +152,7 @@ class _DaemonOptionalCallbacks(TypedDict, total=False):
     get_settings_fn: Callable[[], str]
     get_indexed_paths_fn: Callable[[], str]
     get_session_ids_with_action_items_fn: Callable[[], str]
+    get_upcoming_events_fn: Callable[[], str]
     get_streaming_transcript_fn: Callable[[], str]
     swap_model_fn: Callable[[str, str], str]
     ping_fn: Callable[[], str]
@@ -185,6 +186,7 @@ class DaemonVoiceForgeInterface(ServiceInterface):
         self._get_settings = o.get("get_settings_fn")
         self._get_indexed_paths = o.get("get_indexed_paths_fn")
         self._get_session_ids_with_action_items = o.get("get_session_ids_with_action_items_fn")
+        self._get_upcoming_events = o.get("get_upcoming_events_fn")
         self._get_streaming_transcript = o.get("get_streaming_transcript_fn")
         self._swap_model = o.get("swap_model_fn")
         self._ping = o.get("ping_fn")
@@ -213,12 +215,16 @@ class DaemonVoiceForgeInterface(ServiceInterface):
         log.info("dbus.Analyze.called", seconds=seconds, template=template_val)
         async with self._analyze_sem:
             result = await asyncio.to_thread(self._analyze, seconds, template_val)
-        is_error = _analyze_result_is_error(result)
+        text = result[0] if isinstance(result, tuple) else result
+        session_id = result[1] if isinstance(result, tuple) and len(result) > 1 else None
+        is_error = _analyze_result_is_error(text)
         self.AnalysisDone("error" if is_error else "ok")
+        if session_id is not None:
+            self.SessionCreated(session_id)
         self.TranscriptUpdated(0)
         if _uses_ipc_envelope():
-            return _analyze_ipc_return(result, is_error)
-        return result
+            return _analyze_ipc_return(text, is_error)
+        return text
 
     @dbus_method()
     def Status(self) -> DBusStr:
@@ -319,6 +325,17 @@ class DaemonVoiceForgeInterface(ServiceInterface):
         return payload
 
     @dbus_method()
+    def GetUpcomingEvents(self) -> DBusStr:
+        """Return JSON array of upcoming calendar events (block 64). Hours=48."""
+        if self._get_upcoming_events is None:
+            payload = "[]"
+        else:
+            payload = self._get_upcoming_events()
+        if _uses_ipc_envelope():
+            return _wrap_envelope_with_json_key("events", payload)
+        return payload
+
+    @dbus_method()
     def GetStreamingTranscript(self) -> DBusStr:
         """Block 10.1: return JSON {partial, finals} for real-time transcript (polling)."""
         if self._get_streaming_transcript is None:
@@ -389,6 +406,11 @@ class DaemonVoiceForgeInterface(ServiceInterface):
     @dbus_signal()
     def TranscriptUpdated(self, session_id: DBusUint32) -> DBusUint32:
         """Signal: transcript data changed (session_id may be 0 if unknown)."""
+        return session_id
+
+    @dbus_signal()
+    def SessionCreated(self, session_id: DBusUint32) -> DBusUint32:
+        """Emitted when a new session was saved after Analyze (block 62)."""
         return session_id
 
     @dbus_signal()
