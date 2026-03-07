@@ -26,6 +26,7 @@ const STORE_KEYS = [
   "voiceforge_shortcut_analyze",
   "voiceforge_session_tags",
   "voiceforge_sound_on_record",
+  "voiceforge_settings_as_panel",
   UI_LANG_KEY,
 ];
 
@@ -120,6 +121,8 @@ const I18N = {
     clipboard_history_btn: "История копирований",
     clipboard_history_empty: "Пока пусто",
     clipboard_history_title: "Последние скопированные фрагменты",
+    settings_panel_mode_title: "Отображение настроек",
+    settings_panel_mode_label: "Показывать настройки в выдвижной панели справа",
   },
   en: {
     nav: { home: "Home", sessions: "Sessions", costs: "Costs", settings: "Settings" },
@@ -209,6 +212,8 @@ const I18N = {
     clipboard_history_btn: "Clipboard history",
     clipboard_history_empty: "Empty",
     clipboard_history_title: "Recent copies",
+    settings_panel_mode_title: "Settings display",
+    settings_panel_mode_label: "Show settings in a slide-out panel on the right",
     settings_readonly_hint: "Read-only. Change via config or environment variables.",
   },
 };
@@ -389,6 +394,53 @@ function switchTab(tabId) {
   }
 }
 
+const SETTINGS_AS_PANEL_KEY = "voiceforge_settings_as_panel";
+
+function openSettingsPanel() {
+  const panel = document.getElementById("settings-slide-panel");
+  const slot = document.getElementById("settings-panel-slot");
+  const tabContent = document.getElementById("settings-tab-content");
+  if (!panel || !slot || !tabContent) return;
+  slot.appendChild(tabContent);
+  panel.classList.add("open");
+  panel.setAttribute("aria-hidden", "false");
+  loadSettings();
+  document.getElementById("settings-panel-close")?.focus({ preventScroll: true });
+}
+
+function closeSettingsPanel() {
+  const panel = document.getElementById("settings-slide-panel");
+  const slot = document.getElementById("settings-panel-slot");
+  const tabContent = document.getElementById("settings-tab-content");
+  const tabSettings = document.getElementById("tab-settings");
+  if (!panel || !slot || !tabContent || !tabSettings) return;
+  if (tabContent.parentElement === slot) {
+    tabSettings.appendChild(tabContent);
+  }
+  panel.classList.remove("open");
+  panel.setAttribute("aria-hidden", "true");
+}
+
+function initSettingsPanelMode() {
+  const closeBtn = document.getElementById("settings-panel-close");
+  if (closeBtn) closeBtn.addEventListener("click", closeSettingsPanel);
+  const panel = document.getElementById("settings-slide-panel");
+  if (panel) {
+    panel.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && panel.classList.contains("open")) closeSettingsPanel();
+    });
+  }
+  const cb = document.getElementById("settings-as-panel");
+  if (cb) {
+    cb.checked = localStorage.getItem(SETTINGS_AS_PANEL_KEY) === "true";
+    cb.addEventListener("change", () => {
+      const val = cb.checked ? "true" : "false";
+      localStorage.setItem(SETTINGS_AS_PANEL_KEY, val);
+      setStored(SETTINGS_AS_PANEL_KEY, val);
+    });
+  }
+}
+
 function playBeep() {
   try {
     if (localStorage.getItem("voiceforge_sound_on_record") !== "true") return;
@@ -488,11 +540,23 @@ document.getElementById("daemon-retry-btn")?.addEventListener("click", async () 
 });
 
 document.querySelectorAll(".nav-item").forEach((n) => {
-  n.addEventListener("click", () => switchTab(n.dataset.tab));
+  n.addEventListener("click", () => {
+    const tabId = n.dataset.tab;
+    if (tabId === "settings" && localStorage.getItem(SETTINGS_AS_PANEL_KEY) === "true") {
+      openSettingsPanel();
+      return;
+    }
+    switchTab(tabId);
+  });
   n.addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      switchTab(n.dataset.tab);
+      const tabId = n.dataset.tab;
+      if (tabId === "settings" && localStorage.getItem(SETTINGS_AS_PANEL_KEY) === "true") {
+        openSettingsPanel();
+        return;
+      }
+      switchTab(tabId);
     }
   });
 });
@@ -2185,6 +2249,7 @@ function initDashboardWidgets() {
   initCloseToTrayCard();
   initSoundOnRecordCard();
   initCompactMode();
+  initSettingsPanelMode();
   initDashboardWidgets();
   initQuickActions();
   initSessionsToolbar();

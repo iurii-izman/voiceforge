@@ -234,6 +234,14 @@
 
       <section id="tab-settings" class="tab-panel" tabindex="-1" aria-labelledby="tab-settings-title">
         <h1 id="tab-settings-title" data-i18n="settings_title">Настройки</h1>
+        <div id="settings-tab-content">
+        <div class="card" id="settings-panel-mode-card">
+          <h2 data-i18n="settings_panel_mode_title">Отображение настроек</h2>
+          <label class="hotkeys-toggle">
+            <input type="checkbox" id="settings-as-panel" />
+            <span data-i18n="settings_panel_mode_label">Показывать настройки в выдвижной панели справа</span>
+          </label>
+        </div>
         <div class="card">
           <h2 data-i18n="settings_theme_title">Тема</h2>
           <fieldset class="theme-fieldset" aria-label="Выбор темы">
@@ -301,7 +309,17 @@
           <p class="muted settings-hint" data-i18n="settings_readonly_hint">Только чтение. Изменения — через конфиг или переменные окружения.</p>
           <div id="settings-content" class="settings-grid"></div>
         </div>
+        </div>
       </section>
+      <aside id="settings-slide-panel" class="settings-slide-panel" aria-label="Настройки" aria-hidden="true">
+        <div class="settings-slide-panel-inner">
+          <div class="settings-slide-panel-header">
+            <h2 id="settings-panel-title" data-i18n="settings_title">Настройки</h2>
+            <button type="button" class="settings-panel-close" id="settings-panel-close" aria-label="Закрыть">×</button>
+          </div>
+          <div id="settings-panel-slot" class="settings-slide-panel-body"></div>
+        </div>
+      </aside>
       </div>
     </main>
   </div>
