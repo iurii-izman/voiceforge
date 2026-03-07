@@ -634,6 +634,39 @@ function loadUpcomingEvents() {
     });
 }
 
+function formatStartedShort(started) {
+  if (!started) return "";
+  const s = String(started);
+  const datePart = s.replace(/T.*/, "").replaceAll("-", ".");
+  const timePart = s.includes("T") ? " " + s.split("T")[1].slice(0, 5) : "";
+  return datePart + timePart;
+}
+
+function buildLastAnalysisSummaryHtml(sessionId, session, detail) {
+  const ana = detail?.analysis || null;
+  const started = session?.started_at ?? session?.created_at ?? "";
+  const startShort = formatStartedShort(started);
+  let html = "<p class=\"muted\">Сессия " + escapeHtml(String(sessionId)) + (startShort ? " · " + escapeHtml(startShort) : "") + "</p>";
+  if (ana) {
+    const actions = Array.isArray(ana.action_items) ? ana.action_items : [];
+    const n = actions.length;
+    if (n > 0) {
+      html += "<ul class=\"last-analysis-list\">";
+      actions.slice(0, 3).forEach((ai) => {
+        const d = typeof ai === "object" ? (ai.description || "") : String(ai);
+        html += "<li>" + escapeHtml(d) + "</li>";
+      });
+      if (n > 3) html += "<li class=\"muted\">… ещё " + (n - 3) + "</li>";
+      html += "</ul>";
+    } else {
+      const q = Array.isArray(ana.questions) ? ana.questions.length : 0;
+      const r = Array.isArray(ana.recommendations) ? ana.recommendations.length : 0;
+      if (q || r) html += "<p class=\"muted\">Вопросов: " + q + ", рекомендаций: " + r + "</p>";
+    }
+  }
+  return html;
+}
+
 function loadLastAnalysisWidget() {
   const el = document.getElementById("last-analysis-content");
   if (!el) return;
@@ -650,43 +683,40 @@ function loadLastAnalysisWidget() {
       const sessionId = session?.id ?? session?.session_id;
       if (sessionId == null) {
         el.innerHTML = "<p class=\"muted\">" + escapeHtml(t("last_analysis_empty")) + "</p>";
-        return;
+        return Promise.resolve(null);
       }
       return invoke("get_session_detail", { sessionId: Number(sessionId) }).then((detailRaw) => {
         const denv = parseEnvelope(detailRaw);
         const detail = denv?.data?.session_detail ?? denv?.session_detail ?? denv ?? {};
-        const ana = detail.analysis || null;
-        const started = session.started_at ?? session.created_at ?? "";
-        const startShort = started ? String(started).replace(/T.*/, "").replaceAll("-", ".") + (String(started).includes("T") ? " " + String(started).split("T")[1].slice(0, 5) : "") : "";
-        let summaryHtml = "<p class=\"muted\">Сессия " + escapeHtml(String(sessionId)) + (startShort ? " · " + escapeHtml(startShort) : "") + "</p>";
-        if (ana) {
-          const actions = Array.isArray(ana.action_items) ? ana.action_items : [];
-          const n = actions.length;
-          if (n > 0) {
-            summaryHtml += "<ul class=\"last-analysis-list\">";
-            actions.slice(0, 3).forEach((ai) => {
-              const d = typeof ai === "object" ? (ai.description || "") : String(ai);
-              summaryHtml += "<li>" + escapeHtml(d) + "</li>";
-            });
-            if (n > 3) summaryHtml += "<li class=\"muted\">… ещё " + (n - 3) + "</li>";
-            summaryHtml += "</ul>";
-          } else {
-            const q = Array.isArray(ana.questions) ? ana.questions.length : 0;
-            const r = Array.isArray(ana.recommendations) ? ana.recommendations.length : 0;
-            if (q || r) summaryHtml += "<p class=\"muted\">Вопросов: " + q + ", рекомендаций: " + r + "</p>";
-          }
-        }
-        summaryHtml += "<button type=\"button\" class=\"btn small\" id=\"last-analysis-open-btn\">" + escapeHtml(t("last_analysis_open_btn")) + "</button>";
-        el.innerHTML = summaryHtml;
+        const summaryHtml = buildLastAnalysisSummaryHtml(sessionId, session, detail);
+        const btnHtml = "<button type=\"button\" class=\"btn small\" id=\"last-analysis-open-btn\">" + escapeHtml(t("last_analysis_open_btn")) + "</button>";
+        el.innerHTML = summaryHtml + btnHtml;
         document.getElementById("last-analysis-open-btn")?.addEventListener("click", () => {
           switchTab("sessions");
           setTimeout(() => showSessionDetail(Number(sessionId), {}), 100);
         });
+        return sessionId;
       });
     })
     .catch(() => {
       el.innerHTML = "<p class=\"muted\">" + escapeHtml(t("last_analysis_empty")) + "</p>";
     });
+}
+
+function applyCostWidgetContent(el, raw) {
+  const env = parseEnvelope(raw);
+  let data = env?.data?.analytics ?? env?.analytics ?? env ?? {};
+  if (typeof data === "string") {
+    try {
+      data = JSON.parse(data);
+    } catch {
+      el.textContent = "—";
+      return;
+    }
+  }
+  const total = data.total_cost_usd ?? 0;
+  const calls = data.total_calls ?? 0;
+  el.textContent = "$" + Number(total).toFixed(4) + " (" + calls + " вызовов)";
 }
 
 function loadCostWidget() {
@@ -697,24 +727,8 @@ function loadCostWidget() {
     return;
   }
   invoke("get_analytics", { period: "7d" })
-    .then((raw) => {
-      const env = parseEnvelope(raw);
-      let data = env?.data?.analytics ?? env?.analytics ?? env ?? {};
-      if (typeof data === "string") {
-        try {
-          data = JSON.parse(data);
-        } catch {
-          el.textContent = "—";
-          return;
-        }
-      }
-      const total = data.total_cost_usd ?? 0;
-      const calls = data.total_calls ?? 0;
-      el.textContent = "$" + Number(total).toFixed(4) + " (" + calls + " вызовов)";
-    })
-    .catch(() => {
-      el.textContent = "—";
-    });
+    .then((raw) => applyCostWidgetContent(el, raw))
+    .catch(() => { el.textContent = "—"; });
 }
 
 async function toggleListen() {
@@ -1186,7 +1200,7 @@ function renderSessionDetail(detail, highlightQuery) {
   }
   if (ana && (ana.questions?.length || ana.answers?.length || ana.recommendations?.length || ana.action_items?.length)) {
     html += "<div class=\"detail-section\"><h4>Анализ</h4>";
-    if (ana.model) html += `<p class=\"muted\">Модель: ${escapeHtml(ana.model)}</p>`;
+    if (ana.model) html += `<p class="muted">Модель: ${escapeHtml(ana.model)}</p>`;
     if (ana.questions?.length) {
       html += "<p><strong>Вопросы</strong></p><ul>";
       ana.questions.forEach((q) => { html += "<li>" + escapeHtml(String(q)) + "</li>"; });
