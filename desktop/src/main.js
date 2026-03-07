@@ -110,6 +110,13 @@ const I18N = {
     compact_mode_label: "Компактный режим (только запись и анализ)",
     tags_label: "Теги:",
     tags_placeholder: "тег1, тег2",
+    onboarding_title: "Добро пожаловать в VoiceForge",
+    onboarding_step1: "Запустите демон:",
+    onboarding_step2: "Нажмите «Старт записи» для захвата аудио",
+    onboarding_step3: "Запустите анализ — результаты появятся в разделе «Сессии»",
+    onboarding_ok: "Понятно",
+    onboarding_never: "Не показывать снова",
+    settings_readonly_hint: "Только чтение. Изменения — через конфиг или переменные окружения.",
   },
   en: {
     nav: { home: "Home", sessions: "Sessions", costs: "Costs", settings: "Settings" },
@@ -190,6 +197,13 @@ const I18N = {
     compact_mode_label: "Compact mode (record and analysis only)",
     tags_label: "Tags:",
     tags_placeholder: "tag1, tag2",
+    onboarding_title: "Welcome to VoiceForge",
+    onboarding_step1: "Start the daemon:",
+    onboarding_step2: "Click «Start recording» to capture audio",
+    onboarding_step3: "Run analysis — results will appear in Sessions",
+    onboarding_ok: "Got it",
+    onboarding_never: "Don't show again",
+    settings_readonly_hint: "Read-only. Change via config or environment variables.",
   },
 };
 

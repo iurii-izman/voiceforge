@@ -9,15 +9,15 @@
 <body>
   <div id="onboarding-overlay" class="onboarding-overlay" role="dialog" aria-label="Краткий обзор" aria-modal="true" style="display:none">
     <div class="onboarding-card">
-      <h2>Добро пожаловать в VoiceForge</h2>
+      <h2 data-i18n="onboarding_title">Добро пожаловать в VoiceForge</h2>
       <ol class="onboarding-steps">
-        <li>Запустите демон: <kbd>voiceforge daemon</kbd></li>
-        <li>Нажмите «Старт записи» для захвата аудио</li>
-        <li>Запустите анализ — результаты появятся в разделе «Сессии»</li>
+        <li><span data-i18n="onboarding_step1">Запустите демон:</span> <kbd>voiceforge daemon</kbd></li>
+        <li data-i18n="onboarding_step2">Нажмите «Старт записи» для захвата аудио</li>
+        <li data-i18n="onboarding_step3">Запустите анализ — результаты появятся в разделе «Сессии»</li>
       </ol>
       <div class="onboarding-actions">
-        <button type="button" class="btn primary" id="onboarding-ok">Понятно</button>
-        <label class="onboarding-skip"><input type="checkbox" id="onboarding-never" /> Не показывать снова</label>
+        <button type="button" class="btn primary" id="onboarding-ok" data-i18n="onboarding_ok">Понятно</button>
+        <label class="onboarding-skip"><input type="checkbox" id="onboarding-never" /> <span data-i18n="onboarding_never">Не показывать снова</span></label>
       </div>
     </div>
   </div>
@@ -292,7 +292,7 @@
           </label>
         </div>
         <div class="card">
-          <p class="muted settings-hint">Только чтение. Изменения — через конфиг или переменные окружения.</p>
+          <p class="muted settings-hint" data-i18n="settings_readonly_hint">Только чтение. Изменения — через конфиг или переменные окружения.</p>
           <div id="settings-content" class="settings-grid"></div>
         </div>
       </section>
