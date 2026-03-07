@@ -38,6 +38,30 @@ def get_status_text() -> str:
     return "\n".join(lines)
 
 
+def _get_rag_stats() -> dict[str, Any] | None:
+    """Return RAG DB stats (indexed_sources_count, chunks_count) or None if unavailable."""
+    try:
+        from voiceforge.core.config import Settings
+
+        cfg = Settings()
+        db_path = Path(cfg.get_rag_db_path())
+        if not db_path.is_file():
+            return None
+        import sqlite3
+
+        conn = sqlite3.connect(str(db_path))
+        try:
+            cur = conn.execute("SELECT COUNT(DISTINCT source) FROM chunks")
+            sources = cur.fetchone()[0] or 0
+            cur = conn.execute("SELECT COUNT(*) FROM chunks")
+            chunks = cur.fetchone()[0] or 0
+            return {"indexed_sources_count": sources, "chunks_count": chunks}
+        finally:
+            conn.close()
+    except Exception:
+        return None
+
+
 def get_status_data() -> dict[str, Any]:
     """Return machine-readable status data (includes pii_mode for PII UX)."""
     import psutil
@@ -73,6 +97,9 @@ def get_status_data() -> dict[str, Any]:
     }
     if prompt_version is not None:
         out["prompt_version"] = prompt_version
+    rag_stats = _get_rag_stats()
+    if rag_stats is not None:
+        out["rag"] = rag_stats
     return out
 
 
@@ -142,6 +169,13 @@ def _doctor_check_rag_ring(cfg: Any, t: Any) -> list[tuple[bool, str, str]]:
     out: list[tuple[bool, str, str]] = []
     if Path(cfg.get_rag_db_path()).exists():
         out.append((True, t("doctor.rag_ok"), "doctor.rag_ok"))
+        rag_stats = _get_rag_stats()
+        if rag_stats is not None:
+            n_src = rag_stats.get("indexed_sources_count", 0)
+            n_chunks = rag_stats.get("chunks_count", 0)
+            out.append(
+                (True, f"RAG: {n_src} sources, {n_chunks} chunks", "doctor.rag_stats")
+            )
     else:
         out.append((True, t("doctor.rag_optional"), "doctor.rag_optional"))
     if Path(cfg.get_ring_file_path()).exists():

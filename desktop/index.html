@@ -7,75 +7,268 @@
   <link rel="stylesheet" href="/src/styles.css" />
 </head>
 <body>
-  <div class="app">
-    <nav class="sidebar">
-      <div class="nav-item active" data-tab="home">Главная</div>
-      <div class="nav-item" data-tab="sessions">Сессии</div>
-      <div class="nav-item" data-tab="costs">Затраты</div>
-      <div class="nav-item" data-tab="settings">Настройки</div>
+  <div id="onboarding-overlay" class="onboarding-overlay" role="dialog" aria-label="Краткий обзор" aria-modal="true" style="display:none">
+    <div class="onboarding-card">
+      <h2>Добро пожаловать в VoiceForge</h2>
+      <ol class="onboarding-steps">
+        <li>Запустите демон: <kbd>voiceforge daemon</kbd></li>
+        <li>Нажмите «Старт записи» для захвата аудио</li>
+        <li>Запустите анализ — результаты появятся в разделе «Сессии»</li>
+      </ol>
+      <div class="onboarding-actions">
+        <button type="button" class="btn primary" id="onboarding-ok">Понятно</button>
+        <label class="onboarding-skip"><input type="checkbox" id="onboarding-never" /> Не показывать снова</label>
+      </div>
+    </div>
+  </div>
+  <div class="app" id="app-root">
+    <nav class="sidebar" id="main-sidebar" role="navigation" aria-label="Главное меню">
+      <div class="nav-item active" data-tab="home" role="button" tabindex="0" aria-current="true"><span class="nav-mnemonic">Г</span>лавная</div>
+      <div class="nav-item" data-tab="sessions" role="button" tabindex="0" aria-current="false"><span class="nav-mnemonic">С</span>ессии</div>
+      <div class="nav-item" data-tab="costs" role="button" tabindex="0" aria-current="false"><span class="nav-mnemonic">З</span>атраты</div>
+      <div class="nav-item" data-tab="settings" role="button" tabindex="0" aria-current="false"><span class="nav-mnemonic">Н</span>астройки</div>
     </nav>
-    <main class="content">
+    <main class="content" id="main-content">
+      <div class="compact-bar" id="compact-bar" style="display:none" aria-label="Компактная панель">
+        <span id="compact-status" class="status daemon-off">—</span>
+        <button type="button" class="btn small" id="compact-listen">Запись</button>
+        <button type="button" class="btn small primary" id="compact-analyze">Анализ</button>
+      </div>
+      <div id="full-content" class="full-content">
       <div id="status-bar" class="status daemon-off">Проверка демона…</div>
       <button id="retry" type="button" class="btn secondary" style="display:none">Повторить</button>
+      <div id="daemon-off-banner" class="daemon-off-banner" role="alert" aria-live="polite" style="display:none">
+        <span id="daemon-off-banner-text">Демон отключён.</span>
+        <button type="button" class="btn small" id="daemon-retry-btn">Повторить подключение</button>
+      </div>
 
-      <section id="tab-home" class="tab-panel active">
+      <section id="tab-home" class="tab-panel active" tabindex="-1">
         <h1>Главная</h1>
-        <div class="card">
-          <h2>Запись</h2>
-          <button id="listen-toggle" type="button" class="btn" disabled>Старт записи</button>
-          <span id="listen-label" class="muted"></span>
+        <div class="quick-actions" aria-label="Быстрые действия">
+          <button type="button" class="btn small" id="quick-listen" title="Старт записи">Запись</button>
+          <button type="button" class="btn small" id="quick-analyze-60" title="Анализ последних 60 сек">Анализ 60 сек</button>
         </div>
-        <div class="card">
-          <h2>Анализ</h2>
-          <label>Последние <input type="number" id="analyze-seconds" value="30" min="1" max="3600" /> сек</label>
-          <label>Шаблон
-            <select id="analyze-template">
-              <option value="">—</option>
-              <option value="standup">standup</option>
-              <option value="one_on_one">one_on_one</option>
-              <option value="sprint_review">sprint_review</option>
-              <option value="brainstorm">brainstorm</option>
-              <option value="interview">interview</option>
-            </select>
-          </label>
-          <button id="analyze-btn" type="button" class="btn primary" disabled>Запустить анализ</button>
-          <div id="analyze-status" class="muted"></div>
-        </div>
-        <div class="card" id="streaming-card" style="display:none">
-          <h2>Стриминг</h2>
-          <pre id="streaming-text"></pre>
+        <div id="dashboard-widgets" class="dashboard-widgets" aria-label="Виджеты главной">
+          <div class="card dashboard-widget" data-widget-id="record" id="widget-record">
+            <div class="widget-header">
+              <button type="button" class="widget-toggle" aria-label="Свернуть" title="Свернуть">▼</button>
+              <h2>Запись</h2>
+              <div class="widget-actions">
+                <button type="button" class="btn small widget-up" aria-label="Вверх">↑</button>
+                <button type="button" class="btn small widget-down" aria-label="Вниз">↓</button>
+              </div>
+            </div>
+            <div class="widget-body">
+              <button id="listen-toggle" type="button" class="btn" disabled>Старт записи</button>
+              <span id="listen-label" class="muted"></span>
+            </div>
+          </div>
+          <div class="card dashboard-widget" data-widget-id="analyze" id="widget-analyze">
+            <div class="widget-header">
+              <button type="button" class="widget-toggle" aria-label="Свернуть" title="Свернуть">▼</button>
+              <h2>Анализ</h2>
+              <div class="widget-actions">
+                <button type="button" class="btn small widget-up" aria-label="Вверх">↑</button>
+                <button type="button" class="btn small widget-down" aria-label="Вниз">↓</button>
+              </div>
+            </div>
+            <div class="widget-body">
+              <label>Последние <input type="number" id="analyze-seconds" value="30" min="1" max="3600" /> сек</label>
+              <label>Шаблон
+                <select id="analyze-template">
+                  <option value="">—</option>
+                  <option value="standup">standup</option>
+                  <option value="one_on_one">one_on_one</option>
+                  <option value="sprint_review">sprint_review</option>
+                  <option value="brainstorm">brainstorm</option>
+                  <option value="interview">interview</option>
+                </select>
+              </label>
+              <button id="analyze-btn" type="button" class="btn primary" disabled>Запустить анализ</button>
+              <div id="analyze-status" class="muted"></div>
+            </div>
+          </div>
+          <div class="card dashboard-widget" data-widget-id="streaming" id="streaming-card" style="display:none">
+            <div class="widget-header">
+              <button type="button" class="widget-toggle" aria-label="Свернуть">▼</button>
+              <h2>Стриминг</h2>
+              <div class="widget-actions">
+                <button type="button" class="btn small widget-up" aria-label="Вверх">↑</button>
+                <button type="button" class="btn small widget-down" aria-label="Вниз">↓</button>
+              </div>
+            </div>
+            <div class="widget-body">
+              <pre id="streaming-text"></pre>
+            </div>
+          </div>
+          <div class="card dashboard-widget" data-widget-id="recent-sessions" id="recent-sessions-card">
+            <div class="widget-header">
+              <button type="button" class="widget-toggle" aria-label="Свернуть">▼</button>
+              <h2>Недавние сессии</h2>
+              <div class="widget-actions">
+                <button type="button" class="btn small widget-up" aria-label="Вверх">↑</button>
+                <button type="button" class="btn small widget-down" aria-label="Вниз">↓</button>
+              </div>
+            </div>
+            <div class="widget-body">
+              <div id="recent-sessions-list" class="muted">Загрузка…</div>
+            </div>
+          </div>
+          <div class="card dashboard-widget" data-widget-id="upcoming-events" id="upcoming-events-card">
+            <div class="widget-header">
+              <button type="button" class="widget-toggle" aria-label="Свернуть">▼</button>
+              <h2>Ближайшие встречи</h2>
+              <div class="widget-actions">
+                <button type="button" class="btn small widget-up" aria-label="Вверх">↑</button>
+                <button type="button" class="btn small widget-down" aria-label="Вниз">↓</button>
+              </div>
+            </div>
+            <div class="widget-body">
+              <div id="upcoming-events-content" class="muted">Загрузка…</div>
+            </div>
+          </div>
+          <div class="card dashboard-widget" data-widget-id="cost-widget" id="cost-widget-card">
+            <div class="widget-header">
+              <button type="button" class="widget-toggle" aria-label="Свернуть">▼</button>
+              <h2>Затраты за 7 дней</h2>
+              <div class="widget-actions">
+                <button type="button" class="btn small widget-up" aria-label="Вверх">↑</button>
+                <button type="button" class="btn small widget-down" aria-label="Вниз">↓</button>
+              </div>
+            </div>
+            <div class="widget-body">
+              <div id="cost-widget-content" class="muted">—</div>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section id="tab-sessions" class="tab-panel" style="display:none">
-        <h1>Сессии</h1>
+      <section id="tab-sessions" class="tab-panel" tabindex="-1" aria-labelledby="tab-sessions-title">
+        <h1 id="tab-sessions-title">Сессии</h1>
         <div class="card">
+          <div class="sessions-toolbar">
+            <input type="search" id="sessions-search" placeholder="Поиск по ID или дате…" class="sessions-search-input" aria-label="Поиск сессий" />
+            <input type="search" id="sessions-fts-search" placeholder="Поиск по тексту транскрипта…" class="sessions-search-input" aria-label="Полнотекстовый поиск" />
+            <label>Период
+              <select id="sessions-period" aria-label="Период">
+                <option value="all">Все</option>
+                <option value="today">За сегодня</option>
+                <option value="week">За неделю</option>
+                <option value="month">За месяц</option>
+              </select>
+            </label>
+            <label>Сортировка
+              <select id="sessions-sort" aria-label="Сортировка">
+                <option value="date-desc">Сначала новые</option>
+                <option value="date-asc">Сначала старые</option>
+                <option value="duration-desc">По длительности (↓)</option>
+                <option value="duration-asc">По длительности (↑)</option>
+              </select>
+            </label>
+            <label>Показать
+              <select id="sessions-favorites-filter" aria-label="Показать">
+                <option value="all">Все</option>
+                <option value="favorites">Только избранные</option>
+              </select>
+            </label>
+            <button type="button" class="btn small" id="sessions-export-btn" title="CSV или JSON">Экспорт списка</button>
+          </div>
+          <div id="sessions-fts-results" class="sessions-fts-results" style="display:none"></div>
           <div id="sessions-list"></div>
-          <div id="session-detail" style="display:none">
-            <h3>Детали сессии <span id="detail-id"></span></h3>
+          <div id="session-context-menu" class="context-menu" role="menu" aria-hidden="true" style="display:none">
+            <button type="button" class="context-menu-item" data-action="open">Открыть</button>
+            <button type="button" class="context-menu-item" data-action="copy-link">Копировать ссылку</button>
+            <button type="button" class="context-menu-item" data-action="favorite">В избранное</button>
+            <button type="button" class="context-menu-item" data-action="export-md">Экспорт Markdown</button>
+            <button type="button" class="context-menu-item" data-action="export-pdf">Экспорт PDF</button>
+          </div>
+          <div id="session-detail" class="session-detail-modal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="session-detail-title" tabindex="-1">
+            <div class="session-detail-header">
+              <h3 id="session-detail-title">Детали сессии <span id="detail-id"></span></h3>
+              <button type="button" class="btn small" id="session-detail-close" aria-label="Закрыть">×</button>
+            </div>
             <button type="button" class="btn small" id="export-md">Экспорт Markdown</button>
             <button type="button" class="btn small" id="export-pdf">Экспорт PDF</button>
+            <button type="button" class="btn small" id="copy-transcript">Копировать транскрипт</button>
+            <button type="button" class="btn small" id="copy-action-items">Копировать action items</button>
+            <button type="button" class="btn small" id="session-detail-print" aria-label="Печать">Печать</button>
             <div id="session-detail-body"></div>
           </div>
         </div>
       </section>
 
-      <section id="tab-costs" class="tab-panel" style="display:none">
-        <h1>Затраты</h1>
+      <section id="tab-costs" class="tab-panel" tabindex="-1" aria-labelledby="tab-costs-title">
+        <h1 id="tab-costs-title">Затраты</h1>
         <div class="card">
           <button type="button" class="btn small" id="costs-7d">7 дней</button>
           <button type="button" class="btn small" id="costs-30d">30 дней</button>
+          <button type="button" class="btn small" id="costs-export-btn">Экспорт отчёта</button>
+          <div class="costs-charts" aria-label="Графики затрат">
+            <div class="costs-chart-wrap"><canvas id="costs-chart-days" role="img" aria-label="Стоимость по дням"></canvas></div>
+            <div class="costs-chart-wrap"><canvas id="costs-chart-models" role="img" aria-label="Стоимость по моделям"></canvas></div>
+          </div>
           <div id="analytics-content"></div>
         </div>
       </section>
 
-      <section id="tab-settings" class="tab-panel" style="display:none">
-        <h1>Настройки</h1>
+      <section id="tab-settings" class="tab-panel" tabindex="-1" aria-labelledby="tab-settings-title">
+        <h1 id="tab-settings-title">Настройки</h1>
         <div class="card">
-          <p class="muted">Только чтение. Изменения — через конфиг или переменные окружения.</p>
-          <pre id="settings-content"></pre>
+          <h2>Тема</h2>
+          <fieldset class="theme-fieldset" aria-label="Выбор темы">
+            <label class="theme-option"><input type="radio" name="theme" value="dark" /> Тёмная</label>
+            <label class="theme-option"><input type="radio" name="theme" value="light" /> Светлая</label>
+            <label class="theme-option"><input type="radio" name="theme" value="auto" /> Как в системе</label>
+          </fieldset>
+        </div>
+        <div class="card">
+          <h2>Горячие клавиши</h2>
+          <p class="muted">Глобальные комбинации работают, когда окно в фоне.</p>
+          <ul class="hotkeys-list">
+            <li><kbd>Ctrl+Shift+R</kbd> — старт/стоп записи</li>
+            <li><kbd>Ctrl+Shift+A</kbd> — запуск анализа (30 сек, по умолчанию)</li>
+          </ul>
+          <label class="hotkeys-toggle">
+            <input type="checkbox" id="hotkeys-enabled" checked />
+            Включить глобальные горячие клавиши
+          </label>
+        </div>
+        <div class="card">
+          <h2>Обновления</h2>
+          <label class="hotkeys-toggle">
+            <input type="checkbox" id="updater-check-on-launch" />
+            Проверять обновления при запуске
+          </label>
+          <button type="button" class="btn small" id="updater-check-now">Проверить сейчас</button>
+          <p id="updater-status" class="muted settings-hint"></p>
+        </div>
+        <div class="card">
+          <h2>Автозапуск</h2>
+          <label class="hotkeys-toggle">
+            <input type="checkbox" id="autostart-enabled" />
+            Запускать VoiceForge при входе в систему
+          </label>
+        </div>
+        <div class="card">
+          <h2>Окно</h2>
+          <label class="hotkeys-toggle">
+            <input type="checkbox" id="close-to-tray" />
+            Свернуть в трей при закрытии (крестик)
+          </label>
+        </div>
+        <div class="card">
+          <h2>Режим окна</h2>
+          <label class="hotkeys-toggle">
+            <input type="checkbox" id="compact-mode-toggle" />
+            Компактный режим (только запись и анализ)
+          </label>
+        </div>
+        <div class="card">
+          <p class="muted settings-hint">Только чтение. Изменения — через конфиг или переменные окружения.</p>
+          <div id="settings-content" class="settings-grid"></div>
         </div>
       </section>
+      </div>
     </main>
   </div>
   <script type="module" src="/src/main.js"></script>

@@ -2,6 +2,8 @@
 
 Source of truth: `src/voiceforge/core/config.py`.
 
+**VOICEFORGE_\* variables:** Every Settings field below can be overridden with `VOICEFORGE_<UPPER_FIELD_NAME>` (e.g. `VOICEFORGE_LANGUAGE`, `VOICEFORGE_RETENTION_DAYS`). Runtime-only variables (not in Settings): `VOICEFORGE_IPC_ENVELOPE`, `VOICEFORGE_SERVICE_FILE`, `VOICEFORGE_WEB_ASYNC`, `VOICEFORGE_OTEL_ENABLED` — see tables and sections below.
+
 Priority order:
 1. CLI/runtime explicit values (when applicable)
 2. Environment variables (`VOICEFORGE_*`)
@@ -45,15 +47,16 @@ Priority order:
 
 **Validation:** Settings validates `model_size` (allowed: tiny, base, small, medium, large-v2, large-v3, large), `sample_rate` (1..192000), `default_llm` (non-empty), `budget_limit_usd` (≥ 0), `daily_budget_limit_usd` (≥ 0 when set), `pipeline_step2_timeout_sec` (positive), `analyze_timeout_sec` (positive), `ollama_model` (non-empty), `ring_seconds` (positive), `pyannote_restart_hours` (≥ 1), `live_summary_interval_sec` (≥ 1), `retention_days` (≥ 0), `response_cache_ttl_seconds` (≥ 0). Invalid values raise at load.
 
-## Non-VOICEFORGE Environment Inputs
+## Runtime / Non-Settings Environment
 
 | Variable | Default | Description |
 |---|---|---|
 | `XDG_CONFIG_HOME` | `~/.config` | Config base path |
 | `XDG_DATA_HOME` | `~/.local/share` | Data base path (transcripts/metrics/rag) |
 | `XDG_RUNTIME_DIR` | `~/.cache` | Runtime path for ring buffer |
-| `VOICEFORGE_SERVICE_FILE` | unset | Override systemd unit file source |
+| `VOICEFORGE_SERVICE_FILE` | unset | Override systemd unit file path for `voiceforge install-service` |
 | `VOICEFORGE_IPC_ENVELOPE` | `true` | IPC envelope mode in daemon/dbus (set to `false` for legacy plain-string clients) |
+| `VOICEFORGE_WEB_ASYNC` | unset | Set to `1` to use async web server when running `voiceforge web` (same as `voiceforge web --async`); requires `uv sync --extra web-async` |
 | `OLLAMA_HOST` | `http://localhost:11434` | Local LLM endpoint |
 
 ## D-Bus API (десктоп ↔ демон)

@@ -51,10 +51,28 @@ calendar_app = typer.Typer(help="CalDAV calendar poll (keyring: caldav_url, cald
 app.add_typer(calendar_app, name="calendar")
 
 
-@app.callback()
-def _cli_trace(_ctx: typer.Context) -> None:
-    """Bind trace_id for this CLI invocation (Phase B #61)."""
+def _get_app_version() -> str:
+    """Return VoiceForge package version (block 55)."""
+    try:
+        from importlib.metadata import version
+        return version("voiceforge")
+    except Exception:
+        return "0.2.0-alpha.1"
+
+
+@app.callback(invoke_without_command=True)
+def _cli_trace(ctx: typer.Context) -> None:
+    """Bind trace_id; when no command given, show help instead of error."""
     bind_trace_id()
+    if ctx.invoked_subcommand is None:
+        typer.echo(ctx.get_help())
+        raise typer.Exit(0)
+
+
+@app.command()
+def version() -> None:
+    """Print VoiceForge version (block 55)."""
+    typer.echo(_get_app_version())
 
 
 _INDEX_EXTENSIONS = (
@@ -90,6 +108,20 @@ def _cli_success_payload(data: dict[str, Any]) -> dict[str, Any]:
 
 def _extract_error_message(payload: str) -> str | None:
     return extract_error_message(payload, legacy_prefix=t("error.legacy_prefix"))
+
+
+def _hint_for_error(message: str) -> str | None:
+    """Return a one-line hint for typical errors (block 56)."""
+    if not message:
+        return None
+    msg_lower = message.lower()
+    if "missing keyring" in msg_lower or "keyring" in msg_lower and "set" not in msg_lower:
+        return "Подсказка: keyring set voiceforge caldav_url (и caldav_username, caldav_password). См. docs/runbooks/keyring-keys-reference.md"
+    if "audio" in msg_lower or "pipewire" in msg_lower or "микрофон" in msg_lower:
+        return "Подсказка: проверьте PipeWire (systemctl --user status pipewire) и доступ микрофона."
+    if "daemon" in msg_lower or "демон" in msg_lower:
+        return "Подсказка: запустите voiceforge daemon в отдельном терминале."
+    return None
 
 
 def _speaker_for_interval(start: float, end: float, diar_segments: list[Any]) -> str:
@@ -463,6 +495,9 @@ def listen(
         from voiceforge.audio.capture import AudioCapture
     except ImportError:
         typer.echo(t("error.audio_module_not_found"), err=True)
+        hint = _hint_for_error(t("error.audio_module_not_found"))
+        if hint:
+            typer.echo(hint, err=True)
         raise SystemExit(1) from None
 
     ring_path = cfg.get_ring_file_path()
@@ -819,10 +854,22 @@ def watch(
 
 
 @app.command()
-def daemon() -> None:
+def daemon(
+    foreground: bool = typer.Option(
+        False, "--foreground", "-f", help="Run in foreground, log to stdout"
+    ),
+) -> None:
     """Run D-Bus daemon backend."""
     from voiceforge.core.daemon import run_daemon
 
+    if foreground:
+        structlog.configure(
+            processors=[
+                structlog.contextvars.merge_contextvars,
+                structlog.processors.TimeStamper(fmt="iso"),
+                structlog.dev.ConsoleRenderer(stream=sys.stdout),
+            ]
+        )
     run_daemon()
 
 
@@ -1094,6 +1141,7 @@ def _history_resolve(
     session_id: int | None,
     last_n: int,
     output: str,
+    offset: int = 0,
 ) -> tuple[str, Any, Any] | None:
     """Resolve history command to (kind, data, exit_on_error) or handle purge and return None."""
     from datetime import date as date_type
@@ -1122,7 +1170,7 @@ def _history_resolve(
             _history_echo_session_not_found(data, output)
             raise SystemExit(1)
         return (kind, data, False)
-    kind, data = history_list_result(log_db, last_n, output)
+    kind, data = history_list_result(log_db, last_n, output, offset=offset)
     return (kind, data, True)
 
 
@@ -1130,6 +1178,7 @@ def _history_resolve(
 def history(
     session_id: int | None = typer.Option(None, "--id", help="Показать детали сессии"),
     last_n: int = typer.Option(10, "--last", help="Сколько последних сессий показать"),
+    offset: int = typer.Option(0, "--offset", help="Пропустить N сессий (пагинация, блок 51)"),
     output: str = typer.Option("text", "--output", help=_HELP_OUTPUT_TEXT_JSON_MD),
     search: str | None = typer.Option(None, "--search", help="Поиск по тексту транскриптов (FTS5)"),
     date: str | None = typer.Option(None, "--date", help="Сессии за день YYYY-MM-DD"),
@@ -1147,7 +1196,7 @@ def history(
     log_db = TranscriptLog()
     try:
         result = _history_resolve(
-            log_db, purge_before, action_items, search, date, from_date, to_date, session_id, last_n, output
+            log_db, purge_before, action_items, search, date, from_date, to_date, session_id, last_n, output, offset
         )
         if result is None:
             return
@@ -1180,6 +1229,34 @@ def web_serve(
     run_server(host=host, port=port)
 
 
+@calendar_app.command("upcoming")
+def calendar_upcoming(
+    hours: int = typer.Option(48, "--hours", "-H", help="Часы вперёд для выборки событий"),
+    output: str = typer.Option("text", "--output", help=_HELP_OUTPUT_TEXT_JSON),
+) -> None:
+    """Upcoming calendar events (from now to now+hours)."""
+    from voiceforge.calendar import get_upcoming_events
+
+    events, err = get_upcoming_events(hours_ahead=hours)
+    if err:
+        if output == "json":
+            typer.echo(json.dumps(_cli_error_payload("CALDAV_UPCOMING_FAILED", err), ensure_ascii=False))
+        else:
+            typer.echo(t("calendar.poll_error", msg=err), err=True)
+            hint = _hint_for_error(err)
+            if hint:
+                typer.echo(hint, err=True)
+        raise SystemExit(1)
+    if output == "json":
+        typer.echo(json.dumps(_cli_success_payload({"events": events, "hours": hours}), ensure_ascii=False))
+        return
+    if not events:
+        typer.echo(t("calendar.poll_no_events", minutes=hours * 60))
+        return
+    for ev in events:
+        typer.echo(t("calendar.poll_line", summary=ev.get("summary", ""), start_iso=ev.get("start_iso", "")))
+
+
 @calendar_app.command("poll")
 def calendar_poll(
     minutes: int = typer.Option(5, "--minutes", "-m", help="События, начавшиеся за последние N минут"),
@@ -1194,6 +1271,9 @@ def calendar_poll(
             typer.echo(json.dumps(_cli_error_payload("CALDAV_POLL_FAILED", err), ensure_ascii=False))
         else:
             typer.echo(t("calendar.poll_error", msg=err), err=True)
+            hint = _hint_for_error(err)
+            if hint:
+                typer.echo(hint, err=True)
         raise SystemExit(1)
     if output == "json":
         typer.echo(json.dumps(_cli_success_payload({"events": events, "minutes": minutes}), ensure_ascii=False))
