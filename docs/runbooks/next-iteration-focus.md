@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-07 (Sonar batch в desktop)
+**Обновлено:** 2026-03-07 (Sonar batch #86: desktop, main, daemon, history_helpers)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Sonar S3776 в renderSessionDetail: вынесены renderSessionDetailTranscript() и renderSessionDetailAnalysis(); основная функция только собирает результат. Refs #86.
+**Сделано в сессии:** Sonar S3776/S2004: desktop (applyUiLangStatusElements, buildLastAnalysisSummaryHtml, loadLastAnalysisWidget, initQuickActions, showSessionDetail — bindSegmentCopy/Minimap, handleFtsSearch, checkForUpdate, applyCompactMode), main.py (_export_suffix S3358), daemon (_event_start_in_window, _periodic_purge_task), history_helpers (_action_items_json_payload, _action_items_lines). Refs #86.
 
-**Следующий шаг:** Продолжить Sonar в рамках #86 (остальные S3776/S2004 в desktop/main/daemon) или блоки roadmap (#90, #91, #93). В конце сессии: тесты, коммит, пуш, next-iteration-focus.
+**Следующий шаг:** Проверить остаток Sonar после скана (`uv run python scripts/sonar_fetch_issues.py` в toolbox 43) и доисправить оставшиеся S3776/S2004/S7746/S6819/S2737 по #86 или перейти к блокам roadmap (#90, #91, #93). В конце сессии: тесты, коммит, пуш, next-iteration-focus. Python: toolbox 43 или установить на хост для pre-commit.
 
 ---
 
@@ -30,7 +30,7 @@
 - **PR #81, #79:** закрыты с комментарием «Applied in main» (2026-03-07).
 - **Открытые issues:** #65 (CVE — ждём upstream), #50 (macOS/WSL2 — p2/backlog).
 
-**Sonar:** Исправлены S1192, S7761, S7764, S6819, S2486, S2871, S3358, S7770, S7781, S7773, S6653, S6594, S7768, S6660, S1481 в desktop. Остаток: S3776 (сложность), S2004 (вложенность) в desktop/main/daemon. **Mypy:** в scope verify_pr — 0 ошибок. **verify_pr:** Ruff + Mypy OK; bandit — зелёный (nosec B310/B608). **Gitleaks:** allowlist .hypothesis/ + .gitignore; шаг [8/8] в CI проходит (workflow Gitleaks зелёный после 270b7e2/42f904c).
+**Sonar:** Исправлены S1192, S7761, S7764, S6819, S2486, S2871, S3358, S7770, S7781, S7773, S6653, S6594, S7768, S6660, S1481 в desktop; очередной batch (6093fec): S3776/S2004 в desktop/main.js, main.py (_export_suffix), daemon.py, history_helpers.py. Остаток: проверить sonar_fetch_issues.py (S7746, S6819 index.html, S2737 daemon, прочие по скану). **Mypy:** в scope verify_pr — 0 ошибок. **verify_pr:** Ruff + Mypy OK; bandit — зелёный (nosec B310/B608). **Gitleaks:** allowlist .hypothesis/ + .gitignore; шаг [8/8] в CI проходит (workflow Gitleaks зелёный после 270b7e2/42f904c).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
