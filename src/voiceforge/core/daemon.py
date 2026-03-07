@@ -113,9 +113,7 @@ class VoiceForgeDaemon:
                 self._iface.StreamingAnalysisChunk(delta if delta is not None else "")
 
         with ThreadPoolExecutor(max_workers=1) as ex:
-            future = ex.submit(
-                run_analyze_pipeline, seconds, template=template, stream_callback=stream_cb
-            )
+            future = ex.submit(run_analyze_pipeline, seconds, template=template, stream_callback=stream_cb)
             try:
                 text, segments_for_log, analysis_for_log = future.result(timeout=timeout_sec)
             except FuturesTimeoutError:
