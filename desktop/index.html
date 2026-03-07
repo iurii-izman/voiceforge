@@ -206,6 +206,12 @@
             <button type="button" class="btn small" id="copy-transcript" data-i18n="detail_copy_transcript">Копировать транскрипт</button>
             <button type="button" class="btn small" id="copy-action-items" data-i18n="detail_copy_actions">Копировать action items</button>
             <button type="button" class="btn small" id="session-detail-print" aria-label="Печать" data-i18n="detail_print">Печать</button>
+            <div class="clipboard-history-wrap">
+              <button type="button" class="btn small" id="clipboard-history-btn" data-i18n="clipboard_history_btn" aria-haspopup="listbox" aria-expanded="false">История копирований</button>
+              <div id="clipboard-history-popover" class="clipboard-history-popover" role="listbox" aria-label="История копирований" hidden>
+                <div id="clipboard-history-list"></div>
+              </div>
+            </div>
             <div id="session-detail-tags" class="detail-tags-row" style="display:none"><span data-i18n="tags_label">Теги:</span> <input type="text" id="session-detail-tags-input" placeholder="тег1, тег2" aria-label="Теги сессии" data-i18n-placeholder="tags_placeholder" /></div>
             <div id="session-detail-body"></div>
           </dialog>

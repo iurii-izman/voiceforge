@@ -117,6 +117,9 @@ const I18N = {
     onboarding_ok: "Понятно",
     onboarding_never: "Не показывать снова",
     settings_readonly_hint: "Только чтение. Изменения — через конфиг или переменные окружения.",
+    clipboard_history_btn: "История копирований",
+    clipboard_history_empty: "Пока пусто",
+    clipboard_history_title: "Последние скопированные фрагменты",
   },
   en: {
     nav: { home: "Home", sessions: "Sessions", costs: "Costs", settings: "Settings" },
@@ -203,6 +206,9 @@ const I18N = {
     onboarding_step3: "Run analysis — results will appear in Sessions",
     onboarding_ok: "Got it",
     onboarding_never: "Don't show again",
+    clipboard_history_btn: "Clipboard history",
+    clipboard_history_empty: "Empty",
+    clipboard_history_title: "Recent copies",
     settings_readonly_hint: "Read-only. Change via config or environment variables.",
   },
 };
@@ -261,7 +267,9 @@ function setStored(key, value) {
   const str = typeof value === "string" ? value : JSON.stringify(value);
   localStorage.setItem(key, str);
   if (appStore) {
-    const toSet = key.endsWith("_order") || key.endsWith("_collapsed") || key.endsWith("_favorites") ? (typeof value === "string" ? JSON.parse(value) : value) : value;
+    const needsParse = key.endsWith("_order") || key.endsWith("_collapsed") || key.endsWith("_favorites");
+    const parsed = typeof value === "string" ? JSON.parse(value) : value;
+    const toSet = needsParse ? parsed : value;
     appStore.set(key, toSet).catch((e) => { if (e != null) console.debug("store.set", e); });
   }
 }
@@ -1110,6 +1118,10 @@ function highlightSegmentText(text, query) {
 let lastSessionDetail = null;
 
 function hideSessionDetail() {
+  const histPopover = document.getElementById("clipboard-history-popover");
+  if (histPopover) histPopover.hidden = true;
+  const histBtn = document.getElementById("clipboard-history-btn");
+  if (histBtn) histBtn.setAttribute("aria-expanded", "false");
   const detailBlock = document.getElementById("session-detail");
   if (detailBlock?.close) detailBlock.close();
 }
@@ -1146,6 +1158,7 @@ async function copyTranscriptToClipboard() {
   }
   try {
     await navigator.clipboard.writeText(text);
+    pushClipboardHistory(text);
     notify("VoiceForge", "Транскрипт скопирован.");
   } catch (e) {
     notify("VoiceForge", "Не удалось скопировать: " + (e?.message || e));
@@ -1161,6 +1174,7 @@ async function copyActionItemsToClipboard() {
   }
   try {
     await navigator.clipboard.writeText(text);
+    pushClipboardHistory(text);
     notify("VoiceForge", "Action items скопированы.");
   } catch (e) {
     notify("VoiceForge", "Не удалось скопировать: " + (e?.message || e));
@@ -1204,6 +1218,10 @@ function showSessionDetail(id, opts) {
   document.getElementById("copy-transcript").onclick = copyTranscriptToClipboard;
   document.getElementById("copy-action-items").onclick = copyActionItemsToClipboard;
   document.getElementById("session-detail-print").onclick = () => globalThis.print();
+  const histPopover = document.getElementById("clipboard-history-popover");
+  if (histPopover) histPopover.hidden = true;
+  const histBtn = document.getElementById("clipboard-history-btn");
+  if (histBtn) histBtn.onclick = toggleClipboardHistoryPopover;
   document.getElementById("session-detail-close").onclick = hideSessionDetail;
   const tagsRow = document.getElementById("session-detail-tags");
   const tagsInput = document.getElementById("session-detail-tags-input");
@@ -1245,7 +1263,10 @@ function showSessionDetail(id, opts) {
           const idx = Number.parseInt(li?.dataset?.segmentIndex, 10);
           if (lastSessionDetail?.segments?.[idx] != null) {
             const text = lastSessionDetail.segments[idx].text || "";
-            navigator.clipboard.writeText(text).then(() => notify("VoiceForge", "Сегмент скопирован.")).catch(() => {});
+            navigator.clipboard.writeText(text).then(() => {
+              pushClipboardHistory(text);
+              notify("VoiceForge", "Сегмент скопирован.");
+            }).catch(() => {});
           }
         });
       });
@@ -1486,6 +1507,9 @@ const DASHBOARD_COLLAPSED_KEY = "voiceforge_dashboard_collapsed";
 const DASHBOARD_WIDGET_IDS = ["record", "analyze", "streaming", "recent-sessions", "upcoming-events", "cost-widget"];
 const FAVORITES_KEY = "voiceforge_favorites";
 const SESSION_TAGS_KEY = "voiceforge_session_tags";
+/** Block 44 / #88: clipboard history (last N copied fragments). */
+const CLIPBOARD_HISTORY_KEY = "voiceforge_clipboard_history";
+const MAX_CLIPBOARD_HISTORY = 20;
 
 function getSessionTags() {
   try {
@@ -1516,10 +1540,74 @@ function updateSessionTagFilterOptions() {
   const sel = document.getElementById("sessions-tag-filter");
   if (!sel) return;
   const tagsMap = getSessionTags();
-  const allTags = [...new Set(Object.values(tagsMap).flat())].filter(Boolean).sort();
+  const allTags = [...new Set(Object.values(tagsMap).flat())].filter(Boolean).sort((a, b) => String(a).localeCompare(String(b), undefined, { sensitivity: "base" }));
   const current = sel.value;
   sel.innerHTML = "<option value=\"all\">Все</option>" + allTags.map((t) => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
   if (allTags.includes(current)) sel.value = current; else sel.value = "all";
+}
+
+/** Returns clipboard history entries (newest first). Each item: { t: string, ts: number }. */
+function getClipboardHistory() {
+  try {
+    const raw = localStorage.getItem(CLIPBOARD_HISTORY_KEY);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr.slice(0, MAX_CLIPBOARD_HISTORY) : [];
+  } catch (e) {
+    console.debug("getClipboardHistory", e);
+    return [];
+  }
+}
+
+/** Appends text to clipboard history (dedupe by trimming, newest first). */
+function pushClipboardHistory(text) {
+  const s = (text || "").trim();
+  if (!s) return;
+  let arr = getClipboardHistory();
+  arr = [{ t: s, ts: Date.now() }, ...arr.filter((e) => (e.t || "").trim() !== s)];
+  arr = arr.slice(0, MAX_CLIPBOARD_HISTORY);
+  try {
+    localStorage.setItem(CLIPBOARD_HISTORY_KEY, JSON.stringify(arr));
+  } catch (e) {
+    console.debug("pushClipboardHistory", e);
+  }
+}
+
+function toggleClipboardHistoryPopover() {
+  const popover = document.getElementById("clipboard-history-popover");
+  const btn = document.getElementById("clipboard-history-btn");
+  if (!popover || !btn) return;
+  const isOpen = !popover.hidden;
+  if (isOpen) {
+    popover.hidden = true;
+    btn.setAttribute("aria-expanded", "false");
+    return;
+  }
+  const entries = getClipboardHistory();
+  const listEl = document.getElementById("clipboard-history-list");
+  if (!listEl) return;
+  if (entries.length === 0) {
+    listEl.innerHTML = "<p class=\"muted\">" + escapeHtml(t("clipboard_history_empty")) + "</p>";
+  } else {
+    const maxPreview = 120;
+    listEl.innerHTML = entries.map((e, i) => {
+      const preview = (e.t || "").slice(0, maxPreview) + ((e.t || "").length > maxPreview ? "…" : "");
+      return `<button type="button" class="clipboard-history-item" data-index="${i}">${escapeHtml(preview)}</button>`;
+    }).join("");
+    listEl.querySelectorAll(".clipboard-history-item").forEach((el) => {
+      const idx = Number(el.getAttribute("data-index"), 10);
+      const text = entries[idx]?.t ?? "";
+      el.addEventListener("click", () => {
+        navigator.clipboard.writeText(text).then(() => {
+          notify("VoiceForge", "Скопировано.");
+          popover.hidden = true;
+          btn.setAttribute("aria-expanded", "false");
+        }).catch(() => {});
+      });
+    });
+  }
+  popover.hidden = false;
+  btn.setAttribute("aria-expanded", "true");
 }
 
 function getFavorites() {
@@ -1646,7 +1734,7 @@ async function setupCloseToTray() {
 /** Returns whether the effective theme is dark (for tray icon). */
 function getEffectiveIsDark(themeValue) {
   const v = themeValue ?? localStorage.getItem(THEME_KEY) ?? "dark";
-  if (v === "auto") return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  if (v === "auto") return globalThis.matchMedia("(prefers-color-scheme: dark)").matches;
   return v === "dark";
 }
 
@@ -1683,7 +1771,7 @@ function initTheme() {
       applyTheme(r.value);
     });
   });
-  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+  globalThis.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
     if (localStorage.getItem(THEME_KEY) === "auto") applyTheme("auto");
   });
 }

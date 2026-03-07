@@ -162,6 +162,11 @@ table th { color: var(--muted); font-weight: 600; font-size: 0.875rem; }
 .segment-list li { padding: 0.35rem 0; border-bottom: 1px solid var(--border); }
 .detail-tags-row { margin-bottom: 0.5rem; }
 .detail-tags-row input { min-width: 12rem; }
+.clipboard-history-wrap { position: relative; display: inline-block; }
+.clipboard-history-popover { position: absolute; top: 100%; left: 0; margin-top: 0.25rem; padding: 0.5rem; min-width: 16rem; max-width: 28rem; max-height: 20rem; overflow: auto; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 50; }
+#clipboard-history-list { display: flex; flex-direction: column; gap: 0.25rem; }
+.clipboard-history-item { display: block; width: 100%; text-align: left; padding: 0.35rem 0.5rem; font-size: 0.875rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: none; border-radius: var(--radius); background: transparent; cursor: pointer; color: var(--fg); }
+.clipboard-history-item:hover { background: var(--border); }
 .detail-segment-minimap { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-bottom: 0.5rem; }
 .minimap-segment-btn { font-size: 0.75rem; padding: 0.2rem 0.4rem; min-width: 2.5rem; }
 .fts-highlight { background: rgba(255, 235, 59, 0.5); border-radius: 2px; }
