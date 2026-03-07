@@ -61,6 +61,13 @@ const I18N = {
     listen_label_recording: "Запись идёт",
     analyze_btn_run: "Запустить анализ",
     loading: "Загрузка…",
+    status_checking: "Проверка демона…",
+    status_daemon_off: "Демон недоступен. Запустите: voiceforge daemon",
+    status_daemon_ok: "Демон доступен",
+    retry_btn: "Повторить",
+    daemon_retry_btn: "Повторить подключение",
+    compact_daemon_off: "Демон выкл",
+    compact_daemon_ok: "Демон ок",
   },
   en: {
     nav: { home: "Home", sessions: "Sessions", costs: "Costs", settings: "Settings" },
@@ -92,6 +99,13 @@ const I18N = {
     listen_label_recording: "Recording…",
     analyze_btn_run: "Run analysis",
     loading: "Loading…",
+    status_checking: "Checking daemon…",
+    status_daemon_off: "Daemon unavailable. Run: voiceforge daemon",
+    status_daemon_ok: "Daemon available",
+    retry_btn: "Retry",
+    daemon_retry_btn: "Retry connection",
+    compact_daemon_off: "Daemon off",
+    compact_daemon_ok: "Daemon ok",
   },
 };
 
@@ -115,6 +129,12 @@ function applyUiLang() {
   const listenLabel = document.getElementById("listen-label");
   if (listenBtn) listenBtn.textContent = listenState ? t("listen_btn_stop") : t("listen_btn_start");
   if (listenLabel) listenLabel.textContent = listenState ? t("listen_label_recording") : "";
+  const statusBar = document.getElementById("status-bar");
+  const bannerText = document.getElementById("daemon-off-banner-text");
+  const compactStatus = document.getElementById("compact-status");
+  if (statusBar) statusBar.textContent = daemonOk ? t("status_daemon_ok") : t("status_daemon_off");
+  if (bannerText && document.getElementById("daemon-off-banner").style.display !== "none") bannerText.textContent = t("status_daemon_off");
+  if (compactStatus) compactStatus.textContent = daemonOk ? t("compact_daemon_ok") : t("compact_daemon_off");
   const lang = localStorage.getItem(UI_LANG_KEY) || "ru";
   document.documentElement.lang = lang === "en" ? "en" : "ru";
 }
@@ -154,34 +174,34 @@ let streamingFinals = [];
 let streamingPartial = "";
 
 function setDaemonOff(msg) {
-  if (daemonOk) notify("VoiceForge", "Демон недоступен. Запустите voiceforge daemon.");
+  if (daemonOk) notify("VoiceForge", t("status_daemon_off"));
   daemonOk = false;
   const statusBar = document.getElementById("status-bar");
   const retryBtn = document.getElementById("retry");
-  statusBar.textContent = msg || "Демон недоступен. Запустите: voiceforge daemon";
+  statusBar.textContent = msg || t("status_daemon_off");
   statusBar.className = "status daemon-off";
   retryBtn.style.display = "block";
   document.querySelectorAll(".content button").forEach((b) => (b.disabled = true));
   const compactStatus = document.getElementById("compact-status");
-  if (compactStatus) { compactStatus.textContent = "Демон выкл"; compactStatus.className = "status daemon-off"; }
+  if (compactStatus) { compactStatus.textContent = t("compact_daemon_off"); compactStatus.className = "status daemon-off"; }
   const banner = document.getElementById("daemon-off-banner");
   const bannerText = document.getElementById("daemon-off-banner-text");
   if (banner) banner.style.display = "block";
-  if (bannerText) bannerText.textContent = msg || "Демон отключён. Запустите: voiceforge daemon";
+  if (bannerText) bannerText.textContent = msg || t("status_daemon_off");
 }
 
 function setDaemonOk() {
   daemonOk = true;
   const statusBar = document.getElementById("status-bar");
   const retryBtn = document.getElementById("retry");
-  statusBar.textContent = "Демон доступен";
+  statusBar.textContent = t("status_daemon_ok");
   statusBar.className = "status daemon-ok";
   retryBtn.style.display = "none";
   const banner = document.getElementById("daemon-off-banner");
   if (banner) banner.style.display = "none";
   document.querySelectorAll("#listen-toggle, #analyze-btn").forEach((b) => (b.disabled = false));
   const compactStatus = document.getElementById("compact-status");
-  if (compactStatus) { compactStatus.textContent = "Демон ок"; compactStatus.className = "status daemon-ok"; }
+  if (compactStatus) { compactStatus.textContent = t("compact_daemon_ok"); compactStatus.className = "status daemon-ok"; }
 }
 
 function parseEnvelope(raw) {

@@ -35,11 +35,11 @@
         <button type="button" class="btn small primary" id="compact-analyze">Анализ</button>
       </div>
       <div id="full-content" class="full-content">
-      <div id="status-bar" class="status daemon-off">Проверка демона…</div>
-      <button id="retry" type="button" class="btn secondary" style="display:none">Повторить</button>
+      <div id="status-bar" class="status daemon-off" data-i18n="status_checking">Проверка демона…</div>
+      <button id="retry" type="button" class="btn secondary" style="display:none" data-i18n="retry_btn">Повторить</button>
       <div id="daemon-off-banner" class="daemon-off-banner" role="alert" aria-live="polite" style="display:none">
-        <span id="daemon-off-banner-text">Демон отключён.</span>
-        <button type="button" class="btn small" id="daemon-retry-btn">Повторить подключение</button>
+        <span id="daemon-off-banner-text" data-i18n="status_daemon_off">Демон отключён.</span>
+        <button type="button" class="btn small" id="daemon-retry-btn" data-i18n="daemon_retry_btn">Повторить подключение</button>
       </div>
 
       <section id="tab-home" class="tab-panel active" tabindex="-1">
