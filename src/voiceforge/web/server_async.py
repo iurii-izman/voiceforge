@@ -82,6 +82,7 @@ def _sync_session_by_id(sid: str) -> tuple[int, str, bytes]:
 def _sync_cost(days_str: str, from_str: str, to_str: str) -> tuple[int, str, bytes]:
     try:
         from datetime import date
+
         from voiceforge.core.metrics import get_stats, get_stats_range
         if from_str and to_str:
             fd = date.fromisoformat(from_str)

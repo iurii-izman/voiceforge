@@ -11,6 +11,20 @@ The format is based on Keep a Changelog and this project follows SemVer pre-rele
 - **IPC envelope (#39):** D-Bus/daemon `envelope_v1` is **on by default** (was off). Set `VOICEFORGE_IPC_ENVELOPE=0` for legacy plain-string clients. GetCapabilities and all D-Bus string payloads use envelope when enabled.
 - **Analyze timeout (#39):** `analyze()` (D-Bus/CLI) now respects `analyze_timeout_sec` (default 120s). On timeout returns structured error `ANALYZE_TIMEOUT` (retryable). Config: `VOICEFORGE_ANALYZE_TIMEOUT_SEC` / `analyze_timeout_sec` in voiceforge.yaml.
 
+## [0.2.0-alpha.2] - 2026-03-07
+
+### Added
+
+- **Runbook pre-beta:** [pre-beta-sonar-github.md](docs/runbooks/pre-beta-sonar-github.md) — чеклист Sonar и GitHub перед бета-релизом.
+
+### Changed
+
+- **Sonar S1192:** константы в `main.py` (_ISO_UTC_SUFFIX, _ICAL_DT_FORMAT, _I18N_CALENDAR_POLL_ERROR) и в `caldav_poll.py` (_CALENDAR_DEPS_HINT).
+- **Desktop:** @tauri-apps/cli 2.10.1; в `main.js` — использование `dataset` вместо `getAttribute` для data-* (S7761), `globalThis` вместо `window` (S7764).
+- **Daemon:** contextlib.suppress для CancelledError/TimeoutError (SIM105).
+- **Tests:** ruff RUF043/SIM117 в test_rag_parsers (raw match, combined with); E741 в main.py (ambiguous `l`).
+- **CI:** Dependabot PR #74, #75, #76, #77 (actions), #25 (pre-commit) смержены в main.
+
 ## [0.2.0-alpha.1] - 2026-02-24
 
 ### Added
@@ -51,6 +65,7 @@ The format is based on Keep a Changelog and this project follows SemVer pre-rele
 
 - Baseline alpha0.1 core CLI (9 commands), quality gates, and release/tag baseline.
 
-[Unreleased]: https://github.com/iurii-izman/voiceforge/compare/v0.2.0-alpha.1...HEAD
+[Unreleased]: https://github.com/iurii-izman/voiceforge/compare/v0.2.0-alpha.2...HEAD
+[0.2.0-alpha.2]: https://github.com/iurii-izman/voiceforge/compare/v0.2.0-alpha.1...v0.2.0-alpha.2
 [0.2.0-alpha.1]: https://github.com/iurii-izman/voiceforge/compare/v0.1.0-alpha.1...v0.2.0-alpha.1
 [0.1.0-alpha.1]: https://github.com/iurii-izman/voiceforge/releases/tag/v0.1.0-alpha.1

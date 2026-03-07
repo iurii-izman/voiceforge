@@ -15,7 +15,7 @@ import threading
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FuturesTimeoutError
-from datetime import date, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -103,9 +103,8 @@ class VoiceForgeDaemon:
     def analyze(self, seconds: int, template: str | None = None) -> tuple[str, int | None]:
         """Run full pipeline, save session, return (formatted text, session_id). Block 62: session_id for SessionCreated.
         template: optional meeting template. Respects analyze_timeout_sec (#39)."""
-        from voiceforge.main import run_analyze_pipeline
-
         from voiceforge.core.transcript_log import TranscriptLog
+        from voiceforge.main import run_analyze_pipeline
 
         timeout_sec = max(1.0, float(getattr(self._cfg, "analyze_timeout_sec", 120.0)))
         with ThreadPoolExecutor(max_workers=1) as ex:
@@ -654,10 +653,8 @@ async def _cancel_purge_then_service_reraise(
         await purge_task
     except asyncio.CancelledError as exc:
         service_task.cancel()
-        try:
+        with contextlib.suppress(asyncio.CancelledError):
             await service_task
-        except asyncio.CancelledError:
-            pass
         raise exc
     service_task.cancel()
     try:
@@ -666,7 +663,7 @@ async def _cancel_purge_then_service_reraise(
         raise
 
 
-def _calendar_autostart_loop(daemon: "VoiceForgeDaemon") -> None:
+def _calendar_autostart_loop(daemon: VoiceForgeDaemon) -> None:
     """Block 78: every 60s, if an event starts within N minutes and not listening, start listen."""
     if not getattr(daemon._cfg, "calendar_autostart_enabled", False):
         return
@@ -684,7 +681,7 @@ def _calendar_autostart_loop(daemon: "VoiceForgeDaemon") -> None:
                 events, err = get_upcoming_events(hours_ahead=1)
                 if err or not events:
                     continue
-                now = datetime.now(timezone.utc)
+                now = datetime.now(UTC)
                 window_end = now + timedelta(minutes=minutes_ahead)
                 for ev in events:
                     start_iso = ev.get("start_iso") or ""
@@ -695,7 +692,7 @@ def _calendar_autostart_loop(daemon: "VoiceForgeDaemon") -> None:
                             start_iso = start_iso[:-1] + "+00:00"
                         event_start = datetime.fromisoformat(start_iso)
                         if event_start.tzinfo is None:
-                            event_start = event_start.replace(tzinfo=timezone.utc)
+                            event_start = event_start.replace(tzinfo=UTC)
                         if now <= event_start <= window_end:
                             log.info("calendar_autostart.starting", summary=ev.get("summary", ""), start=start_iso)
                             daemon.listen_start()
@@ -718,10 +715,8 @@ def _run_daemon_loop(
 
     async def _periodic_purge() -> None:
         while True:
-            try:
+            with contextlib.suppress(TimeoutError):
                 await asyncio.wait_for(stop_event.wait(), timeout=PURGE_INTERVAL_SEC)
-            except asyncio.TimeoutError:
-                pass
             if stop_event.is_set():
                 return
             try:

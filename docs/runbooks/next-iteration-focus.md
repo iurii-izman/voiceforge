@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-07 (pre-beta: Sonar S1192, PR 74–77+25 merged, #50 p2)
+**Обновлено:** 2026-03-07 (релиз v0.2.0-alpha.2; Sonar/ruff/desktop)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Выполнен чеклист [pre-beta-sonar-github.md](pre-beta-sonar-github.md): (1) Sonar — прогнан `sonar_fetch_issues.py`; исправлены S1192 в Python (main.py: константы _ISO_UTC_SUFFIX, _ICAL_DT_FORMAT, _I18N_CALENDAR_POLL_ERROR; caldav_poll.py: _CALENDAR_DEPS_HINT). (2) GitHub PR: смержены #74, #75, #76, #77 (actions), #25 (pre-commit) — на main; #81 (tauri), #79 (vite) не мержатся (mergeable: false, при необходимости обновить вручную). (3) Issue #50 — добавлен label p2 (backlog). Оставшиеся замечания Sonar (S3776, S7761, desktop a11y и др.) зафиксированы в runbook; при необходимости — следующий чат или релиз беты.
+**Сделано в сессии:** Релиз **v0.2.0-alpha.2**: версии в pyproject.toml, desktop/package.json, tauri.conf.json; CHANGELOG; тег v0.2.0-alpha.2. Применён бумп @tauri-apps/cli 2.10.1 (эквивалент #81). Исправления: ruff в test_rag_parsers (RUF043, SIM117), daemon (SIM105), main.py (E741); desktop main.js (S7761 dataset, S7764 globalThis). verify_pr: Ruff OK; mypy — 13 прежних ошибок (telegram_notify, dbus_service, daemon, router, rag). Чеклист: db_migrations, check_cli_contract — OK.
 
-**Следующий шаг:** Релиз следующей беты по [release-and-quality.md](release-and-quality.md). При желании: домержить #81/#79 вручную (rebase/конфликты), доисправить остальные Sonar (по приоритету).
+**Следующий шаг:** При желании: исправить mypy (13 ошибок в 5 файлах), рассмотреть #79 (vite 7) после тестов; остальные Sonar — по приоритету.
 
 ---
 
@@ -30,7 +30,7 @@
 - **Открытые PR (после сессии):** #81 (tauri), #79 (vite) — не mergeable (конфликты/обновить ветки вручную). Смержены: #74, #75, #76, #77 (actions), #25 (pre-commit).
 - **Открытые issues:** #65 (CVE — ждём upstream), #50 (macOS/WSL2 — p2/backlog).
 
-**Sonar:** Исправлены S1192 (константы в main.py, caldav_poll.py). Остаток: S3776, S7761, desktop (S6819, S2486 и др.) — по чеклисту pre-beta-sonar-github (исправить или принять).
+**Sonar:** Исправлены S1192, S7761 (dataset), S7764 (globalThis) в desktop. Остаток: S3776, S6819, S2486 и др. **Mypy:** 13 ошибок в 5 файлах (verify_pr не проходит по mypy).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 

@@ -118,7 +118,7 @@ def test_parse_pdf_import_error_when_no_pymupdf(tmp_path: Path) -> None:
         with contextlib.suppress(Exception):
             parsers.parse_pdf(pdf)
     except ImportError:
-        with pytest.raises(ImportError, match="rag|pymupdf"):
+        with pytest.raises(ImportError, match=r"rag|pymupdf"):
             parsers.parse_pdf(pdf)
 
 
@@ -132,9 +132,8 @@ def test_parse_docx_import_error(tmp_path: Path) -> None:
     """parse_docx raises ImportError when python-docx is not installed."""
     docx_path = tmp_path / "x.docx"
     docx_path.touch()
-    with patch.dict(sys.modules, {"docx": None}):
-        with pytest.raises(ImportError, match="rag|python-docx"):
-            parsers.parse_docx(docx_path)
+    with patch.dict(sys.modules, {"docx": None}), pytest.raises(ImportError, match=r"rag|python-docx"):
+        parsers.parse_docx(docx_path)
 
 
 def test_parse_docx_success(tmp_path: Path) -> None:
@@ -162,9 +161,8 @@ def test_parse_odt_import_error(tmp_path: Path) -> None:
     """parse_odt raises ImportError when odfpy is not installed."""
     odt_path = tmp_path / "x.odt"
     odt_path.touch()
-    with patch.dict(sys.modules, {"odf": None}):
-        with pytest.raises(ImportError, match="rag|odfpy"):
-            parsers.parse_odt(odt_path)
+    with patch.dict(sys.modules, {"odf": None}), pytest.raises(ImportError, match=r"rag|odfpy"):
+        parsers.parse_odt(odt_path)
 
 
 def test_parse_odt_success(tmp_path: Path) -> None:
@@ -194,9 +192,8 @@ def test_parse_rtf_import_error(tmp_path: Path) -> None:
     """parse_rtf raises ImportError when striprtf is not installed."""
     rtf_path = tmp_path / "x.rtf"
     rtf_path.write_text(r"{\rtf1 hi}", encoding="utf-8")
-    with patch.dict(sys.modules, {"striprtf": None}):
-        with pytest.raises(ImportError, match="rag|striprtf"):
-            parsers.parse_rtf(rtf_path)
+    with patch.dict(sys.modules, {"striprtf": None}), pytest.raises(ImportError, match=r"rag|striprtf"):
+        parsers.parse_rtf(rtf_path)
 
 
 def test_parse_rtf_success(tmp_path: Path) -> None:

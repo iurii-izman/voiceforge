@@ -8,11 +8,11 @@ from pathlib import Path
 import pytest
 
 from voiceforge.llm.prompt_loader import (
+    _user_templates_dir,
     get_prompt_hashes,
     get_prompt_version,
     load_prompt,
     load_template_prompts,
-    _user_templates_dir,
 )
 
 

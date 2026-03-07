@@ -10,6 +10,7 @@ import subprocess  # nosec B404 -- pandoc for PDF export, args from our paths
 import sys
 import threading
 import time
+from datetime import UTC
 from pathlib import Path
 from typing import Any
 
@@ -120,7 +121,7 @@ def _hint_for_error(message: str) -> str | None:
     if not message:
         return None
     msg_lower = message.lower()
-    if "missing keyring" in msg_lower or "keyring" in msg_lower and "set" not in msg_lower:
+    if "missing keyring" in msg_lower or ("keyring" in msg_lower and "set" not in msg_lower):
         return "Подсказка: keyring set voiceforge caldav_url (и caldav_username, caldav_password). См. docs/runbooks/keyring-keys-reference.md"
     if "audio" in msg_lower or "pipewire" in msg_lower or "микрофон" in msg_lower:
         return "Подсказка: проверьте PipeWire (systemctl --user status pipewire) и доступ микрофона."
@@ -1112,8 +1113,9 @@ def sessions_to_ical(
     to_date: str | None = typer.Option(None, "--to", help="To date YYYY-MM-DD (inclusive)"),
 ) -> None:
     """Export sessions list to iCalendar .ics (block 83). DTSTART/DTEND from started_at and duration."""
-    from datetime import date as date_type, timedelta
-    from datetime import datetime as dt_class, timezone
+    from datetime import date as date_type
+    from datetime import datetime as dt_class
+    from datetime import timedelta
 
     from voiceforge.core.transcript_log import TranscriptLog
 
@@ -1140,9 +1142,9 @@ def sessions_to_ical(
             s = iso_str.strip().replace("Z", _ISO_UTC_SUFFIX)
             dt = dt_class.fromisoformat(s)
             if dt.tzinfo is None:
-                dt = dt.replace(tzinfo=timezone.utc)
+                dt = dt.replace(tzinfo=UTC)
             else:
-                dt = dt.astimezone(timezone.utc)
+                dt = dt.astimezone(UTC)
             return dt.strftime(_ICAL_DT_FORMAT)
         except (ValueError, TypeError):
             return ""
@@ -1155,7 +1157,7 @@ def sessions_to_ical(
         dur_sec = float(getattr(s, "duration_sec", 0) or 0)
         end_dt = dt_class.fromisoformat((getattr(s, "started_at", "") or "").replace("Z", _ISO_UTC_SUFFIX))
         if end_dt.tzinfo is None:
-            end_dt = end_dt.replace(tzinfo=timezone.utc)
+            end_dt = end_dt.replace(tzinfo=UTC)
         end_dt = end_dt + timedelta(seconds=dur_sec)
         end_ical = end_dt.strftime(_ICAL_DT_FORMAT)
         sid = getattr(s, "id", 0) or 0
@@ -1172,7 +1174,7 @@ def sessions_to_ical(
     lines.append("END:VCALENDAR")
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text("\r\n".join(lines), encoding="utf-8")
-    typer.echo(f"Exported {len([l for l in lines if l == 'BEGIN:VEVENT'])} sessions to {output}")
+    typer.echo(f"Exported {len([x for x in lines if x == 'BEGIN:VEVENT'])} sessions to {output}")
 
 
 @app.command("weekly-report")
@@ -1557,7 +1559,7 @@ def calendar_export_ical(
     hours: int = typer.Option(48, "--hours", "-H", help="Hours ahead to fetch"),
 ) -> None:
     """Export upcoming calendar events to iCalendar .ics (block 48)."""
-    from datetime import datetime as dt_class, timezone
+    from datetime import datetime as dt_class
 
     from voiceforge.calendar import get_upcoming_events
 
@@ -1576,9 +1578,9 @@ def calendar_export_ical(
             s = iso_str.strip().replace("Z", _ISO_UTC_SUFFIX)
             dt = dt_class.fromisoformat(s)
             if dt.tzinfo is None:
-                dt = dt.replace(tzinfo=timezone.utc)
+                dt = dt.replace(tzinfo=UTC)
             else:
-                dt = dt.astimezone(timezone.utc)
+                dt = dt.astimezone(UTC)
             return dt.strftime(_ICAL_DT_FORMAT)
         except (ValueError, TypeError):
             return ""

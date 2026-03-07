@@ -216,11 +216,11 @@ function t(key) {
 
 function applyUiLang() {
   document.querySelectorAll("[data-i18n]").forEach((el) => {
-    const k = el.getAttribute("data-i18n");
+    const k = el.dataset.i18n;
     if (k) el.textContent = t(k);
   });
   document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
-    const k = el.getAttribute("data-i18n-placeholder");
+    const k = el.dataset.i18nPlaceholder;
     if (k) el.placeholder = t(k);
   });
   const listenBtn = document.getElementById("listen-toggle");
@@ -384,7 +384,7 @@ function switchTab(tabId) {
 function playBeep() {
   try {
     if (localStorage.getItem("voiceforge_sound_on_record") !== "true") return;
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = new (globalThis.AudioContext || globalThis.webkitAudioContext)();
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.connect(gain);
@@ -1201,7 +1201,7 @@ function showSessionDetail(id, opts) {
   document.getElementById("export-otter").onclick = () => exportSession(id, "otter");
   document.getElementById("copy-transcript").onclick = copyTranscriptToClipboard;
   document.getElementById("copy-action-items").onclick = copyActionItemsToClipboard;
-  document.getElementById("session-detail-print").onclick = () => window.print();
+  document.getElementById("session-detail-print").onclick = () => globalThis.print();
   document.getElementById("session-detail-close").onclick = hideSessionDetail;
   const tagsRow = document.getElementById("session-detail-tags");
   const tagsInput = document.getElementById("session-detail-tags-input");
@@ -1249,7 +1249,7 @@ function showSessionDetail(id, opts) {
       });
       bodyEl.querySelectorAll(".minimap-segment-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
-          const idx = btn.getAttribute("data-segment-idx");
+          const idx = btn.dataset.segmentIdx;
           const el = idx != null ? document.getElementById("segment-" + idx) : null;
           if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
         });
