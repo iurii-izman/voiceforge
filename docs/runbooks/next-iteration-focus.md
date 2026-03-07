@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Блок 66 (prompt caching): в prompt-management.md добавлена секция «Prompt caching (block 66)» (Claude — cache_control в router; не-Claude — по API). Обновлены backlog-and-actions, PROJECT-STATUS-SUMMARY, next-iteration-focus.
+**Сделано в сессии:** Уточнён «Следующий шаг»: кодовая часть по планам завершена; приоритеты — ручные шаги, Sonar S3776 по желанию, новые фичи по backlog.
 
-**Следующий шаг:** Блок 66 задокументирован (prompt-management § Prompt caching). Дальше: ручные шаги из [MANUAL-AND-CANNOT-DO.md](../plans/MANUAL-AND-CANNOT-DO.md), стабилизация (Sonar S3776 и др.) или новые фичи по backlog. verify_pr: при отсутствии hypothesis — `pytest tests/ --ignore=tests/test_rag_parsers_hypothesis.py`. Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
+**Следующий шаг:** Кодовая реализация по текущим планам (Phase A–D, блоки 66–79) завершена. Дальше на выбор: (1) ручные шаги по чеклисту [MANUAL-AND-CANNOT-DO.md](../plans/MANUAL-AND-CANNOT-DO.md), (2) опционально — рефакторинг Sonar S3776 по одному месту за итерацию, (3) новые фичи из [backlog-and-actions.md](../plans/backlog-and-actions.md) или roadmap. verify_pr: при отсутствии hypothesis — `pytest tests/ --ignore=tests/test_rag_parsers_hypothesis.py`. Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
 
 ---
 
