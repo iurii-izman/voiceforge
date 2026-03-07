@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import json
+import threading
 from typing import Any
 
 from voiceforge.core.tracing import bind_trace_id, clear_trace_context, get_trace_id
@@ -414,6 +415,56 @@ def _build_app():
         status, ct, body = await asyncio.to_thread(_sync_analyze, data)
         return Response(body, status_code=status, media_type=ct)
 
+    async def post_analyze_stream(request: Request):
+        """SSE stream of LLM analyze output (#91). POST body: {seconds, template?}."""
+        try:
+            data = await request.json()
+        except Exception:
+            return Response(
+                json.dumps({"error": {"code": "BAD_REQUEST", "message": _ERR_INVALID_JSON}}).encode("utf-8"),
+                status_code=400,
+                media_type=_CONTENT_TYPE_JSON,
+            )
+        seconds = int(data.get("seconds", 30))
+        template = (data.get("template") or "").strip() or None
+        if seconds < 1 or seconds > 600:
+            return Response(
+                json.dumps({"error": {"code": "BAD_REQUEST", "message": "seconds must be 1..600"}}).encode("utf-8"),
+                status_code=400,
+                media_type=_CONTENT_TYPE_JSON,
+            )
+        queue: asyncio.Queue[str | None] = asyncio.Queue()
+        loop = asyncio.get_running_loop()
+
+        def put(chunk: str | None) -> None:
+            loop.call_soon_threadsafe(queue.put_nowait, chunk)
+
+        def run() -> None:
+            try:
+                from voiceforge.main import run_analyze_pipeline
+
+                run_analyze_pipeline(seconds, template=template, stream_callback=put)
+            finally:
+                put(None)
+
+        threading.Thread(target=run, daemon=True).start()
+
+        async def event_stream():
+            while True:
+                chunk = await queue.get()
+                if chunk is None:
+                    yield "event: done\ndata: {}\n\n"
+                    break
+                yield f"data: {json.dumps({'delta': chunk}, ensure_ascii=False)}\n\n"
+
+        from starlette.responses import StreamingResponse
+
+        return StreamingResponse(
+            event_stream(),
+            media_type="text/event-stream",
+            headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+        )
+
     async def post_action_items(request: Request) -> Response:
         try:
             data = await request.json()
@@ -449,6 +500,7 @@ def _build_app():
         Route("/ready", get_ready),
         Route("/metrics", get_metrics),
         Route("/api/analyze", post_analyze, methods=["POST"]),
+        Route("/api/analyze/stream", post_analyze_stream, methods=["POST"]),
         Route("/api/action-items/update", post_action_items, methods=["POST"]),
         Route("/api/telegram/webhook", post_telegram_webhook, methods=["POST"]),
     ]

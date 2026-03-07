@@ -101,6 +101,30 @@ _ICAL_DT_FORMAT = "%Y%m%dT%H%M%SZ"
 _I18N_CALENDAR_POLL_ERROR = "calendar.poll_error"
 
 
+def _calendar_export_ical_fail(err: str) -> None:
+    """Echo calendar error and hint; raise SystemExit(1). S3776."""
+    typer.echo(t(_I18N_CALENDAR_POLL_ERROR, msg=err), err=True)
+    hint = _hint_for_error(err)
+    if hint:
+        typer.echo(hint, err=True)
+    raise SystemExit(1)
+
+
+def _sessions_to_ical_fetch_sessions(log_db: Any, from_date: str | None, to_date: str | None, limit: int) -> list[Any]:
+    """Return sessions for iCal export; on date parse error echo and raise SystemExit(1). S3776."""
+    from datetime import date as date_type
+
+    if from_date is not None and to_date is not None:
+        try:
+            fd = date_type.fromisoformat(from_date)
+            td = date_type.fromisoformat(to_date)
+        except ValueError:
+            typer.echo(t("history.date_invalid", err=from_date + " / " + to_date), err=True)
+            raise SystemExit(1)
+        return log_db.get_sessions_in_range(fd, td)
+    return log_db.get_sessions(last_n=limit, offset=0)
+
+
 def _get_config() -> Settings:
     return Settings()
 
@@ -283,8 +307,10 @@ def run_analyze_pipeline(
     seconds: int,
     template: str | None = None,
     dry_run: bool = False,
+    stream_callback: Any = None,
 ) -> tuple[str, list[dict[str, Any]], dict[str, Any]]:
-    """Run core analyze pipeline and return (display_text, segments_for_log, analysis_for_log)."""
+    """Run core analyze pipeline and return (display_text, segments_for_log, analysis_for_log).
+    If stream_callback is set, LLM output is streamed via stream_callback(delta) (#91)."""
     bind_trace_id()  # one trace_id per pipeline run (CLI or daemon worker)
     cfg = _get_config()
     try:
@@ -324,17 +350,29 @@ def run_analyze_pipeline(
         return (msg, segments_for_log, {})
 
     try:
-        from voiceforge.llm.router import analyze_meeting
+        from voiceforge.llm.router import analyze_meeting, analyze_meeting_stream
 
-        llm_result, cost_usd = analyze_meeting(
-            transcript,
-            context=context,
-            model=cfg.default_llm,
-            template=template,
-            transcript_pre_redacted=transcript_redacted,
-            ollama_model=cfg.ollama_model,
-            pii_mode=cfg.pii_mode,
-        )
+        if stream_callback is not None:
+            llm_result, cost_usd = analyze_meeting_stream(
+                transcript,
+                context=context,
+                model=cfg.default_llm,
+                template=template,
+                transcript_pre_redacted=transcript_redacted,
+                ollama_model=cfg.ollama_model,
+                pii_mode=cfg.pii_mode,
+                stream_callback=stream_callback,
+            )
+        else:
+            llm_result, cost_usd = analyze_meeting(
+                transcript,
+                context=context,
+                model=cfg.default_llm,
+                template=template,
+                transcript_pre_redacted=transcript_redacted,
+                ollama_model=cfg.ollama_model,
+                pii_mode=cfg.pii_mode,
+            )
     except ImportError:
         return (t("error.install_llm_deps"), [], {})
     except BudgetExceeded as e:
@@ -436,11 +474,11 @@ def _streaming_listen_worker(
 ) -> None:
     """Block 10.1: stream STT in a thread — partial/final to stdout (CLI listen)."""
     try:
+        from voiceforge.stt import get_transcriber_for_config
         from voiceforge.stt.streaming import StreamingSegment, StreamingTranscriber
-        from voiceforge.stt.transcriber import Transcriber
     except ImportError:
         return
-    transcriber = Transcriber(model_size=cfg.model_size)
+    transcriber = get_transcriber_for_config(cfg)
     lang = getattr(cfg, "language", "auto")
     language_hint = None if lang in ("auto", "") else lang
 
@@ -1109,7 +1147,6 @@ def sessions_to_ical(
     to_date: str | None = typer.Option(None, "--to", help="To date YYYY-MM-DD (inclusive)"),
 ) -> None:
     """Export sessions list to iCalendar .ics (block 83). DTSTART/DTEND from started_at and duration."""
-    from datetime import date as date_type
     from datetime import datetime as dt_class
     from datetime import timedelta
 
@@ -1117,16 +1154,7 @@ def sessions_to_ical(
 
     log_db = TranscriptLog()
     try:
-        if from_date is not None and to_date is not None:
-            try:
-                fd = date_type.fromisoformat(from_date)
-                td = date_type.fromisoformat(to_date)
-            except ValueError:
-                typer.echo(t("history.date_invalid", err=from_date + " / " + to_date), err=True)
-                raise SystemExit(1)
-            sessions = log_db.get_sessions_in_range(fd, td)
-        else:
-            sessions = log_db.get_sessions(last_n=limit, offset=0)
+        sessions = _sessions_to_ical_fetch_sessions(log_db, from_date, to_date, limit)
     finally:
         log_db.close()
 
@@ -1577,11 +1605,7 @@ def calendar_export_ical(
 
     events, err = get_upcoming_events(hours_ahead=hours)
     if err:
-        typer.echo(t(_I18N_CALENDAR_POLL_ERROR, msg=err), err=True)
-        hint = _hint_for_error(err)
-        if hint:
-            typer.echo(hint, err=True)
-        raise SystemExit(1)
+        _calendar_export_ical_fail(err)
 
     def _iso_to_ical_utc(iso_str: str) -> str:
         if not iso_str:

@@ -315,6 +315,7 @@ class VoiceForgeDaemon:
         return json.dumps(
             {
                 "model_size": c.model_size,
+                "stt_backend": getattr(c, "stt_backend", "local"),
                 "default_llm": c.default_llm,
                 "budget_limit_usd": c.budget_limit_usd,
                 "smart_trigger": c.smart_trigger,
@@ -437,11 +438,11 @@ class VoiceForgeDaemon:
         if get_chunk is None:
             return
         try:
+            from voiceforge.stt import get_transcriber_for_config
             from voiceforge.stt.streaming import StreamingTranscriber
-            from voiceforge.stt.transcriber import Transcriber
         except ImportError:
             return
-        transcriber = Transcriber(model_size=self._cfg.model_size)
+        transcriber = get_transcriber_for_config(self._cfg)
 
         def on_partial(text: str) -> None:
             # For D-Bus signal emitter
@@ -665,10 +666,7 @@ async def _cancel_purge_then_service_reraise(
             await service_task
         raise exc
     service_task.cancel()
-    try:
-        await service_task
-    except asyncio.CancelledError:
-        raise  # rethrow so caller can handle (S2737)
+    await service_task  # CancelledError propagates to caller (S2737: avoid redundant rethrow)
 
 
 def _event_start_in_window(ev: dict, now: datetime, window_end: datetime) -> bool:

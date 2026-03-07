@@ -598,6 +598,30 @@ def test_daemon_streaming_language_hint_explicit_returns_lang() -> None:
     assert _streaming_language_hint(cfg) == "ru"
 
 
+def test_get_transcriber_for_config_local_returns_transcriber() -> None:
+    """get_transcriber_for_config with stt_backend=local returns Transcriber (#93)."""
+    from voiceforge.stt import get_transcriber_for_config
+
+    cfg = MagicMock()
+    cfg.stt_backend = "local"
+    cfg.model_size = "tiny"
+    t = get_transcriber_for_config(cfg)
+    assert hasattr(t, "transcribe")
+    assert getattr(t, "_model_size", None) == "tiny"
+
+
+def test_get_transcriber_for_config_openai_returns_openai_facade() -> None:
+    """get_transcriber_for_config with stt_backend=openai returns OpenAIWhisperTranscriber (#93)."""
+    from voiceforge.stt import get_transcriber_for_config
+
+    cfg = MagicMock()
+    cfg.stt_backend = "openai"
+    cfg.model_size = "small"
+    t = get_transcriber_for_config(cfg)
+    assert hasattr(t, "transcribe")
+    assert getattr(t, "_model_size", None) == "openai"
+
+
 def test_daemon_env_flag_default_and_true() -> None:
     """_env_flag returns default when unset; True for 1/true/yes/on."""
     from voiceforge.core.daemon import _env_flag

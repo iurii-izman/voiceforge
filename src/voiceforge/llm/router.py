@@ -207,6 +207,65 @@ def analyze_meeting(
     return (result, cost)
 
 
+def analyze_meeting_stream(
+    transcript: str,
+    context: str = "",
+    *,
+    model: str | None = None,
+    template: str | None = None,
+    transcript_pre_redacted: str | None = None,
+    ollama_model: str | None = None,
+    pii_mode: str = "ON",
+    stream_callback: Any = None,
+) -> tuple[Any, float]:
+    """Like analyze_meeting but streams deltas via stream_callback(delta). Returns (result, cost). (#91)"""
+    from voiceforge.llm.local_llm import DEFAULT_MODEL as OLLAMA_DEFAULT
+    from voiceforge.llm.schemas import MeetingAnalysis
+
+    model_id = model or DEFAULT_MODEL
+    response_model: type[MeetingAnalysis] | None = MeetingAnalysis
+    system_prompt_override: str | None = None
+    if template:
+        schema_cls, prompt = _template_schema(template)
+        if schema_cls is not None and prompt is not None:
+            response_model = schema_cls
+            system_prompt_override = prompt
+
+    local_model = (ollama_model or OLLAMA_DEFAULT).strip() or OLLAMA_DEFAULT
+    try:
+        ollama_result = _try_ollama_faq(transcript, context, local_model, response_model)
+        if ollama_result is not None:
+            return ollama_result
+    except Exception as e:
+        log.warning("llm.ollama_fallback_failed", error=str(e))
+
+    if response_model is None:
+        response_model = MeetingAnalysis
+    prompt = _analysis_prompt(
+        transcript,
+        context,
+        model_id=model_id,
+        transcript_pre_redacted=transcript_pre_redacted,
+        system_prompt_override=system_prompt_override,
+        pii_mode=pii_mode,
+    )
+    accumulated = ""
+    for delta in stream_completion(prompt, model=model_id):
+        accumulated += delta
+        if stream_callback:
+            stream_callback(delta)
+    if stream_callback:
+        stream_callback(None)  # signal end of stream
+    if not accumulated.strip():
+        return (response_model(questions=[], answers=[], recommendations=[], next_directions=[], action_items=[]), 0.0)
+    try:
+        parsed = response_model.model_validate_json(accumulated)
+        return (parsed, 0.0)
+    except Exception as e:
+        log.warning("llm.stream_parse_failed", error=str(e))
+        raise
+
+
 def _live_summary_system() -> str:
     """Live summary system prompt (from prompts/live_summary.txt or fallback)."""
     fallback = """You are a meeting analyst. Given a transcript fragment, produce a SHORT live summary:
@@ -496,3 +555,35 @@ def complete_structured(
         raise
 
     return _complete_structured_finish(parsed, raw_used, model_id, response_model, key, ttl)
+
+
+def stream_completion(
+    prompt: list[dict[str, Any]],
+    model: str | None = None,
+):
+    """Stream LLM completion; yield content deltas. For UI streaming (#91)."""
+    from voiceforge.core.secrets import set_env_keys_from_keyring
+
+    set_env_keys_from_keyring()
+    try:
+        from litellm import completion
+    except ImportError as e:
+        raise ImportError("Install [llm] extras: uv sync --extra llm") from e
+    from voiceforge.llm.circuit_breaker import wrap_completion
+
+    model_id = model or DEFAULT_MODEL
+    response = wrap_completion(completion)(
+        model=model_id,
+        messages=prompt,
+        stream=True,
+    )
+    for part in response:
+        if not part or not getattr(part, "choices", None):
+            continue
+        choices = part.choices or []
+        if not choices:
+            continue
+        delta = getattr(choices[0], "delta", None) or {}
+        content = (delta.get("content") or "") if isinstance(delta, dict) else (getattr(delta, "content", None) or "")
+        if content:
+            yield content

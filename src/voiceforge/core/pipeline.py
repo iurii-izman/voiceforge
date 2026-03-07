@@ -56,21 +56,28 @@ def _step1_stt(
     sample_rate: int,
     model_size: str,
     language_hint: str | None = None,
+    cfg: Any = None,
 ) -> tuple[list[Any], str]:
-    """Step 1: STT only. Returns (segments, transcript). Block 10.4: use ModelManager if set. Language hint for Whisper."""
+    """Step 1: STT only. Returns (segments, transcript). stt_backend=openai uses Whisper API (#93)."""
     from voiceforge.core.model_manager import get_model_manager
     from voiceforge.stt.transcriber import Transcriber
 
     t0 = time.monotonic()
-    manager = get_model_manager()
-    if manager is not None:
-        transcriber = manager.get_transcriber()
+    stt_backend = getattr(cfg, "stt_backend", "local") if cfg else "local"
+    if stt_backend == "openai":
+        from voiceforge.stt.openai_whisper import OpenAIWhisperTranscriber
+
+        transcriber = OpenAIWhisperTranscriber()
     else:
-        transcriber = Transcriber(model_size=model_size)
+        manager = get_model_manager()
+        if manager is not None:
+            transcriber = manager.get_transcriber()
+        else:
+            transcriber = Transcriber(model_size=model_size)
     segments = transcriber.transcribe(audio, sample_rate=sample_rate, language=language_hint)
     transcript = " ".join(s.text for s in segments if s.text).strip() or t("pipeline.silence")
     duration_sec = time.monotonic() - t0
-    log.info("pipeline.step1_stt", segments=len(segments), duration_sec=round(duration_sec, 2))
+    log.info("pipeline.step1_stt", segments=len(segments), duration_sec=round(duration_sec, 2), backend=stt_backend)
     try:
         from voiceforge.core.observability import record_stt_duration
 
@@ -228,7 +235,7 @@ def _step1_or_error(audio: np.ndarray, effective_rate: int, cfg: Any) -> tuple[l
     language_hint = _get_language_hint(cfg)
     try:
         segments, transcript = _step1_stt(
-            audio, sample_rate=effective_rate, model_size=cfg.model_size, language_hint=language_hint
+            audio, sample_rate=effective_rate, model_size=cfg.model_size, language_hint=language_hint, cfg=cfg
         )
         return (segments, transcript)
     except ImportError:

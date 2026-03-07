@@ -359,8 +359,8 @@ function parseEnvelope(raw) {
 
 function errorMessage(envelope) {
   if (envelope?.error?.message) return envelope.error.message;
-  if (!envelope?.ok && envelope?.error) return JSON.stringify(envelope.error);
-  return t("error_generic");
+  if (envelope?.ok || !envelope?.error) return t("error_generic");
+  return JSON.stringify(envelope.error);
 }
 
 const INVOKE_DEFAULT_TIMEOUT_MS = 10000;
@@ -593,6 +593,24 @@ document.querySelectorAll(".nav-item").forEach((n) => {
   });
 });
 
+function openSessionFromWidget(sessionId) {
+  switchTab("sessions");
+  setTimeout(() => showSessionDetail(Number.parseInt(sessionId, 10)), 100);
+}
+
+function renderRecentSessionsList(sessions) {
+  if (!Array.isArray(sessions) || sessions.length === 0) return null;
+  let html = "<ul class=\"recent-sessions-ul\">";
+  sessions.forEach((s) => {
+    const id = s.id ?? s.session_id ?? "—";
+    const start = s.started_at ?? s.created_at ?? "";
+    const dur = s.duration_sec != null ? s.duration_sec + " с" : "";
+    html += `<li><button type="button" class="btn-link" data-session-id="${id}">Сессия ${id}</button> ${start} ${dur}</li>`;
+  });
+  html += "</ul>";
+  return html;
+}
+
 function loadRecentSessions() {
   const el = document.getElementById("recent-sessions-list");
   if (!el) return;
@@ -604,23 +622,12 @@ function loadRecentSessions() {
     .then((raw) => {
       const env = parseEnvelope(raw);
       const sessions = env?.data?.sessions ?? env?.sessions ?? [];
-      if (!Array.isArray(sessions) || sessions.length === 0) {
+      const html = renderRecentSessionsList(sessions);
+      if (html === null) {
         el.innerHTML = "<p>Нет сессий. Запустите анализ с блока выше.</p>";
         return;
       }
-      let html = "<ul class=\"recent-sessions-ul\">";
-      sessions.forEach((s) => {
-        const id = s.id ?? s.session_id ?? "—";
-        const start = s.started_at ?? s.created_at ?? "";
-        const dur = s.duration_sec != null ? s.duration_sec + " с" : "";
-        html += `<li><button type="button" class="btn-link" data-session-id="${id}">Сессия ${id}</button> ${start} ${dur}</li>`;
-      });
-      html += "</ul>";
       el.innerHTML = html;
-      function openSessionFromWidget(sessionId) {
-        switchTab("sessions");
-        setTimeout(() => showSessionDetail(Number.parseInt(sessionId, 10)), 100);
-      }
       el.querySelectorAll(".btn-link[data-session-id]").forEach((btn) => {
         btn.addEventListener("click", () => openSessionFromWidget(btn.dataset.sessionId));
       });

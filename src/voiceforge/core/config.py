@@ -69,6 +69,10 @@ class Settings(BaseSettings):
     )
 
     model_size: str = Field(default="small", description="faster-whisper model size")
+    stt_backend: Literal["local", "openai"] = Field(
+        default="local",
+        description="STT backend: local (faster-whisper) | openai (Whisper API). Key 'openai' in keyring for API (#93).",
+    )
     sample_rate: int = Field(default=16000, description="Audio sample rate Hz")
     default_llm: str = Field(
         default="anthropic/claude-haiku-4-5",

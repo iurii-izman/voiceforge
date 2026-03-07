@@ -426,6 +426,11 @@ class DaemonVoiceForgeInterface(ServiceInterface):
         """Signal: streaming STT sent a segment. is_final=false is partial, is_final=true is confirmed."""
         return text, speaker, timestamp_ms, is_final
 
+    @dbus_signal()
+    def StreamingAnalysisChunk(self, delta: DBusStr) -> DBusStr:
+        """Signal: LLM streaming analyze sent a text delta. Empty delta = stream ended (#91)."""
+        return delta
+
 
 async def run_dbus_service(iface: ServiceInterface | None = None) -> None:
     """Connect to session bus, export service, request name, wait for disconnect."""
