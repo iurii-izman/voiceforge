@@ -186,3 +186,7 @@ jobs:
         with:
           name: desktop-bundle-linux
           path: desktop/src-tauri/target/release/bundle/
+      - uses: actions/upload-artifact@v6
+        with:
+          name: desktop-appimage
+          path: desktop/src-tauri/target/release/bundle/appimage/

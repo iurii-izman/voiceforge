@@ -227,6 +227,8 @@
 - **91** — Release notes из CHANGELOG: в release.yml body_path: CHANGELOG.md, generate_release_notes: false.
 - **94** — Индекс по сценариям: секция «По сценариям» в DOCS-INDEX (Начало работы, Сборка, Конфиг, Разработка, Релиз, Безопасность, Фичи).
 - **95** — Job desktop-audit в CI: npm audit, cargo audit для desktop/.
+- **96** — Шифрование БД (опция): подраздел в security-and-dependencies.md (текущее состояние, возможные направления: SQLCipher, зашифрованный каталог).
+- **99** — AppImage в CI: артефакт desktop-appimage (bundle/appimage/) в job desktop-build.
 
 ---
 

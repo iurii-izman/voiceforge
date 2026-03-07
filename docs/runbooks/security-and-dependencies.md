@@ -49,6 +49,14 @@
 
 ---
 
+## 5. Шифрование локальных БД (опция, блок 96)
+
+Локальные SQLite-базы (transcripts.db, metrics.db, RAG) **не шифруются**. Данные хранятся в открытом виде в `XDG_DATA_HOME/voiceforge/` (или заданных путях).
+
+**Возможные направления на будущее:** SQLCipher, шифрование на уровне файловой системы (LUKS, ecryptfs), или опция «хранить в зашифрованном каталоге». Реализация не входит в текущий roadmap; при появлении требований — см. [roadmap-100-blocks.md](../plans/roadmap-100-blocks.md) блок 96.
+
+---
+
 ## Ссылки
 
 - Ключи keyring: [keyring-keys-reference.md](keyring-keys-reference.md)
