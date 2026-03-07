@@ -50,4 +50,12 @@ test.describe("Desktop UI navigation", () => {
     await expect(langSelect.locator("option[value=ru]")).toHaveCount(1);
     await expect(langSelect.locator("option[value=en]")).toHaveCount(1);
   });
+
+  test("costs tab shows period and export buttons", async ({ page }) => {
+    await page.getByRole("navigation").locator("[data-tab='costs']").click();
+    await expect(page.locator("#tab-costs.active")).toBeVisible();
+    await expect(page.locator("#costs-7d")).toBeVisible();
+    await expect(page.locator("#costs-30d")).toBeVisible();
+    await expect(page.locator("#costs-export-btn")).toBeVisible();
+  });
 });

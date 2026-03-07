@@ -68,6 +68,10 @@ const I18N = {
     daemon_retry_btn: "Повторить подключение",
     compact_daemon_off: "Демон выкл",
     compact_daemon_ok: "Демон ок",
+    costs_7d: "7 дней",
+    costs_30d: "30 дней",
+    costs_export_btn: "Экспорт отчёта",
+    sessions_export_btn: "Экспорт списка",
   },
   en: {
     nav: { home: "Home", sessions: "Sessions", costs: "Costs", settings: "Settings" },
@@ -106,6 +110,10 @@ const I18N = {
     daemon_retry_btn: "Retry connection",
     compact_daemon_off: "Daemon off",
     compact_daemon_ok: "Daemon ok",
+    costs_7d: "7 days",
+    costs_30d: "30 days",
+    costs_export_btn: "Export report",
+    sessions_export_btn: "Export list",
   },
 };
 
