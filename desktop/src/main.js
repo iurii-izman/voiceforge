@@ -395,7 +395,9 @@ function playBeep() {
     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.1);
-  } catch (_) { /* ignore */ }
+  } catch (e) {
+    console.debug("playBeep", e);
+  }
 }
 
 function applyListenState(isListening) {
@@ -756,7 +758,7 @@ document.addEventListener("keydown", (e) => {
   }
   if (e.key === "Escape") {
     const detailBlock = document.getElementById("session-detail");
-    if (detailBlock?.style.display === "block") {
+    if (detailBlock?.open) {
       e.preventDefault();
       hideSessionDetail();
     }
@@ -993,7 +995,7 @@ function applySessionsFilter() {
 function loadSessions() {
   const container = document.getElementById("sessions-list");
   const detailBlock = document.getElementById("session-detail");
-  detailBlock.style.display = "none";
+  if (detailBlock?.close) detailBlock.close();
   if (!daemonOk) {
     container.innerHTML = emptyStateHtml("⚠️", "Демон не запущен", "Выполните: voiceforge daemon", DOCS_QUICKSTART);
     sessionsCache = [];
@@ -1109,7 +1111,7 @@ let lastSessionDetail = null;
 
 function hideSessionDetail() {
   const detailBlock = document.getElementById("session-detail");
-  detailBlock.style.display = "none";
+  if (detailBlock?.close) detailBlock.close();
 }
 
 function transcriptToText(detail) {
@@ -1167,7 +1169,7 @@ async function copyActionItemsToClipboard() {
 
 function focusTrapDetail(e) {
   const detailBlock = document.getElementById("session-detail");
-  if (detailBlock.style.display !== "block") return;
+  if (!detailBlock?.open) return;
   const focusable = detailBlock.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
   const first = focusable[0];
   const last = focusable[focusable.length - 1];
@@ -1192,7 +1194,7 @@ function showSessionDetail(id, opts) {
   const bodyEl = document.getElementById("session-detail-body");
   const idEl = document.getElementById("detail-id");
   idEl.textContent = id;
-  detailBlock.style.display = "block";
+  if (detailBlock.showModal) detailBlock.showModal();
   bodyEl.innerHTML = "<p class=\"muted\">" + t("loading") + "</p>";
   document.getElementById("export-md").onclick = () => exportSession(id, "md");
   document.getElementById("export-pdf").onclick = () => exportSession(id, "pdf");
@@ -1492,7 +1494,9 @@ function getSessionTags() {
       const o = JSON.parse(raw);
       if (o && typeof o === "object") return o;
     }
-  } catch (_) { /* ignore */ }
+  } catch (e) {
+    console.debug("getSessionTags", e);
+  }
   return {};
 }
 
@@ -1525,7 +1529,9 @@ function getFavorites() {
       const arr = JSON.parse(raw);
       return Array.isArray(arr) ? new Set(arr.map(Number)) : new Set();
     }
-  } catch (_) { /* ignore */ }
+  } catch (e) {
+    console.debug("getFavorites", e);
+  }
   return new Set();
 }
 
@@ -1604,8 +1610,8 @@ function saveWindowState() {
       const size = await win.innerSize();
       const key = document.getElementById("app-root")?.classList.contains("compact-mode") ? COMPACT_WINDOW_STATE_KEY : WINDOW_STATE_KEY;
       localStorage.setItem(key, JSON.stringify({ x: pos.x, y: pos.y, width: size.width, height: size.height }));
-    } catch (_e) {
-      // ignore
+    } catch (e) {
+      console.debug("saveWindowState", e);
     }
   }, 300);
 }
@@ -1659,10 +1665,10 @@ function emptyStateHtml(icon, title, hint, linkHref) {
 function showOnboarding() {
   const overlay = document.getElementById("onboarding-overlay");
   if (localStorage.getItem(ONBOARDING_DISMISSED_KEY) === "true" || !overlay) return;
-  overlay.style.display = "flex";
+  if (overlay.showModal) overlay.showModal();
   document.getElementById("onboarding-ok").onclick = () => {
     if (document.getElementById("onboarding-never")?.checked) localStorage.setItem(ONBOARDING_DISMISSED_KEY, "true");
-    overlay.style.display = "none";
+    if (overlay.close) overlay.close();
   };
 }
 
@@ -1934,7 +1940,9 @@ async function applyCompactMode(compact) {
       const pos = await win.innerPosition();
       const size = await win.innerSize();
       localStorage.setItem(WINDOW_STATE_KEY, JSON.stringify({ x: pos.x, y: pos.y, width: size.width, height: size.height }));
-    } catch (_) { /* ignore */ }
+    } catch (e) {
+      console.debug("applyCompactMode save state", e);
+    }
     appRoot.classList.add("compact-mode");
     compactBar.style.display = "flex";
     fullContent.style.display = "none";
@@ -1951,7 +1959,9 @@ async function applyCompactMode(compact) {
           if (typeof s.height === "number") h = s.height;
           if (typeof s.x === "number") x = s.x;
           if (typeof s.y === "number") y = s.y;
-        } catch (_) { /* ignore */ }
+        } catch (e) {
+          console.debug("applyCompactMode parse compact state", e);
+        }
       }
       await win.setSize(new LogicalSize(w, h));
       if (x != null && y != null) await win.setPosition(new LogicalPosition(x, y));
@@ -2006,7 +2016,9 @@ function getDashboardOrder() {
       const arr = JSON.parse(raw);
       if (Array.isArray(arr) && arr.length) return arr;
     }
-  } catch (_) { /* ignore */ }
+  } catch (e) {
+    console.debug("getDashboardOrder", e);
+  }
   return DASHBOARD_WIDGET_IDS.slice();
 }
 
@@ -2014,7 +2026,9 @@ function getDashboardCollapsed() {
   try {
     const raw = localStorage.getItem(DASHBOARD_COLLAPSED_KEY);
     if (raw) return JSON.parse(raw);
-  } catch (_) { /* ignore */ }
+  } catch (e) {
+    console.debug("getDashboardCollapsed", e);
+  }
   return {};
 }
 

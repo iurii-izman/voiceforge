@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-07 (set_tray_theme с фронта при смене темы; сборка desktop: npm run tauri build, CI=false при CI=1)
+**Обновлено:** 2026-03-07 (Sonar S6819/S2486: dialog, nav buttons, handle exceptions)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** (1) Вызов `set_tray_theme(isDark)` из фронта при смене темы: в `applyTheme()` вычисляется эффективная тема (getEffectiveIsDark: auto → prefers-color-scheme), вызывается `invoke("set_tray_theme", { isDark })`; при выборе «Как в системе» подписываемся на `matchMedia("(prefers-color-scheme: dark)").addEventListener("change")` и переприменяем тему. (2) Сборка desktop: в release.yml и скриптах заменён `cargo tauri build` на `npm run tauri build`; в desktop-build-deps.md добавлена подсказка при ошибке `--ci`: локально запускать `CI=false npm run tauri build`. (3) В desktop/package.json добавлен скрипт `tauri:build`.
+**Сделано в сессии:** Sonar S6819 и S2486 в desktop: (1) Онбординг и модалка деталей сессии переведены на `<dialog>` (showModal/close), навигация — на `<button type="button">` вместо div с role="button". (2) Графики затрат: canvas обёрнуты в `<figure aria-label="…">` вместо role="img" на canvas. (3) S2486: во всех пустых catch добавлена обработка через console.debug("context", e). Стили: ::backdrop для dialog, сброс стилей кнопок в .sidebar .nav-item.
 
-**Следующий шаг:** По желанию: Sonar (S6819, S2486 и др.) или следующий блок из #88–95 (история буфера, слайд-панель настроек, виджет «Последний анализ» и т.д.). Либо продолжение по roadmap/audit.
+**Следующий шаг:** Следующий блок из #88–95 (история буфера #88, слайд-панель настроек #89, виджет «Последний анализ» #92) или оставшиеся замечания Sonar (S3776, S7764, S2871 и др.). Либо продолжение по roadmap/audit.
 
 ---
 
@@ -30,7 +30,7 @@
 - **PR #81, #79:** закрыты с комментарием «Applied in main» (2026-03-07).
 - **Открытые issues:** #65 (CVE — ждём upstream), #50 (macOS/WSL2 — p2/backlog).
 
-**Sonar:** Исправлены S1192, S7761, S7764 в desktop. Остаток: S3776, S6819, S2486 и др. **Mypy:** в scope verify_pr — 0 ошибок. **verify_pr:** Ruff + Mypy OK; bandit — зелёный (nosec B310/B608). **Gitleaks:** allowlist .hypothesis/ + .gitignore; шаг [8/8] в CI проходит (workflow Gitleaks зелёный после 270b7e2/42f904c).
+**Sonar:** Исправлены S1192, S7761, S7764, S6819, S2486 в desktop. Остаток: S3776, S7764 (globalThis), S2871, S3358 и др. **Mypy:** в scope verify_pr — 0 ошибок. **verify_pr:** Ruff + Mypy OK; bandit — зелёный (nosec B310/B608). **Gitleaks:** allowlist .hypothesis/ + .gitignore; шаг [8/8] в CI проходит (workflow Gitleaks зелёный после 270b7e2/42f904c).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 

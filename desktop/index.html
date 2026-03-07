@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/src/styles.css" />
 </head>
 <body>
-  <div id="onboarding-overlay" class="onboarding-overlay" role="dialog" aria-label="Краткий обзор" aria-modal="true" style="display:none">
+  <dialog id="onboarding-overlay" class="onboarding-overlay" aria-label="Краткий обзор">
     <div class="onboarding-card">
       <h2 data-i18n="onboarding_title">Добро пожаловать в VoiceForge</h2>
       <ol class="onboarding-steps">
@@ -20,13 +20,13 @@
         <label class="onboarding-skip"><input type="checkbox" id="onboarding-never" /> <span data-i18n="onboarding_never">Не показывать снова</span></label>
       </div>
     </div>
-  </div>
+  </dialog>
   <div class="app" id="app-root">
     <nav class="sidebar" id="main-sidebar" role="navigation" aria-label="Главное меню">
-      <div class="nav-item active" data-tab="home" data-i18n="nav.home" role="button" tabindex="0" aria-current="true"><span class="nav-mnemonic">Г</span>лавная</div>
-      <div class="nav-item" data-tab="sessions" data-i18n="nav.sessions" role="button" tabindex="0" aria-current="false"><span class="nav-mnemonic">С</span>ессии</div>
-      <div class="nav-item" data-tab="costs" data-i18n="nav.costs" role="button" tabindex="0" aria-current="false"><span class="nav-mnemonic">З</span>атраты</div>
-      <div class="nav-item" data-tab="settings" data-i18n="nav.settings" role="button" tabindex="0" aria-current="false"><span class="nav-mnemonic">Н</span>астройки</div>
+      <button type="button" class="nav-item active" data-tab="home" data-i18n="nav.home" aria-current="true"><span class="nav-mnemonic">Г</span>лавная</button>
+      <button type="button" class="nav-item" data-tab="sessions" data-i18n="nav.sessions" aria-current="false"><span class="nav-mnemonic">С</span>ессии</button>
+      <button type="button" class="nav-item" data-tab="costs" data-i18n="nav.costs" aria-current="false"><span class="nav-mnemonic">З</span>атраты</button>
+      <button type="button" class="nav-item" data-tab="settings" data-i18n="nav.settings" aria-current="false"><span class="nav-mnemonic">Н</span>астройки</button>
     </nav>
     <main class="content" id="main-content" role="main" aria-label="Основной контент">
       <div class="compact-bar" id="compact-bar" style="display:none" aria-label="Компактная панель">
@@ -193,7 +193,7 @@
             <button type="button" class="context-menu-item" data-action="export-md" data-i18n="ctx_export_md">Экспорт Markdown</button>
             <button type="button" class="context-menu-item" data-action="export-pdf" data-i18n="ctx_export_pdf">Экспорт PDF</button>
           </div>
-          <div id="session-detail" class="session-detail-modal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="session-detail-title" tabindex="-1">
+          <dialog id="session-detail" class="session-detail-modal" aria-labelledby="session-detail-title">
             <div class="session-detail-header">
               <h3 id="session-detail-title"><span data-i18n="detail_title">Детали сессии</span> <span id="detail-id"></span></h3>
               <button type="button" class="btn small" id="session-detail-close" aria-label="Закрыть">×</button>
@@ -208,7 +208,7 @@
             <button type="button" class="btn small" id="session-detail-print" aria-label="Печать" data-i18n="detail_print">Печать</button>
             <div id="session-detail-tags" class="detail-tags-row" style="display:none"><span data-i18n="tags_label">Теги:</span> <input type="text" id="session-detail-tags-input" placeholder="тег1, тег2" aria-label="Теги сессии" data-i18n-placeholder="tags_placeholder" /></div>
             <div id="session-detail-body"></div>
-          </div>
+          </dialog>
         </div>
       </section>
 
@@ -219,8 +219,8 @@
           <button type="button" class="btn small" id="costs-30d" data-i18n="costs_30d">30 дней</button>
           <button type="button" class="btn small" id="costs-export-btn" data-i18n="costs_export_btn">Экспорт отчёта</button>
           <div class="costs-charts" aria-label="Графики затрат">
-            <div class="costs-chart-wrap"><canvas id="costs-chart-days" role="img" aria-label="Стоимость по дням"></canvas></div>
-            <div class="costs-chart-wrap"><canvas id="costs-chart-models" role="img" aria-label="Стоимость по моделям"></canvas></div>
+            <figure class="costs-chart-wrap" aria-label="Стоимость по дням"><canvas id="costs-chart-days"></canvas></figure>
+            <figure class="costs-chart-wrap" aria-label="Стоимость по моделям"><canvas id="costs-chart-models"></canvas></figure>
           </div>
           <div id="analytics-content"></div>
         </div>
