@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-07 (кнопка «Добавить в календарь» в UI десктопа, блок 79)
+**Обновлено:** 2026-03-07 (подтверждение блоков 68/#91, 71/#93; обновлён backlog)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Кнопка «Добавить в календарь» в модалке деталей сессии десктопа: вызов `create_event_from_session`, i18n (ru/en), уведомление при успехе, alert при ошибке.
+**Сделано в сессии:** Подтверждено, что блоки 68 (#91 streaming LLM) и 71 (#93 Whisper API) уже реализованы в коде. В backlog-and-actions отмечены как реализованные; обновлены заметки по реализации.
 
-**Следующий шаг:** Следующая задача по [backlog-and-actions.md](../plans/backlog-and-actions.md) / [roadmap-100-blocks.md](../plans/roadmap-100-blocks.md): блок 68 (streaming LLM в UI, #91) или другие отложенные блоки (66 prompt caching #90, 71 Whisper #93). Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
+**Следующий шаг:** Следующая задача по [backlog-and-actions.md](../plans/backlog-and-actions.md): оставшиеся отложенные блоки B (44 история буфера, 46 слайд-панель настроек, 49 виджет «Последний анализ», 66 доработка prompt caching) или блоки 69/72 (retry LLM, оценка длительности analyze). Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
 
 ---
 

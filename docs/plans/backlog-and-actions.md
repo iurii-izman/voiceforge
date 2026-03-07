@@ -29,18 +29,18 @@
 | 44 | История буфера обмена | Локальная история копирований в UI; объём и UX — за вами. |
 | 46 | Слайд-панель настроек | Опция «настройки в выдвижной панели» — дизайн и приоритет. |
 | 49 | Виджет «Последний анализ» | Карточка с summary на главной; нужен контракт API/данных — ваше решение по формату. |
-| 66 | Prompt caching | Зависит от API Claude/провайдеров и бэкенда; решить, подключать ли и когда. |
-| 68 | Streaming LLM в UI | Пошаговый вывод; бэкенд + фронт; приоритет и объём — за вами. |
-| 71 | Whisper API (OpenAI) | Опция STT через OpenAI; решить, нужна ли и в каком виде. |
+| 66 | Prompt caching | В router.py уже есть cache_control (ephemeral) для Claude; остальное — по документации API. |
+| ~~68~~ | ~~Streaming LLM в UI~~ | Реализовано (#91): stream_completion, analyze_meeting_stream, D-Bus StreamingAnalysisChunk, UI #analyze-streaming-output. |
+| ~~71~~ | ~~Whisper API (OpenAI)~~ | Реализовано (#93): stt_backend local\|openai, OpenAIWhisperTranscriber, pipeline и демон по конфигу. |
 | ~~75~~ | ~~Поиск по RAG из UI~~ | Реализовано: search_rag в демоне, D-Bus SearchRag, поле и результаты в UI (#94). |
 | 79 | Создание события из сессии | Реализовано (#95): create_event в calendar, CLI calendar create-from-session, демон + D-Bus CreateEventFromSession, Tauri create_event_from_session. |
 
 Под-issues созданы и добавлены на доску: #87 (35), #88 (44), #89 (46), #92 (49), #90 (66), #91 (68), #93 (71), #94 (75), #95 (79). Приоритет и порядок реализации — на усмотрение maintainer; агент может реализовывать по расстановке.
 
-**Заметки по реализации (2026-03-07):**
+**Заметки по реализации (2026-03-07, обновлено 2026-03-07):**
 - **#90 (66 prompt caching):** В `router.py` уже есть cache_control для Claude в `analyze_meeting`, `analyze_live_summary`, `_analysis_prompt`. Дополнительно добавлен cache для `update_action_item_statuses` при Claude. Остальное (LiteLLM/провайдеры) — по документации API.
-- **#91 (68 streaming LLM в UI):** Нужны: (1) бэкенд — streaming completion (instructor/litellm stream) в демоне или отдельный HTTP SSE; (2) D-Bus или HTTP endpoint для стрима; (3) UI — подписка на стрим и пошаговый вывод summary/action items в деталях сессии или модалке анализа.
-- **#93 (71 Whisper API):** Опция STT через OpenAI Whisper API. Нужны: конфиг (например `stt_backend: local | openai`), ключ `openai` в keyring уже есть; в `stt/` — фасад или отдельный класс для вызова API (файл → multipart/form-data → ответ с segments); pipeline выбирает transcriber по конфигу.
+- **#91 (68 streaming LLM в UI):** Реализовано. Бэкенд: `stream_completion()` в router, `analyze_meeting_stream(stream_callback)`; демон передаёт delta в D-Bus `StreamingAnalysisChunk`; UI подписан на `streaming-analysis-chunk`, выводит в `#analyze-streaming-output`.
+- **#93 (71 Whisper API):** Реализовано. Конфиг `stt_backend: local | openai`, ключ `openai` в keyring; `stt/openai_whisper.py` — `OpenAIWhisperTranscriber`; `get_transcriber_for_config` и `pipeline._step1_stt` выбирают по конфигу.
 
 ---
 
