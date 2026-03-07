@@ -1067,10 +1067,155 @@ def status(
         typer.echo(get_status_text())
 
 
+@app.command("sessions-to-ical")
+def sessions_to_ical(
+    output: Path = typer.Option(..., "--output", "-o", path_type=Path, help="Output .ics file"),
+    limit: int = typer.Option(50, "--limit", "-n", help="Max sessions to include (newest first)"),
+    from_date: str | None = typer.Option(None, "--from", help="From date YYYY-MM-DD (inclusive)"),
+    to_date: str | None = typer.Option(None, "--to", help="To date YYYY-MM-DD (inclusive)"),
+) -> None:
+    """Export sessions list to iCalendar .ics (block 83). DTSTART/DTEND from started_at and duration."""
+    from datetime import date as date_type, timedelta
+    from datetime import datetime as dt_class, timezone
+
+    from voiceforge.core.transcript_log import TranscriptLog
+
+    log_db = TranscriptLog()
+    try:
+        if from_date is not None and to_date is not None:
+            try:
+                fd = date_type.fromisoformat(from_date)
+                td = date_type.fromisoformat(to_date)
+            except ValueError:
+                typer.echo(t("history.date_invalid", err=from_date + " / " + to_date), err=True)
+                raise SystemExit(1)
+            sessions = log_db.get_sessions_in_range(fd, td)
+        else:
+            sessions = log_db.get_sessions(last_n=limit, offset=0)
+    finally:
+        log_db.close()
+
+    def _iso_to_ical_utc(iso_str: str) -> str:
+        """Convert ISO datetime string to iCal format 20250307T100000Z."""
+        if not iso_str:
+            return ""
+        try:
+            s = iso_str.strip().replace("Z", "+00:00")
+            dt = dt_class.fromisoformat(s)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            else:
+                dt = dt.astimezone(timezone.utc)
+            return dt.strftime("%Y%m%dT%H%M%SZ")
+        except (ValueError, TypeError):
+            return ""
+
+    lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//VoiceForge//sessions//EN"]
+    for s in sessions:
+        start_ical = _iso_to_ical_utc(getattr(s, "started_at", "") or "")
+        if not start_ical:
+            continue
+        dur_sec = float(getattr(s, "duration_sec", 0) or 0)
+        end_dt = dt_class.fromisoformat((getattr(s, "started_at", "") or "").replace("Z", "+00:00"))
+        if end_dt.tzinfo is None:
+            end_dt = end_dt.replace(tzinfo=timezone.utc)
+        end_dt = end_dt + timedelta(seconds=dur_sec)
+        end_ical = end_dt.strftime("%Y%m%dT%H%M%SZ")
+        sid = getattr(s, "id", 0) or 0
+        summary = f"Session {sid}"
+        desc = f"VoiceForge session {sid}"
+        lines.append("BEGIN:VEVENT")
+        lines.append(f"UID:session-{sid}@voiceforge")
+        lines.append(f"DTSTAMP:{start_ical}")
+        lines.append(f"DTSTART:{start_ical}")
+        lines.append(f"DTEND:{end_ical}")
+        lines.append(f"SUMMARY:{summary}")
+        lines.append(f"DESCRIPTION:{desc}")
+        lines.append("END:VEVENT")
+    lines.append("END:VCALENDAR")
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text("\r\n".join(lines), encoding="utf-8")
+    typer.echo(f"Exported {len([l for l in lines if l == 'BEGIN:VEVENT'])} sessions to {output}")
+
+
+@app.command("weekly-report")
+def weekly_report(
+    output: Path | None = typer.Option(None, "--output", "-o", path_type=Path, help="Write report to file (default: stdout)"),
+    days: int = typer.Option(7, "--days", help="Report period in days (default 7)"),
+    format: str = typer.Option("text", "--format", help="Output: text | json | md"),
+) -> None:
+    """Generate weekly report: sessions count, cost, action items (block 82)."""
+    from datetime import date, timedelta
+
+    from voiceforge.core.metrics import get_stats_range
+    from voiceforge.core.transcript_log import TranscriptLog
+
+    to_date = date.today()
+    from_date = to_date - timedelta(days=days)
+    log_db = TranscriptLog()
+    try:
+        sessions = log_db.get_sessions_in_range(from_date, to_date)
+        session_ids = {s.id for s in sessions}
+        items = log_db.get_action_items(limit=500)
+        week_items = [r for r in items if r.session_id in session_ids]
+    finally:
+        log_db.close()
+    try:
+        stats = get_stats_range(from_date, to_date)
+        total_cost = stats.get("total_cost_usd") or 0
+    except Exception:
+        total_cost = 0.0
+
+    if format == "json":
+        payload = {
+            "from_date": from_date.isoformat(),
+            "to_date": to_date.isoformat(),
+            "sessions_count": len(sessions),
+            "total_cost_usd": total_cost,
+            "action_items_count": len(week_items),
+            "action_items": [
+                {"session_id": r.session_id, "description": r.description, "status": r.status}
+                for r in week_items
+            ],
+        }
+        out = json.dumps(payload, ensure_ascii=False, indent=2)
+    elif format == "md":
+        lines = [
+            f"# Отчёт за {days} дн. ({from_date} — {to_date})",
+            "",
+            f"- **Сессий:** {len(sessions)}",
+            f"- **Затраты (LLM):** ${total_cost:.2f}",
+            f"- **Action items:** {len(week_items)}",
+            "",
+            "## Action items",
+            "",
+        ]
+        for r in week_items:
+            lines.append(f"- [{r.session_id}] {r.status}: {r.description}")
+        out = "\n".join(lines)
+    else:
+        lines = [
+            f"Period: {from_date} — {to_date} ({days} days)",
+            f"Sessions: {len(sessions)}",
+            f"Cost (LLM): ${total_cost:.2f}",
+            f"Action items: {len(week_items)}",
+            "",
+        ]
+        for r in week_items:
+            lines.append(f"  [{r.session_id}] {r.status}: {r.description}")
+        out = "\n".join(lines)
+
+    if output is not None:
+        output.write_text(out, encoding="utf-8")
+        typer.echo(f"Report written to {output}")
+    else:
+        typer.echo(out)
+
+
 @app.command("export")
 def export_session(
     session_id: int = typer.Option(..., "--id", help="ID сессии для экспорта"),
-    format: str = typer.Option("md", "--format", help="Формат: md | pdf | notion | otter"),
+    format: str = typer.Option("md", "--format", help="Формат: md | pdf | docx | notion | otter"),
     output: Path = typer.Option(
         None,
         "--output",
@@ -1079,10 +1224,10 @@ def export_session(
         help="Файл вывода (по умолчанию: session_<id>.<format>)",
     ),
 ) -> None:
-    """Экспорт сессии в Markdown, PDF, Notion или Otter (block 39)."""
+    """Экспорт сессии в Markdown, PDF, DOCX, Notion или Otter (blocks 39, 81)."""
     from voiceforge.core.transcript_log import TranscriptLog
 
-    if format not in ("md", "pdf", "notion", "otter"):
+    if format not in ("md", "pdf", "docx", "notion", "otter"):
         typer.echo(t("export.format_md_or_pdf"), err=True)
         raise SystemExit(1)
     log_db = TranscriptLog()
@@ -1103,25 +1248,28 @@ def export_session(
     finally:
         log_db.close()
 
-    suffix = "pdf" if format == "pdf" else "txt" if format == "otter" else "md"
+    suffix = "pdf" if format == "pdf" else "docx" if format == "docx" else "txt" if format == "otter" else "md"
     out_path = output or Path(f"session_{session_id}.{suffix}")
     if format in ("md", "notion", "otter"):
         out_path.write_text(md_text, encoding="utf-8")
         typer.echo(t("export.saved", path=str(out_path)))
         return
-    # PDF: write temp md, run pandoc
+    # PDF or DOCX: write temp md, run pandoc
     tmp_md = out_path.with_suffix(".md")
     tmp_md.write_text(md_text, encoding="utf-8")
+    pandoc_args = ["pandoc", str(tmp_md), "-o", str(out_path)]
+    if format == "pdf":
+        pandoc_args.append("--pdf-engine=pdflatex")
     try:
         subprocess.run(  # nosec B603 B607 -- pandoc from PATH, paths from our export
-            ["pandoc", str(tmp_md), "-o", str(out_path), "--pdf-engine=pdflatex"],
+            pandoc_args,
             check=True,
             capture_output=True,
         )
         tmp_md.unlink(missing_ok=True)
         typer.echo(t("export.saved", path=str(out_path)))
     except FileNotFoundError:
-        typer.echo(t("export.pdf_install"), err=True)
+        typer.echo(t("export.pdf_install") if format == "pdf" else "pandoc not found. Install: pandoc", err=True)
         typer.echo(t("export.md_fallback", path=str(tmp_md)))
         raise SystemExit(1)
     except subprocess.CalledProcessError as e:

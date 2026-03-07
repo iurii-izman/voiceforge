@@ -983,6 +983,7 @@ function showSessionDetail(id, opts) {
   bodyEl.innerHTML = "<p class=\"muted\">Загрузка…</p>";
   document.getElementById("export-md").onclick = () => exportSession(id, "md");
   document.getElementById("export-pdf").onclick = () => exportSession(id, "pdf");
+  document.getElementById("export-docx").onclick = () => exportSession(id, "docx");
   document.getElementById("export-notion").onclick = () => exportSession(id, "notion");
   document.getElementById("export-otter").onclick = () => exportSession(id, "otter");
   document.getElementById("copy-transcript").onclick = copyTranscriptToClipboard;

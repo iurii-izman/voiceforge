@@ -15,7 +15,7 @@ import threading
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FuturesTimeoutError
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -324,6 +324,8 @@ class VoiceForgeDaemon:
                 "pii_mode": pii,
                 "privacy_mode": pii,
                 "language": getattr(c, "language", "auto"),
+                "calendar_autostart_enabled": getattr(c, "calendar_autostart_enabled", False),
+                "calendar_autostart_minutes": getattr(c, "calendar_autostart_minutes", 5),
             },
             ensure_ascii=False,
         )
@@ -664,6 +666,46 @@ async def _cancel_purge_then_service_reraise(
         raise
 
 
+def _calendar_autostart_loop(daemon: "VoiceForgeDaemon") -> None:
+    """Block 78: every 60s, if an event starts within N minutes and not listening, start listen."""
+    if not getattr(daemon._cfg, "calendar_autostart_enabled", False):
+        return
+    minutes_ahead = max(1, getattr(daemon._cfg, "calendar_autostart_minutes", 5))
+    interval_sec = 60
+    while True:
+        try:
+            import time
+            time.sleep(interval_sec)
+        except Exception:
+            break
+        if not daemon.is_listening():
+            try:
+                from voiceforge.calendar import get_upcoming_events
+                events, err = get_upcoming_events(hours_ahead=1)
+                if err or not events:
+                    continue
+                now = datetime.now(timezone.utc)
+                window_end = now + timedelta(minutes=minutes_ahead)
+                for ev in events:
+                    start_iso = ev.get("start_iso") or ""
+                    if not start_iso:
+                        continue
+                    try:
+                        if start_iso.endswith("Z"):
+                            start_iso = start_iso[:-1] + "+00:00"
+                        event_start = datetime.fromisoformat(start_iso)
+                        if event_start.tzinfo is None:
+                            event_start = event_start.replace(tzinfo=timezone.utc)
+                        if now <= event_start <= window_end:
+                            log.info("calendar_autostart.starting", summary=ev.get("summary", ""), start=start_iso)
+                            daemon.listen_start()
+                            break
+                    except (ValueError, TypeError):
+                        continue
+            except Exception as e:
+                log.debug("calendar_autostart.check_failed", error=str(e))
+
+
 def _run_daemon_loop(
     iface: DaemonVoiceForgeInterface,
     daemon: VoiceForgeDaemon,
@@ -729,6 +771,11 @@ def run_daemon() -> None:
     daemon = VoiceForgeDaemon(iface)
     _retention_purge_at_startup(daemon)
     _wire_daemon_iface(iface, daemon)
+
+    if getattr(daemon._cfg, "calendar_autostart_enabled", False):
+        _calendar_thread = threading.Thread(target=_calendar_autostart_loop, args=(daemon,), daemon=True)
+        _calendar_thread.start()
+        log.info("daemon.calendar_autostart_enabled", minutes=getattr(daemon._cfg, "calendar_autostart_minutes", 5))
 
     log.info("daemon.starting", pid=os.getpid(), pid_file=str(pid_path))
     stop_event = asyncio.Event()

@@ -23,6 +23,8 @@ def test_daemon_get_settings_returns_json_with_expected_keys(tmp_path, monkeypat
         mock_cfg.streaming_stt = False
         mock_cfg.pii_mode = "ON"
         mock_cfg.language = "auto"
+        mock_cfg.calendar_autostart_enabled = False
+        mock_cfg.calendar_autostart_minutes = 5
         mock_settings.return_value = mock_cfg
 
         from voiceforge.core.daemon import VoiceForgeDaemon

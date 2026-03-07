@@ -149,6 +149,16 @@ class Settings(BaseSettings):
         default=False,
         description="D3 (#48): inject next CalDAV event into analyze context (keyring: caldav_*).",
     )
+    calendar_autostart_enabled: bool = Field(
+        default=False,
+        description="Block 78: auto-start listen N minutes before next calendar event (requires calendar_autostart_minutes).",
+    )
+    calendar_autostart_minutes: int = Field(
+        default=5,
+        ge=1,
+        le=60,
+        description="Block 78: start listen this many minutes before event start when calendar_autostart_enabled.",
+    )
 
     @field_validator("model_size")
     @classmethod

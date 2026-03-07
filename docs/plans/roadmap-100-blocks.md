@@ -211,7 +211,12 @@
 - **74** — RAG exclude_patterns: настройка rag_exclude_patterns в config, пропуск путей в _index_directory по fnmatch.
 - **76** — Статистика RAG в status/doctor: _get_rag_stats(), rag.indexed_sources_count/chunks_count в get_status_data(), doctor.rag_stats.
 - **77** — Экспорт RAG-индекса: команда `voiceforge rag-export --output <file>` (метаданные источников и чанков, опция --content).
+- **78** — Автостарт записи по календарю: calendar_autostart_enabled, calendar_autostart_minutes в config; поток _calendar_autostart_loop в демоне (get_upcoming_events, старт listen за N мин до события).
+- **79** — (не реализовано в этой сессии)
 - **80** — Заглушка видеовстреч: [video-meetings-integration.md](video-meetings-integration.md), запись в DOCS-INDEX.
+- **81** — Экспорт в DOCX: export --format docx (pandoc), кнопка DOCX в десктопе, Tauri export_session(docx).
+- **82** — Еженедельный отчёт: команда weekly-report (--days, --output, --format text|json|md), сессии + затраты + action items за период.
+- **83** — Экспорт списка сессий в iCal: команда sessions-to-ical --output file.ics (--limit, --from/--to).
 - **92** — Runbook [desktop-updater.md](../runbooks/desktop-updater.md).
 - **93** — Секция «Ключевые решения» в docs/architecture/README.md со ссылками на ADR.
 - **94** — DOCS-INDEX обновлён (roadmap, desktop-updater, MANUAL-AND-CANNOT-DO).

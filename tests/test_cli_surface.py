@@ -37,6 +37,8 @@ def test_help_exposes_only_core_commands() -> None:
         "index",
         "watch",
         "rag-export",
+        "sessions-to-ical",
+        "weekly-report",
         "daemon",
         "install-service",
         "uninstall-service",

@@ -192,7 +192,7 @@ table th { color: var(--muted); font-weight: 600; font-size: 0.875rem; }
 /* Block 40: print-friendly — only session detail content */
 @media print {
   .sidebar, .compact-bar, .nav-mnemonic, .btn, .context-menu,
-  #session-detail-close, #export-md, #export-pdf, #export-notion, #export-otter, #copy-transcript, #copy-action-items, #session-detail-print,
+  #session-detail-close, #export-md, #export-pdf, #export-docx, #export-notion, #export-otter, #copy-transcript, #copy-action-items, #session-detail-print,
   .widget-toggle, .widget-actions, .widget-up, .widget-down { display: none !important; }
   .session-detail-modal { box-shadow: none; border: 1px solid #333; }
   #session-detail { display: block !important; position: static; overflow: visible; }

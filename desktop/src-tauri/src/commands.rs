@@ -174,8 +174,8 @@ pub async fn get_upcoming_calendar_events() -> Result<String, String> {
 #[tauri::command]
 pub async fn export_session(session_id: u32, format: String) -> Result<String, String> {
     let fmt = format.to_lowercase();
-    if fmt != "md" && fmt != "pdf" && fmt != "notion" && fmt != "otter" {
-        return Err("format must be md, pdf, notion or otter".to_string());
+    if fmt != "md" && fmt != "pdf" && fmt != "docx" && fmt != "notion" && fmt != "otter" {
+        return Err("format must be md, pdf, docx, notion or otter".to_string());
     }
     let output = std::process::Command::new("voiceforge")
         .args(["export", "--id", &session_id.to_string(), "--format", &fmt])
