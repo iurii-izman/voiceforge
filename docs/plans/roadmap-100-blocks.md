@@ -217,9 +217,13 @@
 - **81** — Экспорт в DOCX: export --format docx (pandoc), кнопка DOCX в десктопе, Tauri export_session(docx).
 - **82** — Еженедельный отчёт: команда weekly-report (--days, --output, --format text|json|md), сессии + затраты + action items за период.
 - **83** — Экспорт списка сессий в iCal: команда sessions-to-ical --output file.ics (--limit, --from/--to).
+- **85** — Тесты D-Bus из Python: test_daemon_iface_contract_safe_calls (вызов всех методов с безопасными аргументами), run_dbus_service с mock bus.
+- **86** — Property-based тесты: Hypothesis для parse_txt и parse_markdown (test_rag_parsers_hypothesis.py).
+- **88** — Бенчмарк: test_benchmark_pipeline.py (get_sessions на 100 сессиях), маркер @pytest.mark.benchmark.
 - **92** — Runbook [desktop-updater.md](../runbooks/desktop-updater.md).
 - **93** — Секция «Ключевые решения» в docs/architecture/README.md со ссылками на ADR.
 - **94** — DOCS-INDEX обновлён (roadmap, desktop-updater, MANUAL-AND-CANNOT-DO).
+- **89** — Сборка десктопа в CI: job desktop-build (npm run tauri build, артефакт desktop-bundle-linux).
 - **95** — Job desktop-audit в CI: npm audit, cargo audit для desktop/.
 
 ---

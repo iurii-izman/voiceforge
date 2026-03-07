@@ -145,3 +145,44 @@ jobs:
       - run: uv sync --extra all
       - run: uv run pip-audit --desc --ignore-vuln CVE-2025-69872
       - run: uv run bandit -r src -ll -q --configfile .bandit.yaml
+
+  desktop-audit:
+    permissions:
+      contents: read
+      pull-requests: read
+    name: desktop-audit (block 95)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: desktop/package-lock.json
+      - run: cd desktop && npm ci && npm audit --audit-level=high
+        continue-on-error: true
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo install cargo-audit
+      - run: cd desktop/src-tauri && cargo audit
+        continue-on-error: true
+
+  desktop-build:
+    permissions:
+      contents: read
+      pull-requests: read
+    name: desktop-build (block 89)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: desktop/package-lock.json
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cd desktop && npm ci
+      - run: cd desktop && npm run tauri build
+      - uses: actions/upload-artifact@v6
+        with:
+          name: desktop-bundle-linux
+          path: desktop/src-tauri/target/release/bundle/
