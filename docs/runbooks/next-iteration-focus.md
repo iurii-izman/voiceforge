@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-07 (Sonar #86 закрыт; следующий шаг — roadmap #90/#91/#93)
+**Обновлено:** 2026-03-07 (prompt caching расширен для status_update; заметки по #91/#93 в backlog)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Sonar: S6819 (index.html &lt;section&gt; вместо role=region), S2737 (daemon except comment), S1481/S1854 (unused vars applyCompactMode), S2004 (openSessionFromWidget), S3776 (daemon: _calendar_autostart_try_start, process_one_chunk; main: _analyze_echo_success, _session_to_vevent_lines, _event_to_vevent_lines, _export_via_pandoc; history_helpers: _format_otter_analysis; desktop: getCompactWindowState). Closes #86.
+**Сделано в сессии:** Расширен prompt caching на `update_action_item_statuses` для Claude в router.py (Refs #90). В backlog-and-actions добавлены заметки по реализации #91 (streaming LLM в UI) и #93 (Whisper API). Sonar fetch в toolbox 43: остаток — S7721, S2737, S3776 (daemon/main), S7735 (desktop main.js).
 
-**Следующий шаг:** Перейти к блокам roadmap #90 (prompt caching), #91 (streaming LLM в UI), #93 (Whisper API) по [backlog-and-actions.md](../plans/backlog-and-actions.md) или после следующего скана Sonar проверить `uv run python scripts/sonar_fetch_issues.py` в toolbox 43. В конце сессии: тесты, коммит, пуш, next-iteration-focus.
+**Следующий шаг:** Реализовать #91 (streaming LLM в UI: бэкенд stream + D-Bus/HTTP + UI подписка) или #93 (Whisper API: конфиг stt_backend, фасад в stt/) по [backlog-and-actions.md](../plans/backlog-and-actions.md); либо доработать оставшиеся замечания Sonar (S7721, S2737, S3776, S7735). Pre-commit — в toolbox 43: `toolbox run -c fedora-toolbox-43 bash -c 'cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files'`.
 
 ---
 
@@ -30,7 +30,7 @@
 - **PR #81, #79:** закрыты с комментарием «Applied in main» (2026-03-07).
 - **Открытые issues:** #65 (CVE — ждём upstream), #50 (macOS/WSL2 — p2/backlog).
 
-**Sonar:** Batch #86 (82a71a4): S6819 index.html, S2737/S3776 daemon, S1481/S1854/S2004/S3776 desktop main.js, S3776 main.py, history_helpers. #86 закрыт. После следующего скана проверить sonar_fetch_issues.py на остаток (S7735 и др.). **Mypy:** в scope verify_pr — 0 ошибок. **verify_pr:** Ruff + Mypy OK; bandit — зелёный (nosec B310/B608). **Gitleaks:** allowlist .hypothesis/ + .gitignore; шаг [8/8] в CI проходит (workflow Gitleaks зелёный после 270b7e2/42f904c).
+**Sonar:** Остаток (sonar_fetch_issues.py в toolbox 43): S7721 (openSessionFromWidget), S2737/S3776 (daemon.py), S3776 (main.py 1119/1585), S7735 (main.js negated condition). #86 закрыт ранее. **Mypy:** в scope verify_pr — 0 ошибок. **verify_pr:** Ruff + Mypy OK; bandit — зелёный (nosec B310/B608). **Gitleaks:** allowlist .hypothesis/ + .gitignore; шаг [8/8] в CI проходит (workflow Gitleaks зелёный после 270b7e2/42f904c).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
