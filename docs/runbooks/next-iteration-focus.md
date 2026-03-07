@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-07 (mypy fix, vite 7, E2E green)
+**Обновлено:** 2026-03-07 (бэклог A–E: #82–86 закрыты, под-issues #87–95 на доске)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** (1) **Mypy:** исправлены 5 ошибок в scope verify_pr: dbus_service — добавлены `_search_transcripts` в __init__ и тип `analyze_fn` как `Callable[..., str | tuple[str, int | None]]`; daemon — проверка `get_chunk is None` перед вызовом, тип analyze_fn согласован. Mypy для src/voiceforge/core, llm, rag, stt — Success. (2) **Vite 7 (#79):** desktop/package.json `"vite": "^7"`, npm update; сборка и 8 E2E тестов прошли. verify_pr: Ruff и Mypy OK; падает на bandit (существующие Low/Medium).
+**Сделано в сессии:** Бэклог A–E: (A) CVE #65, keyring, OTel — статус подтверждён; скрипт Dependabot — ссылка на security-and-dependencies.md; #82 закрыт. (B) Созданы под-issues #87–95 (блоки 35, 44, 46, 49, 66, 68, 71, 75, 79), добавлены на доску; #83 закрыт. (C) Чеклист ручных шагов в MANUAL-AND-CANNOT-DO.md; #84 закрыт. (D) PR #81, #79 закрыты с комментарием «Applied in main»; решения по #65, #50, bandit зафиксированы в backlog; #85 закрыт. (E) #86 закрыт с комментарием (E опционален).
 
-**Следующий шаг:** При желании: привести bandit в порядок для полного зелёного verify_pr; остальные Sonar — по приоритету.
+**Следующий шаг:** По желанию: bandit для зелёного verify_pr; Sonar; или реализация одного из блоков #87–95 по приоритету.
 
 ---
 
@@ -27,7 +27,7 @@
 
 **Полный чеклист:** [pre-beta-sonar-github.md](pre-beta-sonar-github.md).
 
-- **Открытые PR:** #81 (tauri), #79 (vite) — изменения применены вручную в main (tauri 2.10.1 ранее; vite ^7 в этой сессии). PR можно закрыть с комментарием «Applied in main».
+- **PR #81, #79:** закрыты с комментарием «Applied in main» (2026-03-07).
 - **Открытые issues:** #65 (CVE — ждём upstream), #50 (macOS/WSL2 — p2/backlog).
 
 **Sonar:** Исправлены S1192, S7761, S7764 в desktop. Остаток: S3776, S6819, S2486 и др. **Mypy:** в scope verify_pr — 0 ошибок (исправлены dbus_service, daemon). **verify_pr:** Ruff + Mypy OK; bandit — есть Low/Medium (не блокирующие по политике).
