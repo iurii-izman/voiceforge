@@ -73,8 +73,8 @@
               </div>
             </div>
             <div class="widget-body">
-              <label>Последние <input type="number" id="analyze-seconds" value="30" min="1" max="3600" /> сек</label>
-              <label>Шаблон
+              <label><span data-i18n="analyze_last_label">Последние</span> <input type="number" id="analyze-seconds" value="30" min="1" max="3600" /> <span data-i18n="analyze_sec_label">сек</span></label>
+              <label><span data-i18n="analyze_template_label">Шаблон</span>
                 <select id="analyze-template">
                   <option value="">—</option>
                   <option value="standup">standup</option>
@@ -157,7 +157,7 @@
                 <option value="month">За месяц</option>
               </select>
             </label>
-            <label>Сортировка
+            <label><span data-i18n="sessions_sort">Сортировка</span>
               <select id="sessions-sort" aria-label="Сортировка">
                 <option value="date-desc">Сначала новые</option>
                 <option value="date-asc">Сначала старые</option>
@@ -165,7 +165,7 @@
                 <option value="duration-asc">По длительности (↑)</option>
               </select>
             </label>
-            <label>Показать
+            <label><span data-i18n="sessions_show">Показать</span>
               <select id="sessions-favorites-filter" aria-label="Показать">
                 <option value="all">Все</option>
                 <option value="favorites">Только избранные</option>
@@ -177,7 +177,7 @@
                 <option value="with-actions">Только с action items</option>
               </select>
             </label>
-            <label>По тегу
+            <label><span data-i18n="sessions_tag">По тегу</span>
               <select id="sessions-tag-filter" aria-label="По тегу">
                 <option value="all">Все</option>
               </select>

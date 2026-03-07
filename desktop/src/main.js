@@ -89,6 +89,13 @@ const I18N = {
     error_generic: "Ошибка",
     error_status: "Ошибка.",
     export_error_prefix: "Ошибка экспорта: ",
+    analyze_last_label: "Последние",
+    analyze_sec_label: "сек",
+    analyze_template_label: "Шаблон",
+    sessions_period: "Период",
+    sessions_sort: "Сортировка",
+    sessions_show: "Показать",
+    sessions_tag: "По тегу",
   },
   en: {
     nav: { home: "Home", sessions: "Sessions", costs: "Costs", settings: "Settings" },
@@ -148,6 +155,13 @@ const I18N = {
     error_generic: "Error",
     error_status: "Error.",
     export_error_prefix: "Export error: ",
+    analyze_last_label: "Last",
+    analyze_sec_label: "sec",
+    analyze_template_label: "Template",
+    sessions_period: "Period",
+    sessions_sort: "Sort",
+    sessions_show: "Show",
+    sessions_tag: "By tag",
   },
 };
 
