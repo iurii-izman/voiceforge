@@ -206,7 +206,7 @@
             <button type="button" class="btn small" id="copy-transcript" data-i18n="detail_copy_transcript">Копировать транскрипт</button>
             <button type="button" class="btn small" id="copy-action-items" data-i18n="detail_copy_actions">Копировать action items</button>
             <button type="button" class="btn small" id="session-detail-print" aria-label="Печать" data-i18n="detail_print">Печать</button>
-            <div id="session-detail-tags" class="detail-tags-row" style="display:none">Теги: <input type="text" id="session-detail-tags-input" placeholder="тег1, тег2" aria-label="Теги сессии" /></div>
+            <div id="session-detail-tags" class="detail-tags-row" style="display:none"><span data-i18n="tags_label">Теги:</span> <input type="text" id="session-detail-tags-input" placeholder="тег1, тег2" aria-label="Теги сессии" data-i18n-placeholder="tags_placeholder" /></div>
             <div id="session-detail-body"></div>
           </div>
         </div>
@@ -231,9 +231,9 @@
         <div class="card">
           <h2 data-i18n="settings_theme_title">Тема</h2>
           <fieldset class="theme-fieldset" aria-label="Выбор темы">
-            <label class="theme-option"><input type="radio" name="theme" value="dark" /> Тёмная</label>
-            <label class="theme-option"><input type="radio" name="theme" value="light" /> Светлая</label>
-            <label class="theme-option"><input type="radio" name="theme" value="auto" /> Как в системе</label>
+            <label class="theme-option"><input type="radio" name="theme" value="dark" /> <span data-i18n="theme_dark">Тёмная</span></label>
+            <label class="theme-option"><input type="radio" name="theme" value="light" /> <span data-i18n="theme_light">Светлая</span></label>
+            <label class="theme-option"><input type="radio" name="theme" value="auto" /> <span data-i18n="theme_auto">Как в системе</span></label>
           </fieldset>
         </div>
         <div class="card">
@@ -247,48 +247,48 @@
         <div class="card">
           <h2 data-i18n="settings_hotkeys_title">Горячие клавиши</h2>
           <p class="muted">Глобальные комбинации работают, когда окно в фоне. Формат: Ctrl+Shift+R (на macOS — Cmd).</p>
-          <label class="hotkey-row">Запись: <input type="text" id="hotkey-record" value="CommandOrControl+Shift+R" placeholder="CommandOrControl+Shift+R" class="hotkey-input" aria-label="Горячая клавиша записи" /></label>
-          <label class="hotkey-row">Анализ: <input type="text" id="hotkey-analyze" value="CommandOrControl+Shift+A" placeholder="CommandOrControl+Shift+A" class="hotkey-input" aria-label="Горячая клавиша анализа" /></label>
+          <label class="hotkey-row"><span data-i18n="hotkey_record_label">Запись:</span> <input type="text" id="hotkey-record" value="CommandOrControl+Shift+R" placeholder="CommandOrControl+Shift+R" class="hotkey-input" aria-label="Горячая клавиша записи" /></label>
+          <label class="hotkey-row"><span data-i18n="hotkey_analyze_label">Анализ:</span> <input type="text" id="hotkey-analyze" value="CommandOrControl+Shift+A" placeholder="CommandOrControl+Shift+A" class="hotkey-input" aria-label="Горячая клавиша анализа" /></label>
           <label class="hotkeys-toggle">
             <input type="checkbox" id="hotkeys-enabled" checked />
-            Включить глобальные горячие клавиши
+            <span data-i18n="hotkeys_enabled_label">Включить глобальные горячие клавиши</span>
           </label>
         </div>
         <div class="card">
           <h2 data-i18n="settings_updates_title">Обновления</h2>
           <label class="hotkeys-toggle">
             <input type="checkbox" id="updater-check-on-launch" />
-            Проверять обновления при запуске
+            <span data-i18n="updater_check_label">Проверять обновления при запуске</span>
           </label>
-          <button type="button" class="btn small" id="updater-check-now">Проверить сейчас</button>
+          <button type="button" class="btn small" id="updater-check-now" data-i18n="updater_check_now_btn">Проверить сейчас</button>
           <p id="updater-status" class="muted settings-hint"></p>
         </div>
         <div class="card">
           <h2 data-i18n="settings_autostart_title">Автозапуск</h2>
           <label class="hotkeys-toggle">
             <input type="checkbox" id="autostart-enabled" />
-            Запускать VoiceForge при входе в систему
+            <span data-i18n="autostart_label">Запускать VoiceForge при входе в систему</span>
           </label>
         </div>
         <div class="card">
           <h2 data-i18n="settings_sound_title">Звук</h2>
           <label class="hotkeys-toggle">
             <input type="checkbox" id="sound-on-record" />
-            Звук при старте/стопе записи
+            <span data-i18n="sound_on_record_label">Звук при старте/стопе записи</span>
           </label>
         </div>
         <div class="card">
           <h2 data-i18n="settings_window_title">Окно</h2>
           <label class="hotkeys-toggle">
             <input type="checkbox" id="close-to-tray" />
-            Свернуть в трей при закрытии (крестик)
+            <span data-i18n="close_to_tray_label">Свернуть в трей при закрытии (крестик)</span>
           </label>
         </div>
         <div class="card">
           <h2 data-i18n="settings_compact_title">Режим окна</h2>
           <label class="hotkeys-toggle">
             <input type="checkbox" id="compact-mode-toggle" />
-            Компактный режим (только запись и анализ)
+            <span data-i18n="compact_mode_label">Компактный режим (только запись и анализ)</span>
           </label>
         </div>
         <div class="card">
