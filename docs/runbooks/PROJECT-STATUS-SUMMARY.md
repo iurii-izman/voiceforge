@@ -18,7 +18,7 @@
 |----------|---------------------|
 | **backlog-and-actions блок B** | 35, 44, 46, 49, 66 (cache_control есть), 68, 71, 75, 79 |
 | **roadmap 1–19 (plans.md)** | 1–18 реализованы; 19 (prompt caching для не-Claude) — research |
-| **Phase A–D (Steps 1–19)** | Большинство закрыто; #65 (CVE) ждёт upstream; #70, #72 реализованы; #71, #73 в бэклоге |
+| **Phase A–D (Steps 1–19)** | Большинство закрыто; #65 (CVE) ждёт upstream; Phase D #70–#73 реализованы |
 | **roadmap-100-blocks «Не реализовано»** | Остаётся только 66 (prompt caching — доработка по API) |
 
 Файлы-подтверждения: `desktop/src/main.js` (clipboard_history, last-analysis, settings_as_panel, streaming-analysis-chunk, add-to-calendar), `stt/openai_whisper.py`, `llm/router.py` (stream_completion, analyze_meeting_stream), `core/pipeline.py` (_step1_stt stt_backend), демон/D-Bus (CreateEventFromSession, StreamingAnalysisChunk, SearchRag).
@@ -30,7 +30,7 @@
 - **По приоритету (на усмотрение):**
   - Блок 66: доработка prompt caching для не-Claude (LiteLLM/провайдеры) — по документации API.
   - ~~Блок 69~~: реализовано — retry с backoff в circuit_breaker. ~~Блок 72~~: уже было — подсказка «Analyzing… (≈ N–M s)» в CLI.
-  - Phase D: ~~#70~~ (A/B — реализовано: make eval-ab, scripts/eval_ab.py), #71 (OTel до GA), ~~#72~~ (custom templates — реализовано: ~/.config/voiceforge/templates/), #73 (packaging GA).
+  - Phase D: ~~#70~~ (A/B), ~~#71~~ (OTel: core/otel.py + observability-alerts.md), ~~#72~~ (custom templates), ~~#73~~ (packaging: offline-package.md, make flatpak-build) — реализованы.
 - **Из roadmap-100 списка:** часть пунктов (45, 50, 51–54, 57–65, 67, 70, 73–78, 80–100) уже есть в коде или в доке; остальное — по приоритету из планов и backlog.
 
 ---
@@ -70,7 +70,7 @@
 ## 7. Рекомендации по приоритетам
 
 1. **Стабилизация:** довести Sonar (S3776 и остальное) по решению команды; при появлении фикса CVE #65 — обновить зависимости.
-2. **Phase D:** #71 (OTel), #72 (plugins), #73 (packaging) — по дорожной карте; #70 (A/B) при необходимости.
+2. **Phase D:** #70–#73 закрыты (eval-ab, OTel, custom templates, packaging runbook).
 3. **Блоки 69/72:** retry LLM, оценка длительности analyze — быстрые улучшения UX.
 4. **Ручные шаги:** сборка десктопа, ключи, релиз, тестирование — по чеклисту MANUAL-AND-CANNOT-DO.
 

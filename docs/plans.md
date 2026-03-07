@@ -74,9 +74,9 @@
 | Step | Issue | Цель | Критерий приёмки |
 |------|-------|------|------------------|
 | ~~16~~ | ~~#70~~ | ~~A/B testing моделей/промптов~~ | Реализовано: `make eval-ab MODEL_A=haiku MODEL_B=sonnet`, `scripts/eval_ab.py` (ROUGE-L сравнение). |
-| 17 | #71 | OpenTelemetry (tracing) | Trace в Jaeger: все шаги pipeline с durations (runbook: observability-alerts.md) |
+| ~~17~~ | ~~#71~~ | ~~OpenTelemetry (tracing)~~ | Реализовано: спаны в `core/otel.py`, runbook [observability-alerts.md](runbooks/observability-alerts.md), контракт в config-env-contract; проверка вручную в Jaeger. |
 | ~~18~~ | ~~#72~~ | ~~Plugin system (custom templates)~~ | Реализовано: `load_prompt` берёт template_* из `~/.config/voiceforge/templates/` первым (prompt_loader.py). |
-| 19 | #73 | Packaging GA | AppImage: download → chmod +x → run; Flatpak: install → run |
+| ~~19~~ | ~~#73~~ | ~~Packaging GA~~ | Реализовано: [offline-package.md](runbooks/offline-package.md), `make flatpak-build`, AppImage в bundle.targets; сборка и публикация по runbook. |
 
 Подробные формулировки (Scope, Effort, KPI): [archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md) — раздел «Phase D: Productization».
 
@@ -88,13 +88,12 @@
 - **План развития (development-plan) Часть I:** все 10 пунктов реализованы (--template, streaming listen, export, status --detailed, history --search, action items DB, history --date/--from/--to, quickstart, GetAnalytics, status --doctor).
 - **Issues #32–49, #51–53:** закрыты. Текущий фокус — только Linux (macOS/WSL2 вне скоупа).
 - **Phase A–C (Steps 1–15):** большинство в статусе «СДЕЛАНО»; частично #56, #65, #66, W17. См. [audit/audit.md](audit/audit.md).
-- **Phase D (Steps 16–19):** #70 eval-ab GA (make eval-ab MODEL_A=… MODEL_B=…); #71 OTel + runbook Jaeger; #72 custom templates + doc (eval uses ~/.config/voiceforge/templates/); #73 packaging GA (offline-package checklist, Flatpak/AppImage). Доработки по мере готовности.
+- **Phase D (Steps 16–19):** #70–#73 реализованы (eval-ab, OTel/Jaeger runbook, custom templates, offline-package runbook + make flatpak-build).
 
 ---
 
 ## 5. Текущие задачи и фокус
 
-- **В работе / частично:** #65 (CVE, чеклист снятия). #66 закрыто (async web). #71 (OTel) — runbook и спаны есть; GA по желанию.
-- **Phase D:** #70, #72 реализованы; #71 (OTel), #73 (packaging GA) — по критериям в разд. 3.2.
+- **В работе / частично:** #65 (CVE, чеклист снятия). #66 закрыто (async web). Phase D (#70–#73) закрыт.
 
 Фокус итерации: [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md). Статус W1–W20: [audit/audit.md](audit/audit.md).

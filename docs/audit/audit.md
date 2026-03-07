@@ -50,7 +50,7 @@
 - **#65 CVE:** убрать `--ignore-vuln` после фикса upstream (diskcache/instructor).
 - **#66 Async web (полный):** миграция на Starlette/Litestar — опционально; минимальный путь (ThreadingMixIn) выполнен.
 - **W17:** закрыто — do_GET/do_POST через dispatch table (S3776).
-- **Phase D (#70–#73):** #70 eval-ab GA (Makefile MODEL_A/MODEL_B); #71 OTel + runbook Jaeger (observability-alerts); #72 custom templates (prompt-management, eval path); #73 packaging GA (offline-package checklist). См. [plans.md](../plans.md) разд. 3.2.
+- **Phase D (#70–#73):** закрыт — #70 eval-ab, #71 OTel (core/otel.py + observability-alerts), #72 custom templates, #73 packaging (offline-package.md, make flatpak-build). См. [plans.md](../plans.md) разд. 3.2.
 
 ---
 
@@ -64,6 +64,6 @@
 
 **Дата:** 2026-03-05. Полный текст отчёта: [archive/audit/audit-2026-03-full.md](../archive/audit/audit-2026-03-full.md).
 
-**Резюме:** VoiceForge — local-first AI для аудиовстреч на Linux (PipeWire → STT → diarization → RAG → LLM → SQLite). Alpha 0.2, CLI, daemon, Web UI, Telegram, десктоп (Tauri 2). Большинство W1–W20 в статусе «СДЕЛАНО». Остаётся: #56 (coverage), #65 (CVE), #66 (async опционально), W17, Phase D в бэклоге. Сильные стороны: доки, CI, безопасность (keyring, pip-audit, bandit, gitleaks), observability. Приоритеты: качество до 100%, OTel #71, plugins #72, packaging #73, A/B #70.
+**Резюме:** VoiceForge — local-first AI для аудиовстреч на Linux (PipeWire → STT → diarization → RAG → LLM → SQLite). Alpha 0.2, CLI, daemon, Web UI, Telegram, десктоп (Tauri 2). Большинство W1–W20 в статусе «СДЕЛАНО». Phase D (#70–#73) закрыт. Остаётся: #65 (CVE), блок 66 (prompt caching), ручные шаги, Sonar по желанию. Сильные стороны: доки, CI, безопасность (keyring, pip-audit, bandit, gitleaks), observability.
 
 **Системный аудит (оценки):** Код 4/5, Тесты 3/5, Доки 5/5, CI/CD 4/5, Безопасность 4/5, Observability 4/5. Блочный аудит и рекомендуемые шаги — в полном отчёте по ссылке выше.

@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-07 (Phase D #70, #72 отмечены реализованными)
+**Обновлено:** 2026-03-07 (Phase D #71, #73 отмечены GA; Phase D закрыт)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Подтверждено и отражено в планах: Phase D #70 (A/B) и #72 (custom templates) реализованы. #70: `make eval-ab`, `scripts/eval_ab.py` (ROUGE-L). #72: `prompt_loader.load_prompt` загружает template_* из `~/.config/voiceforge/templates/`. Обновлены plans.md, PROJECT-STATUS-SUMMARY, next-iteration-focus (следующий шаг — #71, #73, блок 66).
+**Сделано в сессии:** Phase D (#70–#73) отмечен закрытым в планах: #71 (OTel — core/otel.py + observability-alerts.md), #73 (packaging — offline-package.md, make flatpak-build). Обновлены plans.md, PROJECT-STATUS-SUMMARY, next-iteration-focus (следующий шаг — блок 66, ручные шаги, Sonar).
 
-**Следующий шаг:** По [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md): Phase D #71 (OTel до GA), #73 (packaging GA) или блок 66 (доработка prompt caching), ручные шаги из MANUAL-AND-CANNOT-DO. #70 (eval-ab) и #72 (custom templates) отмечены реализованными в планах. verify_pr: при отсутствии hypothesis — `pytest tests/ --ignore=tests/test_rag_parsers_hypothesis.py`. Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
+**Следующий шаг:** Phase D (#70–#73) закрыт. Дальше: блок 66 (доработка prompt caching для не-Claude), ручные шаги из [MANUAL-AND-CANNOT-DO.md](../plans/MANUAL-AND-CANNOT-DO.md), стабилизация (Sonar S3776 и др.) или новые фичи по backlog. verify_pr: при отсутствии hypothesis — `pytest tests/ --ignore=tests/test_rag_parsers_hypothesis.py`. Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
 
 ---
 
