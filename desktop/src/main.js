@@ -12,6 +12,8 @@ import { Chart } from "chart.js/auto";
 
 let appStore = null;
 
+const UI_LANG_KEY = "voiceforge_ui_lang";
+
 const STORE_KEYS = [
   "voiceforge_theme",
   "voiceforge_hotkeys_enabled",
@@ -24,7 +26,40 @@ const STORE_KEYS = [
   "voiceforge_shortcut_analyze",
   "voiceforge_session_tags",
   "voiceforge_sound_on_record",
+  UI_LANG_KEY,
 ];
+
+/** Block 97: minimal i18n for UI language (ru/en). */
+const I18N = {
+  ru: {
+    nav: { home: "Главная", sessions: "Сессии", costs: "Затраты", settings: "Настройки" },
+    settings_title: "Настройки",
+    settings_lang_label: "Язык интерфейса",
+    settings_lang_hint: "Перезагрузка не требуется.",
+  },
+  en: {
+    nav: { home: "Home", sessions: "Sessions", costs: "Costs", settings: "Settings" },
+    settings_title: "Settings",
+    settings_lang_label: "Interface language",
+    settings_lang_hint: "No reload required.",
+  },
+};
+
+function t(key) {
+  const lang = localStorage.getItem(UI_LANG_KEY) || "ru";
+  const map = I18N[lang] || I18N.ru;
+  const val = key.split(".").reduce((o, p) => o?.[p], map);
+  return val != null && typeof val === "string" ? val : key;
+}
+
+function applyUiLang() {
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    const k = el.getAttribute("data-i18n");
+    if (k) el.textContent = t(k);
+  });
+  const lang = localStorage.getItem(UI_LANG_KEY) || "ru";
+  document.documentElement.lang = lang === "en" ? "en" : "ru";
+}
 
 async function loadStoreAndMigrate() {
   try {
@@ -1457,6 +1492,19 @@ function initTheme() {
   });
 }
 
+function initUiLang() {
+  applyUiLang();
+  const sel = document.getElementById("ui-lang");
+  if (!sel) return;
+  const saved = localStorage.getItem(UI_LANG_KEY) || "ru";
+  sel.value = saved === "en" ? "en" : "ru";
+  sel.addEventListener("change", () => {
+    const v = sel.value === "en" ? "en" : "ru";
+    setStored(UI_LANG_KEY, v);
+    applyUiLang();
+  });
+}
+
 function initHotkeysCard() {
   const cb = document.getElementById("hotkeys-enabled");
   const inputRecord = document.getElementById("hotkey-record");
@@ -1835,6 +1883,7 @@ function initDashboardWidgets() {
 (async () => { // NOSONAR S7785 — top-level await not supported by build target (es2020/chrome87)
   await loadStoreAndMigrate();
   initTheme();
+  initUiLang();
   showOnboarding();
   await setupWindowStatePersistence();
   await setupCloseToTray();

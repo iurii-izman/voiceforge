@@ -23,10 +23,10 @@
   </div>
   <div class="app" id="app-root">
     <nav class="sidebar" id="main-sidebar" role="navigation" aria-label="Главное меню">
-      <div class="nav-item active" data-tab="home" role="button" tabindex="0" aria-current="true"><span class="nav-mnemonic">Г</span>лавная</div>
-      <div class="nav-item" data-tab="sessions" role="button" tabindex="0" aria-current="false"><span class="nav-mnemonic">С</span>ессии</div>
-      <div class="nav-item" data-tab="costs" role="button" tabindex="0" aria-current="false"><span class="nav-mnemonic">З</span>атраты</div>
-      <div class="nav-item" data-tab="settings" role="button" tabindex="0" aria-current="false"><span class="nav-mnemonic">Н</span>астройки</div>
+      <div class="nav-item active" data-tab="home" data-i18n="nav.home" role="button" tabindex="0" aria-current="true"><span class="nav-mnemonic">Г</span>лавная</div>
+      <div class="nav-item" data-tab="sessions" data-i18n="nav.sessions" role="button" tabindex="0" aria-current="false"><span class="nav-mnemonic">С</span>ессии</div>
+      <div class="nav-item" data-tab="costs" data-i18n="nav.costs" role="button" tabindex="0" aria-current="false"><span class="nav-mnemonic">З</span>атраты</div>
+      <div class="nav-item" data-tab="settings" data-i18n="nav.settings" role="button" tabindex="0" aria-current="false"><span class="nav-mnemonic">Н</span>астройки</div>
     </nav>
     <main class="content" id="main-content" role="main" aria-label="Основной контент">
       <div class="compact-bar" id="compact-bar" style="display:none" aria-label="Компактная панель">
@@ -227,7 +227,7 @@
       </section>
 
       <section id="tab-settings" class="tab-panel" tabindex="-1" aria-labelledby="tab-settings-title">
-        <h1 id="tab-settings-title">Настройки</h1>
+        <h1 id="tab-settings-title" data-i18n="settings_title">Настройки</h1>
         <div class="card">
           <h2>Тема</h2>
           <fieldset class="theme-fieldset" aria-label="Выбор темы">
@@ -235,6 +235,14 @@
             <label class="theme-option"><input type="radio" name="theme" value="light" /> Светлая</label>
             <label class="theme-option"><input type="radio" name="theme" value="auto" /> Как в системе</label>
           </fieldset>
+        </div>
+        <div class="card">
+          <h2 data-i18n="settings_lang_label">Язык интерфейса</h2>
+          <p class="muted" data-i18n="settings_lang_hint">Перезагрузка не требуется.</p>
+          <select id="ui-lang" aria-label="Язык интерфейса">
+            <option value="ru">Русский</option>
+            <option value="en">English</option>
+          </select>
         </div>
         <div class="card">
           <h2>Горячие клавиши</h2>
