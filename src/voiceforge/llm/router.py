@@ -126,7 +126,7 @@ def _try_ollama_faq(
     transcript: str,
     context: str,
     local_model: str,
-    response_model: type[Any],
+    response_model: type[Any] | None,
 ) -> tuple[Any, float] | None:
     """If Ollama is available and transcript is FAQ, return (MeetingAnalysis stub, 0.0); else None."""
     try:
@@ -290,10 +290,22 @@ def update_action_item_statuses(
     user_content = (
         "Action items from previous meeting:\n" + "\n".join(lines) + "\n\nTranscript of follow-up meeting:\n" + transcript_for_llm
     )
-    prompt = [
-        {"role": "system", "content": _status_update_system()},
-        {"role": "user", "content": user_content},
-    ]
+    sys_text = _status_update_system()
+    if _is_claude_model(model_id):
+        prompt = [
+            {
+                "role": "system",
+                "content": [
+                    {"type": "text", "text": sys_text, "cache_control": {"type": "ephemeral"}},
+                ],
+            },
+            {"role": "user", "content": user_content},
+        ]
+    else:
+        prompt = [
+            {"role": "system", "content": sys_text},
+            {"role": "user", "content": user_content},
+        ]
     result, cost = complete_structured(prompt, response_model=StatusUpdateResponse, model=model_id)
     return (result, cost)
 
