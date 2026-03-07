@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-07 (автопилот: E2E a11y role=main)
+**Обновлено:** 2026-03-07 (runbook pre-beta Sonar/GitHub; фокус на порядок → релиз беты)
 
 ---
 
@@ -17,19 +17,20 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** E2E: добавлен тест «main content has role main (block 98 a11y)»; в roadmap обновлён пункт 98 (упоминание E2E в nav.spec.js).
+**Сделано в сессии:** Runbook [pre-beta-sonar-github.md](pre-beta-sonar-github.md) — чеклист Sonar и GitHub перед бета-релизом; обновлён фокус: следующий шаг — закрыть оставшиеся проблемы, затем релиз беты.
 
-**Следующий шаг:** Ручная проверка десктопа/сборки; оставшиеся блоки — см. раздел «Не реализовано (отложено)» в roadmap-100-blocks.md.
+**Следующий шаг:** Привести Sonar и GitHub в порядок по чеклисту [pre-beta-sonar-github.md](pre-beta-sonar-github.md) (Sonar issues, Dependabot PR, issues #65/#50). В следующем чате — закрыть оставшиеся проблемы, затем релиз следующей беты.
 
 ---
 
 ## GitHub: подготовка к бете (PR и issues)
 
-- **Открытые PR:** в основном Dependabot (desktop vite/tauri, actions setup-node/upload-artifact/sbom, pre-commit-ci). Решение: мержить по одному после прохода CI или батчем; при необходимости отклонить с комментарием (см. security-and-dependencies для CVE).
-- **Открытые issues:** #65 (CVE — ждём upstream), #50 (macOS/WSL2 — исследование, можно отложить). Остальные Phase A–D закрыты.
-- **Рекомендация:** перед бетой закрыть или отклонить Dependabot-PR с обновлением зависимостей; оставить #65 открытым до появления фикса; при желании перевести #50 в backlog.
+**Полный чеклист:** [pre-beta-sonar-github.md](pre-beta-sonar-github.md).
 
-**Sonar (сессии):** Исправлено: S1192, S108, S1186, S1481, S5603, S1244, S7688, S8264, S1515, S7497, S2737, S3358, S5864, S7500, S7484, S3776 (run_daemon, _run_daemon_loop, _run_one_retention_purge, _cancel_purge_then_service_reraise). Остаток: проверить после скана.
+- **Открытые PR (на 2026-03-07):** #81 (dependabot tauri), #79 (vite), #77 (sbom), #76 (setup-node), #75 (setup-uv), #74 (upload-artifact), #25 (pre-commit-ci). Решение: Dependabot без CVE — мержить по одному после CI; CVE — см. security-and-dependencies; pre-commit — merge или close.
+- **Открытые issues:** #65 (CVE — ждём upstream), #50 (macOS/WSL2 — исследование). Оставить #65 открытым; #50 по желанию в backlog.
+
+**Sonar:** Скан в CI без continue-on-error. Локально: `uv run python scripts/sonar_fetch_issues.py` — проверить остаток; исправить или задокументировать по чеклисту pre-beta-sonar-github.
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
