@@ -200,6 +200,8 @@
             </div>
             <button type="button" class="btn small" id="export-md">Экспорт Markdown</button>
             <button type="button" class="btn small" id="export-pdf">Экспорт PDF</button>
+            <button type="button" class="btn small" id="export-notion" title="Формат для вставки в Notion">Notion</button>
+            <button type="button" class="btn small" id="export-otter" title="Формат Otter">Otter</button>
             <button type="button" class="btn small" id="copy-transcript">Копировать транскрипт</button>
             <button type="button" class="btn small" id="copy-action-items">Копировать action items</button>
             <button type="button" class="btn small" id="session-detail-print" aria-label="Печать">Печать</button>
@@ -257,6 +259,13 @@
           <label class="hotkeys-toggle">
             <input type="checkbox" id="autostart-enabled" />
             Запускать VoiceForge при входе в систему
+          </label>
+        </div>
+        <div class="card">
+          <h2>Звук</h2>
+          <label class="hotkeys-toggle">
+            <input type="checkbox" id="sound-on-record" />
+            Звук при старте/стопе записи
           </label>
         </div>
         <div class="card">

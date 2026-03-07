@@ -17,6 +17,8 @@ import structlog
 import typer
 
 from voiceforge.cli.history_helpers import (
+    build_session_export_notion,
+    build_session_export_otter,
     build_session_markdown,
     history_action_items_result,
     history_date_range_result,
@@ -993,19 +995,19 @@ def status(
 @app.command("export")
 def export_session(
     session_id: int = typer.Option(..., "--id", help="ID сессии для экспорта"),
-    format: str = typer.Option("md", "--format", help="Формат: md | pdf"),
+    format: str = typer.Option("md", "--format", help="Формат: md | pdf | notion | otter"),
     output: Path = typer.Option(
         None,
         "--output",
         "-o",
         path_type=Path,
-        help="Файл вывода (по умолчанию: session_<id>.md или .pdf)",
+        help="Файл вывода (по умолчанию: session_<id>.<format>)",
     ),
 ) -> None:
-    """Экспорт сессии в Markdown или PDF (PDF через pandoc, если установлен)."""
+    """Экспорт сессии в Markdown, PDF, Notion или Otter (block 39)."""
     from voiceforge.core.transcript_log import TranscriptLog
 
-    if format not in ("md", "pdf"):
+    if format not in ("md", "pdf", "notion", "otter"):
         typer.echo(t("export.format_md_or_pdf"), err=True)
         raise SystemExit(1)
     log_db = TranscriptLog()
@@ -1017,12 +1019,18 @@ def export_session(
         segments, analysis = detail
         meta = log_db.get_session_meta(session_id)
         started_at = meta[0] if meta else None
-        md_text = build_session_markdown(session_id, segments, analysis, started_at=started_at)
+        if format == "notion":
+            md_text = build_session_export_notion(session_id, segments, analysis, started_at=started_at)
+        elif format == "otter":
+            md_text = build_session_export_otter(session_id, segments, analysis, started_at=started_at)
+        else:
+            md_text = build_session_markdown(session_id, segments, analysis, started_at=started_at)
     finally:
         log_db.close()
 
-    out_path = output or Path(f"session_{session_id}.{format}")
-    if format == "md":
+    suffix = "pdf" if format == "pdf" else "txt" if format == "otter" else "md"
+    out_path = output or Path(f"session_{session_id}.{suffix}")
+    if format in ("md", "notion", "otter"):
         out_path.write_text(md_text, encoding="utf-8")
         typer.echo(t("export.saved", path=str(out_path)))
         return

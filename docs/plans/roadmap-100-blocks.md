@@ -193,6 +193,8 @@
 - **50** — Офлайн-индикатор: баннер «Демон отключён» с кнопкой «Повторить подключение» (daemon-off-banner).
 - **51** — history --offset для пагинации (ранее —last; добавлен offset в get_sessions и CLI).
 - **52** — status --output json уже был (get_status_data, doctor в JSON).
+- **39** — Экспорт Notion/Otter: build_session_export_notion/otter в history_helpers, export --format notion|otter, кнопки в десктопе.
+- **41** — Звуковые уведомления: опция «Звук при старте/стопе записи», playBeep() (Web Audio), карточка в настройках.
 - **53** — Единый --output: документирован в cli-commands-and-run.md (envelope { ok, data } / { ok: false, error }).
 - **54** — `daemon --foreground` / `-f`: логи в stdout (structlog ConsoleRenderer(stream=sys.stdout)).
 - **58** — calendar list: list_calendars() в caldav_poll, команда voiceforge calendar list (--output text|json).
@@ -200,6 +202,7 @@
 - **56** — Подсказки при типовых ошибках (_hint_for_error: keyring, audio, daemon).
 - **59** — Документация VOICEFORGE_*: индекс в config-env-contract.md, добавлен VOICEFORGE_WEB_ASYNC.
 - **61** — D-Bus GetVersion, daemon.get_version(), get_daemon_version в десктопе.
+- **63** — Таймаут и retry для invoke: invokeWithRetry (timeout 5s для ping, 1 retry) в checkDaemon.
 - **76** — Статистика RAG в status/doctor: _get_rag_stats(), rag.indexed_sources_count/chunks_count в get_status_data(), doctor.rag_stats.
 - **92** — Runbook [desktop-updater.md](../runbooks/desktop-updater.md).
 - **93** — Секция «Ключевые решения» в docs/architecture/README.md со ссылками на ADR.

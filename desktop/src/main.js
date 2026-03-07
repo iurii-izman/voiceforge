@@ -23,6 +23,7 @@ const STORE_KEYS = [
   "voiceforge_shortcut_record",
   "voiceforge_shortcut_analyze",
   "voiceforge_session_tags",
+  "voiceforge_sound_on_record",
 ];
 
 async function loadStoreAndMigrate() {
@@ -105,9 +106,29 @@ function errorMessage(envelope) {
   return "Ошибка";
 }
 
+const INVOKE_DEFAULT_TIMEOUT_MS = 10000;
+const INVOKE_DEFAULT_RETRIES = 1;
+
+async function invokeWithRetry(cmd, args, opts) {
+  const timeoutMs = opts?.timeoutMs ?? INVOKE_DEFAULT_TIMEOUT_MS;
+  const retries = opts?.retries ?? INVOKE_DEFAULT_RETRIES;
+  let lastErr;
+  for (let i = 0; i <= retries; i++) {
+    try {
+      const p = invoke(cmd, args ?? {});
+      const t = new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), timeoutMs));
+      return await Promise.race([p, t]);
+    } catch (e) {
+      lastErr = e;
+      if (i < retries) await new Promise((r) => setTimeout(r, 300));
+    }
+  }
+  throw lastErr;
+}
+
 async function checkDaemon() {
   try {
-    const pong = await invoke("ping");
+    const pong = await invokeWithRetry("ping", {}, { timeoutMs: 5000, retries: 1 });
     if (pong !== "pong") {
       setDaemonOff("Неожиданный ответ: " + pong);
       return false;
@@ -147,6 +168,23 @@ function switchTab(tabId) {
   }
 }
 
+function playBeep() {
+  try {
+    if (localStorage.getItem("voiceforge_sound_on_record") !== "true") return;
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 440;
+    osc.type = "sine";
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.1);
+  } catch (_) { /* ignore */ }
+}
+
 function applyListenState(isListening) {
   listenState = isListening;
   const btn = document.getElementById("listen-toggle");
@@ -167,6 +205,7 @@ function applyListenState(isListening) {
       streamingInterval = null;
     }
   }
+  playBeep();
 }
 
 function updateStreamingDisplay() {
@@ -936,6 +975,8 @@ function showSessionDetail(id, opts) {
   bodyEl.innerHTML = "<p class=\"muted\">Загрузка…</p>";
   document.getElementById("export-md").onclick = () => exportSession(id, "md");
   document.getElementById("export-pdf").onclick = () => exportSession(id, "pdf");
+  document.getElementById("export-notion").onclick = () => exportSession(id, "notion");
+  document.getElementById("export-otter").onclick = () => exportSession(id, "otter");
   document.getElementById("copy-transcript").onclick = copyTranscriptToClipboard;
   document.getElementById("copy-action-items").onclick = copyActionItemsToClipboard;
   document.getElementById("session-detail-print").onclick = () => window.print();
@@ -1626,6 +1667,15 @@ function initCloseToTrayCard() {
   });
 }
 
+function initSoundOnRecordCard() {
+  const cb = document.getElementById("sound-on-record");
+  if (!cb) return;
+  cb.checked = localStorage.getItem("voiceforge_sound_on_record") === "true";
+  cb.addEventListener("change", () => {
+    setStored("voiceforge_sound_on_record", cb.checked ? "true" : "false");
+  });
+}
+
 async function applyCompactMode(compact) {
   const appRoot = document.getElementById("app-root");
   const compactBar = document.getElementById("compact-bar");
@@ -1782,6 +1832,7 @@ function initDashboardWidgets() {
   initUpdaterCard();
   initAutostartCard();
   initCloseToTrayCard();
+  initSoundOnRecordCard();
   initCompactMode();
   initDashboardWidgets();
   initQuickActions();

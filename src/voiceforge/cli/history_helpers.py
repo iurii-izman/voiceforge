@@ -141,6 +141,59 @@ def build_session_markdown(
     return "\n".join(lines)
 
 
+def build_session_export_notion(
+    session_id: int,
+    segments: list[object],
+    analysis: object | None,
+    started_at: str | None = None,
+) -> str:
+    """Build export text for pasting into Notion (block 39): headings + transcript + analysis as lists."""
+    lines = [f"# Session {session_id}", ""]
+    if started_at:
+        lines.append(f"**Date:** {started_at[:10] if len(started_at) >= 10 else started_at}")
+        lines.append("")
+    lines.append("## Transcript")
+    lines.append("")
+    for s in segments:
+        speaker = getattr(s, "speaker", "") or "Speaker"
+        start_s = getattr(s, "start_sec", 0) or 0
+        end_s = getattr(s, "end_sec", 0) or 0
+        text = getattr(s, "text", "") or ""
+        lines.append(f"- **{speaker}** ({start_s:.0f}:{end_s - start_s:.0f}s) {text}")
+    if analysis:
+        lines.extend(["", "## Analysis", ""])
+        lines.extend(_format_analysis_block(analysis))
+    return "\n".join(lines)
+
+
+def build_session_export_otter(
+    session_id: int,
+    segments: list[object],
+    analysis: object | None,
+    started_at: str | None = None,
+) -> str:
+    """Build export text in Otter-style lines (block 39): MM:SS Speaker: text."""
+    lines = [f"Session {session_id}" + (f" — {started_at[:10]}" if started_at and len(started_at) >= 10 else ""), ""]
+    for s in segments:
+        speaker = getattr(s, "speaker", "") or "Speaker"
+        start_s = getattr(s, "start_sec", 0) or 0
+        text = getattr(s, "text", "") or ""
+        mm = int(start_s // 60)
+        ss = int(start_s % 60)
+        lines.append(f"{mm}:{ss:02d} {speaker}: {text}")
+    if analysis:
+        lines.append("")
+        lines.append("--- Analysis ---")
+        for q in getattr(analysis, "questions", []):
+            lines.append(f"  Q: {q}")
+        for a in getattr(analysis, "answers", []):
+            lines.append(f"  A: {a}")
+        for ai in getattr(analysis, "action_items", []):
+            d = ai.get("description", ai) if isinstance(ai, dict) else str(ai)
+            lines.append(f"  • {d}")
+    return "\n".join(lines)
+
+
 def render_sessions_table_lines(sessions: list[object]) -> list[str]:
     """Build text table lines for session summaries."""
     lines = [
@@ -250,9 +303,9 @@ def history_session_detail_result(log_db: Any, session_id: int, output: str) -> 
     return ("lines", render_session_detail_lines(session_id, segments, analysis))
 
 
-def history_list_result(log_db: Any, last_n: int, output: str) -> tuple[str, Any]:
-    """Return ("json", payload) | ("lines", list) | ("message", i18n_key)."""
-    sessions = log_db.get_sessions(last_n=last_n)
+def history_list_result(log_db: Any, last_n: int, output: str, offset: int = 0) -> tuple[str, Any]:
+    """Return ("json", payload) | ("lines", list) | ("message", i18n_key). Block 51: offset for pagination."""
+    sessions = log_db.get_sessions(last_n=last_n, offset=offset)
     if output == "json":
         return ("json", build_sessions_payload(sessions) if sessions else empty_sessions_payload())
     if not sessions:
