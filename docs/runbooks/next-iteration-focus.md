@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-07 (verify_pr/bandit/S3776: Mypy, Bandit B310, рефакторинг S3776, S3358, S4624)
+**Обновлено:** 2026-03-07 (блок 69 retry LLM с backoff)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** verify_pr/bandit и Sonar: (1) Mypy — cast(prompt) в router, transcriber: Any в pipeline; (2) Bandit B310 — nosec для urlopen в openai_whisper; (3) S3776 — рефакторинг в daemon (_event_description_from_detail, _streaming_on_*), router (_stream_accumulate_and_parse, _stream_part_content), main (_iso_to_ical_utc, _session_to_vevent_lines, _calendar_event_description_from_detail), desktop (buildRagHitsHtml), NOSONAR для _build_app; (4) S3358 — fake_key в test_caldav_poll; (5) S4624 — убран вложенный template literal в buildRagHitsHtml.
+**Сделано в сессии:** Блок 69 — retry с экспоненциальным backoff для LLM: в `circuit_breaker.py` до 3 попыток (задержки 1s, 2s), лог `llm.retry_backoff`, тесты с patch time.sleep и test_wrap_completion_retries_then_succeeds. Обновлены backlog, roadmap, PROJECT-STATUS-SUMMARY (69 и 72 отмечены как сделанные).
 
-**Следующий шаг:** По [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md): блоки 69/72, Phase D (#70–73) или ручные шаги. verify_pr: при отсутствии hypothesis — `pytest tests/ --ignore=tests/test_rag_parsers_hypothesis.py` или установить hypothesis. Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
+**Следующий шаг:** По [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md): Phase D (#70–73) — A/B тесты, OTel до GA, plugins/templates, packaging GA — или блок 66 (доработка prompt caching), ручные шаги из MANUAL-AND-CANNOT-DO. verify_pr: при отсутствии hypothesis — `pytest tests/ --ignore=tests/test_rag_parsers_hypothesis.py`. Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
 
 ---
 
