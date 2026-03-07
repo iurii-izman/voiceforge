@@ -46,6 +46,9 @@ const I18N = {
     widget_recent_sessions: "Недавние сессии",
     widget_upcoming_events: "Ближайшие встречи",
     widget_costs_7d: "Затраты за 7 дней",
+    widget_last_analysis: "Последний анализ",
+    last_analysis_empty: "Нет проанализированных сессий.",
+    last_analysis_open_btn: "Открыть",
     quick_listen: "Запись",
     quick_analyze_60: "Анализ 60 сек",
     settings_theme_title: "Тема",
@@ -138,6 +141,9 @@ const I18N = {
     widget_recent_sessions: "Recent sessions",
     widget_upcoming_events: "Upcoming events",
     widget_costs_7d: "Costs (7 days)",
+    widget_last_analysis: "Last analysis",
+    last_analysis_empty: "No analyzed sessions yet.",
+    last_analysis_open_btn: "Open",
     quick_listen: "Record",
     quick_analyze_60: "Analyze 60 sec",
     settings_theme_title: "Theme",
@@ -391,6 +397,7 @@ function switchTab(tabId) {
     loadRecentSessions();
     loadUpcomingEvents();
     loadCostWidget();
+    loadLastAnalysisWidget();
   }
 }
 
@@ -627,6 +634,61 @@ function loadUpcomingEvents() {
     });
 }
 
+function loadLastAnalysisWidget() {
+  const el = document.getElementById("last-analysis-content");
+  if (!el) return;
+  if (!daemonOk) {
+    el.textContent = t("last_analysis_empty");
+    return;
+  }
+  el.textContent = t("loading");
+  invoke("get_sessions", { limit: 1 })
+    .then((raw) => {
+      const env = parseEnvelope(raw);
+      const sessions = env?.data?.sessions ?? env?.sessions ?? [];
+      const session = Array.isArray(sessions) && sessions.length > 0 ? sessions[0] : null;
+      const sessionId = session?.id ?? session?.session_id;
+      if (sessionId == null) {
+        el.innerHTML = "<p class=\"muted\">" + escapeHtml(t("last_analysis_empty")) + "</p>";
+        return;
+      }
+      return invoke("get_session_detail", { sessionId: Number(sessionId) }).then((detailRaw) => {
+        const denv = parseEnvelope(detailRaw);
+        const detail = denv?.data?.session_detail ?? denv?.session_detail ?? denv ?? {};
+        const ana = detail.analysis || null;
+        const started = session.started_at ?? session.created_at ?? "";
+        const startShort = started ? String(started).replace(/T.*/, "").replace(/-/g, ".") + (String(started).includes("T") ? " " + String(started).split("T")[1].slice(0, 5) : "") : "";
+        let summaryHtml = "<p class=\"muted\">Сессия " + escapeHtml(String(sessionId)) + (startShort ? " · " + escapeHtml(startShort) : "") + "</p>";
+        if (ana) {
+          const actions = Array.isArray(ana.action_items) ? ana.action_items : [];
+          const n = actions.length;
+          if (n > 0) {
+            summaryHtml += "<ul class=\"last-analysis-list\">";
+            actions.slice(0, 3).forEach((ai) => {
+              const d = typeof ai === "object" ? (ai.description || "") : String(ai);
+              summaryHtml += "<li>" + escapeHtml(d) + "</li>";
+            });
+            if (n > 3) summaryHtml += "<li class=\"muted\">… ещё " + (n - 3) + "</li>";
+            summaryHtml += "</ul>";
+          } else {
+            const q = Array.isArray(ana.questions) ? ana.questions.length : 0;
+            const r = Array.isArray(ana.recommendations) ? ana.recommendations.length : 0;
+            if (q || r) summaryHtml += "<p class=\"muted\">Вопросов: " + q + ", рекомендаций: " + r + "</p>";
+          }
+        }
+        summaryHtml += "<button type=\"button\" class=\"btn small\" id=\"last-analysis-open-btn\">" + escapeHtml(t("last_analysis_open_btn")) + "</button>";
+        el.innerHTML = summaryHtml;
+        document.getElementById("last-analysis-open-btn")?.addEventListener("click", () => {
+          switchTab("sessions");
+          setTimeout(() => showSessionDetail(Number(sessionId), {}), 100);
+        });
+      });
+    })
+    .catch(() => {
+      el.innerHTML = "<p class=\"muted\">" + escapeHtml(t("last_analysis_empty")) + "</p>";
+    });
+}
+
 function loadCostWidget() {
   const el = document.getElementById("cost-widget-content");
   if (!el) return;
@@ -796,7 +858,10 @@ listen("transcript-updated", () => {
   if (daemonOk) loadSessions();
 });
 listen("session-created", (e) => {
-  if (daemonOk) loadSessions();
+  if (daemonOk) {
+    loadSessions();
+    loadLastAnalysisWidget();
+  }
   const id = e.payload?.session_id;
   if (id != null) {
     switchTab("sessions");
@@ -1568,7 +1633,7 @@ const COMPACT_DEFAULT_WIDTH = 380;
 const COMPACT_DEFAULT_HEIGHT = 72;
 const DASHBOARD_ORDER_KEY = "voiceforge_dashboard_order";
 const DASHBOARD_COLLAPSED_KEY = "voiceforge_dashboard_collapsed";
-const DASHBOARD_WIDGET_IDS = ["record", "analyze", "streaming", "recent-sessions", "upcoming-events", "cost-widget"];
+const DASHBOARD_WIDGET_IDS = ["record", "analyze", "streaming", "recent-sessions", "last-analysis", "upcoming-events", "cost-widget"];
 const FAVORITES_KEY = "voiceforge_favorites";
 const SESSION_TAGS_KEY = "voiceforge_session_tags";
 /** Block 44 / #88: clipboard history (last N copied fragments). */
@@ -2270,6 +2335,7 @@ function initDashboardWidgets() {
   loadRecentSessions();
   loadUpcomingEvents();
   loadCostWidget();
+  loadLastAnalysisWidget();
   if (localStorage.getItem(UPDATER_CHECK_ON_LAUNCH_KEY) === "true") {
     checkForUpdate(true);
   }
