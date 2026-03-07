@@ -476,15 +476,20 @@ class VoiceForgeDaemon:
             on_final=on_final,
         )
         chunk_sec, interval_sec = 2.0, 1.5
-        while not self._streaming_stop.is_set():
-            if self._streaming_stop.wait(timeout=interval_sec):
-                break
+        min_samples = int(self._cfg.sample_rate * chunk_sec * 0.5)
+
+        def process_one_chunk() -> None:
             try:
                 mic, _ = get_chunk(chunk_sec)
-                if mic.size >= self._cfg.sample_rate * int(chunk_sec) * 0.5:
+                if mic.size >= min_samples:
                     stream.process_chunk(mic, start_offset_sec=0.0)
             except Exception as e:
                 log.warning("daemon.streaming_stt.failed", error=str(e))
+
+        while not self._streaming_stop.is_set():
+            if self._streaming_stop.wait(timeout=interval_sec):
+                break
+            process_one_chunk()
 
     def _listen_loop(self) -> None:
         try:
@@ -662,7 +667,7 @@ async def _cancel_purge_then_service_reraise(
     try:
         await service_task
     except asyncio.CancelledError:
-        raise
+        raise  # rethrow so caller can handle (S2737)
 
 
 def _event_start_in_window(ev: dict, now: datetime, window_end: datetime) -> bool:
@@ -681,6 +686,29 @@ def _event_start_in_window(ev: dict, now: datetime, window_end: datetime) -> boo
         return False
 
 
+def _calendar_autostart_try_start(daemon: VoiceForgeDaemon, minutes_ahead: int) -> None:
+    """If an event starts within minutes_ahead, start listen (S3776)."""
+    try:
+        from voiceforge.calendar import get_upcoming_events
+
+        events, err = get_upcoming_events(hours_ahead=1)
+        if err or not events:
+            return
+        now = datetime.now(UTC)
+        window_end = now + timedelta(minutes=minutes_ahead)
+        for ev in events:
+            if _event_start_in_window(ev, now, window_end):
+                log.info(
+                    "calendar_autostart.starting",
+                    summary=ev.get("summary", ""),
+                    start=ev.get("start_iso", ""),
+                )
+                daemon.listen_start()
+                return
+    except Exception as e:
+        log.debug("calendar_autostart.check_failed", error=str(e))
+
+
 def _calendar_autostart_loop(daemon: VoiceForgeDaemon) -> None:
     """Block 78: every 60s, if an event starts within N minutes and not listening, start listen."""
     if not getattr(daemon._cfg, "calendar_autostart_enabled", False):
@@ -694,20 +722,7 @@ def _calendar_autostart_loop(daemon: VoiceForgeDaemon) -> None:
         except Exception:
             break
         if not daemon.is_listening():
-            try:
-                from voiceforge.calendar import get_upcoming_events
-                events, err = get_upcoming_events(hours_ahead=1)
-                if err or not events:
-                    continue
-                now = datetime.now(UTC)
-                window_end = now + timedelta(minutes=minutes_ahead)
-                for ev in events:
-                    if _event_start_in_window(ev, now, window_end):
-                        log.info("calendar_autostart.starting", summary=ev.get("summary", ""), start=ev.get("start_iso", ""))
-                        daemon.listen_start()
-                        break
-            except Exception as e:
-                log.debug("calendar_autostart.check_failed", error=str(e))
+            _calendar_autostart_try_start(daemon, minutes_ahead)
 
 
 async def _periodic_purge_task(daemon: VoiceForgeDaemon, stop_event: asyncio.Event) -> None:

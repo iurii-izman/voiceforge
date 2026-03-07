@@ -582,6 +582,32 @@ def listen(
 _TEMPLATE_CHOICES = ["standup", "sprint_review", "one_on_one", "brainstorm", "interview"]
 
 
+def _analyze_echo_success(
+    session_id: int | None,
+    display_text: str | None,
+    analysis_for_log: dict,
+    output: str,
+) -> None:
+    """Echo analyze result (JSON or text) to reduce cognitive complexity (S3776)."""
+    if output == "json":
+        typer.echo(
+            json.dumps(
+                _cli_success_payload(
+                    {
+                        "session_id": session_id,
+                        "display_text": display_text,
+                        "analysis": analysis_for_log,
+                    }
+                ),
+                ensure_ascii=False,
+            )
+        )
+    else:
+        if session_id is not None:
+            typer.echo(f"session_id={session_id}")
+        typer.echo(display_text)
+
+
 @app.command()
 def analyze(
     seconds: int = typer.Option(30, help="Последние N секунд"),
@@ -658,23 +684,7 @@ def analyze(
     except Exception as e:
         log.debug("analyze.telegram_notify_failed", error=str(e))
 
-    if output == "json":
-        typer.echo(
-            json.dumps(
-                _cli_success_payload(
-                    {
-                        "session_id": session_id,
-                        "display_text": display_text,
-                        "analysis": analysis_for_log,
-                    }
-                ),
-                ensure_ascii=False,
-            )
-        )
-    else:
-        if session_id is not None:
-            typer.echo(f"session_id={session_id}")
-        typer.echo(display_text)
+    _analyze_echo_success(session_id, display_text, analysis_for_log, output)
 
 
 def _action_item_status_path() -> Path:
@@ -1149,28 +1159,34 @@ def sessions_to_ical(
         except (ValueError, TypeError):
             return ""
 
-    lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//VoiceForge//sessions//EN"]
-    for s in sessions:
-        start_ical = _iso_to_ical_utc(getattr(s, "started_at", "") or "")
+    def _session_to_vevent_lines(session: object) -> list[str]:
+        """Build VEVENT lines for one session (S3776)."""
+        start_ical = _iso_to_ical_utc(getattr(session, "started_at", "") or "")
         if not start_ical:
-            continue
-        dur_sec = float(getattr(s, "duration_sec", 0) or 0)
-        end_dt = dt_class.fromisoformat((getattr(s, "started_at", "") or "").replace("Z", _ISO_UTC_SUFFIX))
+            return []
+        dur_sec = float(getattr(session, "duration_sec", 0) or 0)
+        end_dt = dt_class.fromisoformat(
+            (getattr(session, "started_at", "") or "").replace("Z", _ISO_UTC_SUFFIX)
+        )
         if end_dt.tzinfo is None:
             end_dt = end_dt.replace(tzinfo=UTC)
         end_dt = end_dt + timedelta(seconds=dur_sec)
         end_ical = end_dt.strftime(_ICAL_DT_FORMAT)
-        sid = getattr(s, "id", 0) or 0
-        summary = f"Session {sid}"
-        desc = f"VoiceForge session {sid}"
-        lines.append("BEGIN:VEVENT")
-        lines.append(f"UID:session-{sid}@voiceforge")
-        lines.append(f"DTSTAMP:{start_ical}")
-        lines.append(f"DTSTART:{start_ical}")
-        lines.append(f"DTEND:{end_ical}")
-        lines.append(f"SUMMARY:{summary}")
-        lines.append(f"DESCRIPTION:{desc}")
-        lines.append("END:VEVENT")
+        sid = getattr(session, "id", 0) or 0
+        return [
+            "BEGIN:VEVENT",
+            f"UID:session-{sid}@voiceforge",
+            f"DTSTAMP:{start_ical}",
+            f"DTSTART:{start_ical}",
+            f"DTEND:{end_ical}",
+            f"SUMMARY:Session {sid}",
+            f"DESCRIPTION:VoiceForge session {sid}",
+            "END:VEVENT",
+        ]
+
+    lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//VoiceForge//sessions//EN"]
+    for s in sessions:
+        lines.extend(_session_to_vevent_lines(s))
     lines.append("END:VCALENDAR")
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text("\r\n".join(lines), encoding="utf-8")
@@ -1303,7 +1319,11 @@ def export_session(
         out_path.write_text(md_text, encoding="utf-8")
         typer.echo(t("export.saved", path=str(out_path)))
         return
-    # PDF or DOCX: write temp md, run pandoc
+    _export_via_pandoc(format, out_path, md_text)
+
+
+def _export_via_pandoc(format: str, out_path: Path, md_text: str) -> None:
+    """Run pandoc for PDF/DOCX export (S3776). Raises SystemExit on failure."""
     tmp_md = out_path.with_suffix(".md")
     tmp_md.write_text(md_text, encoding="utf-8")
     pandoc_args = ["pandoc", str(tmp_md), "-o", str(out_path)]
@@ -1593,22 +1613,26 @@ def calendar_export_ical(
         except (ValueError, TypeError):
             return ""
 
-    lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//VoiceForge//calendar-upcoming//EN"]
-    for i, ev in enumerate(events):
+    def _event_to_vevent_lines(ev: dict, index: int) -> list[str]:
+        """Build VEVENT lines for one calendar event (S3776)."""
         start_ical = _iso_to_ical_utc(ev.get("start_iso") or "")
         if not start_ical:
-            continue
-        end_ical = _iso_to_ical_utc(ev.get("end_iso") or "")
-        if not end_ical:
-            end_ical = start_ical
+            return []
+        end_ical = _iso_to_ical_utc(ev.get("end_iso") or "") or start_ical
         summary = (ev.get("summary") or "(no title)").replace("\r", "").replace("\n", " ")
-        uid = f"voiceforge-upcoming-{i}-{hash(ev.get('start_iso', '')) & 0x7FFFFFFF}@voiceforge"
-        lines.append("BEGIN:VEVENT")
-        lines.append(f"UID:{uid}")
-        lines.append(f"DTSTART:{start_ical}")
-        lines.append(f"DTEND:{end_ical}")
-        lines.append(f"SUMMARY:{summary}")
-        lines.append("END:VEVENT")
+        uid = f"voiceforge-upcoming-{index}-{hash(ev.get('start_iso', '')) & 0x7FFFFFFF}@voiceforge"
+        return [
+            "BEGIN:VEVENT",
+            f"UID:{uid}",
+            f"DTSTART:{start_ical}",
+            f"DTEND:{end_ical}",
+            f"SUMMARY:{summary}",
+            "END:VEVENT",
+        ]
+
+    lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//VoiceForge//calendar-upcoming//EN"]
+    for i, ev in enumerate(events):
+        lines.extend(_event_to_vevent_lines(ev, i))
     lines.append("END:VCALENDAR")
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text("\r\n".join(lines), encoding="utf-8")

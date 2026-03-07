@@ -617,11 +617,12 @@ function loadRecentSessions() {
       });
       html += "</ul>";
       el.innerHTML = html;
+      function openSessionFromWidget(sessionId) {
+        switchTab("sessions");
+        setTimeout(() => showSessionDetail(Number.parseInt(sessionId, 10)), 100);
+      }
       el.querySelectorAll(".btn-link[data-session-id]").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          switchTab("sessions");
-          setTimeout(() => showSessionDetail(Number.parseInt(btn.dataset.sessionId, 10)), 100);
-        });
+        btn.addEventListener("click", () => openSessionFromWidget(btn.dataset.sessionId));
       });
     })
     .catch((e) => {
@@ -2229,6 +2230,26 @@ function initSoundOnRecordCard() {
   });
 }
 
+function getCompactWindowState() {
+  const raw = localStorage.getItem(COMPACT_WINDOW_STATE_KEY);
+  let w = COMPACT_DEFAULT_WIDTH;
+  let h = COMPACT_DEFAULT_HEIGHT;
+  let x = null;
+  let y = null;
+  if (raw) {
+    try {
+      const s = JSON.parse(raw);
+      if (typeof s.width === "number") w = s.width;
+      if (typeof s.height === "number") h = s.height;
+      if (typeof s.x === "number") x = s.x;
+      if (typeof s.y === "number") y = s.y;
+    } catch (e) {
+      console.debug("getCompactWindowState parse", e);
+    }
+  }
+  return { w, h, x, y };
+}
+
 async function applyCompactModeOn(win) {
   try {
     const pos = await win.innerPosition();
@@ -2244,22 +2265,7 @@ async function applyCompactModeOn(win) {
   compactBar.style.display = "flex";
   fullContent.style.display = "none";
   try {
-    const raw = localStorage.getItem(COMPACT_WINDOW_STATE_KEY);
-    let w = COMPACT_DEFAULT_WIDTH;
-    let h = COMPACT_DEFAULT_HEIGHT;
-    let x = null;
-    let y = null;
-    if (raw) {
-      try {
-        const s = JSON.parse(raw);
-        if (typeof s.width === "number") w = s.width;
-        if (typeof s.height === "number") h = s.height;
-        if (typeof s.x === "number") x = s.x;
-        if (typeof s.y === "number") y = s.y;
-      } catch (e) {
-        console.debug("applyCompactMode parse compact state", e);
-      }
-    }
+    const { w, h, x, y } = getCompactWindowState();
     await win.setSize(new LogicalSize(w, h));
     if (x != null && y != null) await win.setPosition(new LogicalPosition(x, y));
   } catch (e) {
@@ -2293,9 +2299,6 @@ async function applyCompactModeOff(win) {
 }
 
 async function applyCompactMode(compact) {
-  const appRoot = document.getElementById("app-root");
-  const compactBar = document.getElementById("compact-bar");
-  const fullContent = document.getElementById("full-content");
   const win = getCurrentWindow();
   if (compact) {
     await applyCompactModeOn(win);

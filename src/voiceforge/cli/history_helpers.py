@@ -166,6 +166,19 @@ def build_session_export_notion(
     return "\n".join(lines)
 
 
+def _format_otter_analysis(analysis: object) -> list[str]:
+    """Format analysis block for Otter export (S3776)."""
+    out = ["", "--- Analysis ---"]
+    for q in getattr(analysis, "questions", []):
+        out.append(f"  Q: {q}")
+    for a in getattr(analysis, "answers", []):
+        out.append(f"  A: {a}")
+    for ai in getattr(analysis, "action_items", []):
+        d = ai.get("description", ai) if isinstance(ai, dict) else str(ai)
+        out.append(f"  • {d}")
+    return out
+
+
 def build_session_export_otter(
     session_id: int,
     segments: list[object],
@@ -182,15 +195,7 @@ def build_session_export_otter(
         ss = int(start_s % 60)
         lines.append(f"{mm}:{ss:02d} {speaker}: {text}")
     if analysis:
-        lines.append("")
-        lines.append("--- Analysis ---")
-        for q in getattr(analysis, "questions", []):
-            lines.append(f"  Q: {q}")
-        for a in getattr(analysis, "answers", []):
-            lines.append(f"  A: {a}")
-        for ai in getattr(analysis, "action_items", []):
-            d = ai.get("description", ai) if isinstance(ai, dict) else str(ai)
-            lines.append(f"  • {d}")
+        lines.extend(_format_otter_analysis(analysis))
     return "\n".join(lines)
 
 
