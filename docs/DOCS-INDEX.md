@@ -23,6 +23,20 @@
 
 ---
 
+## По сценариям (блок 94)
+
+| Сценарий | Документы |
+|----------|-----------|
+| **Начало работы** | [first-meeting-5min.md](first-meeting-5min.md), [runbooks/quickstart.md](runbooks/quickstart.md), [runbooks/installation-guide.md](runbooks/installation-guide.md) |
+| **Сборка и установка** | [runbooks/desktop-build-deps.md](runbooks/desktop-build-deps.md), [runbooks/offline-package.md](runbooks/offline-package.md), [runbooks/desktop-updater.md](runbooks/desktop-updater.md) |
+| **Конфигурация и ключи** | [runbooks/config-env-contract.md](runbooks/config-env-contract.md), [runbooks/keyring-keys-reference.md](runbooks/keyring-keys-reference.md) |
+| **Разработка и агент** | [AGENTS.md](../AGENTS.md), [runbooks/agent-context.md](runbooks/agent-context.md), [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md), [runbooks/cursor.md](runbooks/cursor.md), [architecture/README.md](architecture/README.md) |
+| **Релиз и качество** | [runbooks/release-and-quality.md](runbooks/release-and-quality.md), [runbooks/repo-and-git-governance.md](runbooks/repo-and-git-governance.md), [audit/audit.md](audit/audit.md) |
+| **Безопасность и зависимости** | [runbooks/security-and-dependencies.md](runbooks/security-and-dependencies.md) |
+| **Фичи (календарь, RAG, Telegram)** | [runbooks/calendar-integration.md](runbooks/calendar-integration.md), [runbooks/rag-formats.md](runbooks/rag-formats.md), [runbooks/telegram-bot-setup.md](runbooks/telegram-bot-setup.md) |
+
+---
+
 ## Вся документация по каталогам
 
 ### Корень репо
