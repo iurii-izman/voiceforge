@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-07 (Sonar S6819/S2486: dialog, nav buttons, handle exceptions)
+**Обновлено:** 2026-03-07 (clipboard history #88, Sonar S7764/S2871/S3358)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Sonar S6819 и S2486 в desktop: (1) Онбординг и модалка деталей сессии переведены на `<dialog>` (showModal/close), навигация — на `<button type="button">` вместо div с role="button". (2) Графики затрат: canvas обёрнуты в `<figure aria-label="…">` вместо role="img" на canvas. (3) S2486: во всех пустых catch добавлена обработка через console.debug("context", e). Стили: ::backdrop для dialog, сброс стилей кнопок в .sidebar .nav-item.
+**Сделано в сессии:** (1) История буфера обмена (#88, блок 44): voiceforge_clipboard_history в localStorage (до 20 записей), кнопка «История копирований» и поповер в деталях сессии; запись при копировании транскрипта, action items и сегмента. (2) Sonar в desktop: S7764 (globalThis вместо window), S2871 (явный compare для sort тегов), S3358 (вынос вложенного тернарного оператора в setStored). Roadmap: блок 44 отмечен реализованным.
 
-**Следующий шаг:** Следующий блок из #88–95 (история буфера #88, слайд-панель настроек #89, виджет «Последний анализ» #92) или оставшиеся замечания Sonar (S3776, S7764, S2871 и др.). Либо продолжение по roadmap/audit.
+**Следующий шаг:** Следующий блок из #89–95: слайд-панель настроек (#89), виджет «Последний анализ» (#92) или остальные замечания Sonar (S3776 в daemon.py/main.py, S2004/S6660 и др. в desktop). Либо продолжение по roadmap/audit.
 
 ---
 
@@ -30,7 +30,7 @@
 - **PR #81, #79:** закрыты с комментарием «Applied in main» (2026-03-07).
 - **Открытые issues:** #65 (CVE — ждём upstream), #50 (macOS/WSL2 — p2/backlog).
 
-**Sonar:** Исправлены S1192, S7761, S7764, S6819, S2486 в desktop. Остаток: S3776, S7764 (globalThis), S2871, S3358 и др. **Mypy:** в scope verify_pr — 0 ошибок. **verify_pr:** Ruff + Mypy OK; bandit — зелёный (nosec B310/B608). **Gitleaks:** allowlist .hypothesis/ + .gitignore; шаг [8/8] в CI проходит (workflow Gitleaks зелёный после 270b7e2/42f904c).
+**Sonar:** Исправлены S1192, S7761, S7764, S6819, S2486, S2871, S3358 в desktop. Остаток: S3776 (daemon.py, main.py, history_helpers, desktop main.js), S2004/S6660 и др. **Mypy:** в scope verify_pr — 0 ошибок. **verify_pr:** Ruff + Mypy OK; bandit — зелёный (nosec B310/B608). **Gitleaks:** allowlist .hypothesis/ + .gitignore; шаг [8/8] в CI проходит (workflow Gitleaks зелёный после 270b7e2/42f904c).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
