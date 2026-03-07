@@ -172,6 +172,11 @@ pub async fn get_upcoming_calendar_events() -> Result<String, String> {
 }
 
 #[tauri::command]
+pub async fn set_tray_theme(app: tauri::AppHandle, is_dark: bool) -> Result<(), String> {
+    crate::tray::set_tray_theme(&app, is_dark).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 pub async fn export_session(session_id: u32, format: String) -> Result<String, String> {
     let fmt = format.to_lowercase();
     if fmt != "md" && fmt != "pdf" && fmt != "docx" && fmt != "notion" && fmt != "otter" {

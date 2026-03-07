@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Gitleaks: в `.gitleaks.toml` добавлен allowlist для `.hypothesis/` (кэш Hypothesis даёт ложные срабатывания при локальном `verify_pr` с `--no-git`); `.hypothesis/` добавлен в `.gitignore`; в security-and-dependencies.md — примечание про исключения. Коммит 270b7e2, пуш в main.
+**Сделано в сессии:** (1) Gitleaks: шаг [8/8] verify_pr в CI проходит после правок (allowlist .hypothesis/, .gitignore) — workflow Gitleaks #296/#297 зелёный. (2) В доки добавлено: Python 3.12 и 3.14 в toolbox-43 (next-iteration-focus, bootstrap.md). (3) Блок #87 (тёмная тема трея): реализованы tray с id, иконка из icons/icon.png, команда `set_tray_theme(is_dark)`; при наличии icons/icon-dark.png используется для тёмной темы; в Cargo.toml добавлены image-png, tray-icon и недостающие tauri-плагины для сборки desktop.
 
-**Следующий шаг:** Проверить verify_pr локально или в CI: шаг [8/8] gitleaks после правок должен проходить (если 7 leaks были из .hypothesis). По желанию: Sonar (S3776, S6819, S2486 и др.) или реализация одного из блоков #87–95 по приоритету.
+**Следующий шаг:** Подключить вызов `set_tray_theme` из фронта при смене темы (prefers-color-scheme или переключатель в UI). По желанию: Sonar (S6819, S2486 и др.) или следующий блок из #88–95.
 
 ---
 
@@ -30,7 +30,7 @@
 - **PR #81, #79:** закрыты с комментарием «Applied in main» (2026-03-07).
 - **Открытые issues:** #65 (CVE — ждём upstream), #50 (macOS/WSL2 — p2/backlog).
 
-**Sonar:** Исправлены S1192, S7761, S7764 в desktop. Остаток: S3776, S6819, S2486 и др. **Mypy:** в scope verify_pr — 0 ошибок. **verify_pr:** Ruff + Mypy OK; bandit — зелёный (nosec B310/B608). **Gitleaks:** добавлен allowlist для .hypothesis/ (коммит 270b7e2); при локальном прогоне 7 leaks могли быть из кэша Hypothesis — проверить после пуша.
+**Sonar:** Исправлены S1192, S7761, S7764 в desktop. Остаток: S3776, S6819, S2486 и др. **Mypy:** в scope verify_pr — 0 ошибок. **verify_pr:** Ruff + Mypy OK; bandit — зелёный (nosec B310/B608). **Gitleaks:** allowlist .hypothesis/ + .gitignore; шаг [8/8] в CI проходит (workflow Gitleaks зелёный после 270b7e2/42f904c).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
@@ -121,7 +121,7 @@
 
 - **OOM / зависание Cursor при тестах:** запускать **только лёгкие** тесты, напр. `uv run pytest tests/test_prompt_loader.py tests/test_core_metrics.py tests/test_llm_circuit_breaker.py tests/test_tracing.py tests/test_audio_buffer.py tests/test_telegram_notify.py tests/test_llm_retry.py -q --tb=line` и/или `uv run pytest tests/eval/ -k "not judge" -q`. Не запускать полный `pytest tests/` в Cursor (pyannote/torch/pipeline) — риск OOM.
 - **OOM при тестах (pyannote/torch):** если полный `pytest tests/` вылетает по памяти, запускать подмножество: `uv run pytest tests/test_pipeline_integration.py tests/test_caldav_poll.py tests/test_calendar.py tests/test_transcript_log.py -q`. В test_pipeline_integration тест с полным run мокает _gather_step2, чтобы не загружать diarizer/RAG.
-- **Pre-commit (Fedora Atomic):** Python 3.12 в контейнере **fedora-toolbox-43** (`toolbox run -c fedora-toolbox-43 bash -c 'cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files'`). Выполнять `./scripts/ensure_precommit_env.sh` внутри этого контейнера. Вне toolbox (на хосте без 3.12) — временно `git commit --no-verify`, `git push --no-verify`.
+- **Pre-commit (Fedora Atomic):** Python **3.12 и 3.14** установлены в контейнере **fedora-toolbox-43** (toolbox-43). Pre-commit и uv: `toolbox run -c fedora-toolbox-43 bash -c 'cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files'`. Выполнять `./scripts/ensure_precommit_env.sh` внутри этого контейнера. Вне toolbox (на хосте без 3.12) — временно `git commit --no-verify`, `git push --no-verify`.
 - **Sonar:** `uv run python scripts/sonar_fetch_issues.py` — проверить остаток после последнего скана.
 - **Критично:** pyannote 4.0.4; при OOM — [pyannote-version.md](pyannote-version.md). Десктоп — toolbox ([desktop-build-deps.md](desktop-build-deps.md)). Новые CLI-команды — через ADR (ADR-0001).
 - **Ключи:** только keyring ([keyring-keys-reference.md](keyring-keys-reference.md)).

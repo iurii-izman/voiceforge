@@ -84,6 +84,7 @@ pub fn run() {
             commands::analyze,
             commands::get_streaming_transcript,
             commands::get_upcoming_calendar_events,
+            commands::set_tray_theme,
             commands::export_session,
         ])
         .run(tauri::generate_context!())
