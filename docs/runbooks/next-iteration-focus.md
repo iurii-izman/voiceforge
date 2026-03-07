@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Ещё правки Sonar в desktop: вынесены formatStartedShort(), buildLastAnalysisSummaryHtml(), applyCostWidgetContent() для снижения S3776/S2004 в loadLastAnalysisWidget и loadCostWidget; исправлен S6535 (кавычка в template literal). Без привязки к issue.
+**Сделано в сессии:** Карточка #86 (Backlog E) переведена в In Progress. Sonar S3776: вынесены applyUiLangDataAttrs(), applyUiLangStatusElements() из applyUiLang; getValueToSetInStore() из loadStoreAndMigrate. Refs #86.
 
-**Следующий шаг:** Оставшиеся Sonar (S3776/S2004 в других функциях desktop/main/daemon) или блоки roadmap (#90, #91, #93). Либо audit.
+**Следующий шаг:** Продолжить Sonar (S3776/S2004 в renderSessionDetail и др.) в рамках #86 или блоки roadmap (#90, #91, #93). Либо audit.
 
 ---
 
