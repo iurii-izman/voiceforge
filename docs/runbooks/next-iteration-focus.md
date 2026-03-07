@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-07 (блок 79 — создание события из сессии; Closes #95)
+**Обновлено:** 2026-03-07 (кнопка «Добавить в календарь» в UI десктопа, блок 79)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Блок 79 — создание события из сессии (#95): `calendar.create_event()`, CLI `calendar create-from-session`, демон `create_event_from_session`, D-Bus `CreateEventFromSession`, Tauri `create_event_from_session`; тесты и правка pipeline/get_settings моков. Closes #95.
+**Сделано в сессии:** Кнопка «Добавить в календарь» в модалке деталей сессии десктопа: вызов `create_event_from_session`, i18n (ru/en), уведомление при успехе, alert при ошибке.
 
-**Следующий шаг:** Следующая задача по [backlog-and-actions.md](../plans/backlog-and-actions.md) / [roadmap-100-blocks.md](../plans/roadmap-100-blocks.md): блок 68 (streaming LLM в UI, #91) или другие отложенные блоки (66 prompt caching #90, 71 уже реализован #93). Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
+**Следующий шаг:** Следующая задача по [backlog-and-actions.md](../plans/backlog-and-actions.md) / [roadmap-100-blocks.md](../plans/roadmap-100-blocks.md): блок 68 (streaming LLM в UI, #91) или другие отложенные блоки (66 prompt caching #90, 71 Whisper #93). Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
 
 ---
 
