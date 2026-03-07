@@ -107,8 +107,15 @@ class VoiceForgeDaemon:
         from voiceforge.main import run_analyze_pipeline
 
         timeout_sec = max(1.0, float(getattr(self._cfg, "analyze_timeout_sec", 120.0)))
+
+        def stream_cb(delta: str | None) -> None:
+            if self._iface:
+                self._iface.StreamingAnalysisChunk(delta if delta is not None else "")
+
         with ThreadPoolExecutor(max_workers=1) as ex:
-            future = ex.submit(run_analyze_pipeline, seconds, template=template)
+            future = ex.submit(
+                run_analyze_pipeline, seconds, template=template, stream_callback=stream_cb
+            )
             try:
                 text, segments_for_log, analysis_for_log = future.result(timeout=timeout_sec)
             except FuturesTimeoutError:

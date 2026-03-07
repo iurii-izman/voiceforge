@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-07 (реализованы #91, #93, Sonar S2737/S7721/S3776/S7735)
+**Обновлено:** 2026-03-07 (подключён стрим анализа в desktop UI; Closes #91)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Реализованы #91 (streaming LLM: stream_completion, analyze_meeting_stream, run_analyze_pipeline(stream_callback), D-Bus StreamingAnalysisChunk, POST /api/analyze/stream SSE) и #93 (stt_backend local|openai, OpenAI Whisper API фасад, get_transcriber_for_config). Исправлены Sonar S2737, S7721, S3776, S7735. Коммит 9b92a46, пуш в main.
+**Сделано в сессии:** Подключена подписка на стрим анализа в desktop UI: демон передаёт stream_callback в run_analyze_pipeline и эмитит D-Bus StreamingAnalysisChunk; Tauri dbus_signals подписан на StreamingAnalysisChunk и эмитит событие streaming-analysis-chunk; фронт слушает событие и выводит куски в виджете «Анализ» (#analyze-streaming-output). Обновлён DBUS.md. Closes #91.
 
-**Следующий шаг:** Подключить подписку на стрим в desktop UI (D-Bus StreamingAnalysisChunk → Tauri event → вывод в деталях сессии или модалке анализа); либо следующая задача по [backlog-and-actions.md](../plans/backlog-and-actions.md) / roadmap. Pre-commit в toolbox 43: `toolbox run -c fedora-toolbox-43 bash -c 'cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files'`.
+**Следующий шаг:** Следующая задача по [backlog-and-actions.md](../plans/backlog-and-actions.md) / [roadmap-100-blocks.md](../plans/roadmap-100-blocks.md): например блок 49 (виджет «Последний анализ»), 75 (поиск по RAG из UI), 35 (тёмная тема трея) или 44 (история буфера обмена). Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
 
 ---
 

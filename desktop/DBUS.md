@@ -28,8 +28,9 @@
 - **TranscriptUpdated**(session_id: u32) — обновление транскрипта/сессий (session_id может быть 0).
 - **AnalysisDone**(status: str) — завершение анализа, status = "ok" | "error".
 - **TranscriptChunk**(text, speaker, timestamp_ms, is_final) — стриминг STT (опционально).
+- **StreamingAnalysisChunk**(delta: str) — стрим кусков текста анализа LLM; пустая строка = конец стрима (#91).
 
-Десктоп подписывается на сигналы **ListenStateChanged**, **AnalysisDone**, **TranscriptChunk** и **TranscriptUpdated** (модуль `dbus_signals`) и обновляет UI по событиям (реактивно); опрос IsListening/GetStreamingTranscript по таймеру используется при инициализации и как fallback.
+Десктоп подписывается на сигналы **ListenStateChanged**, **AnalysisDone**, **TranscriptChunk**, **TranscriptUpdated** и **StreamingAnalysisChunk** (модуль `dbus_signals`) и обновляет UI по событиям (реактивно); опрос IsListening/GetStreamingTranscript по таймеру используется при инициализации и как fallback.
 
 ## Экспорт
 

@@ -12,6 +12,7 @@ const EVENT_ANALYSIS_DONE: &str = "analysis-done";
 const EVENT_SESSION_CREATED: &str = "session-created";
 const EVENT_TRANSCRIPT_CHUNK: &str = "transcript-chunk";
 const EVENT_TRANSCRIPT_UPDATED: &str = "transcript-updated";
+const EVENT_STREAMING_ANALYSIS_CHUNK: &str = "streaming-analysis-chunk";
 
 fn rule_listen_state() -> Result<MatchRule<'static>, zbus::Error> {
     Ok(MatchRule::builder()
@@ -60,6 +61,16 @@ fn rule_transcript_updated() -> Result<MatchRule<'static>, zbus::Error> {
         .path(DBUS_PATH)?
         .interface(DBUS_INTERFACE)?
         .member("TranscriptUpdated")?
+        .build())
+}
+
+fn rule_streaming_analysis_chunk() -> Result<MatchRule<'static>, zbus::Error> {
+    Ok(MatchRule::builder()
+        .msg_type(Type::Signal)
+        .sender(DBUS_NAME)?
+        .path(DBUS_PATH)?
+        .interface(DBUS_INTERFACE)?
+        .member("StreamingAnalysisChunk")?
         .build())
 }
 
@@ -143,11 +154,26 @@ pub fn spawn_signal_listener(app: AppHandle) {
             }
         };
 
+        let stream_streaming_analysis = match MessageStream::for_match_rule(
+            rule_streaming_analysis_chunk().expect("StreamingAnalysisChunk rule"),
+            &conn,
+            Some(8),
+        )
+        .await
+        {
+            Ok(s) => s,
+            Err(e) => {
+                eprintln!("dbus_signals: StreamingAnalysisChunk stream: {}", e);
+                return;
+            }
+        };
+
         let app_listen = app.clone();
         let app_analysis = app.clone();
         let app_session_created = app.clone();
         let app_chunk = app.clone();
         let app_updated = app.clone();
+        let app_streaming_analysis = app.clone();
 
         tauri::async_runtime::spawn(async move {
             let mut stream = stream_listen;
@@ -214,6 +240,20 @@ pub fn spawn_signal_listener(app: AppHandle) {
                         let _ = app_updated.emit(
                             EVENT_TRANSCRIPT_UPDATED,
                             serde_json::json!({ "session_id": session_id }),
+                        );
+                    }
+                }
+            }
+        });
+
+        tauri::async_runtime::spawn(async move {
+            let mut stream = stream_streaming_analysis;
+            while let Some(res) = stream.next().await {
+                if let Ok(msg) = res {
+                    if let Ok((delta,)) = msg.body().deserialize::<(String,)>() {
+                        let _ = app_streaming_analysis.emit(
+                            EVENT_STREAMING_ANALYSIS_CHUNK,
+                            serde_json::json!({ "delta": delta }),
                         );
                     }
                 }

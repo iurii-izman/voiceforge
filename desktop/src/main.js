@@ -889,6 +889,18 @@ async function notify(title, body) {
   }
 }
 
+listen("streaming-analysis-chunk", (e) => {
+  const delta = e.payload?.delta ?? "";
+  const outEl = document.getElementById("analyze-streaming-output");
+  if (!outEl) return;
+  if (delta === "") {
+    outEl.dataset.streamEnd = "1";
+    return;
+  }
+  outEl.style.display = "block";
+  outEl.textContent += delta;
+  outEl.scrollTop = outEl.scrollHeight;
+});
 listen("analysis-done", (e) => {
   const status = e.payload?.status;
   const statusEl = document.getElementById("analyze-status");
@@ -900,6 +912,8 @@ listen("analysis-done", (e) => {
     statusEl.textContent = msg;
   }
   document.getElementById("analyze-btn").disabled = false;
+  const outEl = document.getElementById("analyze-streaming-output");
+  if (outEl && outEl.dataset.streamEnd === "1") outEl.dataset.streamEnd = "";
   if (daemonOk) loadSessions();
   if (status === "ok") notify("VoiceForge", "Анализ завершён.");
   else if (status === "error") notify("VoiceForge", "Анализ: ошибка.");
@@ -968,6 +982,12 @@ document.getElementById("analyze-btn").addEventListener("click", async () => {
   const template = document.getElementById("analyze-template").value || null;
   const statusEl = document.getElementById("analyze-status");
   const btn = document.getElementById("analyze-btn");
+  const outEl = document.getElementById("analyze-streaming-output");
+  if (outEl) {
+    outEl.style.display = "none";
+    outEl.textContent = "";
+    delete outEl.dataset.streamEnd;
+  }
   btn.disabled = true;
   statusEl.textContent = "Анализ…";
   try {
