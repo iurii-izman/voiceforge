@@ -34,6 +34,18 @@
 3. Добавить тесты (unit для парсера и/или интеграционный тест `voiceforge index` на файле нового типа).
 4. Обновить этот runbook (таблица форматов, при необходимости — зависимости в [security-and-dependencies.md](security-and-dependencies.md)).
 
+## Индексация по расписанию (блок 73)
+
+Периодическую переиндексацию RAG можно выполнять через **cron** или systemd timer. Команда `voiceforge index <path>` добавляет/обновляет документы в базе (инкрементально по необходимости).
+
+Пример crontab (ежедневно в 06:00, из каталога репо):
+
+```bash
+0 6 * * * cd /path/to/voiceforge && uv run voiceforge index /path/to/docs
+```
+
+Или через systemd timer: юнит запускает `voiceforge index ...`; таймер — по расписанию (см. [install-service](cli-commands-and-run.md) для шаблона юнита демона; для index достаточно oneshot-юнита и timer).
+
 ## См. также
 
 - [security-and-dependencies.md](security-and-dependencies.md) — политика зависимостей и добавление новых пакетов.

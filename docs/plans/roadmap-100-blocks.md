@@ -210,6 +210,7 @@
 - **70** — Метрики по моделям: model_call_counts в get_stats (словарь model_id → число вызовов).
 - **74** — RAG exclude_patterns: настройка rag_exclude_patterns в config, пропуск путей в _index_directory по fnmatch.
 - **76** — Статистика RAG в status/doctor: _get_rag_stats(), rag.indexed_sources_count/chunks_count в get_status_data(), doctor.rag_stats.
+- **73** — Индексация RAG по расписанию: раздел в rag-formats.md (cron, systemd timer), пример crontab для `voiceforge index`.
 - **77** — Экспорт RAG-индекса: команда `voiceforge rag-export --output <file>` (метаданные источников и чанков, опция --content).
 - **78** — Автостарт записи по календарю: calendar_autostart_enabled, calendar_autostart_minutes в config; поток _calendar_autostart_loop в демоне (get_upcoming_events, старт listen за N мин до события).
 - **79** — (не реализовано в этой сессии)
@@ -233,6 +234,7 @@
 - **98** — a11y: явный role="main" и aria-label на main, существующие aria-label сохранены.
 - **99** — AppImage в CI: артефакт desktop-appimage (bundle/appimage/) в job desktop-build.
 - **48** — Экспорт календаря в iCal: команда `voiceforge calendar export-ical --output file.ics` (--hours), запись ближайших событий CalDAV в .ics.
+- **57** — Индикатор прогресса в TTY: при выводе в текст и TTY — «Analyzing…» / «Exporting…» в stderr перед длительной операцией (analyze, export).
 - **60** — analyze --dry-run: флаг --dry-run, run_analyze_pipeline(dry_run=True) без вызова LLM; вывод «что будет проанализировано» (сегменты, длина транскрипта).
 - **84** — E2E десктопа: Playwright (e2e/nav.spec.js) против vite preview; проверка загрузки, активной вкладки, переключения вкладок; job desktop-e2e в CI; онбординг скрыт в тестах через localStorage.
 - **97** — Английская локализация (задел): выбор языка в настройках (ru/en), ключ voiceforge_ui_lang в Store, t() и applyUiLang(); навигация, заголовки вкладок (Главная/Сессии/Затраты/Настройки) и карточка языка из I18N.

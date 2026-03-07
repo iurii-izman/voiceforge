@@ -597,6 +597,8 @@ def analyze(
     if template is not None and template not in _TEMPLATE_CHOICES:
         typer.echo(t("analyze.unknown_template", template=template, choices=", ".join(_TEMPLATE_CHOICES)), err=True)
         raise SystemExit(1)
+    if not dry_run and output == "text" and sys.stderr.isatty():
+        typer.echo("Analyzing…", err=True)
     display_text, segments_for_log, analysis_for_log = run_analyze_pipeline(
         seconds, template=template, dry_run=dry_run
     )
@@ -1256,6 +1258,8 @@ def export_session(
     """Экспорт сессии в Markdown, PDF, DOCX, Notion или Otter (blocks 39, 81)."""
     from voiceforge.core.transcript_log import TranscriptLog
 
+    if sys.stderr.isatty():
+        typer.echo("Exporting…", err=True)
     if format not in ("md", "pdf", "docx", "notion", "otter"):
         typer.echo(t("export.format_md_or_pdf"), err=True)
         raise SystemExit(1)
