@@ -1637,9 +1637,18 @@ async function setupCloseToTray() {
   });
 }
 
+/** Returns whether the effective theme is dark (for tray icon). */
+function getEffectiveIsDark(themeValue) {
+  const v = themeValue ?? localStorage.getItem(THEME_KEY) ?? "dark";
+  if (v === "auto") return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  return v === "dark";
+}
+
 function applyTheme(theme) {
   const v = theme || localStorage.getItem(THEME_KEY) || "dark";
   document.body.className = "theme-" + (v === "auto" ? "auto" : v);
+  const isDark = getEffectiveIsDark(v);
+  invoke("set_tray_theme", { isDark }).catch(() => {});
 }
 
 function emptyStateHtml(icon, title, hint, linkHref) {
@@ -1667,6 +1676,9 @@ function initTheme() {
       setStored(THEME_KEY, r.value);
       applyTheme(r.value);
     });
+  });
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+    if (localStorage.getItem(THEME_KEY) === "auto") applyTheme("auto");
   });
 }
 

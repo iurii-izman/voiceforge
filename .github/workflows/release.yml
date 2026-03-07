@@ -66,7 +66,7 @@ jobs:
           cd desktop
           npm ci
           npm run build
-          cargo tauri build
+          npm run tauri build
       - name: Build Flatpak
         run: |
           chmod +x scripts/build-flatpak.sh

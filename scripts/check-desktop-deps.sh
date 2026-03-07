@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Check that the environment is ready for building the Tauri desktop app (cargo tauri build).
+# Check that the environment is ready for building the Tauri desktop app (npm run tauri build).
 # Run from repo root or from desktop/.
 set -euo pipefail
 
@@ -69,7 +69,7 @@ else
 fi
 
 if [[ $errors -gt 0 ]]; then
-  echo "--- $errors check(s) failed. Fix them before running: cd desktop && cargo tauri build"
+  echo "--- $errors check(s) failed. Fix them before running: cd desktop && npm run tauri build"
   exit 1
 fi
 if [[ $warnings -gt 0 ]]; then

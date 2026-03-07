@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-07 (gitleaks CI OK; блок #87 тёмная тема трея; Python 3.12/3.14 toolbox-43; коммит e972ba0)
+**Обновлено:** 2026-03-07 (set_tray_theme с фронта при смене темы; сборка desktop: npm run tauri build, CI=false при CI=1)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** (1) Gitleaks: шаг [8/8] verify_pr в CI проходит после правок (allowlist .hypothesis/, .gitignore) — workflow Gitleaks #296/#297 зелёный. (2) В доки добавлено: Python 3.12 и 3.14 в toolbox-43 (next-iteration-focus, bootstrap.md). (3) Блок #87 (тёмная тема трея): реализованы tray с id, иконка из icons/icon.png, команда `set_tray_theme(is_dark)`; при наличии icons/icon-dark.png используется для тёмной темы; в Cargo.toml добавлены image-png, tray-icon и недостающие tauri-плагины для сборки desktop.
+**Сделано в сессии:** (1) Вызов `set_tray_theme(isDark)` из фронта при смене темы: в `applyTheme()` вычисляется эффективная тема (getEffectiveIsDark: auto → prefers-color-scheme), вызывается `invoke("set_tray_theme", { isDark })`; при выборе «Как в системе» подписываемся на `matchMedia("(prefers-color-scheme: dark)").addEventListener("change")` и переприменяем тему. (2) Сборка desktop: в release.yml и скриптах заменён `cargo tauri build` на `npm run tauri build`; в desktop-build-deps.md добавлена подсказка при ошибке `--ci`: локально запускать `CI=false npm run tauri build`. (3) В desktop/package.json добавлен скрипт `tauri:build`.
 
-**Следующий шаг:** Подключить вызов `set_tray_theme` из фронта при смене темы (prefers-color-scheme или переключатель в UI). По желанию: Sonar (S6819, S2486 и др.) или следующий блок из #88–95.
+**Следующий шаг:** По желанию: Sonar (S6819, S2486 и др.) или следующий блок из #88–95 (история буфера, слайд-панель настроек, виджет «Последний анализ» и т.д.). Либо продолжение по roadmap/audit.
 
 ---
 

@@ -16,10 +16,10 @@ fi
 
 # Build .deb if missing
 if ! compgen -G "$BUNDLE_DEB_DIR/VoiceForge_"*"_amd64.deb" >/dev/null 2>&1; then
-  echo "=== .deb not found; building desktop (npm run build && cargo tauri build) ==="
+  echo "=== .deb not found; building desktop (npm run build && npm run tauri build) ==="
   cd "$REPO_ROOT/desktop"
   npm run build
-  cargo tauri build
+  npm run tauri build
   cd "$REPO_ROOT"
 fi
 

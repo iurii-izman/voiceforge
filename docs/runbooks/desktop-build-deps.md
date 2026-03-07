@@ -50,8 +50,10 @@ From repo root:
 Or from `desktop/`:
 
 ```bash
-cd desktop && cargo tauri build
+cd desktop && npm run tauri build
 ```
+
+If the build fails with `invalid value '1' for '--ci'`, run with `CI=false`: `cd desktop && CI=false npm run tauri build` (CI in Cursor may be set to `1`; Tauri expects `true` or `false`).
 
 If the script reports all checks OK, `cargo tauri build` should succeed. For OOM or crashes in the Python/daemon part (e.g. diarization), see [pyannote-version.md](pyannote-version.md).
 
@@ -72,8 +74,10 @@ cd /path/to/voiceforge
 **Сборка:**
 
 ```bash
-cd /path/to/voiceforge/desktop && npm run build && cargo tauri build
+cd /path/to/voiceforge/desktop && npm run build && npm run tauri build
 ```
+
+Локально при `CI=1` в окружении: `CI=false npm run tauri build`.
 
 Артефакты: `desktop/src-tauri/target/release/bundle/`.
 
@@ -82,7 +86,7 @@ cd /path/to/voiceforge/desktop && npm run build && cargo tauri build
 1. **Войти в toolbox:** `toolbox enter` (или `toolbox enter ИМЯ`).
 2. **Установить зависимости:** пакеты из раздела выше (dnf) или `./scripts/setup-desktop-toolbox.sh` из корня репо.
 3. **Проверить окружение:** `./scripts/check-desktop-deps.sh` — все проверки [OK].
-4. **Собрать:** `cd desktop && npm run build && cargo tauri build`.
+4. **Собрать:** `cd desktop && npm run build && npm run tauri build`.
 
 Без webkit2gtk-4.1 и gtk+-3.0 `check-desktop-deps` выдаст [FAIL]; в этом случае устанавливать пакеты в toolbox (шаг 2).
 
@@ -93,7 +97,7 @@ cd /path/to/voiceforge/desktop && npm run build && cargo tauri build
 
 ## Сборка релиза и упаковка
 
-- Релизный бинарник: `cd desktop && npm run build && cargo tauri build`. Артефакты в `desktop/src-tauri/target/release/bundle/` (deb, rpm, appimage).
+- Релизный бинарник: `cd desktop && npm run build && npm run tauri build`. Артефакты в `desktop/src-tauri/target/release/bundle/` (deb, rpm, appimage).
 - **Flatpak:** манифест `desktop/flatpak/com.voiceforge.app.yaml`. Локальная сборка из .deb: `./scripts/build-flatpak.sh` (см. `offline-package.md`). Требуются flatpak-builder и runtime org.gnome.Platform//46.
 
 ### AppImage в toolbox (Fedora)
@@ -103,7 +107,7 @@ cd /path/to/voiceforge/desktop && npm run build && cargo tauri build
 ```bash
 export NO_STRIP=true
 export APPIMAGE_EXTRACT_AND_RUN=1
-cd desktop && npm run build && cargo tauri build
+cd desktop && npm run build && npm run tauri build
 ```
 
 Убедитесь, что установлен `librsvg2-devel` (см. системные пакеты выше). Артефакт: `desktop/src-tauri/target/release/bundle/appimage/VoiceForge_*_amd64.AppImage`.
