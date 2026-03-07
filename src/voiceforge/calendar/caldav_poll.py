@@ -15,6 +15,7 @@ log = structlog.get_logger()
 _CALDAV_URL = "caldav_url"
 _CALDAV_USERNAME = "caldav_username"
 _CALDAV_PASSWORD = "caldav_password"
+_CALENDAR_DEPS_HINT = "Install calendar deps: uv sync --extra calendar"
 
 
 def _dt_to_aware(dt: Any) -> datetime | None:
@@ -80,7 +81,7 @@ def poll_events_started_in_last(minutes: int = 5) -> tuple[list[dict[str, Any]],
     try:
         import caldav
     except ImportError:
-        return [], "Install calendar deps: uv sync --extra calendar"
+        return [], _CALENDAR_DEPS_HINT
 
     now = datetime.now(UTC)
     start_range = now - timedelta(minutes=minutes)
@@ -115,7 +116,7 @@ def list_calendars() -> tuple[list[dict[str, Any]], str | None]:
     try:
         import caldav
     except ImportError:
-        return [], "Install calendar deps: uv sync --extra calendar"
+        return [], _CALENDAR_DEPS_HINT
 
     try:
         client = caldav.DAVClient(url=url, username=username, password=password)
@@ -169,7 +170,7 @@ def get_upcoming_events(hours_ahead: int = 48) -> tuple[list[dict[str, Any]], st
     try:
         import caldav
     except ImportError:
-        return [], "Install calendar deps: uv sync --extra calendar"
+        return [], _CALENDAR_DEPS_HINT
 
     now = datetime.now(UTC)
     end_range = now + timedelta(hours=hours_ahead)

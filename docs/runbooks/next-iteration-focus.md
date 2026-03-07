@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-07 (runbook pre-beta Sonar/GitHub; фокус на порядок → релиз беты)
+**Обновлено:** 2026-03-07 (pre-beta: Sonar S1192, PR 74–77+25 merged, #50 p2)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Runbook [pre-beta-sonar-github.md](pre-beta-sonar-github.md) — чеклист Sonar и GitHub перед бета-релизом; обновлён фокус: следующий шаг — закрыть оставшиеся проблемы, затем релиз беты.
+**Сделано в сессии:** Выполнен чеклист [pre-beta-sonar-github.md](pre-beta-sonar-github.md): (1) Sonar — прогнан `sonar_fetch_issues.py`; исправлены S1192 в Python (main.py: константы _ISO_UTC_SUFFIX, _ICAL_DT_FORMAT, _I18N_CALENDAR_POLL_ERROR; caldav_poll.py: _CALENDAR_DEPS_HINT). (2) GitHub PR: смержены #74, #75, #76, #77 (actions), #25 (pre-commit) — на main; #81 (tauri), #79 (vite) не мержатся (mergeable: false, при необходимости обновить вручную). (3) Issue #50 — добавлен label p2 (backlog). Оставшиеся замечания Sonar (S3776, S7761, desktop a11y и др.) зафиксированы в runbook; при необходимости — следующий чат или релиз беты.
 
-**Следующий шаг:** Привести Sonar и GitHub в порядок по чеклисту [pre-beta-sonar-github.md](pre-beta-sonar-github.md) (Sonar issues, Dependabot PR, issues #65/#50). В следующем чате — закрыть оставшиеся проблемы, затем релиз следующей беты.
+**Следующий шаг:** Релиз следующей беты по [release-and-quality.md](release-and-quality.md). При желании: домержить #81/#79 вручную (rebase/конфликты), доисправить остальные Sonar (по приоритету).
 
 ---
 
@@ -27,10 +27,10 @@
 
 **Полный чеклист:** [pre-beta-sonar-github.md](pre-beta-sonar-github.md).
 
-- **Открытые PR (на 2026-03-07):** #81 (dependabot tauri), #79 (vite), #77 (sbom), #76 (setup-node), #75 (setup-uv), #74 (upload-artifact), #25 (pre-commit-ci). Решение: Dependabot без CVE — мержить по одному после CI; CVE — см. security-and-dependencies; pre-commit — merge или close.
-- **Открытые issues:** #65 (CVE — ждём upstream), #50 (macOS/WSL2 — исследование). Оставить #65 открытым; #50 по желанию в backlog.
+- **Открытые PR (после сессии):** #81 (tauri), #79 (vite) — не mergeable (конфликты/обновить ветки вручную). Смержены: #74, #75, #76, #77 (actions), #25 (pre-commit).
+- **Открытые issues:** #65 (CVE — ждём upstream), #50 (macOS/WSL2 — p2/backlog).
 
-**Sonar:** Скан в CI без continue-on-error. Локально: `uv run python scripts/sonar_fetch_issues.py` — проверить остаток; исправить или задокументировать по чеклисту pre-beta-sonar-github.
+**Sonar:** Исправлены S1192 (константы в main.py, caldav_poll.py). Остаток: S3776, S7761, desktop (S6819, S2486 и др.) — по чеклисту pre-beta-sonar-github (исправить или принять).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 

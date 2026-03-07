@@ -94,6 +94,9 @@ _I18N_TEMPLATE_ACTIONS = "template.one_on_one.actions"
 _HELP_OUTPUT_TEXT_JSON = "Формат вывода: text | json"
 _HELP_OUTPUT_TEXT_JSON_MD = "Формат вывода: text | json | md (md только с --id)"
 _SERVICE_UNIT_NAME = "voiceforge.service"
+_ISO_UTC_SUFFIX = "+00:00"
+_ICAL_DT_FORMAT = "%Y%m%dT%H%M%SZ"
+_I18N_CALENDAR_POLL_ERROR = "calendar.poll_error"
 
 
 def _get_config() -> Settings:
@@ -1134,13 +1137,13 @@ def sessions_to_ical(
         if not iso_str:
             return ""
         try:
-            s = iso_str.strip().replace("Z", "+00:00")
+            s = iso_str.strip().replace("Z", _ISO_UTC_SUFFIX)
             dt = dt_class.fromisoformat(s)
             if dt.tzinfo is None:
                 dt = dt.replace(tzinfo=timezone.utc)
             else:
                 dt = dt.astimezone(timezone.utc)
-            return dt.strftime("%Y%m%dT%H%M%SZ")
+            return dt.strftime(_ICAL_DT_FORMAT)
         except (ValueError, TypeError):
             return ""
 
@@ -1150,11 +1153,11 @@ def sessions_to_ical(
         if not start_ical:
             continue
         dur_sec = float(getattr(s, "duration_sec", 0) or 0)
-        end_dt = dt_class.fromisoformat((getattr(s, "started_at", "") or "").replace("Z", "+00:00"))
+        end_dt = dt_class.fromisoformat((getattr(s, "started_at", "") or "").replace("Z", _ISO_UTC_SUFFIX))
         if end_dt.tzinfo is None:
             end_dt = end_dt.replace(tzinfo=timezone.utc)
         end_dt = end_dt + timedelta(seconds=dur_sec)
-        end_ical = end_dt.strftime("%Y%m%dT%H%M%SZ")
+        end_ical = end_dt.strftime(_ICAL_DT_FORMAT)
         sid = getattr(s, "id", 0) or 0
         summary = f"Session {sid}"
         desc = f"VoiceForge session {sid}"
@@ -1509,7 +1512,7 @@ def calendar_upcoming(
         if output == "json":
             typer.echo(json.dumps(_cli_error_payload("CALDAV_UPCOMING_FAILED", err), ensure_ascii=False))
         else:
-            typer.echo(t("calendar.poll_error", msg=err), err=True)
+            typer.echo(t(_I18N_CALENDAR_POLL_ERROR, msg=err), err=True)
             hint = _hint_for_error(err)
             if hint:
                 typer.echo(hint, err=True)
@@ -1536,7 +1539,7 @@ def calendar_list(
         if output == "json":
             typer.echo(json.dumps(_cli_error_payload("CALDAV_LIST_FAILED", err), ensure_ascii=False))
         else:
-            typer.echo(t("calendar.poll_error", msg=err), err=True)
+            typer.echo(t(_I18N_CALENDAR_POLL_ERROR, msg=err), err=True)
             hint = _hint_for_error(err)
             if hint:
                 typer.echo(hint, err=True)
@@ -1560,7 +1563,7 @@ def calendar_export_ical(
 
     events, err = get_upcoming_events(hours_ahead=hours)
     if err:
-        typer.echo(t("calendar.poll_error", msg=err), err=True)
+        typer.echo(t(_I18N_CALENDAR_POLL_ERROR, msg=err), err=True)
         hint = _hint_for_error(err)
         if hint:
             typer.echo(hint, err=True)
@@ -1570,13 +1573,13 @@ def calendar_export_ical(
         if not iso_str:
             return ""
         try:
-            s = iso_str.strip().replace("Z", "+00:00")
+            s = iso_str.strip().replace("Z", _ISO_UTC_SUFFIX)
             dt = dt_class.fromisoformat(s)
             if dt.tzinfo is None:
                 dt = dt.replace(tzinfo=timezone.utc)
             else:
                 dt = dt.astimezone(timezone.utc)
-            return dt.strftime("%Y%m%dT%H%M%SZ")
+            return dt.strftime(_ICAL_DT_FORMAT)
         except (ValueError, TypeError):
             return ""
 
@@ -1615,7 +1618,7 @@ def calendar_poll(
         if output == "json":
             typer.echo(json.dumps(_cli_error_payload("CALDAV_POLL_FAILED", err), ensure_ascii=False))
         else:
-            typer.echo(t("calendar.poll_error", msg=err), err=True)
+            typer.echo(t(_I18N_CALENDAR_POLL_ERROR, msg=err), err=True)
             hint = _hint_for_error(err)
             if hint:
                 typer.echo(hint, err=True)
