@@ -433,6 +433,8 @@ class VoiceForgeDaemon:
         if capture is None or not getattr(capture, "get_chunk", None):
             return
         get_chunk = getattr(capture, "get_chunk", None)
+        if get_chunk is None:
+            return
         try:
             from voiceforge.stt.streaming import StreamingTranscriber
             from voiceforge.stt.transcriber import Transcriber

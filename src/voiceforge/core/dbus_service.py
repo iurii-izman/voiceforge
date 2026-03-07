@@ -167,7 +167,7 @@ class DaemonVoiceForgeInterface(ServiceInterface):
 
     def __init__(
         self,
-        analyze_fn: Callable[[int, str | None], str],
+        analyze_fn: Callable[[int, str | None], str | tuple[str, int | None]],
         status_fn: Callable[[], str],
         listen_start_fn: Callable[[], None],
         listen_stop_fn: Callable[[], None],
@@ -183,6 +183,7 @@ class DaemonVoiceForgeInterface(ServiceInterface):
         self._is_listening = is_listening_fn
         self._get_sessions = o.get("get_sessions_fn")
         self._get_session_detail = o.get("get_session_detail_fn")
+        self._search_transcripts = o.get("search_transcripts_fn")
         self._get_settings = o.get("get_settings_fn")
         self._get_indexed_paths = o.get("get_indexed_paths_fn")
         self._get_session_ids_with_action_items = o.get("get_session_ids_with_action_items_fn")

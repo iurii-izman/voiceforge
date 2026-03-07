@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-07 (релиз v0.2.0-alpha.2; Sonar/ruff/desktop)
+**Обновлено:** 2026-03-07 (mypy fix, vite 7, E2E green)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Релиз **v0.2.0-alpha.2**: версии в pyproject.toml, desktop/package.json, tauri.conf.json; CHANGELOG; тег v0.2.0-alpha.2. Применён бумп @tauri-apps/cli 2.10.1 (эквивалент #81). Исправления: ruff в test_rag_parsers (RUF043, SIM117), daemon (SIM105), main.py (E741); desktop main.js (S7761 dataset, S7764 globalThis). verify_pr: Ruff OK; mypy — 13 прежних ошибок (telegram_notify, dbus_service, daemon, router, rag). Чеклист: db_migrations, check_cli_contract — OK.
+**Сделано в сессии:** (1) **Mypy:** исправлены 5 ошибок в scope verify_pr: dbus_service — добавлены `_search_transcripts` в __init__ и тип `analyze_fn` как `Callable[..., str | tuple[str, int | None]]`; daemon — проверка `get_chunk is None` перед вызовом, тип analyze_fn согласован. Mypy для src/voiceforge/core, llm, rag, stt — Success. (2) **Vite 7 (#79):** desktop/package.json `"vite": "^7"`, npm update; сборка и 8 E2E тестов прошли. verify_pr: Ruff и Mypy OK; падает на bandit (существующие Low/Medium).
 
-**Следующий шаг:** При желании: исправить mypy (13 ошибок в 5 файлах), рассмотреть #79 (vite 7) после тестов; остальные Sonar — по приоритету.
+**Следующий шаг:** При желании: привести bandit в порядок для полного зелёного verify_pr; остальные Sonar — по приоритету.
 
 ---
 
@@ -27,10 +27,10 @@
 
 **Полный чеклист:** [pre-beta-sonar-github.md](pre-beta-sonar-github.md).
 
-- **Открытые PR (после сессии):** #81 (tauri), #79 (vite) — не mergeable (конфликты/обновить ветки вручную). Смержены: #74, #75, #76, #77 (actions), #25 (pre-commit).
+- **Открытые PR:** #81 (tauri), #79 (vite) — изменения применены вручную в main (tauri 2.10.1 ранее; vite ^7 в этой сессии). PR можно закрыть с комментарием «Applied in main».
 - **Открытые issues:** #65 (CVE — ждём upstream), #50 (macOS/WSL2 — p2/backlog).
 
-**Sonar:** Исправлены S1192, S7761 (dataset), S7764 (globalThis) в desktop. Остаток: S3776, S6819, S2486 и др. **Mypy:** 13 ошибок в 5 файлах (verify_pr не проходит по mypy).
+**Sonar:** Исправлены S1192, S7761, S7764 в desktop. Остаток: S3776, S6819, S2486 и др. **Mypy:** в scope verify_pr — 0 ошибок (исправлены dbus_service, daemon). **verify_pr:** Ruff + Mypy OK; bandit — есть Low/Medium (не блокирующие по политике).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
