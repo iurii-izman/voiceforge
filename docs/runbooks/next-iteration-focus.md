@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-07 (Phase D #71, #73 отмечены GA; Phase D закрыт)
+**Обновлено:** 2026-03-07 (блок 66 prompt caching задокументирован)
 
 ---
 
