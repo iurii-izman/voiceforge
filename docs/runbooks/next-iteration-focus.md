@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Пакет правок Sonar в desktop: S7770 (filter(Boolean)), S7781 (replaceAll), S7773 (Number.isNaN), S6653 (Object.hasOwn), S6594 (RegExp.exec), S7768 (before()), S7761 (dataset), S6660 (else if в 3 местах), S6819 (popover role region), S1481 (удалён неиспользуемый parse). Без привязки к issue.
+**Сделано в сессии:** Ещё правки Sonar в desktop: вынесены formatStartedShort(), buildLastAnalysisSummaryHtml(), applyCostWidgetContent() для снижения S3776/S2004 в loadLastAnalysisWidget и loadCostWidget; исправлен S6535 (кавычка в template literal). Без привязки к issue.
 
-**Следующий шаг:** Оставшиеся Sonar (S3776 когнитивная сложность, S2004 вложенность в desktop/main/daemon) или блоки roadmap (#90, #91, #93). Либо audit.
+**Следующий шаг:** Оставшиеся Sonar (S3776/S2004 в других функциях desktop/main/daemon) или блоки roadmap (#90, #91, #93). Либо audit.
 
 ---
 
