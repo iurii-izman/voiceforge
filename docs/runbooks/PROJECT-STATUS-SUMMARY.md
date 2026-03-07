@@ -18,7 +18,7 @@
 |----------|---------------------|
 | **backlog-and-actions блок B** | 35, 44, 46, 49, 66 (cache_control есть), 68, 71, 75, 79 |
 | **roadmap 1–19 (plans.md)** | 1–18 реализованы; 19 (prompt caching для не-Claude) — research |
-| **Phase A–D (Steps 1–19)** | Большинство закрыто; #65 (CVE) ждёт upstream; #70–73 в бэклоге |
+| **Phase A–D (Steps 1–19)** | Большинство закрыто; #65 (CVE) ждёт upstream; #70, #72 реализованы; #71, #73 в бэклоге |
 | **roadmap-100-blocks «Не реализовано»** | Остаётся только 66 (prompt caching — доработка по API) |
 
 Файлы-подтверждения: `desktop/src/main.js` (clipboard_history, last-analysis, settings_as_panel, streaming-analysis-chunk, add-to-calendar), `stt/openai_whisper.py`, `llm/router.py` (stream_completion, analyze_meeting_stream), `core/pipeline.py` (_step1_stt stt_backend), демон/D-Bus (CreateEventFromSession, StreamingAnalysisChunk, SearchRag).
@@ -30,7 +30,7 @@
 - **По приоритету (на усмотрение):**
   - Блок 66: доработка prompt caching для не-Claude (LiteLLM/провайдеры) — по документации API.
   - ~~Блок 69~~: реализовано — retry с backoff в circuit_breaker. ~~Блок 72~~: уже было — подсказка «Analyzing… (≈ N–M s)» в CLI.
-  - Phase D: #70 (A/B тесты), #71 (OTel до GA), #72 (plugins/templates), #73 (packaging GA).
+  - Phase D: ~~#70~~ (A/B — реализовано: make eval-ab, scripts/eval_ab.py), #71 (OTel до GA), ~~#72~~ (custom templates — реализовано: ~/.config/voiceforge/templates/), #73 (packaging GA).
 - **Из roadmap-100 списка:** часть пунктов (45, 50, 51–54, 57–65, 67, 70, 73–78, 80–100) уже есть в коде или в доке; остальное — по приоритету из планов и backlog.
 
 ---

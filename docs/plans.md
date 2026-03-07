@@ -73,9 +73,9 @@
 
 | Step | Issue | Цель | Критерий приёмки |
 |------|-------|------|------------------|
-| 16 | #70 | A/B testing моделей/промптов | `make eval-ab MODEL_A=haiku MODEL_B=sonnet` → сравнение |
-| 17 | #71 | OpenTelemetry (tracing) | Trace в Jaeger: все шаги pipeline с durations |
-| 18 | #72 | Plugin system (custom templates) | Custom template из `~/.config/voiceforge/templates/`; eval на custom |
+| ~~16~~ | ~~#70~~ | ~~A/B testing моделей/промптов~~ | Реализовано: `make eval-ab MODEL_A=haiku MODEL_B=sonnet`, `scripts/eval_ab.py` (ROUGE-L сравнение). |
+| 17 | #71 | OpenTelemetry (tracing) | Trace в Jaeger: все шаги pipeline с durations (runbook: observability-alerts.md) |
+| ~~18~~ | ~~#72~~ | ~~Plugin system (custom templates)~~ | Реализовано: `load_prompt` берёт template_* из `~/.config/voiceforge/templates/` первым (prompt_loader.py). |
 | 19 | #73 | Packaging GA | AppImage: download → chmod +x → run; Flatpak: install → run |
 
 Подробные формулировки (Scope, Effort, KPI): [archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md) — раздел «Phase D: Productization».
@@ -94,7 +94,7 @@
 
 ## 5. Текущие задачи и фокус
 
-- **В работе / частично:** #65 (CVE, чеклист снятия), #66 (async web опционально), #71 (OTel). #56 закрыто (fail_under=75, тесты стабилизированы).
-- **Phase D:** #70–#73 частично реализованы; довести до GA по критериям в разд. 3.2.
+- **В работе / частично:** #65 (CVE, чеклист снятия). #66 закрыто (async web). #71 (OTel) — runbook и спаны есть; GA по желанию.
+- **Phase D:** #70, #72 реализованы; #71 (OTel), #73 (packaging GA) — по критериям в разд. 3.2.
 
 Фокус итерации: [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md). Статус W1–W20: [audit/audit.md](audit/audit.md).

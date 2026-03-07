@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Блок 69 — retry с экспоненциальным backoff для LLM: в `circuit_breaker.py` до 3 попыток (задержки 1s, 2s), лог `llm.retry_backoff`, тесты с patch time.sleep и test_wrap_completion_retries_then_succeeds. Обновлены backlog, roadmap, PROJECT-STATUS-SUMMARY (69 и 72 отмечены как сделанные).
+**Сделано в сессии:** Подтверждено и отражено в планах: Phase D #70 (A/B) и #72 (custom templates) реализованы. #70: `make eval-ab`, `scripts/eval_ab.py` (ROUGE-L). #72: `prompt_loader.load_prompt` загружает template_* из `~/.config/voiceforge/templates/`. Обновлены plans.md, PROJECT-STATUS-SUMMARY, next-iteration-focus (следующий шаг — #71, #73, блок 66).
 
-**Следующий шаг:** По [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md): Phase D (#70–73) — A/B тесты, OTel до GA, plugins/templates, packaging GA — или блок 66 (доработка prompt caching), ручные шаги из MANUAL-AND-CANNOT-DO. verify_pr: при отсутствии hypothesis — `pytest tests/ --ignore=tests/test_rag_parsers_hypothesis.py`. Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
+**Следующий шаг:** По [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md): Phase D #71 (OTel до GA), #73 (packaging GA) или блок 66 (доработка prompt caching), ручные шаги из MANUAL-AND-CANNOT-DO. #70 (eval-ab) и #72 (custom templates) отмечены реализованными в планах. verify_pr: при отсутствии hypothesis — `pytest tests/ --ignore=tests/test_rag_parsers_hypothesis.py`. Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
 
 ---
 
