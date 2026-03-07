@@ -125,6 +125,52 @@ def _sessions_to_ical_fetch_sessions(log_db: Any, from_date: str | None, to_date
     return log_db.get_sessions(last_n=limit, offset=0)
 
 
+def _iso_to_ical_utc(iso_str: str) -> str:
+    """Convert ISO datetime string to iCal format 20250307T100000Z (S3776)."""
+    if not iso_str:
+        return ""
+    from datetime import datetime as dt_class
+
+    try:
+        s = iso_str.strip().replace("Z", _ISO_UTC_SUFFIX)
+        dt = dt_class.fromisoformat(s)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=UTC)
+        else:
+            dt = dt.astimezone(UTC)
+        return dt.strftime(_ICAL_DT_FORMAT)
+    except (ValueError, TypeError):
+        return ""
+
+
+def _session_to_vevent_lines(session: Any) -> list[str]:
+    """Build VEVENT lines for one session (S3776)."""
+    from datetime import datetime as dt_class
+    from datetime import timedelta
+
+    start_ical = _iso_to_ical_utc(getattr(session, "started_at", "") or "")
+    if not start_ical:
+        return []
+    dur_sec = float(getattr(session, "duration_sec", 0) or 0)
+    started = (getattr(session, "started_at", "") or "").replace("Z", _ISO_UTC_SUFFIX)
+    end_dt = dt_class.fromisoformat(started)
+    if end_dt.tzinfo is None:
+        end_dt = end_dt.replace(tzinfo=UTC)
+    end_dt = end_dt + timedelta(seconds=dur_sec)
+    end_ical = end_dt.strftime(_ICAL_DT_FORMAT)
+    sid = getattr(session, "id", 0) or 0
+    return [
+        "BEGIN:VEVENT",
+        f"UID:session-{sid}@voiceforge",
+        f"DTSTAMP:{start_ical}",
+        f"DTSTART:{start_ical}",
+        f"DTEND:{end_ical}",
+        f"SUMMARY:Session {sid}",
+        f"DESCRIPTION:VoiceForge session {sid}",
+        "END:VEVENT",
+    ]
+
+
 def _get_config() -> Settings:
     return Settings()
 
@@ -1147,9 +1193,6 @@ def sessions_to_ical(
     to_date: str | None = typer.Option(None, "--to", help="To date YYYY-MM-DD (inclusive)"),
 ) -> None:
     """Export sessions list to iCalendar .ics (block 83). DTSTART/DTEND from started_at and duration."""
-    from datetime import datetime as dt_class
-    from datetime import timedelta
-
     from voiceforge.core.transcript_log import TranscriptLog
 
     log_db = TranscriptLog()
@@ -1157,44 +1200,6 @@ def sessions_to_ical(
         sessions = _sessions_to_ical_fetch_sessions(log_db, from_date, to_date, limit)
     finally:
         log_db.close()
-
-    def _iso_to_ical_utc(iso_str: str) -> str:
-        """Convert ISO datetime string to iCal format 20250307T100000Z."""
-        if not iso_str:
-            return ""
-        try:
-            s = iso_str.strip().replace("Z", _ISO_UTC_SUFFIX)
-            dt = dt_class.fromisoformat(s)
-            if dt.tzinfo is None:
-                dt = dt.replace(tzinfo=UTC)
-            else:
-                dt = dt.astimezone(UTC)
-            return dt.strftime(_ICAL_DT_FORMAT)
-        except (ValueError, TypeError):
-            return ""
-
-    def _session_to_vevent_lines(session: object) -> list[str]:
-        """Build VEVENT lines for one session (S3776)."""
-        start_ical = _iso_to_ical_utc(getattr(session, "started_at", "") or "")
-        if not start_ical:
-            return []
-        dur_sec = float(getattr(session, "duration_sec", 0) or 0)
-        end_dt = dt_class.fromisoformat((getattr(session, "started_at", "") or "").replace("Z", _ISO_UTC_SUFFIX))
-        if end_dt.tzinfo is None:
-            end_dt = end_dt.replace(tzinfo=UTC)
-        end_dt = end_dt + timedelta(seconds=dur_sec)
-        end_ical = end_dt.strftime(_ICAL_DT_FORMAT)
-        sid = getattr(session, "id", 0) or 0
-        return [
-            "BEGIN:VEVENT",
-            f"UID:session-{sid}@voiceforge",
-            f"DTSTAMP:{start_ical}",
-            f"DTSTART:{start_ical}",
-            f"DTEND:{end_ical}",
-            f"SUMMARY:Session {sid}",
-            f"DESCRIPTION:VoiceForge session {sid}",
-            "END:VEVENT",
-        ]
 
     lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//VoiceForge//sessions//EN"]
     for s in sessions:
@@ -1676,6 +1681,26 @@ def calendar_poll(
         typer.echo(t("calendar.poll_line", summary=ev.get("summary", ""), start_iso=ev.get("start_iso", "")))
 
 
+def _calendar_event_description_from_detail(detail: Any, sid: int) -> str:
+    """Build event description from session detail (action items). S3776."""
+    if not detail:
+        return f"Session {sid} (VoiceForge)"
+    _segments, analysis = detail
+    if not (analysis and analysis.action_items):
+        return f"Session {sid} (VoiceForge)"
+    parts: list[str] = []
+    for ai in analysis.action_items:
+        desc = (ai.get("description") or ai.get("text") or "").strip()
+        if not desc:
+            continue
+        assignee = (ai.get("assignee") or "").strip()
+        deadline = (ai.get("deadline") or "").strip()
+        if assignee or deadline:
+            desc = f"{desc} ({', '.join(x for x in [assignee, deadline] if x)})"
+        parts.append(f"- {desc}")
+    return "\n".join(parts) if parts else f"Session {sid} (VoiceForge)"
+
+
 @calendar_app.command("create-from-session")
 def calendar_create_from_session(
     session_id: int = typer.Argument(..., help="Session ID to create calendar event from (block 79, #95)."),
@@ -1697,29 +1722,17 @@ def calendar_create_from_session(
             raise SystemExit(1)
         started_at, ended_at, _duration_sec = meta
         detail = log_db.get_session_detail(session_id)
-        summary = f"VoiceForge session {session_id}"
-        description_parts: list[str] = []
-        if detail:
-            _segments, analysis = detail
-            if analysis and analysis.action_items:
-                for ai in analysis.action_items:
-                    desc = (ai.get("description") or ai.get("text") or "").strip()
-                    if desc:
-                        assignee = (ai.get("assignee") or "").strip()
-                        deadline = (ai.get("deadline") or "").strip()
-                        if assignee or deadline:
-                            desc = f"{desc} ({', '.join(x for x in [assignee, deadline] if x)})"
-                        description_parts.append(f"- {desc}")
-        description = "\n".join(description_parts) if description_parts else f"Session {session_id} (VoiceForge)"
+        description = _calendar_event_description_from_detail(detail, session_id)
     finally:
         log_db.close()
 
+    summary = f"VoiceForge session {session_id}"
     event_uid, err = create_event(
         start_iso=started_at,
         end_iso=ended_at,
         summary=summary,
         description=description,
-        calendar_url=calendar_url,
+        calendar_url=calendar_url or None,
     )
     if err is not None:
         if output == "json":

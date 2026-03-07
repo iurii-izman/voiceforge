@@ -3,7 +3,7 @@ Budget $75/mo. Block 5.1: prompt caching for Claude."""
 
 from __future__ import annotations
 
-from typing import Any, TypeVar
+from typing import Any, TypeVar, cast
 
 import structlog
 from pydantic import BaseModel
@@ -207,6 +207,32 @@ def analyze_meeting(
     return (result, cost)
 
 
+def _stream_accumulate_and_parse(
+    prompt: list[dict[str, Any]],
+    model_id: str,
+    stream_callback: Any,
+    response_model: type[Any],
+) -> tuple[Any, float]:
+    accumulated = ""
+    for delta in stream_completion(prompt, model=model_id):
+        accumulated += delta
+        if stream_callback:
+            stream_callback(delta)
+    if stream_callback:
+        stream_callback(None)
+    empty = response_model(
+        questions=[], answers=[], recommendations=[], next_directions=[], action_items=[]
+    )
+    if not accumulated.strip():
+        return (empty, 0.0)
+    try:
+        parsed = response_model.model_validate_json(accumulated)
+        return (parsed, 0.0)
+    except Exception as e:
+        log.warning("llm.stream_parse_failed", error=str(e))
+        raise
+
+
 def analyze_meeting_stream(
     transcript: str,
     context: str = "",
@@ -226,10 +252,10 @@ def analyze_meeting_stream(
     response_model: type[MeetingAnalysis] | None = MeetingAnalysis
     system_prompt_override: str | None = None
     if template:
-        schema_cls, prompt = _template_schema(template)
-        if schema_cls is not None and prompt is not None:
+        schema_cls, prompt_text = _template_schema(template)
+        if schema_cls is not None and prompt_text is not None:
             response_model = schema_cls
-            system_prompt_override = prompt
+            system_prompt_override = prompt_text
 
     local_model = (ollama_model or OLLAMA_DEFAULT).strip() or OLLAMA_DEFAULT
     try:
@@ -249,21 +275,7 @@ def analyze_meeting_stream(
         system_prompt_override=system_prompt_override,
         pii_mode=pii_mode,
     )
-    accumulated = ""
-    for delta in stream_completion(prompt, model=model_id):
-        accumulated += delta
-        if stream_callback:
-            stream_callback(delta)
-    if stream_callback:
-        stream_callback(None)  # signal end of stream
-    if not accumulated.strip():
-        return (response_model(questions=[], answers=[], recommendations=[], next_directions=[], action_items=[]), 0.0)
-    try:
-        parsed = response_model.model_validate_json(accumulated)
-        return (parsed, 0.0)
-    except Exception as e:
-        log.warning("llm.stream_parse_failed", error=str(e))
-        raise
+    return _stream_accumulate_and_parse(prompt, model_id, stream_callback, response_model)
 
 
 def _live_summary_system() -> str:
@@ -365,7 +377,9 @@ def update_action_item_statuses(
             {"role": "system", "content": sys_text},
             {"role": "user", "content": user_content},
         ]
-    result, cost = complete_structured(prompt, response_model=StatusUpdateResponse, model=model_id)
+    result, cost = complete_structured(
+        cast(list[dict[str, Any]], prompt), response_model=StatusUpdateResponse, model=model_id
+    )
     return (result, cost)
 
 
@@ -557,6 +571,19 @@ def complete_structured(
     return _complete_structured_finish(parsed, raw_used, model_id, response_model, key, ttl)
 
 
+def _stream_part_content(part: Any) -> str:
+    """Extract content delta from one stream part. Returns empty string if none."""
+    if not part or not getattr(part, "choices", None):
+        return ""
+    choices = part.choices or []
+    if not choices:
+        return ""
+    delta = getattr(choices[0], "delta", None) or {}
+    if isinstance(delta, dict):
+        return (delta.get("content") or "") or ""
+    return getattr(delta, "content", None) or ""
+
+
 def stream_completion(
     prompt: list[dict[str, Any]],
     model: str | None = None,
@@ -578,12 +605,6 @@ def stream_completion(
         stream=True,
     )
     for part in response:
-        if not part or not getattr(part, "choices", None):
-            continue
-        choices = part.choices or []
-        if not choices:
-            continue
-        delta = getattr(choices[0], "delta", None) or {}
-        content = (delta.get("content") or "") if isinstance(delta, dict) else (getattr(delta, "content", None) or "")
+        content = _stream_part_content(part)
         if content:
             yield content

@@ -2181,6 +2181,19 @@ async function handleFtsSearch(q, listEl, resultsEl) {
   }
 }
 
+function buildRagHitsHtml(hits) {
+  const parts = ["<p class=\"muted\">", t("rag_hits_title"), "</p><ul class=\"rag-hits-list\">"];
+  hits.forEach((h) => {
+    const src = escapeHtml((h.source ?? "").trim() || "—");
+    const content = escapeHtml((h.content ?? "").trim().slice(0, 200) || "—");
+    const score = h.score != null ? escapeHtml(String(h.score)) : "";
+    const scoreSpan = score ? " <span class=\"muted\">(" + score + ")</span>" : "";
+    parts.push("<li class=\"rag-hit\"><span class=\"rag-hit-source\">", src, "</span>", scoreSpan, "<br><span class=\"rag-hit-content\">", content, "</span></li>");
+  });
+  parts.push("</ul>");
+  return parts.join("");
+}
+
 async function handleRagSearch(q, listEl, ftsResultsEl, resultsEl) {
   if (!daemonOk) return;
   try {
@@ -2196,14 +2209,7 @@ async function handleRagSearch(q, listEl, ftsResultsEl, resultsEl) {
       if (listEl) listEl.style.display = "none";
       return;
     }
-    let html = "<p class=\"muted\">" + t("rag_hits_title") + "</p><ul class=\"rag-hits-list\">";
-    hits.forEach((h) => {
-      const src = escapeHtml((h.source ?? "").trim() || "—");
-      const content = escapeHtml((h.content ?? "").trim().slice(0, 200) || "—");
-      const score = h.score != null ? escapeHtml(String(h.score)) : "";
-      html += `<li class="rag-hit"><span class="rag-hit-source">${src}</span>${score ? ` <span class="muted">(${score})</span>` : ""}<br><span class="rag-hit-content">${content}</span></li>`;
-    });
-    html += "</ul>";
+    const html = buildRagHitsHtml(hits);
     if (resultsEl) {
       resultsEl.innerHTML = html;
       resultsEl.style.display = "block";

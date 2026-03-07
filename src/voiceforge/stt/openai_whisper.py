@@ -107,7 +107,7 @@ class OpenAIWhisperTranscriber:
             },
         )
         try:
-            with urllib.request.urlopen(req, timeout=60) as resp:
+            with urllib.request.urlopen(req, timeout=60) as resp:  # nosec B310 — URL is HTTPS constant only
                 import json
 
                 data = json.loads(resp.read().decode())

@@ -341,7 +341,11 @@ def test_create_event_success_mocked(monkeypatch: pytest.MonkeyPatch) -> None:
     from voiceforge.calendar.caldav_poll import create_event
 
     def fake_key(name: str) -> str | None:
-        return "https://cal.example.com" if name == "caldav_url" else "user" if name == "caldav_username" else "secret"
+        if name == "caldav_url":
+            return "https://cal.example.com"
+        if name == "caldav_username":
+            return "user"
+        return "secret"
 
     monkeypatch.setattr("voiceforge.calendar.caldav_poll.get_api_key", fake_key)
     mock_cal = MagicMock()

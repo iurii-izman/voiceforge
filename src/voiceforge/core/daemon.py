@@ -17,7 +17,7 @@ from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FuturesTimeoutError
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import structlog
 
@@ -421,6 +421,24 @@ class VoiceForgeDaemon:
         from voiceforge.core.contracts import build_cli_error_payload, build_cli_success_payload
         from voiceforge.core.transcript_log import TranscriptLog
 
+        def _event_description_from_detail(detail: Any, sid: int) -> str:
+            parts: list[str] = []
+            if not detail:
+                return f"Session {sid} (VoiceForge)"
+            _segments, analysis = detail
+            if not (analysis and analysis.action_items):
+                return f"Session {sid} (VoiceForge)"
+            for ai in analysis.action_items:
+                desc = (ai.get("description") or ai.get("text") or "").strip()
+                if not desc:
+                    continue
+                assignee = (ai.get("assignee") or "").strip()
+                deadline = (ai.get("deadline") or "").strip()
+                if assignee or deadline:
+                    desc = f"{desc} ({', '.join(x for x in [assignee, deadline] if x)})"
+                parts.append(f"- {desc}")
+            return "\n".join(parts) if parts else f"Session {sid} (VoiceForge)"
+
         try:
             log_db = TranscriptLog()
             try:
@@ -432,22 +450,10 @@ class VoiceForgeDaemon:
                     )
                 started_at, ended_at, _ = meta
                 detail = log_db.get_session_detail(session_id)
-                summary = f"VoiceForge session {session_id}"
-                description_parts: list[str] = []
-                if detail:
-                    _segments, analysis = detail
-                    if analysis and analysis.action_items:
-                        for ai in analysis.action_items:
-                            desc = (ai.get("description") or ai.get("text") or "").strip()
-                            if desc:
-                                assignee = (ai.get("assignee") or "").strip()
-                                deadline = (ai.get("deadline") or "").strip()
-                                if assignee or deadline:
-                                    desc = f"{desc} ({', '.join(x for x in [assignee, deadline] if x)})"
-                                description_parts.append(f"- {desc}")
-                description = "\n".join(description_parts) if description_parts else f"Session {session_id} (VoiceForge)"
+                description = _event_description_from_detail(detail, session_id)
             finally:
                 log_db.close()
+            summary = f"VoiceForge session {session_id}"
             cal_url = (calendar_url or "").strip() or None
             event_uid, err = create_event(
                 start_iso=started_at,
@@ -517,13 +523,29 @@ class VoiceForgeDaemon:
             ensure_ascii=False,
         )
 
+    def _streaming_on_partial(self, text: str) -> None:
+        with contextlib.suppress(queue.Full):
+            self._streaming_chunk_queue.put_nowait((text, "SPEAKER_??", 0.0, False))
+        if text:
+            with self._streaming_lock:
+                self._streaming_partial = text
+
+    def _streaming_on_final(self, segment: "StreamingSegment") -> None:  # noqa: UP037 — forward ref
+        t = getattr(segment, "text", "") or ""
+        if not t.strip():
+            return
+        start = getattr(segment, "start", 0.0)
+        end = getattr(segment, "end", 0.0)
+        with contextlib.suppress(queue.Full):
+            self._streaming_chunk_queue.put_nowait((t, "SPEAKER_??", end, True))
+        with self._streaming_lock:
+            self._streaming_finals.append({"text": t, "start": start, "end": end})
+
     def _streaming_loop(self) -> None:
         """Block 10.1: every 1.5s get 2s chunk, transcribe, update _streaming_partial/_streaming_finals."""
         capture = self._streaming_capture
-        if capture is None or not getattr(capture, "get_chunk", None):
-            return
-        get_chunk = getattr(capture, "get_chunk", None)
-        if get_chunk is None:
+        get_chunk = getattr(capture, "get_chunk", None) if capture else None
+        if not get_chunk:
             return
         try:
             from voiceforge.stt import get_transcriber_for_config
@@ -531,55 +553,26 @@ class VoiceForgeDaemon:
         except ImportError:
             return
         transcriber = get_transcriber_for_config(self._cfg)
-
-        def on_partial(text: str) -> None:
-            # For D-Bus signal emitter
-            with contextlib.suppress(queue.Full):
-                self._streaming_chunk_queue.put_nowait((text, "SPEAKER_??", 0.0, False))
-
-            # For polling clients
-            if text:
-                with self._streaming_lock:
-                    self._streaming_partial = text
-
-        def on_final(segment: StreamingSegment) -> None:
-            t = getattr(segment, "text", "") or ""
-            if not t.strip():
-                return
-            start = getattr(segment, "start", 0.0)
-            end = getattr(segment, "end", 0.0)
-
-            # For D-Bus signal emitter
-            with contextlib.suppress(queue.Full):
-                self._streaming_chunk_queue.put_nowait((t, "SPEAKER_??", end, True))
-
-            # For polling clients
-            with self._streaming_lock:
-                self._streaming_finals.append({"text": t, "start": start, "end": end})
-
         language_hint = _streaming_language_hint(self._cfg)
         stream = StreamingTranscriber(
             transcriber,
             sample_rate=self._cfg.sample_rate,
             language=language_hint,
-            on_partial=on_partial,
-            on_final=on_final,
+            on_partial=self._streaming_on_partial,
+            on_final=self._streaming_on_final,
         )
         chunk_sec, interval_sec = 2.0, 1.5
         min_samples = int(self._cfg.sample_rate * chunk_sec * 0.5)
 
-        def process_one_chunk() -> None:
+        while not self._streaming_stop.is_set():
+            if self._streaming_stop.wait(timeout=interval_sec):
+                break
             try:
                 mic, _ = get_chunk(chunk_sec)
                 if mic.size >= min_samples:
                     stream.process_chunk(mic, start_offset_sec=0.0)
             except Exception as e:
                 log.warning("daemon.streaming_stt.failed", error=str(e))
-
-        while not self._streaming_stop.is_set():
-            if self._streaming_stop.wait(timeout=interval_sec):
-                break
-            process_one_chunk()
 
     def _listen_loop(self) -> None:
         try:

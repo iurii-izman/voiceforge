@@ -340,7 +340,7 @@ def _sync_telegram_webhook(body_bytes: bytes) -> tuple[int, str, bytes]:
     return (200, _CONTENT_TYPE_JSON, b'{"ok":true}')
 
 
-def _build_app():
+def _build_app():  # NOSONAR S3776 — single place wiring all async routes; splitting would scatter routing
     from starlette.applications import Starlette
     from starlette.requests import Request
     from starlette.responses import Response

@@ -64,6 +64,7 @@ def _step1_stt(
 
     t0 = time.monotonic()
     stt_backend = getattr(cfg, "stt_backend", "local") if cfg else "local"
+    transcriber: Any
     if stt_backend == "openai":
         from voiceforge.stt.openai_whisper import OpenAIWhisperTranscriber
 
