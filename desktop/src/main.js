@@ -22,6 +22,7 @@ const STORE_KEYS = [
   "voiceforge_favorites",
   "voiceforge_shortcut_record",
   "voiceforge_shortcut_analyze",
+  "voiceforge_session_tags",
 ];
 
 async function loadStoreAndMigrate() {
@@ -688,10 +689,19 @@ function applySessionsFilter() {
   const sortKey = document.getElementById("sessions-sort")?.value ?? "date-desc";
   const favoritesOnly = document.getElementById("sessions-favorites-filter")?.value === "favorites";
   const actionItemsOnly = document.getElementById("sessions-action-items-filter")?.value === "with-actions";
+  const tagFilter = document.getElementById("sessions-tag-filter")?.value;
   lastFilteredSessions = filterAndSortSessions(sessionsCache, search, period, sortKey);
   if (favoritesOnly) {
     const fav = getFavorites();
     lastFilteredSessions = lastFilteredSessions.filter((s) => fav.has(Number(s.id ?? s.session_id)));
+  }
+  if (tagFilter && tagFilter !== "all") {
+    const tagsMap = getSessionTags();
+    lastFilteredSessions = lastFilteredSessions.filter((s) => {
+      const id = Number(s.id ?? s.session_id);
+      const tags = tagsMap[id];
+      return Array.isArray(tags) && tags.includes(tagFilter);
+    });
   }
   if (actionItemsOnly) {
     if (sessionIdsWithActionItemsCache === null) {
@@ -749,7 +759,7 @@ function loadSessions() {
     });
 }
 
-function renderSessionDetail(detail) {
+function renderSessionDetail(detail, highlightQuery) {
   if (!detail || (typeof detail === "object" && !detail.segments && !detail.analysis)) {
     return "<p class=\"muted\">Нет данных.</p>";
   }
@@ -770,7 +780,8 @@ function renderSessionDetail(detail) {
     segs.forEach((s, idx) => {
       const speaker = s.speaker ? `[${s.speaker}] ` : "";
       const time = (s.start_sec != null && s.end_sec != null) ? `${Number(s.start_sec).toFixed(1)}–${Number(s.end_sec).toFixed(1)} с ` : "";
-      html += `<li id="segment-${idx}" data-segment-index="${idx}"><span class="segment-meta">${time}${speaker}</span>${escapeHtml(s.text || "")} <button type="button" class="btn small segment-copy" aria-label="Копировать сегмент">Копировать</button></li>`;
+      const textHtml = highlightQuery ? highlightSegmentText(s.text || "", highlightQuery) : escapeHtml(s.text || "");
+      html += `<li id="segment-${idx}" data-segment-index="${idx}"><span class="segment-meta">${time}${speaker}</span>${textHtml} <button type="button" class="btn small segment-copy" aria-label="Копировать сегмент">Копировать</button></li>`;
     });
     html += "</ul></div>";
   }
@@ -811,6 +822,27 @@ function escapeHtml(text) {
   const div = document.createElement("div");
   div.textContent = text == null ? "" : String(text);
   return div.innerHTML;
+}
+
+function highlightSegmentText(text, query) {
+  if (!query || !String(text)) return escapeHtml(text);
+  const str = String(text);
+  const q = String(query).trim();
+  if (!q) return escapeHtml(str);
+  const lower = str.toLowerCase();
+  const qLower = q.toLowerCase();
+  let out = "";
+  let pos = 0;
+  for (;;) {
+    const i = lower.indexOf(qLower, pos);
+    if (i === -1) {
+      out += escapeHtml(str.slice(pos));
+      break;
+    }
+    out += escapeHtml(str.slice(pos, i)) + "<mark class=\"fts-highlight\">" + escapeHtml(str.slice(i, i + q.length)) + "</mark>";
+    pos = i + q.length;
+  }
+  return out;
 }
 
 let lastSessionDetail = null;
@@ -894,7 +926,8 @@ function focusTrapDetail(e) {
   }
 }
 
-function showSessionDetail(id) {
+function showSessionDetail(id, opts) {
+  const highlightQuery = opts?.highlightQuery ?? null;
   const detailBlock = document.getElementById("session-detail");
   const bodyEl = document.getElementById("session-detail-body");
   const idEl = document.getElementById("detail-id");
@@ -907,6 +940,18 @@ function showSessionDetail(id) {
   document.getElementById("copy-action-items").onclick = copyActionItemsToClipboard;
   document.getElementById("session-detail-print").onclick = () => window.print();
   document.getElementById("session-detail-close").onclick = hideSessionDetail;
+  const tagsRow = document.getElementById("session-detail-tags");
+  const tagsInput = document.getElementById("session-detail-tags-input");
+  if (tagsRow) tagsRow.style.display = "block";
+  if (tagsInput) {
+    const tags = getSessionTags()[id] || [];
+    tagsInput.value = tags.join(", ");
+    tagsInput.onchange = () => {
+      const val = (tagsInput.value || "").trim();
+      const arr = val ? val.split(/,\s*/).map((t) => t.trim()).filter(Boolean) : [];
+      setSessionTags(id, arr);
+    };
+  }
   detailBlock.onkeydown = (e) => {
     if (e.key === "Escape") {
       hideSessionDetail();
@@ -928,7 +973,7 @@ function showSessionDetail(id) {
         }
       }
       lastSessionDetail = detail;
-      bodyEl.innerHTML = renderSessionDetail(detail);
+      bodyEl.innerHTML = renderSessionDetail(detail, highlightQuery);
       bodyEl.querySelectorAll(".segment-copy").forEach((btn) => {
         btn.addEventListener("click", () => {
           const li = btn.closest("li");
@@ -949,7 +994,7 @@ function showSessionDetail(id) {
     })
     .catch((e) => {
       bodyEl.innerHTML = "<p class=\"muted\">Ошибка: " + escapeHtml(e?.message || e) + "</p><button type=\"button\" class=\"btn small\" id=\"detail-retry\">Повторить</button>";
-      document.getElementById("detail-retry")?.addEventListener("click", () => showSessionDetail(id));
+      document.getElementById("detail-retry")?.addEventListener("click", () => showSessionDetail(id, opts));
     });
 }
 
@@ -1174,6 +1219,40 @@ const DASHBOARD_ORDER_KEY = "voiceforge_dashboard_order";
 const DASHBOARD_COLLAPSED_KEY = "voiceforge_dashboard_collapsed";
 const DASHBOARD_WIDGET_IDS = ["record", "analyze", "streaming", "recent-sessions", "upcoming-events", "cost-widget"];
 const FAVORITES_KEY = "voiceforge_favorites";
+const SESSION_TAGS_KEY = "voiceforge_session_tags";
+
+function getSessionTags() {
+  try {
+    const raw = localStorage.getItem(SESSION_TAGS_KEY);
+    if (raw) {
+      const o = JSON.parse(raw);
+      if (o && typeof o === "object") return o;
+    }
+  } catch (_) { /* ignore */ }
+  return {};
+}
+
+function setSessionTags(sessionId, tags) {
+  const id = Number(sessionId);
+  if (Number.isNaN(id)) return;
+  const o = getSessionTags();
+  const arr = Array.isArray(tags) ? tags.map(String).filter(Boolean) : [];
+  if (arr.length) o[id] = arr; else delete o[id];
+  const s = JSON.stringify(o);
+  localStorage.setItem(SESSION_TAGS_KEY, s);
+  setStored(SESSION_TAGS_KEY, o);
+  updateSessionTagFilterOptions();
+}
+
+function updateSessionTagFilterOptions() {
+  const sel = document.getElementById("sessions-tag-filter");
+  if (!sel) return;
+  const tagsMap = getSessionTags();
+  const allTags = [...new Set(Object.values(tagsMap).flat())].filter(Boolean).sort();
+  const current = sel.value;
+  sel.innerHTML = "<option value=\"all\">Все</option>" + allTags.map((t) => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
+  if (allTags.includes(current)) sel.value = current; else sel.value = "all";
+}
 
 function getFavorites() {
   try {
@@ -1423,6 +1502,8 @@ function initSessionsToolbar() {
   document.getElementById("sessions-sort")?.addEventListener("change", () => applySessionsFilter());
   document.getElementById("sessions-favorites-filter")?.addEventListener("change", () => applySessionsFilter());
   document.getElementById("sessions-action-items-filter")?.addEventListener("change", () => applySessionsFilter());
+  document.getElementById("sessions-tag-filter")?.addEventListener("change", () => applySessionsFilter());
+  updateSessionTagFilterOptions();
   let ftsSearchTimeout = null;
   document.getElementById("sessions-fts-search")?.addEventListener("input", () => {
     const input = document.getElementById("sessions-fts-search");

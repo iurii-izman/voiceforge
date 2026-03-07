@@ -144,8 +144,11 @@ table th { color: var(--muted); font-weight: 600; font-size: 0.875rem; }
 .detail-section h4 { font-size: 0.95rem; margin: 0 0 0.5rem; color: var(--muted); }
 .segment-list { list-style: none; padding: 0; margin: 0; }
 .segment-list li { padding: 0.35rem 0; border-bottom: 1px solid var(--border); }
+.detail-tags-row { margin-bottom: 0.5rem; }
+.detail-tags-row input { min-width: 12rem; }
 .detail-segment-minimap { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-bottom: 0.5rem; }
 .minimap-segment-btn { font-size: 0.75rem; padding: 0.2rem 0.4rem; min-width: 2.5rem; }
+.fts-highlight { background: rgba(255, 235, 59, 0.5); border-radius: 2px; }
 .segment-copy { margin-left: 0.5rem; vertical-align: middle; }
 .segment-meta { color: var(--muted); font-size: 0.85rem; margin-right: 0.5rem; }
 .analytics-summary { margin-bottom: 1rem; }

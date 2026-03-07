@@ -6,7 +6,7 @@
 
 ## 1. Список команд (voiceforge)
 
-Источник правды: `voiceforge --help` и `voiceforge <команда> --help`. ADR-0001 расширен; ниже — полный перечень.
+Источник правды: `voiceforge --help` и `voiceforge <команда> --help`. Если запустить `voiceforge` без команды — выведется справка (то же, что `voiceforge --help`). ADR-0001 расширен; ниже — полный перечень.
 
 | Команда | Назначение |
 |---------|------------|
@@ -25,6 +25,8 @@
 | **web** | Локальный HTTP-сервер (Web UI): статус, сессии, анализ, затраты, action-items. Опции: `--port`, `--host`. С опцией `--async` (или `VOICEFORGE_WEB_ASYNC=1`) — Starlette+uvicorn (нужен `uv sync --extra web-async`). |
 | **backup** | Копирование БД (transcripts, metrics, RAG) в timestamped-каталог. Опция `--keep N` — оставить только последние N бэкапов. |
 | **calendar poll** | Опрос CalDAV (keyring: caldav_url, caldav_username, caldav_password). Опции: `--minutes`, `--output`. |
+
+**Единый формат --output (block 53):** команды `status`, `cost`, `history`, `calendar *`, `analyze` и др. поддерживают `--output text` (по умолчанию) и `--output json`. При `--output json` ответ всегда в виде envelope: успех — `{ "ok": true, "data": ... }`, ошибка — `{ "ok": false, "error": { "code": "...", "message": "..." } }`. Предсказуемый парсинг для скриптов и CI.
 
 Проверка ключей в keyring (без вывода значений):
 

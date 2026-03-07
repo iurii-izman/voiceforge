@@ -180,6 +180,9 @@
 
 - **31** — Настраиваемые горячие клавиши: поля «Запись»/«Анализ» в настройках, сохранение в Store (voiceforge_shortcut_record/analyze), getShortcuts(), teardown/setup при смене.
 - **32** — Мини-карта сессии: кнопки по сегментам (время или №), scroll to segment в деталях сессии (detail-segment-minimap).
+- **33** — Подсветка поиска в транскрипте: при открытии из FTS передаётся highlightQuery, highlightSegmentText(), .fts-highlight.
+- **34** — Уведомления при завершении анализа (уже были: notify при analysis-done).
+- **38** — Теги сессий: voiceforge_session_tags в Store, фильтр «По тегу», поле тегов в деталях сессии.
 - **36** — Версия демона в настройках (get_daemon_version, строка под настройками).
 - **37** — Панель быстрых действий на главной: кнопки «Запись», «Анализ 60 сек» (quick-actions, initQuickActions).
 - **47** — Поиск по action items: фильтр «Только с action items», get_session_ids_with_action_items (TranscriptLog, D-Bus, Tauri), кэш в UI.
@@ -190,6 +193,7 @@
 - **50** — Офлайн-индикатор: баннер «Демон отключён» с кнопкой «Повторить подключение» (daemon-off-banner).
 - **51** — history --offset для пагинации (ранее —last; добавлен offset в get_sessions и CLI).
 - **52** — status --output json уже был (get_status_data, doctor в JSON).
+- **53** — Единый --output: документирован в cli-commands-and-run.md (envelope { ok, data } / { ok: false, error }).
 - **54** — `daemon --foreground` / `-f`: логи в stdout (structlog ConsoleRenderer(stream=sys.stdout)).
 - **58** — calendar list: list_calendars() в caldav_poll, команда voiceforge calendar list (--output text|json).
 - **55** — Команда `voiceforge version`.

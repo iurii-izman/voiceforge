@@ -177,6 +177,11 @@
                 <option value="with-actions">Только с action items</option>
               </select>
             </label>
+            <label>По тегу
+              <select id="sessions-tag-filter" aria-label="По тегу">
+                <option value="all">Все</option>
+              </select>
+            </label>
             <button type="button" class="btn small" id="sessions-export-btn" title="CSV или JSON">Экспорт списка</button>
           </div>
           <div id="sessions-fts-results" class="sessions-fts-results" style="display:none"></div>
@@ -198,6 +203,7 @@
             <button type="button" class="btn small" id="copy-transcript">Копировать транскрипт</button>
             <button type="button" class="btn small" id="copy-action-items">Копировать action items</button>
             <button type="button" class="btn small" id="session-detail-print" aria-label="Печать">Печать</button>
+            <div id="session-detail-tags" class="detail-tags-row" style="display:none">Теги: <input type="text" id="session-detail-tags-input" placeholder="тег1, тег2" aria-label="Теги сессии" /></div>
             <div id="session-detail-body"></div>
           </div>
         </div>
