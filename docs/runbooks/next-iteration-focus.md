@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-07 (bandit nosec — verify_pr зелёный по bandit; под-issues #87–95 на доске)
+**Обновлено:** 2026-03-07 (gitleaks: allowlist .hypothesis, .gitignore; коммит 270b7e2)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Bandit: добавлены nosec B310/B608 (telegram_notify, web/server, transcript_log, main) — verify_pr проходит шаг bandit (0 issues). Коммит 93d3607, пуш в main.
+**Сделано в сессии:** Gitleaks: в `.gitleaks.toml` добавлен allowlist для `.hypothesis/` (кэш Hypothesis даёт ложные срабатывания при локальном `verify_pr` с `--no-git`); `.hypothesis/` добавлен в `.gitignore`; в security-and-dependencies.md — примечание про исключения. Коммит 270b7e2, пуш в main.
 
-**Следующий шаг:** По желанию: Sonar (оставшиеся S3776, S6819, S2486 и др.); или реализация одного из блоков #87–95 по приоритету; или разбор gitleaks (verify_pr падает на [8/8] при 7 leaks — возможно .hypothesis или локальные данные).
+**Следующий шаг:** Проверить verify_pr локально или в CI: шаг [8/8] gitleaks после правок должен проходить (если 7 leaks были из .hypothesis). По желанию: Sonar (S3776, S6819, S2486 и др.) или реализация одного из блоков #87–95 по приоритету.
 
 ---
 
@@ -30,7 +30,7 @@
 - **PR #81, #79:** закрыты с комментарием «Applied in main» (2026-03-07).
 - **Открытые issues:** #65 (CVE — ждём upstream), #50 (macOS/WSL2 — p2/backlog).
 
-**Sonar:** Исправлены S1192, S7761, S7764 в desktop. Остаток: S3776, S6819, S2486 и др. **Mypy:** в scope verify_pr — 0 ошибок (исправлены dbus_service, daemon). **verify_pr:** Ruff + Mypy OK; bandit — зелёный (nosec B310/B608). Gitleaks — 7 leaks при полном прогоне (шаг [8/8]).
+**Sonar:** Исправлены S1192, S7761, S7764 в desktop. Остаток: S3776, S6819, S2486 и др. **Mypy:** в scope verify_pr — 0 ошибок. **verify_pr:** Ruff + Mypy OK; bandit — зелёный (nosec B310/B608). **Gitleaks:** добавлен allowlist для .hypothesis/ (коммит 270b7e2); при локальном прогоне 7 leaks могли быть из кэша Hypothesis — проверить после пуша.
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
