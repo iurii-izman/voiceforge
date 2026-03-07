@@ -34,7 +34,7 @@ def test_benchmark_get_sessions(benchmark: object, tmp_path: Path) -> None:
 
     log2 = TranscriptLog(db_path=db)
     try:
-        result = benchmark(log2.get_sessions, 100)
+        result = benchmark(log2.get_sessions, 100)  # NOSONAR S5864: pytest-benchmark fixture is callable
         assert len(result) == 100
     finally:
         log2.close()

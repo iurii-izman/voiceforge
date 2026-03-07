@@ -100,6 +100,7 @@
 | repo-and-git-governance.md | Репо, main, Git, PR, теги, issues, Sonar | Актуален |
 | release-and-quality.md | Релиз, откат, чеклисты альфа, DoD | Актуален |
 | pre-beta-sonar-github.md | Чеклист Sonar и GitHub перед бета-релизом (PR, issues, порядок) | Актуален |
+| PROJECT-STATUS-SUMMARY.md | Итог по проекту (9 разделов): планы↔код, что сделано/осталось, Sonar, GitHub, приоритеты | Актуален |
 | web-api.md, observability-alerts.md | API, мониторинг, трассировка Jaeger (#71) | Актуален |
 | test-operations.md, sonar-pr-cleanup.md | Тесты и CI | Актуален |
 | prompt-management.md, calendar-integration.md, rag-formats.md | Фичи и форматы | Актуален |

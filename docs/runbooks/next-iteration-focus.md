@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-07 (подтверждение блоков 68/#91, 71/#93; обновлён backlog)
+**Обновлено:** 2026-03-07 (полный аудит: планы↔код, backlog 44/46/49, Sonar правки, PROJECT-STATUS-SUMMARY)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Подтверждено, что блоки 68 (#91 streaming LLM) и 71 (#93 Whisper API) уже реализованы в коде. В backlog-and-actions отмечены как реализованные; обновлены заметки по реализации.
+**Сделано в сессии:** Полный аудит: сверка планов с кодом; в backlog отмечены как реализованные блоки 44 (#88), 46 (#89), 49 (#92). Обновлена секция «Не реализовано» в roadmap-100-blocks. Правки Sonar: optional chain (S6582), dict comprehension (S7494), NOSONAR в openai_whisper и test_benchmark_pipeline. Добавлен [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md) (9 разделов: сделано, планы↔код, осталось реализовать, что вам, Sonar, GitHub, приоритеты, криты, промпт).
 
-**Следующий шаг:** Следующая задача по [backlog-and-actions.md](../plans/backlog-and-actions.md): оставшиеся отложенные блоки B (44 история буфера, 46 слайд-панель настроек, 49 виджет «Последний анализ», 66 доработка prompt caching) или блоки 69/72 (retry LLM, оценка длительности analyze). Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
+**Следующий шаг:** По [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md) разд. 3–4, 7–8: рефакторинг Sonar S3776 (когнитивная сложность), блоки 69/72, Phase D (#70–73) или ручные шаги из MANUAL-AND-CANNOT-DO. Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
 
 ---
 

@@ -66,9 +66,9 @@ class OpenAIWhisperTranscriber:
         language: str | None = None,
         sample_rate: int = 16000,
         *,
-        beam_size: int = 1,
-        vad_filter: bool = True,
-        vad_parameters: dict | None = None,
+        beam_size: int = 1,  # NOSONAR keep for Transcriber interface
+        vad_filter: bool = True,  # NOSONAR
+        vad_parameters: dict | None = None,  # NOSONAR
     ) -> list[Segment]:
         """Send audio to OpenAI Whisper API; return list of Segment. Ignores beam_size/vad_*."""
         from voiceforge.core.secrets import get_api_key

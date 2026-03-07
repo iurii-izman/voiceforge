@@ -923,7 +923,7 @@ listen("analysis-done", (e) => {
   }
   document.getElementById("analyze-btn").disabled = false;
   const outEl = document.getElementById("analyze-streaming-output");
-  if (outEl && outEl.dataset.streamEnd === "1") outEl.dataset.streamEnd = "";
+  if (outEl?.dataset?.streamEnd === "1") outEl.dataset.streamEnd = "";
   if (daemonOk) loadSessions();
   if (status === "ok") notify("VoiceForge", "Анализ завершён.");
   else if (status === "error") notify("VoiceForge", "Анализ: ошибка.");

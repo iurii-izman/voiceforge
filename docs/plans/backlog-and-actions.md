@@ -26,9 +26,9 @@
 | # | Блок | Зачем ваше решение |
 |---|------|---------------------|
 | ~~35~~ | ~~Тёмная тема трея~~ | Реализовано: icon-dark.png + set_tray_theme по теме UI (#87). |
-| 44 | История буфера обмена | Локальная история копирований в UI; объём и UX — за вами. |
-| 46 | Слайд-панель настроек | Опция «настройки в выдвижной панели» — дизайн и приоритет. |
-| 49 | Виджет «Последний анализ» | Карточка с summary на главной; нужен контракт API/данных — ваше решение по формату. |
+| ~~44~~ | ~~История буфера обмена~~ | Реализовано (#88): voiceforge_clipboard_history, кнопка «История копирований», поповер в деталях сессии. |
+| ~~46~~ | ~~Слайд-панель настроек~~ | Реализовано (#89): voiceforge_settings_as_panel, settings-slide-panel, чекбокс в настройках. |
+| ~~49~~ | ~~Виджет «Последний анализ»~~ | Реализовано (#92): карточка last-analysis на главной, get_sessions + get_session_detail, кнопка «Открыть». |
 | 66 | Prompt caching | В router.py уже есть cache_control (ephemeral) для Claude; остальное — по документации API. |
 | ~~68~~ | ~~Streaming LLM в UI~~ | Реализовано (#91): stream_completion, analyze_meeting_stream, D-Bus StreamingAnalysisChunk, UI #analyze-streaming-output. |
 | ~~71~~ | ~~Whisper API (OpenAI)~~ | Реализовано (#93): stt_backend local\|openai, OpenAIWhisperTranscriber, pipeline и демон по конфигу. |
