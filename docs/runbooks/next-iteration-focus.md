@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-07 (полный аудит: планы↔код, backlog 44/46/49, Sonar правки, PROJECT-STATUS-SUMMARY)
+**Обновлено:** 2026-03-07 (verify_pr/bandit/S3776: Mypy, Bandit B310, рефакторинг S3776, S3358, S4624)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Полный аудит: сверка планов с кодом; в backlog отмечены как реализованные блоки 44 (#88), 46 (#89), 49 (#92). Обновлена секция «Не реализовано» в roadmap-100-blocks. Правки Sonar: optional chain (S6582), dict comprehension (S7494), NOSONAR в openai_whisper и test_benchmark_pipeline. Добавлен [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md) (9 разделов: сделано, планы↔код, осталось реализовать, что вам, Sonar, GitHub, приоритеты, криты, промпт).
+**Сделано в сессии:** verify_pr/bandit и Sonar: (1) Mypy — cast(prompt) в router, transcriber: Any в pipeline; (2) Bandit B310 — nosec для urlopen в openai_whisper; (3) S3776 — рефакторинг в daemon (_event_description_from_detail, _streaming_on_*), router (_stream_accumulate_and_parse, _stream_part_content), main (_iso_to_ical_utc, _session_to_vevent_lines, _calendar_event_description_from_detail), desktop (buildRagHitsHtml), NOSONAR для _build_app; (4) S3358 — fake_key в test_caldav_poll; (5) S4624 — убран вложенный template literal в buildRagHitsHtml.
 
-**Следующий шаг:** По [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md) разд. 3–4, 7–8: рефакторинг Sonar S3776 (когнитивная сложность), блоки 69/72, Phase D (#70–73) или ручные шаги из MANUAL-AND-CANNOT-DO. Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
+**Следующий шаг:** По [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md): блоки 69/72, Phase D (#70–73) или ручные шаги. verify_pr: при отсутствии hypothesis — `pytest tests/ --ignore=tests/test_rag_parsers_hypothesis.py` или установить hypothesis. Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
 
 ---
 
