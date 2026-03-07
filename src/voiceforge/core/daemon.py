@@ -323,6 +323,7 @@ class VoiceForgeDaemon:
                 "streaming_stt": c.streaming_stt,
                 "pii_mode": pii,
                 "privacy_mode": pii,
+                "language": getattr(c, "language", "auto"),
             },
             ensure_ascii=False,
         )

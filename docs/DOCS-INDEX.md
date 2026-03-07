@@ -92,6 +92,16 @@
 | claude-proposal-alignment.md | Заглушка → архив | [archive/plans/](archive/plans/) |
 | git-github-practices-rule.md, agent-session-handoff-rule.md | Копии для .cursor/rules/ | Актуален |
 | offline-package.md | Flatpak/AppImage (GA #73): сборка, установка, GA checklist | Актуален |
+| desktop-updater.md | Обновления десктопа (Tauri updater): ключи, endpoints, подпись, CI (блок 92) | Актуален |
+
+### docs/plans/
+
+| Файл | Роль | Статус |
+|------|------|--------|
+| [desktop-gui-phase2-10-blocks.md](plans/desktop-gui-phase2-10-blocks.md) | Следующие 10 блоков UI (11–20): горячие клавиши, темы, графики, поиск сессий, закрытие в трей, экспорт, онбординг, клавиатура, компактный режим, виджеты | Актуален |
+| [roadmap-100-blocks.md](plans/roadmap-100-blocks.md) | 100 блоков улучшений по всем направлениям (Desktop 31–50, CLI 51–60, D-Bus 61–65, пайплайн, RAG, календарь, экспорт, тесты, CI, доки, безопасность, i18n, упаковка) | Актуален |
+| [MANUAL-AND-CANNOT-DO.md](plans/MANUAL-AND-CANNOT-DO.md) | Что сделать вручную после автопилота и что агент не может сделать сам | Актуален |
+| [video-meetings-integration.md](plans/video-meetings-integration.md) | Заглушка: интеграция с видеовстречами (Jitsi/Meet) — roadmap блок 80 | Запланировано |
 
 ### docs/adr/
 
@@ -105,7 +115,7 @@
 
 | Файл | Роль | Статус |
 |------|------|--------|
-| README.md, overview.md | Пайплайн, модули | Актуален |
+| README.md, overview.md | Пайплайн, модули; ключевые решения и ссылки на ADR (блок 93) | Актуален |
 
 ### monitoring/ (корень репо)
 

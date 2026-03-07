@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-07 (автопилот: блоки 62, 64, 65 roadmap-100)
+**Обновлено:** 2026-03-07 (автопилот: блоки 67, 70, 74, 77, 80 roadmap-100)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Реализованы блоки 62, 64, 65: сигнал SessionCreated (демон сохраняет сессию в Analyze, возвращает (text, session_id), D-Bus SessionCreated, UI session-created → loadSessions + открытие сессии); GetUpcomingEvents в демоне (daemon.get_upcoming_events, D-Bus GetUpcomingEvents, Tauri через D-Bus); логи демона в файл (daemon --log-file, _Tee). Roadmap обновлён.
+**Сделано в сессии:** Реализованы блоки 67, 70, 74, 77, 80: язык STT в GetSettings и в UI настроек; model_call_counts в analytics; rag_exclude_patterns в config и пропуск при index; команда rag-export для экспорта метаданных RAG; заглушка видеовстреч (video-meetings-integration.md, DOCS-INDEX). Roadmap обновлён.
 
-**Следующий шаг:** Продолжить roadmap-100: блоки 66–72 (STT/LLM/пайплайн), 73–77 (RAG), 78–80 (календарь) или ручная проверка десктопа/сборки.
+**Следующий шаг:** Продолжить roadmap-100: блоки 78–79 (календарь), 81–83 (экспорт/отчёты), 84–88 (тесты) или ручная проверка десктопа.
 
 ---
 

@@ -1198,6 +1198,7 @@ const SETTINGS_LABELS = {
   streaming_stt: "Стриминг STT",
   pii_mode: "Режим PII",
   privacy_mode: "Режим конфиденциальности",
+  language: "Язык распознавания (STT)",
 };
 
 function renderSettings(data) {

@@ -36,9 +36,11 @@ def test_help_exposes_only_core_commands() -> None:
         "web",
         "index",
         "watch",
+        "rag-export",
         "daemon",
         "install-service",
         "uninstall-service",
+        "version",
     }
     removed = {"dashboard", "analytics", "privacy", "update", "prefetch", "tasks", "summary", "plugin", "speaker"}
     assert _normalized_command_names() == expected

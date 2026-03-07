@@ -292,11 +292,13 @@ def _build_stats_result(
     cache_misses: int,
 ) -> dict:
     total_cache = cache_hits + cache_misses
+    model_call_counts = {m.get("model", ""): m.get("calls", 0) for m in by_model if m.get("model")}
     return {
         "by_model": by_model,
         "by_day": by_day,
         "total_cost_usd": total_cost,
         "total_calls": total_calls,
+        "model_call_counts": model_call_counts,
         "avg_latency_ms": sum(latencies) / len(latencies) if latencies else None,
         "response_cache_hits": cache_hits,
         "response_cache_misses": cache_misses,

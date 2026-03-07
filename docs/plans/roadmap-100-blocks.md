@@ -206,7 +206,12 @@
 - **63** — Таймаут и retry для invoke: invokeWithRetry (timeout 5s для ping, 1 retry) в checkDaemon.
 - **64** — GetUpcomingEvents в демоне: daemon.get_upcoming_events(48), D-Bus GetUpcomingEvents(), Tauri вызывает D-Bus вместо CLI.
 - **65** — Логи демона в файл: daemon --log-file <path>, _Tee(stderr, file), создание директорий при необходимости.
+- **67** — Язык STT в UI: поле language в GetSettings, отображение в настройках десктопа («Язык распознавания (STT)»).
+- **70** — Метрики по моделям: model_call_counts в get_stats (словарь model_id → число вызовов).
+- **74** — RAG exclude_patterns: настройка rag_exclude_patterns в config, пропуск путей в _index_directory по fnmatch.
 - **76** — Статистика RAG в status/doctor: _get_rag_stats(), rag.indexed_sources_count/chunks_count в get_status_data(), doctor.rag_stats.
+- **77** — Экспорт RAG-индекса: команда `voiceforge rag-export --output <file>` (метаданные источников и чанков, опция --content).
+- **80** — Заглушка видеовстреч: [video-meetings-integration.md](video-meetings-integration.md), запись в DOCS-INDEX.
 - **92** — Runbook [desktop-updater.md](../runbooks/desktop-updater.md).
 - **93** — Секция «Ключевые решения» в docs/architecture/README.md со ссылками на ADR.
 - **94** — DOCS-INDEX обновлён (roadmap, desktop-updater, MANUAL-AND-CANNOT-DO).

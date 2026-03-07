@@ -773,17 +773,28 @@ def action_items_update(
     _action_items_update_echo(output, from_session, next_session, updates, cost_usd, save)
 
 
-def _index_directory(indexer: Any, p: Path) -> tuple[int, set[str]]:
-    """Index all supported files under directory p. Return (total chunks added, indexed paths)."""
+def _index_directory(
+    indexer: Any, p: Path, exclude_patterns: list[str] | None = None
+) -> tuple[int, set[str]]:
+    """Index all supported files under directory p. Block 74: skip paths matching rag_exclude_patterns."""
+    import fnmatch
+
     total = 0
     indexed_paths: set[str] = set()
+    patterns = exclude_patterns or []
     for ext in _INDEX_EXTENSIONS:
         for f in sorted(p.glob(f"**/*{ext}")):
             if not f.is_file():
                 continue
+            path_str = str(f.resolve())
+            if any(
+                fnmatch.fnmatch(path_str, pat) or fnmatch.fnmatch(f.name, pat)
+                for pat in patterns
+            ):
+                continue
             try:
                 total += indexer.add_file(f)
-                indexed_paths.add(str(f.resolve()))
+                indexed_paths.add(path_str)
             except Exception as e:
                 typer.echo(t("index.skip_file", path=str(f), e=str(e)), err=True)
     return (total, indexed_paths)
@@ -818,7 +829,9 @@ def index(
             typer.echo(t("index.chunks_added", n=added))
             return
         if p.is_dir():
-            total, indexed_paths = _index_directory(indexer, p)
+            total, indexed_paths = _index_directory(
+                indexer, p, getattr(cfg, "rag_exclude_patterns", None) or []
+            )
             pruned = indexer.prune_sources_not_in(indexed_paths, only_under_prefix=str(p.resolve()))
             if pruned:
                 typer.echo(t("index.chunks_pruned", n=pruned))
@@ -853,6 +866,39 @@ def watch(
     except ImportError:
         typer.echo(t("error.rag_deps"), err=True)
         raise SystemExit(1) from None
+
+
+@app.command("rag-export")
+def rag_export(
+    output: Path = typer.Option(..., "--output", "-o", path_type=Path, help="Output file (JSON)"),
+    db: str | None = typer.Option(None, "--db", help="RAG DB path; default from config"),
+    include_content: bool = typer.Option(False, "--content", help="Include chunk content in export"),
+) -> None:
+    """Export RAG index metadata for backup (block 77). Writes sources and chunk list to JSON."""
+    cfg = _get_config()
+    db_path = Path(db or cfg.get_rag_db_path())
+    if not db_path.is_file():
+        typer.echo(t("error.path_not_found", path=str(db_path)), err=True)
+        raise SystemExit(1)
+    import sqlite3
+
+    conn = sqlite3.connect(str(db_path))
+    conn.row_factory = sqlite3.Row
+    try:
+        cur = conn.execute(
+            "SELECT id, source, page, chunk_index, timestamp"
+            + (", content" if include_content else "")
+            + " FROM chunks ORDER BY source, page, chunk_index"
+        )
+        rows = cur.fetchall()
+        sources = sorted({r["source"] for r in rows})
+        chunks = [dict(r) for r in rows]
+        out = {"sources": sources, "chunks_count": len(chunks), "chunks": chunks}
+    finally:
+        conn.close()
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(out, ensure_ascii=False, indent=2))
+    typer.echo(f"Exported {len(sources)} sources, {len(chunks)} chunks to {output}")
 
 
 class _Tee:

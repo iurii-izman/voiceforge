@@ -85,6 +85,10 @@ class Settings(BaseSettings):
         description="Ring file path; default XDG_RUNTIME_DIR/voiceforge/ring.raw",
     )
     rag_db_path: str | None = Field(default=None, description="RAG SQLite path")
+    rag_exclude_patterns: list[str] = Field(
+        default_factory=list,
+        description="Block 74: glob patterns to exclude paths from RAG indexing (e.g. *.tmp, */.git/*).",
+    )
     smart_trigger: bool = Field(
         default=False,
         description="Block 4.4: auto-analyze on semantic pause (silence > 3s after >= 30s speech)",
