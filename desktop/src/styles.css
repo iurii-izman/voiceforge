@@ -131,6 +131,11 @@ pre { background: var(--bg); padding: 0.75rem; border-radius: 6px; overflow: aut
 .sessions-fts-results { margin-bottom: 0.5rem; }
 .fts-hits-list { list-style: none; padding-left: 0; }
 .fts-hits-list li { margin: 0.25rem 0; }
+.sessions-rag-results { margin-bottom: 0.5rem; }
+.rag-hits-list { list-style: none; padding-left: 0; }
+.rag-hits-list .rag-hit { margin: 0.5rem 0; }
+.rag-hit-source { font-size: 0.9em; color: var(--fg-muted, #666); }
+.rag-hit-content { font-size: 0.95em; }
 .sessions-search-input { min-width: 180px; padding: 0.35rem 0.5rem; background: var(--bg); border: 1px solid var(--border); color: var(--fg); border-radius: var(--radius-sm); }
 .sessions-toolbar select { padding: 0.25rem 0.5rem; background: var(--bg); border: 1px solid var(--border); color: var(--fg); border-radius: var(--radius-sm); }
 table { border-collapse: collapse; width: 100%; }

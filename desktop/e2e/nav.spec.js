@@ -76,6 +76,7 @@ test.describe("Desktop UI navigation", () => {
     await expect(page.locator("#tab-sessions.active")).toBeVisible();
     await expect(page.locator("#sessions-search")).toBeVisible();
     await expect(page.locator("#sessions-fts-search")).toBeVisible();
+    await expect(page.locator("#sessions-rag-search")).toBeVisible();
     await expect(page.locator("#sessions-period")).toBeVisible();
     await expect(page.locator("#sessions-export-btn")).toBeVisible();
   });

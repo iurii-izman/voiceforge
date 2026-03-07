@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-07 (тёмная тема трея — блок 35; Closes #87)
+**Обновлено:** 2026-03-07 (блок 75 — поиск по RAG из UI; Closes #94)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Блок 35 — тёмная тема трея: добавлен `icons/icon-dark.png`, в tray.rs — `tray_icon_dark()` через `include_bytes!`, `set_tray_theme` переключает иконку по is_dark; фронт уже вызывает `set_tray_theme` при `applyTheme`. Обновлены roadmap и backlog. Closes #87.
+**Сделано в сессии:** Блок 75 — поиск по RAG из UI (#94): демон `search_rag(query, top_k)`, D-Bus `SearchRag`, Tauri `search_rag`, поле «Поиск по документам (RAG)» и блок результатов на вкладке Сессии; i18n, E2E проверка видимости поля. Closes #94.
 
-**Следующий шаг:** Следующая задача по [backlog-and-actions.md](../plans/backlog-and-actions.md) / [roadmap-100-blocks.md](../plans/roadmap-100-blocks.md): блок 75 (поиск по RAG из UI, #94), 68 (streaming LLM в UI), 71 (Whisper API) или 79 (создание события из сессии). Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
+**Следующий шаг:** Следующая задача по [backlog-and-actions.md](../plans/backlog-and-actions.md) / [roadmap-100-blocks.md](../plans/roadmap-100-blocks.md): блок 68 (streaming LLM в UI, #91), 71 (Whisper API, #93) или 79 (создание события из сессии, #95). Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
 
 ---
 

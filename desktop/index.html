@@ -163,6 +163,7 @@
           <div class="sessions-toolbar">
             <input type="search" id="sessions-search" placeholder="Поиск по ID или дате…" class="sessions-search-input" aria-label="Поиск сессий" data-i18n-placeholder="sessions_search_placeholder" />
             <input type="search" id="sessions-fts-search" placeholder="Поиск по тексту транскрипта…" class="sessions-search-input" aria-label="Полнотекстовый поиск" data-i18n-placeholder="sessions_fts_placeholder" />
+            <input type="search" id="sessions-rag-search" placeholder="Поиск по документам (RAG)…" class="sessions-search-input" aria-label="Поиск по документам" data-i18n-placeholder="sessions_rag_placeholder" />
             <label><span data-i18n="sessions_period">Период</span>
               <select id="sessions-period" aria-label="Период">
                 <option value="all" data-i18n="period_all">Все</option>
@@ -199,6 +200,7 @@
             <button type="button" class="btn small" id="sessions-export-btn" title="CSV или JSON" data-i18n="sessions_export_btn">Экспорт списка</button>
           </div>
           <div id="sessions-fts-results" class="sessions-fts-results" style="display:none"></div>
+          <div id="sessions-rag-results" class="sessions-rag-results" style="display:none"></div>
           <div id="sessions-list"></div>
           <div id="session-context-menu" class="context-menu" role="menu" aria-hidden="true" style="display:none">
             <button type="button" class="context-menu-item" data-action="open" data-i18n="ctx_open">Открыть</button>

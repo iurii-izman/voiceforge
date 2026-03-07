@@ -203,6 +203,15 @@ def test_daemon_get_sessions_no_callback_returns_empty(monkeypatch: pytest.Monke
     assert data.get("data", {}).get("sessions") == []
 
 
+def test_daemon_search_rag_no_callback_returns_empty(monkeypatch: pytest.MonkeyPatch) -> None:
+    """SearchRag without callback returns [] in envelope (block 75)."""
+    monkeypatch.setenv("VOICEFORGE_IPC_ENVELOPE", "1")
+    iface = _daemon_iface()
+    out = DaemonVoiceForgeInterface.SearchRag.__wrapped__(iface, "test", 10)
+    data = json.loads(out)
+    assert data.get("data", {}).get("rag_hits") == []
+
+
 def test_daemon_get_settings_with_callback(monkeypatch: pytest.MonkeyPatch) -> None:
     """GetSettings with callback returns wrapped payload."""
     monkeypatch.setenv("VOICEFORGE_IPC_ENVELOPE", "1")

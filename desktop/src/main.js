@@ -60,6 +60,9 @@ const I18N = {
     settings_compact_title: "Режим окна",
     sessions_search_placeholder: "Поиск по ID или дате…",
     sessions_fts_placeholder: "Поиск по тексту транскрипта…",
+    sessions_rag_placeholder: "Поиск по документам (RAG)…",
+    rag_hits_title: "Найдено в документах:",
+    rag_no_hits: "Ничего не найдено.",
     listen_btn_start: "Старт записи",
     listen_btn_stop: "Стоп записи",
     listen_label_recording: "Запись идёт",
@@ -155,6 +158,9 @@ const I18N = {
     settings_compact_title: "Window mode",
     sessions_search_placeholder: "Search by ID or date…",
     sessions_fts_placeholder: "Search transcript text…",
+    sessions_rag_placeholder: "Search documents (RAG)…",
+    rag_hits_title: "Found in documents:",
+    rag_no_hits: "No results.",
     listen_btn_start: "Start recording",
     listen_btn_stop: "Stop recording",
     listen_label_recording: "Recording…",
@@ -2106,6 +2112,7 @@ function exportCostsReport() {
 
 async function handleFtsSearch(q, listEl, resultsEl) {
   if (!daemonOk) return;
+  document.getElementById("sessions-rag-results")?.style.setProperty("display", "none");
   try {
     const raw = await invoke("search_transcripts", { query: q, limit: 25 });
     const env = parseEnvelope(raw);
@@ -2142,6 +2149,45 @@ async function handleFtsSearch(q, listEl, resultsEl) {
   }
 }
 
+async function handleRagSearch(q, listEl, ftsResultsEl, resultsEl) {
+  if (!daemonOk) return;
+  try {
+    const raw = await invoke("search_rag", { query: q, limit: 15 });
+    const env = parseEnvelope(raw);
+    const hits = env?.data?.rag_hits ?? env?.rag_hits ?? [];
+    if (!Array.isArray(hits) || hits.length === 0) {
+      if (resultsEl) {
+        resultsEl.innerHTML = "<p class=\"muted\">" + t("rag_no_hits") + "</p>";
+        resultsEl.style.display = "block";
+      }
+      if (ftsResultsEl) ftsResultsEl.style.display = "none";
+      if (listEl) listEl.style.display = "none";
+      return;
+    }
+    let html = "<p class=\"muted\">" + t("rag_hits_title") + "</p><ul class=\"rag-hits-list\">";
+    hits.forEach((h) => {
+      const src = escapeHtml((h.source ?? "").trim() || "—");
+      const content = escapeHtml((h.content ?? "").trim().slice(0, 200) || "—");
+      const score = h.score != null ? escapeHtml(String(h.score)) : "";
+      html += `<li class="rag-hit"><span class="rag-hit-source">${src}</span>${score ? ` <span class="muted">(${score})</span>` : ""}<br><span class="rag-hit-content">${content}</span></li>`;
+    });
+    html += "</ul>";
+    if (resultsEl) {
+      resultsEl.innerHTML = html;
+      resultsEl.style.display = "block";
+    }
+    if (ftsResultsEl) ftsResultsEl.style.display = "none";
+    if (listEl) listEl.style.display = "none";
+  } catch (e) {
+    if (resultsEl) {
+      resultsEl.innerHTML = "<p class=\"muted\">" + t("error_prefix") + escapeHtml(e?.message || e) + "</p>";
+      resultsEl.style.display = "block";
+    }
+    if (ftsResultsEl) ftsResultsEl.style.display = "none";
+    if (listEl) listEl.style.display = "none";
+  }
+}
+
 function initSessionsToolbar() {
   document.getElementById("sessions-search")?.addEventListener("input", () => applySessionsFilter());
   document.getElementById("sessions-period")?.addEventListener("change", () => applySessionsFilter());
@@ -2156,8 +2202,10 @@ function initSessionsToolbar() {
     const q = (input?.value ?? "").trim();
     const listEl = document.getElementById("sessions-list");
     const resultsEl = document.getElementById("sessions-fts-results");
+    const ragResultsEl = document.getElementById("sessions-rag-results");
     if (!q) {
       if (resultsEl) resultsEl.style.display = "none";
+      if (ragResultsEl) ragResultsEl.style.display = "none";
       if (listEl) listEl.style.display = "";
       applySessionsFilter();
       return;
@@ -2166,6 +2214,25 @@ function initSessionsToolbar() {
     ftsSearchTimeout = setTimeout(() => {
       ftsSearchTimeout = null;
       void handleFtsSearch(q, listEl, resultsEl);
+    }, 350);
+  });
+  let ragSearchTimeout = null;
+  document.getElementById("sessions-rag-search")?.addEventListener("input", () => {
+    const input = document.getElementById("sessions-rag-search");
+    const q = (input?.value ?? "").trim();
+    const listEl = document.getElementById("sessions-list");
+    const ftsResultsEl = document.getElementById("sessions-fts-results");
+    const resultsEl = document.getElementById("sessions-rag-results");
+    if (!q) {
+      if (resultsEl) resultsEl.style.display = "none";
+      if (listEl) listEl.style.display = "";
+      applySessionsFilter();
+      return;
+    }
+    if (ragSearchTimeout) clearTimeout(ragSearchTimeout);
+    ragSearchTimeout = setTimeout(() => {
+      ragSearchTimeout = null;
+      void handleRagSearch(q, listEl, ftsResultsEl, resultsEl);
     }, 350);
   });
   document.getElementById("sessions-export-btn")?.addEventListener("click", () => {

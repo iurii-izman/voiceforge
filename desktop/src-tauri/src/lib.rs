@@ -76,6 +76,7 @@ pub fn run() {
             commands::get_sessions,
             commands::get_session_ids_with_action_items,
             commands::search_transcripts,
+            commands::search_rag,
             commands::get_session_detail,
             commands::get_analytics,
             commands::is_listening,

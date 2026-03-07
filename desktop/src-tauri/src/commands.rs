@@ -61,6 +61,23 @@ pub async fn search_transcripts(query: String, limit: u32) -> Result<String, Str
 }
 
 #[tauri::command]
+pub async fn search_rag(query: String, limit: u32) -> Result<String, String> {
+    let conn = connection().await?;
+    let reply = conn
+        .call_method(
+            Some(crate::DBUS_NAME),
+            crate::DBUS_PATH,
+            Some(crate::DBUS_INTERFACE),
+            "SearchRag",
+            &(query.as_str(), limit),
+        )
+        .await
+        .map_err(|e| e.to_string())?;
+    let body: String = reply.body().deserialize().map_err(|e| e.to_string())?;
+    Ok(body)
+}
+
+#[tauri::command]
 pub async fn get_session_detail(session_id: u32) -> Result<String, String> {
     let conn = connection().await?;
     let reply = conn

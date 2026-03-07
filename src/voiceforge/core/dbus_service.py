@@ -149,6 +149,7 @@ class _DaemonOptionalCallbacks(TypedDict, total=False):
     get_sessions_fn: Callable[[int], str]
     get_session_detail_fn: Callable[[int], str]
     search_transcripts_fn: Callable[[str, int], str]
+    search_rag_fn: Callable[[str, int], str]
     get_settings_fn: Callable[[], str]
     get_indexed_paths_fn: Callable[[], str]
     get_session_ids_with_action_items_fn: Callable[[], str]
@@ -184,6 +185,7 @@ class DaemonVoiceForgeInterface(ServiceInterface):
         self._get_sessions = o.get("get_sessions_fn")
         self._get_session_detail = o.get("get_session_detail_fn")
         self._search_transcripts = o.get("search_transcripts_fn")
+        self._search_rag = o.get("search_rag_fn")
         self._get_settings = o.get("get_settings_fn")
         self._get_indexed_paths = o.get("get_indexed_paths_fn")
         self._get_session_ids_with_action_items = o.get("get_session_ids_with_action_items_fn")
@@ -290,6 +292,16 @@ class DaemonVoiceForgeInterface(ServiceInterface):
         payload = self._search_transcripts(query, limit)
         if _uses_ipc_envelope():
             return _wrap_envelope_with_json_key("hits", payload)
+        return payload
+
+    @dbus_method()
+    def SearchRag(self, query: DBusStr, limit: DBusUint32) -> DBusStr:
+        """Return JSON array of RAG search hits: chunk_id, content, source, page, chunk_index, timestamp, score (block 75)."""
+        if self._search_rag is None:
+            return _wrap_envelope_with_json_key("rag_hits", "[]") if _uses_ipc_envelope() else "[]"
+        payload = self._search_rag(query, limit)
+        if _uses_ipc_envelope():
+            return _wrap_envelope_with_json_key("rag_hits", payload)
         return payload
 
     @dbus_method()

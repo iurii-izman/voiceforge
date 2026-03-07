@@ -354,6 +354,38 @@ class VoiceForgeDaemon:
             log.warning("daemon.get_indexed_paths_failed", error=str(e))
             return "[]"
 
+    def search_rag(self, query: str, top_k: int = 10) -> str:
+        """Return JSON array of RAG search hits: chunk_id, content, source, page, chunk_index, timestamp, score (block 75)."""
+        if not query or not query.strip():
+            return "[]"
+        try:
+            from voiceforge.rag.searcher import HybridSearcher
+
+            db_path = self._cfg.get_rag_db_path()
+            if not Path(db_path).is_file():
+                return "[]"
+            searcher = HybridSearcher(db_path)
+            try:
+                results = searcher.search(query.strip(), top_k=min(top_k, 25))
+                out = [
+                    {
+                        "chunk_id": r.chunk_id,
+                        "content": r.content,
+                        "source": r.source,
+                        "page": r.page,
+                        "chunk_index": r.chunk_index,
+                        "timestamp": r.timestamp,
+                        "score": round(r.score, 6),
+                    }
+                    for r in results
+                ]
+                return json.dumps(out, ensure_ascii=False)
+            finally:
+                searcher.close()
+        except Exception as e:
+            log.warning("daemon.search_rag_failed", error=str(e))
+            return "[]"
+
     def get_session_ids_with_action_items(self) -> str:
         """Return JSON array of session_id that have at least one action item (block 47)."""
         try:
@@ -621,6 +653,7 @@ def _wire_daemon_iface(iface: DaemonVoiceForgeInterface, daemon: VoiceForgeDaemo
     iface._get_sessions = daemon.get_sessions
     iface._get_session_detail = daemon.get_session_detail
     iface._search_transcripts = daemon.search_transcripts
+    iface._search_rag = daemon.search_rag
     iface._get_settings = daemon.get_settings
     iface._get_indexed_paths = daemon.get_indexed_paths
     iface._get_session_ids_with_action_items = daemon.get_session_ids_with_action_items
