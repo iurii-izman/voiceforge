@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import contextlib
 import time
+from unittest.mock import patch
 
 import pytest
 
@@ -82,7 +83,7 @@ def test_circuit_breaker_get_all_states() -> None:
 
 
 def test_wrap_completion_records_success_and_failure() -> None:
-    """Wrapped completion records success on return, failure on exception."""
+    """Wrapped completion records success on return, failure on exception (block 69: retries then opens)."""
     cb = get_circuit_breaker()
     ok_key, fail_key = "wrap_ok_key", "wrap_fail_key"
 
@@ -94,10 +95,31 @@ def test_wrap_completion_records_success_and_failure() -> None:
     wrapped = wrap_completion(fake_completion)
     wrapped(model=ok_key)
     assert cb.get_state(ok_key) == STATE_CLOSED
-    for _ in range(3):
-        with contextlib.suppress(ValueError):
-            wrapped(model=fail_key)
+    with patch("voiceforge.llm.circuit_breaker.time.sleep"):  # block 69 retry backoff: avoid 9s in test
+        for _ in range(3):
+            with contextlib.suppress(ValueError):
+                wrapped(model=fail_key)
     assert cb.get_state(fail_key) == STATE_OPEN
+
+
+def test_wrap_completion_retries_then_succeeds() -> None:
+    """Block 69: wrapped completion retries with backoff; on success after retry, records success."""
+    cb = get_circuit_breaker()
+    key = "retry_then_ok"
+    calls: list[int] = []
+
+    def fail_twice_then_ok(**kwargs: object) -> str:
+        calls.append(1)
+        if len(calls) <= 2:
+            raise OSError("transient")
+        return "ok"
+
+    with patch("voiceforge.llm.circuit_breaker.time.sleep"):
+        wrapped = wrap_completion(fail_twice_then_ok)
+        result = wrapped(model=key)
+    assert result == "ok"
+    assert len(calls) == 3
+    assert cb.get_state(key) == STATE_CLOSED
 
 
 def test_wrap_completion_raises_when_circuit_open() -> None:

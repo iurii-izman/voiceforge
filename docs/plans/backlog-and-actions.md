@@ -41,6 +41,7 @@
 - **#90 (66 prompt caching):** В `router.py` уже есть cache_control для Claude в `analyze_meeting`, `analyze_live_summary`, `_analysis_prompt`. Дополнительно добавлен cache для `update_action_item_statuses` при Claude. Остальное (LiteLLM/провайдеры) — по документации API.
 - **#91 (68 streaming LLM в UI):** Реализовано. Бэкенд: `stream_completion()` в router, `analyze_meeting_stream(stream_callback)`; демон передаёт delta в D-Bus `StreamingAnalysisChunk`; UI подписан на `streaming-analysis-chunk`, выводит в `#analyze-streaming-output`.
 - **#93 (71 Whisper API):** Реализовано. Конфиг `stt_backend: local | openai`, ключ `openai` в keyring; `stt/openai_whisper.py` — `OpenAIWhisperTranscriber`; `get_transcriber_for_config` и `pipeline._step1_stt` выбирают по конфигу.
+- **Блок 69 (retry LLM):** Реализовано. В `llm/circuit_breaker.py`: до 3 попыток (1 + _LLM_RETRY_MAX) с экспоненциальной задержкой (1s, 2s); после исчерпания — record_failure и открытие circuit.
 
 ---
 

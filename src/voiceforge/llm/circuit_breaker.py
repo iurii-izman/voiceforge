@@ -133,9 +133,15 @@ def get_circuit_breaker() -> CircuitBreaker:
         return _breaker
 
 
+# Block 69: retry with exponential backoff (attempts: 1 + max_retries, delays: initial * multiplier^i)
+_LLM_RETRY_MAX = 2
+_LLM_RETRY_INITIAL_DELAY = 1.0
+_LLM_RETRY_MULTIPLIER = 2.0
+
+
 def _completion_with_breaker(completion_fn: Any, **kwargs: Any) -> Any:
     """
-    Wrapper for litellm completion: check breaker for model, record success/failure.
+    Wrapper for litellm completion: check breaker, retry with backoff (block 69), record success/failure.
     Raises so that Instructor can try fallback when circuit is open.
     """
     model = kwargs.get("model") or ""
@@ -143,13 +149,30 @@ def _completion_with_breaker(completion_fn: Any, **kwargs: Any) -> Any:
     if not breaker.can_execute(model):
         log.warning("llm.circuit_breaker.skip", model=model)
         raise RuntimeError(f"Circuit breaker open for model {model}") from None
-    try:
-        out = completion_fn(**kwargs)
-        breaker.record_success(model)
-        return out
-    except Exception:
-        breaker.record_failure(model)
-        raise
+    last_exc: BaseException | None = None
+    delay = _LLM_RETRY_INITIAL_DELAY
+    for attempt in range(_LLM_RETRY_MAX + 1):
+        try:
+            out = completion_fn(**kwargs)
+            breaker.record_success(model)
+            return out
+        except Exception as e:
+            last_exc = e
+            if attempt < _LLM_RETRY_MAX:
+                log.warning(
+                    "llm.retry_backoff",
+                    model=model,
+                    attempt=attempt + 1,
+                    max_attempts=_LLM_RETRY_MAX + 1,
+                    delay_sec=round(delay, 1),
+                    error=str(e),
+                )
+                time.sleep(delay)
+                delay *= _LLM_RETRY_MULTIPLIER
+            else:
+                break
+    breaker.record_failure(model)
+    raise last_exc from None
 
 
 def wrap_completion(completion_fn: Any) -> Any:
