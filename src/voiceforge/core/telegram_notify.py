@@ -21,7 +21,7 @@ def get_telegram_chat_id() -> str | None:
         out = keyring.get_password(_SERVICE, "telegram_chat_id")
         return out.strip() if out else None
     except Exception as e:
-        _log.debug("telegram_notify.get_chat_id failed", error=str(e))
+        _log.debug("telegram_notify.get_chat_id failed: %s", e)
         return None
 
 
@@ -32,7 +32,7 @@ def set_telegram_chat_id(chat_id: int | str) -> None:
 
         keyring.set_password(_SERVICE, "telegram_chat_id", str(chat_id))
     except Exception as e:
-        _log.warning("telegram_notify.set_chat_id failed", error=str(e))
+        _log.warning("telegram_notify.set_chat_id failed: %s", e)
 
 
 def notify_analyze_done(session_id: int | None, summary: str) -> None:
@@ -51,8 +51,9 @@ def notify_analyze_done(session_id: int | None, summary: str) -> None:
     req = urllib.request.Request(url, data=payload, method="POST")
     req.add_header("Content-Type", _CONTENT_TYPE_JSON)
     try:
-        with urllib.request.urlopen(req, timeout=10) as r:
+        with urllib.request.urlopen(req, timeout=10) as r:  # nosec B310 -- HTTPS only, URL from config
             if r.status >= 400:
-                _log.warning("telegram_notify.send failed", status=r.status, body=r.read())
+                body = r.read()
+                _log.warning("telegram_notify.send failed status=%s body=%s", r.status, body)
     except Exception as e:
-        _log.warning("telegram_notify.send error", error=str(e))
+        _log.warning("telegram_notify.send error: %s", e)

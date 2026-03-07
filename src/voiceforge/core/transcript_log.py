@@ -615,7 +615,7 @@ class TranscriptLog:
         placeholders = ",".join("?" * len(session_ids))
         try:
             cursor.execute(
-                f"DELETE FROM action_items WHERE session_id IN ({placeholders})",
+                f"DELETE FROM action_items WHERE session_id IN ({placeholders})",  # nosec B608
                 session_ids,
             )
         except sqlite3.OperationalError as e:
@@ -625,15 +625,15 @@ class TranscriptLog:
             else:
                 raise
         cursor.execute(
-            f"DELETE FROM segments WHERE session_id IN ({placeholders})",
+            f"DELETE FROM segments WHERE session_id IN ({placeholders})",  # nosec B608
             session_ids,
         )
         cursor.execute(
-            f"DELETE FROM analyses WHERE session_id IN ({placeholders})",
+            f"DELETE FROM analyses WHERE session_id IN ({placeholders})",  # nosec B608
             session_ids,
         )
         cursor.execute(
-            f"DELETE FROM sessions WHERE id IN ({placeholders})",
+            f"DELETE FROM sessions WHERE id IN ({placeholders})",  # nosec B608
             session_ids,
         )
         conn.commit()

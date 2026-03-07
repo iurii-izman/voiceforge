@@ -169,7 +169,7 @@ def _telegram_send_message(token: str, chat_id: int | str, text: str) -> None:
     req = urllib.request.Request(url, data=payload, method="POST")
     req.add_header("Content-Type", _CONTENT_TYPE_JSON)
     try:
-        with urllib.request.urlopen(req, timeout=10) as r:
+        with urllib.request.urlopen(req, timeout=10) as r:  # nosec B310 -- HTTPS only, URL from config
             if r.status >= 400:
                 _log.warning("telegram.sendMessage failed", status=r.status, body=r.read())
     except Exception as e:

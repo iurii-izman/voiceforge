@@ -924,7 +924,7 @@ def rag_export(
     conn.row_factory = sqlite3.Row
     try:
         cur = conn.execute(
-            "SELECT id, source, page, chunk_index, timestamp"
+            "SELECT id, source, page, chunk_index, timestamp"  # nosec B608
             + (", content" if include_content else "")
             + " FROM chunks ORDER BY source, page, chunk_index"
         )
