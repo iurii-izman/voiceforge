@@ -43,6 +43,8 @@ jobs:
     needs: build
     permissions:
       contents: write
+    env:
+      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
     steps:
       - uses: actions/checkout@v6
       - name: Install system deps (Tauri + Flatpak)

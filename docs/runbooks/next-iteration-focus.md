@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-07 (автопилот: блоки 87, 98, 100)
+**Обновлено:** 2026-03-07 (автопилот: блоки 87, 90, 98, 100)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Блок 87 — job desktop-a11y (vite preview + pa11y). Блок 98 — role="main" и aria-label на main. Блок 100 — отмечен в roadmap (Flatpak в release.yml). Добавлен скрипт preview в desktop.
+**Сделано в сессии:** Блоки 87, 98, 100 (a11y job, main landmark, Flatpak в roadmap). Блок 90 — TAURI_SIGNING_PRIVATE_KEY в release.yml (job flatpak), п.6 desktop-updater.md.
 
-**Следующий шаг:** Продолжить roadmap-100: блоки 84 (E2E Playwright), 90 (подпись в CI), 97 (EN локализация UI) или ручная проверка десктопа/сборки.
+**Следующий шаг:** Продолжить roadmap-100: блоки 84 (E2E Playwright), 97 (EN локализация UI) или ручная проверка десктопа/сборки.
 
 ---
 

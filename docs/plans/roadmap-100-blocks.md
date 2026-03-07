@@ -224,6 +224,7 @@
 - **93** — Секция «Ключевые решения» в docs/architecture/README.md со ссылками на ADR.
 - **94** — DOCS-INDEX обновлён (roadmap, desktop-updater, MANUAL-AND-CANNOT-DO).
 - **89** — Сборка десктопа в CI: job desktop-build (npm run tauri build, артефакт desktop-bundle-linux).
+- **90** — Подпись обновлений в CI: в release.yml job flatpak задан env TAURI_SIGNING_PRIVATE_KEY из секрета; desktop-updater.md п.6 обновлён.
 - **91** — Release notes из CHANGELOG: в release.yml body_path: CHANGELOG.md, generate_release_notes: false.
 - **94** — Индекс по сценариям: секция «По сценариям» в DOCS-INDEX (Начало работы, Сборка, Конфиг, Разработка, Релиз, Безопасность, Фичи).
 - **95** — Job desktop-audit в CI: npm audit, cargo audit для desktop/.
