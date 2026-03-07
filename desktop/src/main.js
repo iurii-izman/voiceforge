@@ -39,6 +39,12 @@ const I18N = {
     settings_title: "Настройки",
     settings_lang_label: "Язык интерфейса",
     settings_lang_hint: "Перезагрузка не требуется.",
+    widget_record: "Запись",
+    widget_analyze: "Анализ",
+    widget_streaming: "Стриминг",
+    widget_recent_sessions: "Недавние сессии",
+    widget_upcoming_events: "Ближайшие встречи",
+    widget_costs_7d: "Затраты за 7 дней",
   },
   en: {
     nav: { home: "Home", sessions: "Sessions", costs: "Costs", settings: "Settings" },
@@ -48,6 +54,12 @@ const I18N = {
     settings_title: "Settings",
     settings_lang_label: "Interface language",
     settings_lang_hint: "No reload required.",
+    widget_record: "Recording",
+    widget_analyze: "Analysis",
+    widget_streaming: "Streaming",
+    widget_recent_sessions: "Recent sessions",
+    widget_upcoming_events: "Upcoming events",
+    widget_costs_7d: "Costs (7 days)",
   },
 };
 

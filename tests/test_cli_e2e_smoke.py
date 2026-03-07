@@ -525,3 +525,32 @@ def test_calendar_poll_missing_keyring(monkeypatch) -> None:
     result = runner.invoke(main_mod.app, ["calendar", "poll", "--minutes", "5"])
     assert result.exit_code == 1, result.stdout + result.stderr
     assert "Missing keyring" in result.stderr or "caldav" in result.stderr.lower()
+
+
+def test_calendar_export_ical_smoke(monkeypatch, tmp_path) -> None:
+    """calendar export-ical writes .ics with upcoming events (block 48)."""
+    fake_events = [
+        {
+            "summary": "Team standup",
+            "start_iso": "2026-03-08T10:00:00+00:00",
+            "end_iso": "2026-03-08T10:30:00+00:00",
+            "calendar_name": "Work",
+        },
+    ]
+
+    def fake_get_upcoming(hours_ahead: int = 48):
+        return fake_events, None
+
+    monkeypatch.setattr("voiceforge.calendar.get_upcoming_events", fake_get_upcoming)
+    out_ics = tmp_path / "upcoming.ics"
+    result = runner.invoke(
+        main_mod.app,
+        ["calendar", "export-ical", "--output", str(out_ics), "--hours", "24"],
+    )
+    assert result.exit_code == 0, result.stdout + result.stderr
+    assert out_ics.exists()
+    text = out_ics.read_text(encoding="utf-8")
+    assert "BEGIN:VCALENDAR" in text
+    assert "BEGIN:VEVENT" in text
+    assert "SUMMARY:Team standup" in text
+    assert "END:VCALENDAR" in text
