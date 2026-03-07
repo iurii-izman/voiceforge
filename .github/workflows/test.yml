@@ -208,3 +208,20 @@ jobs:
       - run: cd desktop && npm run preview &
       - run: sleep 5 && npx pa11y@latest http://localhost:4173 --runner html --reporter tap
         continue-on-error: true
+
+  desktop-e2e:
+    permissions:
+      contents: read
+      pull-requests: read
+    name: desktop-e2e (block 84)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: desktop/package-lock.json
+      - run: cd desktop && npm ci && npm run build
+      - run: cd desktop && npx playwright install chromium --with-deps
+      - run: cd desktop && npm run e2e

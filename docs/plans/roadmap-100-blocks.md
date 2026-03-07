@@ -232,7 +232,8 @@
 - **87** — Тесты a11y в CI: job desktop-a11y (build frontend, vite preview, pa11y на localhost), continue-on-error.
 - **98** — a11y: явный role="main" и aria-label на main, существующие aria-label сохранены.
 - **99** — AppImage в CI: артефакт desktop-appimage (bundle/appimage/) в job desktop-build.
-- **97** — Английская локализация (задел): выбор языка в настройках (ru/en), ключ voiceforge_ui_lang в Store, t() и applyUiLang(); навигация и заголовок «Настройки» из I18N (расширение строк — по мере необходимости).
+- **84** — E2E десктопа: Playwright (e2e/nav.spec.js) против vite preview; проверка загрузки, активной вкладки, переключения вкладок; job desktop-e2e в CI; онбординг скрыт в тестах через localStorage.
+- **97** — Английская локализация (задел): выбор языка в настройках (ru/en), ключ voiceforge_ui_lang в Store, t() и applyUiLang(); навигация, заголовки вкладок (Главная/Сессии/Затраты/Настройки) и карточка языка из I18N.
 - **100** — Flatpak: манифест desktop/flatpak/com.voiceforge.app.yaml, job в release.yml (сборка и загрузка .flatpak в Release); подача в Flathub — ручной шаг.
 
 ---

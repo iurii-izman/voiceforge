@@ -33,12 +33,18 @@ const STORE_KEYS = [
 const I18N = {
   ru: {
     nav: { home: "Главная", sessions: "Сессии", costs: "Затраты", settings: "Настройки" },
+    tab_home_title: "Главная",
+    tab_sessions_title: "Сессии",
+    tab_costs_title: "Затраты",
     settings_title: "Настройки",
     settings_lang_label: "Язык интерфейса",
     settings_lang_hint: "Перезагрузка не требуется.",
   },
   en: {
     nav: { home: "Home", sessions: "Sessions", costs: "Costs", settings: "Settings" },
+    tab_home_title: "Home",
+    tab_sessions_title: "Sessions",
+    tab_costs_title: "Costs",
     settings_title: "Settings",
     settings_lang_label: "Interface language",
     settings_lang_hint: "No reload required.",
