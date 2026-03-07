@@ -598,7 +598,10 @@ def analyze(
         typer.echo(t("analyze.unknown_template", template=template, choices=", ".join(_TEMPLATE_CHOICES)), err=True)
         raise SystemExit(1)
     if not dry_run and output == "text" and sys.stderr.isatty():
-        typer.echo("Analyzing…", err=True)
+        # Block 72: rough estimate (transcribe + LLM) for user feedback
+        est_lo = max(10, seconds // 5 + 5)
+        est_hi = min(120, max(20, seconds // 2 + 30))
+        typer.echo(f"Analyzing… (≈ {est_lo}–{est_hi} s)", err=True)
     display_text, segments_for_log, analysis_for_log = run_analyze_pipeline(
         seconds, template=template, dry_run=dry_run
     )

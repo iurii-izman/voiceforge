@@ -235,6 +235,8 @@
 - **99** — AppImage в CI: артефакт desktop-appimage (bundle/appimage/) в job desktop-build.
 - **48** — Экспорт календаря в iCal: команда `voiceforge calendar export-ical --output file.ics` (--hours), запись ближайших событий CalDAV в .ics.
 - **57** — Индикатор прогресса в TTY: при выводе в текст и TTY — «Analyzing…» / «Exporting…» в stderr перед длительной операцией (analyze, export).
+- **69** — Надёжность LLM: подраздел в security-and-dependencies.md (circuit breaker, Instructor retry; блок 69).
+- **72** — Оценка длительности до analyze: при TTY и текстовом выводе — подсказка «Analyzing… (≈ N–M s)» по длине буфера.
 - **60** — analyze --dry-run: флаг --dry-run, run_analyze_pipeline(dry_run=True) без вызова LLM; вывод «что будет проанализировано» (сегменты, длина транскрипта).
 - **84** — E2E десктопа: Playwright (e2e/nav.spec.js) против vite preview; проверка загрузки, активной вкладки, переключения вкладок; job desktop-e2e в CI; онбординг скрыт в тестах через localStorage.
 - **97** — Английская локализация (задел): выбор языка в настройках (ru/en), ключ voiceforge_ui_lang в Store, t() и applyUiLang(); навигация, заголовки вкладок (Главная/Сессии/Затраты/Настройки) и карточка языка из I18N.
