@@ -40,4 +40,14 @@ test.describe("Desktop UI navigation", () => {
     await page.getByRole("navigation").locator("[data-tab='home']").click();
     await expect(page.locator("#tab-home")).toHaveClass(/active/);
   });
+
+  test("settings tab shows language selector (block 97)", async ({ page }) => {
+    await page.getByRole("navigation").locator("[data-tab='settings']").click();
+    await expect(page.locator("#tab-settings.active")).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Настройки|Settings/ })).toBeVisible();
+    const langSelect = page.getByLabel(/Язык интерфейса|Interface language/i);
+    await expect(langSelect).toBeVisible();
+    await expect(langSelect.locator("option[value=ru]")).toHaveCount(1);
+    await expect(langSelect.locator("option[value=en]")).toHaveCount(1);
+  });
 });
