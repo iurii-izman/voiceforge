@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-07 (виджет «Последний анализ» #92)
+**Обновлено:** 2026-03-07 (Sonar batch в desktop)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Слайд-панель настроек (#89, блок 46): опция «Показывать настройки в выдвижной панели справа» (voiceforge_settings_as_panel); при включении клик по «Настройки» в навигации открывает панель справа вместо вкладки; контент настроек переносится в панель/обратно; закрытие по кнопке или Escape. Roadmap: блок 46 отмечен реализованным. Карточка #89 на доске переведена в Done.
+**Сделано в сессии:** Пакет правок Sonar в desktop: S7770 (filter(Boolean)), S7781 (replaceAll), S7773 (Number.isNaN), S6653 (Object.hasOwn), S6594 (RegExp.exec), S7768 (before()), S7761 (dataset), S6660 (else if в 3 местах), S6819 (popover role region), S1481 (удалён неиспользуемый parse). Без привязки к issue.
 
-**Следующий шаг:** Виджет «Последний анализ» (#92, блок 49) или остальные замечания Sonar (S3776, S2004/S6660 в desktop). Либо продолжение по roadmap/audit.
+**Следующий шаг:** Оставшиеся Sonar (S3776 когнитивная сложность, S2004 вложенность в desktop/main/daemon) или блоки roadmap (#90, #91, #93). Либо audit.
 
 ---
 
@@ -30,7 +30,7 @@
 - **PR #81, #79:** закрыты с комментарием «Applied in main» (2026-03-07).
 - **Открытые issues:** #65 (CVE — ждём upstream), #50 (macOS/WSL2 — p2/backlog).
 
-**Sonar:** Исправлены S1192, S7761, S7764, S6819, S2486, S2871, S3358 в desktop. Остаток: S3776 (daemon.py, main.py, history_helpers, desktop main.js), S2004/S6660 и др. **Mypy:** в scope verify_pr — 0 ошибок. **verify_pr:** Ruff + Mypy OK; bandit — зелёный (nosec B310/B608). **Gitleaks:** allowlist .hypothesis/ + .gitignore; шаг [8/8] в CI проходит (workflow Gitleaks зелёный после 270b7e2/42f904c).
+**Sonar:** Исправлены S1192, S7761, S7764, S6819, S2486, S2871, S3358, S7770, S7781, S7773, S6653, S6594, S7768, S6660, S1481 в desktop. Остаток: S3776 (сложность), S2004 (вложенность) в desktop/main/daemon. **Mypy:** в scope verify_pr — 0 ошибок. **verify_pr:** Ruff + Mypy OK; bandit — зелёный (nosec B310/B608). **Gitleaks:** allowlist .hypothesis/ + .gitignore; шаг [8/8] в CI проходит (workflow Gitleaks зелёный после 270b7e2/42f904c).
 
 *(Агент в конце сессии обновляет этот блок одной задачей для следующего чата.)*
 
