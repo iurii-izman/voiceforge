@@ -14,6 +14,7 @@
   uv run pip-audit --desc --ignore-vuln CVE-2025-69872
   ```
   Если `gitleaks` не установлен локально, `scripts/verify_pr.sh` запускает скан через Podman/Docker.
+- **Исключения gitleaks:** в `.gitleaks.toml` в allowlist добавлены `.venv/`, кэши (`.mypy_cache/`, `.pytest_cache/`, `.ruff_cache/`) и `.hypothesis/` (кэш Hypothesis — тестовые данные могут давать ложные срабатывания при локальном `verify_pr` с `--no-git`).
 - **Исключение CVE-2025-69872:** дискcache (transitive через instructor); снять ignore после фикса upstream. Weekly workflow запускает pip-audit без ignore (allowed to fail), чтобы обнаружить появление фикса.
 - **Ротация токенов:** минимум раз в 90 дней; least privilege; удалять устаревшие; фиксировать в аудит-логе.
 

@@ -17,6 +17,7 @@ node_modules/
 .ruff_cache/
 .pytest_cache/
 .mypy_cache/
+.hypothesis/
 .uv-cache/
 .env
 voiceforge.yaml

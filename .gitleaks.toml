@@ -4,10 +4,11 @@ title = "VoiceForge Gitleaks Config"
 useDefault = true
 
 [allowlist]
-description = "Allow known local caches"
+description = "Allow known local caches and test data"
 paths = [
   '''(?i)^\.venv/''',
   '''(?i)^\.mypy_cache/''',
   '''(?i)^\.pytest_cache/''',
   '''(?i)^\.ruff_cache/''',
+  '''(?i)^\.hypothesis/''',
 ]
