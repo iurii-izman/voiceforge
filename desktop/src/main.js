@@ -231,7 +231,7 @@ function t(key) {
   return val != null && typeof val === "string" ? val : key;
 }
 
-function applyUiLang() {
+function applyUiLangDataAttrs() {
   document.querySelectorAll("[data-i18n]").forEach((el) => {
     const k = el.dataset.i18n;
     if (k) el.textContent = t(k);
@@ -240,20 +240,34 @@ function applyUiLang() {
     const k = el.dataset.i18nPlaceholder;
     if (k) el.placeholder = t(k);
   });
+}
+
+function applyUiLangStatusElements() {
   const listenBtn = document.getElementById("listen-toggle");
   const listenLabel = document.getElementById("listen-label");
   if (listenBtn) listenBtn.textContent = listenState ? t("listen_btn_stop") : t("listen_btn_start");
   if (listenLabel) listenLabel.textContent = listenState ? t("listen_label_recording") : "";
   const statusBar = document.getElementById("status-bar");
-  const bannerText = document.getElementById("daemon-off-banner-text");
-  const compactStatus = document.getElementById("compact-status");
   if (statusBar) statusBar.textContent = daemonOk ? t("status_daemon_ok") : t("status_daemon_off");
-  if (bannerText && document.getElementById("daemon-off-banner").style.display !== "none") bannerText.textContent = t("status_daemon_off");
+  const banner = document.getElementById("daemon-off-banner");
+  const bannerText = document.getElementById("daemon-off-banner-text");
+  if (bannerText && banner?.style.display !== "none") bannerText.textContent = t("status_daemon_off");
+  const compactStatus = document.getElementById("compact-status");
   if (compactStatus) compactStatus.textContent = daemonOk ? t("compact_daemon_ok") : t("compact_daemon_off");
   const closeBtn = document.getElementById("session-detail-close");
   if (closeBtn) closeBtn.setAttribute("aria-label", t("close_btn"));
   const lang = localStorage.getItem(UI_LANG_KEY) || "ru";
   document.documentElement.lang = lang === "en" ? "en" : "ru";
+}
+
+function applyUiLang() {
+  applyUiLangDataAttrs();
+  applyUiLangStatusElements();
+}
+
+function getValueToSetInStore(key, local) {
+  const needsParse = key.endsWith("_order") || key.endsWith("_collapsed") || key.endsWith("_favorites");
+  return needsParse ? JSON.parse(local) : local;
 }
 
 async function loadStoreAndMigrate() {
@@ -266,7 +280,10 @@ async function loadStoreAndMigrate() {
         localStorage.setItem(key, str);
       } else {
         const local = localStorage.getItem(key);
-        if (local !== null) await appStore.set(key, key.endsWith("_order") || key.endsWith("_collapsed") || key.endsWith("_favorites") ? JSON.parse(local) : local);
+        if (local !== null) {
+          const toSet = getValueToSetInStore(key, local);
+          await appStore.set(key, toSet);
+        }
       }
     }
   } catch (e) {
