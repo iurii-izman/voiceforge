@@ -14,7 +14,7 @@ REPO = "iurii-izman/voiceforge"
 API_BASE = "https://api.github.com"
 TARGET_CVE = "CVE-2025-69872"
 TARGET_PACKAGE = "diskcache"
-DISMISS_COMMENT = "No fix version yet. See docs/runbooks/security.md. Revisit when upstream fixes."
+DISMISS_COMMENT = "No fix version yet. See docs/runbooks/security-and-dependencies.md. Revisit when upstream fixes."
 
 
 def _fetch_open_alerts(headers: dict) -> list:

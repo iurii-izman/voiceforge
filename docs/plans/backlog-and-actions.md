@@ -10,10 +10,12 @@
 
 | Тема | Что нужно от вас | Статус |
 |------|-------------------|--------|
-| **#65 CVE** | Пока ничего. Когда в upstream (diskcache/instructor) будет фикс — обновить зависимости, убрать `--ignore-vuln` по [security-and-dependencies.md](../runbooks/security-and-dependencies.md) разд. 4. Dependabot-алерт можно отклонить с комментарием «No fix yet; см. runbook». | Ждём upstream |
+| **#65 CVE** | Пока ничего. Когда в upstream (diskcache/instructor) будет фикс — обновить зависимости, убрать `--ignore-vuln` по [security-and-dependencies.md](../runbooks/security-and-dependencies.md) разд. 4. Dependabot-алерт отклонить: «No fix version yet. See docs/runbooks/security-and-dependencies.md. Revisit when upstream fixes.» или скрипт `uv run python scripts/dependabot_dismiss_moderate.py`. | Ждём upstream |
 | **Keyring (HuggingFace)** | Один раз сохранить токен, если ещё не сохранён. Проверка: `uv run python -c "from voiceforge.core.secrets import get_api_key; print('huggingface:', 'present' if get_api_key('huggingface') else 'absent')"`. Сохранение: `secret-tool store --label='voiceforge huggingface' service voiceforge key huggingface`. | По доке проверено |
 | **OTel/Jaeger** | Запуск контейнера (podman/docker), открытие http://localhost:16686, при необходимости выставить переменные в сессии. Агент только подсказывает команды. | По желанию |
 | **#66 Async** | Ничего подтверждать не нужно. | — |
+
+*Блок A подтверждён 2026-03-07 (#82).*
 
 ---
 
@@ -83,3 +85,23 @@
 5. **Раз в итерацию** просматривать доску: что в Todo, что застряло в In Progress, что можно закрыть или переприоритизировать.
 
 Связь с репо: [repo-and-git-governance.md](../runbooks/repo-and-git-governance.md), [planning.md](../runbooks/planning.md).
+
+---
+
+## Промпт для нового чата (решить все задачи бэклога)
+
+Скопируй в начало нового чата:
+
+```
+Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md (правила, keyring, коммит/пуш в конце сессии). Единый бэклог: @docs/plans/backlog-and-actions.md.
+
+Цель: пройти все блоки A–E и закрыть по максимуму. Доска: [GitHub Project #1](https://github.com/users/iurii-izman/projects/1), issues #82–86.
+
+- Блок A: подтвердить статус CVE #65, keyring, OTel; при необходимости обновить доки или отклонить Dependabot с комментарием из runbook. Закрыть #82 когда всё зафиксировано.
+- Блок B: со мной определить приоритет и scope отложенных блоков (35, 44, 46, 49, 66, 68, 71, 75, 79); оформить выбранные в issues и добавить на доску; реализовать по очереди. Закрыть #83 после решений и при необходимости создания под-issues.
+- Блок C: напомнить чеклист ручных шагов (сборка, ключи, updater, релиз, тестирование); обновить MANUAL-AND-CANNOT-DO или runbooks по результатам. Закрыть #84 когда ручные пункты выполнены или зафиксированы.
+- Блок D: закрыть PR #81 и #79 с комментарием «Applied in main»; зафиксировать решения по #65, #50, verify_pr/bandit в доке или в issue. Закрыть #85.
+- Блок E: по моему решению — поручить тебе bandit, Sonar или отложенные блоки; выполнить и закрыть #86.
+
+В конце сессии: тесты, коммит, пуш, обновить next-iteration-focus, перевести закрытые карточки в Done на доске. Начинай с блока A, затем по моим ответам — B, C, D, E.
+```
