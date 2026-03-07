@@ -172,6 +172,7 @@ def _completion_with_breaker(completion_fn: Any, **kwargs: Any) -> Any:
             else:
                 break
     breaker.record_failure(model)
+    assert last_exc is not None  # at least one attempt ran and raised
     raise last_exc from None
 
 

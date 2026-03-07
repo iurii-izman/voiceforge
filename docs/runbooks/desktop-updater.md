@@ -18,7 +18,7 @@
 На машине разработчика (один раз):
 
 ```bash
-cd desktop && npm run tauri signer generate -w ~/.tauri/voiceforge.key
+cd desktop && npm run tauri signer generate -- -w ~/.tauri/voiceforge.key
 ```
 
 - Сохраните **приватный** ключ в безопасном месте (потеря = невозможность выпускать обновления для уже установленных копий).

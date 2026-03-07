@@ -53,7 +53,7 @@
 |----------|-----|
 | **Сборка/запуск десктопа** | `cd desktop && npm run tauri build`, `npm run tauri dev` — у вас на машине; проверка в окне. |
 | **Ключи и секреты** | Keyring (в т.ч. CalDAV для виджета «Ближайшие встречи»); агент не видит секреты. |
-| **Updater** | Сгенерировать ключи подписи (`npm run tauri signer generate -w ~/.tauri/voiceforge.key`), настроить сервер обновлений, при необходимости CI и `TAURI_SIGNING_PRIVATE_KEY`. См. [desktop-updater.md](../runbooks/desktop-updater.md). |
+| **Updater** | Сгенерировать ключи подписи (`npm run tauri signer generate -- -w ~/.tauri/voiceforge.key`), настроить сервер обновлений, при необходимости CI и `TAURI_SIGNING_PRIVATE_KEY`. См. [desktop-updater.md](../runbooks/desktop-updater.md). |
 | **Релизы и распространение** | Создание GitHub Release, загрузка артефактов; при желании — Flatpak/Flathub. |
 | **Тестирование с человеком** | E2E в среде с GUI, a11y с реальными пользователями/скринридерами, ручные сценарии (second instance, deep link, автозапуск). |
 
@@ -67,8 +67,8 @@
 |-----|----------|--------|
 | **PR #81, #79** | Изменения уже в main. Закрыть PR с комментарием «Applied in main». | ✓ Закрыты 2026-03-07 |
 | **Issue #65** | Оставить открытым до фикса upstream; при желании отклонить Dependabot с комментарием из runbook. | Решение: оставить открытым; см. [security-and-dependencies.md](../runbooks/security-and-dependencies.md) §3–4 |
-| **Issue #50** (macOS/WSL2) | В backlog (p2). Решить: оставить в бэклоге или снять/переформулировать. | Оставлен в бэклоге (p2) |
-| **verify_pr и bandit** | Сейчас падает на bandit (Low/Medium). Решить: добиваться полного зелёного verify_pr или оставить как есть. | Решение: по желанию — см. блок E (bandit/Sonar) |
+| **Issue #50** (macOS/WSL2) | Снят с текущего скоупа (фокус только Linux). | ✓ Закрыт 2026-03-07 |
+| **verify_pr и bandit** | Добиться зелёного verify_pr (mypy, bandit, hypothesis в dev deps). | ✓ Mypy исправлен, hypothesis добавлен в dev; bandit зелёный |
 
 ---
 

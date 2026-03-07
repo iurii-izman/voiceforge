@@ -28,7 +28,7 @@
 **Полный чеклист:** [pre-beta-sonar-github.md](pre-beta-sonar-github.md).
 
 - **PR #81, #79:** закрыты с комментарием «Applied in main» (2026-03-07).
-- **Открытые issues:** #65 (CVE — ждём upstream), #50 (macOS/WSL2 — p2/backlog).
+- **Открытые issues:** #65 (CVE — ждём upstream). #50 (macOS/WSL2) закрыт 2026-03-07 — снят с скоупа.
 
 **Sonar:** S7721, S2737, S3776, S7735 закрыты в 9b92a46. Проверить остаток: `uv run python scripts/sonar_fetch_issues.py` в toolbox 43. **Mypy:** в scope verify_pr — 0 ошибок. **verify_pr:** Ruff + Mypy OK; bandit — зелёный (nosec B310/B608). **Gitleaks:** allowlist .hypothesis/ + .gitignore; шаг [8/8] в CI проходит (workflow Gitleaks зелёный после 270b7e2/42f904c).
 

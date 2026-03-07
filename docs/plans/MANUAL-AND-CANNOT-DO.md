@@ -32,7 +32,7 @@
 
 ### Обновления (Updater)
 
-- **Сгенерировать ключи подписи:** `cd desktop && npm run tauri signer generate -w ~/.tauri/voiceforge.key`. Приватный ключ хранить в безопасном месте.
+- **Сгенерировать ключи подписи:** `cd desktop && npm run tauri signer generate -- -w ~/.tauri/voiceforge.key` (двойной дефис `--` нужен, чтобы npm не воспринимал `-w` как свой флаг). Приватный ключ хранить в безопасном месте.
 - **Настроить сервер обновлений:** развернуть endpoint (или статический JSON), прописать `endpoints` и `pubkey` в `desktop/src-tauri/tauri.conf.json`. Без этого в приложении будет «Обновления отключены или недоступны». См. [desktop-updater.md](../runbooks/desktop-updater.md).
 - **CI:** добавить в секреты репозитория `TAURI_SIGNING_PRIVATE_KEY` и в workflow сборки десктопа — экспорт этой переменной перед `npm run tauri build`.
 
