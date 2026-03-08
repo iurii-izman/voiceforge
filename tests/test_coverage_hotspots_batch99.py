@@ -8,7 +8,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from types import SimpleNamespace
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -357,6 +357,59 @@ def test_router_template_prompts_fallback(monkeypatch) -> None:
     out = router._template_prompts()
     assert "standup" in out
     assert out == router._TEMPLATE_PROMPTS_FALLBACK
+
+
+def test_router_live_summary_system_fallback(monkeypatch) -> None:
+    """_live_summary_system returns fallback when load_prompt is None (#107)."""
+    monkeypatch.setattr("voiceforge.llm.router.load_prompt", lambda _: None)
+    out = router._live_summary_system()
+    assert "meeting analyst" in out.lower() or "key_points" in out
+    assert "action_items" in out
+
+
+def test_router_status_update_system_fallback(monkeypatch) -> None:
+    """_status_update_system returns fallback when load_prompt is None (#107)."""
+    monkeypatch.setattr("voiceforge.llm.router.load_prompt", lambda _: None)
+    out = router._status_update_system()
+    assert "action item" in out.lower() or "updates" in out
+    assert "follow-up" in out.lower() or "status" in out.lower()
+
+
+def test_router_try_ollama_faq_returns_none_when_unavailable(monkeypatch) -> None:
+    """_try_ollama_faq returns None when local_llm is_available False (#107)."""
+    from voiceforge.llm.schemas import MeetingAnalysis
+
+    fake_llm = MagicMock()
+    fake_llm.is_available = lambda: False
+    with patch.dict("sys.modules", {"voiceforge.llm.local_llm": fake_llm}):
+        result = router._try_ollama_faq("t", "c", "model", MeetingAnalysis)
+    assert result is None
+
+
+def test_router_complete_structured_check_budget_raises(monkeypatch) -> None:
+    """_complete_structured_check_budget raises BudgetExceeded when over limit (#107)."""
+    from voiceforge.core.contracts import BudgetExceeded
+
+    monkeypatch.setattr("voiceforge.core.metrics.get_cost_today", lambda: 15.0)
+    cfg = SimpleNamespace(daily_budget_limit_usd=10.0)
+    with pytest.raises(BudgetExceeded, match="exceeded"):
+        router._complete_structured_check_budget(cfg)
+
+
+def test_router_complete_structured_check_budget_no_raise_when_under(monkeypatch) -> None:
+    """_complete_structured_check_budget does not raise when under limit (#107)."""
+    monkeypatch.setattr("voiceforge.core.metrics.get_cost_today", lambda: 5.0)
+    cfg = SimpleNamespace(daily_budget_limit_usd=10.0)
+    router._complete_structured_check_budget(cfg)
+
+
+def test_router_complete_structured_cached_miss_returns_none(monkeypatch) -> None:
+    """_complete_structured_cached returns None on cache miss (#107)."""
+    monkeypatch.setattr("voiceforge.llm.cache.get", lambda *a, **k: None)
+    from voiceforge.llm.schemas import MeetingAnalysis
+
+    result = router._complete_structured_cached("key", MeetingAnalysis, 60)
+    assert result is None
 
 
 def test_router_update_action_item_statuses_short_circuits_empty_items() -> None:
