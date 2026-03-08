@@ -148,6 +148,119 @@ def test_server_async_sync_telegram_webhook_rejects_invalid_json(monkeypatch) ->
     }
 
 
+def test_server_async_sync_health_returns_200() -> None:
+    status, _, body = server_async._sync_health()
+    assert status == 200
+    assert json.loads(body.decode("utf-8")) == {"status": "ok"}
+
+
+def test_server_async_sync_ready_200_when_db_ok(monkeypatch, tmp_path) -> None:
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
+    monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "runtime"))
+    status, content_type, body = server_async._sync_ready()
+    assert status == 200
+    assert content_type == server_async._CONTENT_TYPE_JSON
+    assert json.loads(body.decode("utf-8"))["ready"] is True
+
+
+def test_server_async_sync_ready_503_when_db_raises(monkeypatch) -> None:
+    class FakeLog:
+        def get_sessions(self, last_n: int = 1):
+            raise RuntimeError("db unavailable")
+
+        def close(self) -> None:
+            pass
+
+    monkeypatch.setattr("voiceforge.core.transcript_log.TranscriptLog", lambda: FakeLog())
+    status, content_type, body = server_async._sync_ready()
+    assert status == 503
+    assert json.loads(body.decode("utf-8"))["ready"] is False
+
+
+def test_server_async_sync_export_400_id_required() -> None:
+    status, _, body = server_async._sync_export("", "md")
+    assert status == 400
+    payload = json.loads(body.decode("utf-8"))
+    assert "id" in payload["error"]["message"].lower()
+
+
+def test_server_async_sync_export_400_format_invalid() -> None:
+    status, _, body = server_async._sync_export("1", "docx")
+    assert status == 400
+    payload = json.loads(body.decode("utf-8"))
+    assert "format" in payload["error"]["message"].lower()
+
+
+def test_server_async_sync_export_404_session_not_found(monkeypatch) -> None:
+    class FakeLog:
+        def get_session_detail(self, session_id: int):
+            return None
+
+        def close(self) -> None:
+            pass
+
+    monkeypatch.setattr("voiceforge.core.transcript_log.TranscriptLog", lambda: FakeLog())
+    status, _, body = server_async._sync_export("999", "md")
+    assert status == 404
+    payload = json.loads(body.decode("utf-8"))
+    assert "999" in payload["error"]["message"] or "not found" in payload["error"]["message"].lower()
+
+
+def test_server_async_sync_status_200(monkeypatch) -> None:
+    monkeypatch.setattr(
+        "voiceforge.cli.status_helpers.get_status_data",
+        lambda: {"ok": True, "ram_mb": 100},
+    )
+    status, _, body = server_async._sync_status()
+    assert status == 200
+    assert json.loads(body.decode("utf-8"))["ok"] is True
+
+
+def test_server_async_sync_status_500_on_exception(monkeypatch) -> None:
+    monkeypatch.setattr(
+        "voiceforge.cli.status_helpers.get_status_data",
+        lambda: (_ for _ in ()).throw(RuntimeError("status failed")),
+    )
+    status, _, body = server_async._sync_status()
+    assert status == 500
+    assert "status failed" in json.loads(body.decode("utf-8"))["error"]["message"]
+
+
+def test_server_async_sync_session_by_id_400_invalid_id() -> None:
+    status, _, body = server_async._sync_session_by_id("x")
+    assert status == 400
+    assert "invalid" in json.loads(body.decode("utf-8"))["error"]["message"].lower()
+
+
+def test_server_async_sync_session_by_id_404_not_found(monkeypatch) -> None:
+    class FakeLog:
+        def get_session_detail(self, session_id: int):
+            return None
+
+        def close(self) -> None:
+            pass
+
+    monkeypatch.setattr("voiceforge.core.transcript_log.TranscriptLog", lambda: FakeLog())
+    status, _, body = server_async._sync_session_by_id("999")
+    assert status == 404
+
+
+def test_server_async_sync_action_items_update_400_missing_params() -> None:
+    status, _, body = server_async._sync_action_items_update({})
+    assert status == 400
+    payload = json.loads(body.decode("utf-8"))
+    assert "required" in payload["error"]["message"].lower()
+
+
+def test_server_async_sync_action_items_update_400_not_integers() -> None:
+    status, _, body = server_async._sync_action_items_update(
+        {"from_session": "x", "next_session": 2}
+    )
+    assert status == 400
+    payload = json.loads(body.decode("utf-8"))
+    assert "integer" in payload["error"]["message"].lower()
+
+
 def test_router_analysis_prompt_uses_pre_redacted_text_for_claude(monkeypatch) -> None:
     monkeypatch.setattr("voiceforge.llm.router.redact", lambda text, mode: "should-not-be-used")
     monkeypatch.setattr("voiceforge.llm.router._system_prompt", lambda: "system prompt")
