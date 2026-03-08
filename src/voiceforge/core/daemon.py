@@ -419,24 +419,6 @@ class VoiceForgeDaemon:
         from voiceforge.core.contracts import build_cli_error_payload, build_cli_success_payload
         from voiceforge.core.transcript_log import TranscriptLog
 
-        def _event_description_from_detail(detail: Any, sid: int) -> str:
-            parts: list[str] = []
-            if not detail:
-                return f"Session {sid} (VoiceForge)"
-            _segments, analysis = detail
-            if not (analysis and analysis.action_items):
-                return f"Session {sid} (VoiceForge)"
-            for ai in analysis.action_items:
-                desc = (ai.get("description") or ai.get("text") or "").strip()
-                if not desc:
-                    continue
-                assignee = (ai.get("assignee") or "").strip()
-                deadline = (ai.get("deadline") or "").strip()
-                if assignee or deadline:
-                    desc = f"{desc} ({', '.join(x for x in [assignee, deadline] if x)})"
-                parts.append(f"- {desc}")
-            return "\n".join(parts) if parts else f"Session {sid} (VoiceForge)"
-
         try:
             log_db = TranscriptLog()
             try:
@@ -771,6 +753,26 @@ def _event_start_in_window(ev: dict, now: datetime, window_end: datetime) -> boo
         return now <= event_start <= window_end
     except (ValueError, TypeError):
         return False
+
+
+def _event_description_from_detail(detail: Any, sid: int) -> str:
+    """Build CalDAV event description from session detail (action items). Extracted for #104/S3776."""
+    parts: list[str] = []
+    if not detail:
+        return f"Session {sid} (VoiceForge)"
+    _segments, analysis = detail
+    if not (analysis and getattr(analysis, "action_items", None)):
+        return f"Session {sid} (VoiceForge)"
+    for ai in (analysis.action_items or []):
+        desc = (ai.get("description") or ai.get("text") or "").strip()
+        if not desc:
+            continue
+        assignee = (ai.get("assignee") or "").strip()
+        deadline = (ai.get("deadline") or "").strip()
+        if assignee or deadline:
+            desc = f"{desc} ({', '.join(x for x in [assignee, deadline] if x)})"
+        parts.append(f"- {desc}")
+    return "\n".join(parts) if parts else f"Session {sid} (VoiceForge)"
 
 
 def _calendar_autostart_try_start(daemon: VoiceForgeDaemon, minutes_ahead: int) -> None:

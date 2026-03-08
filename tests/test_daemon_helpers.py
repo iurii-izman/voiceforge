@@ -20,6 +20,7 @@ from voiceforge.core.daemon import (
     PID_FILE_NAME,
     VoiceForgeDaemon,
     _env_flag,
+    _event_description_from_detail,
     _event_start_in_window,
     _pid_path,
     _retention_purge_at_startup,
@@ -99,6 +100,29 @@ def test_event_start_in_window_empty_or_invalid() -> None:
     assert _event_start_in_window({}, now, end) is False
     assert _event_start_in_window({"start_iso": ""}, now, end) is False
     assert _event_start_in_window({"start_iso": "not-a-date"}, now, end) is False
+
+
+def test_event_description_from_detail_none_or_empty() -> None:
+    """_event_description_from_detail returns fallback when detail is None or no action items (#104)."""
+    assert _event_description_from_detail(None, 1) == "Session 1 (VoiceForge)"
+    analysis_empty = SimpleNamespace(action_items=[])
+    assert _event_description_from_detail(([], analysis_empty), 2) == "Session 2 (VoiceForge)"
+    assert _event_description_from_detail(([], None), 3) == "Session 3 (VoiceForge)"
+
+
+def test_event_description_from_detail_with_action_items() -> None:
+    """_event_description_from_detail builds description from action items (#104)."""
+    analysis = SimpleNamespace(
+        action_items=[
+            {"description": "Ship feature", "assignee": "Alice", "deadline": "2026-03-15"},
+            {"text": "Review PR"},
+        ]
+    )
+    out = _event_description_from_detail(([], analysis), 42)
+    assert "Ship feature" in out
+    assert "Alice" in out or "2026-03-15" in out
+    assert "Review PR" in out
+    assert out.startswith("- ") or "Session 42" in out
 
 
 # --- VoiceForgeDaemon with mocked Settings/ModelManager ---

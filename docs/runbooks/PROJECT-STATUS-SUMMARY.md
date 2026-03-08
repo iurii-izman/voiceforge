@@ -80,7 +80,7 @@
 ## 8. Критичные/важные проблемы на следующую итерацию
 
 - **#65 CVE:** следить за upstream (diskcache/instructor); при фиксе — обновить и убрать ignore.
-- **Sonar S3776:** 8 мест с высокой когнитивной сложностью — рефакторинг по одному или принять по решению.
+- **Sonar S3776:** 8 мест с высокой когнитивной сложностью — рефакторинг по одному или принять по решению. **#104 batch:** из `daemon.py` вынесена `_event_description_from_detail` (create_event_from_session); следующий structural hotspot для extraction — `main.py` или `server_async.py` (по одному за итерацию).
 - **Coverage blind spots:** после `server.py` и `rag/watcher.py` в `omit` всё ещё остаются `main.py`, `core/daemon.py`, `llm/router.py`, `stt/diarizer.py`, тяжёлые `rag/*`, `llm/local_llm.py`.
 - **verify_pr/bandit:** при желании полного зелёного — доработать оставшиеся предупреждения bandit.
 - **Pre-commit на хосте:** без Python 3.12 использовать `git commit/push --no-verify`; полный pre-commit в toolbox 43.
