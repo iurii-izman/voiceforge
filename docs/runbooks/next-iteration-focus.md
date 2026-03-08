@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-08 (desktop native smoke + release gate batch closed)
+**Обновлено:** 2026-03-08 (main.py coverage batch for #99, policy unchanged)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** закрыт coherent desktop QA batch по [#102](https://github.com/iurii-izman/voiceforge/issues/102) и [#103](https://github.com/iurii-izman/voiceforge/issues/103): (1) добавлен реальный Linux native-shell smoke layer в `desktop/e2e-native/` на `tauri-driver` + WebdriverIO; (2) `desktop/package.json` получил команды `npm run e2e:native` и `npm run e2e:native:headless`; (3) `desktop/e2e-native/wdio.conf.js` теперь сам собирает debug Tauri binary, поднимает `tauri-driver` и автоищет `WebKitWebDriver` в env, system paths и Flatpak runtime; (4) `desktop/e2e-native/specs/native-smoke.e2e.js` проверяет реальное окно, daemon-off banner, navigation, settings slide panel, persistence для `close-to-tray`/`updater-check-on-launch` и retry path; (5) оформлен честный release-gate runbook `docs/runbooks/desktop-release-gate-matrix.md`, синхронизированы `docs/runbooks/desktop-gui-testing.md`, `docs/runbooks/release-and-quality.md`, `desktop/README.md`, `docs/DOCS-INDEX.md`. Verify: `cd desktop && npx playwright test --project=chromium` и `cd desktop && npm run e2e:native` зелёные.
+**Сделано в сессии:** продолжен P1 coverage batch по [#99](https://github.com/iurii-izman/voiceforge/issues/99) без смешивания surfaces. Выбран кандидат `main.py` (потому что `server.py` уже выведен из `omit`) и добавлен узкий regression suite `tests/test_main_status_export_action_items.py`, который закрывает дешёвые helper/CLI ветки вокруг `status`, `export`, `action-items update`, pandoc fallback, iCal/session helpers и template-format helpers. Verify зелёный: `uv run pytest tests/test_main_status_export_action_items.py tests/test_cli_e2e_smoke.py tests/test_cli_helpers_contracts.py tests/test_core_commands.py tests/test_coverage_hotspots_batch99.py -q --tb=line` → `65 passed`. Дополнительно выполнена честная policy-проверка с временно снятым `omit` для `main.py`: safe subset поднимает `main.py` только до `48%`, поэтому `pyproject.toml` намеренно **не** менялся.
 
-**Следующий шаг:** Вернуться к верхнему P1 batch из `next-iteration-focus` и GitHub Project вне desktop surface. Начать с coverage-политики по [#99](https://github.com/iurii-izman/voiceforge/issues/99): выбрать один кандидат на вывод из `omit` между `server.py` и `main.py`, добавить ещё один узкий targeted suite вокруг action-items/status/export и только после локального подтверждения без просадки `fail_under` править `pyproject.toml`.
+**Следующий шаг:** Продолжить `main.py` coverage batch тем же дисциплинированным способом: добрать только дешёвые pure-helper/CLI ветки в одном subsystem, чтобы поднять `main.py` минимум до локально подтверждённого уровня, после которого снятие из `omit` не просаживает policy. Начать с соседних helpers в `main.py`, не требующих тяжёлого pipeline: `weekly_report`, `sessions_to_ical`, `backup/purge`, export/status error branches. Если после ещё одного узкого batch `main.py` всё ещё ниже честного порога, прекратить добивать его и переключиться на следующий ROI-candidate из `omit`.
 
 ---
 
