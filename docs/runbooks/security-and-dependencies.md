@@ -50,9 +50,15 @@
 
 ---
 
-## 5. Шифрование локальных БД (опция, блок 96)
+## 5. Локальные данные на диске: текущий baseline и accepted risk
 
-Локальные SQLite-базы (transcripts.db, metrics.db, RAG) **не шифруются**. Данные хранятся в открытом виде в `XDG_DATA_HOME/voiceforge/` (или заданных путях).
+Локальные SQLite-базы (transcripts.db, metrics.db, RAG) и локальный LLM cache **не шифруются**. Данные хранятся в открытом виде в `XDG_DATA_HOME/voiceforge/` (или заданных путях).
+
+Что уже сделано как security baseline:
+
+- runtime создаёт `XDG_DATA_HOME/voiceforge/` и backup directories с private permissions `0700`;
+- создаваемые local DB/cache/status/backup files приводятся к private permissions `0600`;
+- regression suite `tests/test_security_batch120.py` фиксирует этот baseline, чтобы проект не выглядел защищённее, чем он есть.
 
 **Возможные направления на будущее:** SQLCipher, шифрование на уровне файловой системы (LUKS, ecryptfs), или опция «хранить в зашифрованном каталоге». Реализация не входит в текущий roadmap; при появлении требований — см. [roadmap-100-blocks.md](../plans/roadmap-100-blocks.md) блок 96.
 
@@ -75,7 +81,8 @@
 
 **Чеклист (data-at-rest):**
 
-- Локальные БД (transcripts, metrics, RAG) — в `XDG_DATA_HOME/voiceforge/` (или заданных путях); не шифруются (раздел 5). При требовании конфиденциальности — LUKS/каталог в зашифрованном разделе или будущий блок 96 (SQLCipher).
+- Локальные БД, cache и backup artifacts — в `XDG_DATA_HOME/voiceforge/` (или заданных путях); runtime держит private filesystem permissions `0700/0600`, но это **не** заменяет encryption-at-rest.
+- При требовании конфиденциальности — LUKS/каталог в зашифрованном разделе или будущий блок 96 (SQLCipher).
 - Секреты — только keyring (сервис `voiceforge`); не хранить в конфиг-файлах и не коммитить.
 
 ---

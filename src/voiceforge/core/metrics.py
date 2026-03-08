@@ -11,6 +11,8 @@ from pathlib import Path
 
 import structlog
 
+from voiceforge.core.fs import ensure_private_dir, ensure_private_file
+
 log = structlog.get_logger()
 
 TABLE_DDL = """
@@ -86,9 +88,10 @@ def _run_migrations(conn: sqlite3.Connection) -> None:
 
 def _get_conn() -> sqlite3.Connection:
     path = _metrics_db_path()
-    path.parent.mkdir(parents=True, exist_ok=True)
+    ensure_private_dir(path.parent)
     db_str = str(path)
     conn = sqlite3.connect(db_str)
+    ensure_private_file(path)
     if db_str not in _init_done_paths:
         with _init_lock:
             if db_str not in _init_done_paths:

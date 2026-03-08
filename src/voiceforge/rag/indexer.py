@@ -11,6 +11,8 @@ from typing import Any
 import numpy as np
 import structlog
 
+from voiceforge.core.fs import ensure_private_dir, ensure_private_file
+
 try:
     import sqlite_vec
 except ImportError:
@@ -202,7 +204,9 @@ class KnowledgeIndexer:
 
     def _get_conn(self) -> sqlite3.Connection:
         if self._conn is None:
+            ensure_private_dir(self.db_path.parent)
             self._conn = sqlite3.connect(str(self.db_path))
+            ensure_private_file(self.db_path)
             _init_db(self._conn)
         return self._conn
 

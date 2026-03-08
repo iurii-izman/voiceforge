@@ -2,14 +2,14 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-08 (closed #119; следующий batch = #120 security)
+**Обновлено:** 2026-03-08 (closed #120; следующий batch = #121 observability evidence)
 
 ---
 
 ## Что требуется от вас (подтверждения и действия)
 
 - **#65 CVE:** Фикса в upstream (diskcache/instructor) **пока нет — делать ничего не нужно**. Когда появится версия с фиксом: обновить зависимости и убрать `--ignore-vuln` по чеклисту в [security-and-dependencies.md](security-and-dependencies.md) разд. 4. Dependabot-алерт можно отклонить с комментарием «No fix yet; см. runbook».
-- **Новая стратегическая очередь #114-#123:** ручных действий для её сопровождения не требуется; после закрытия `#114`, `#115`, `#116`, `#117`, `#118` и `#119` текущий practical execution order на ближайшие сессии: **#120 -> #121 -> #122**.
+- **Новая стратегическая очередь #114-#123:** ручных действий для её сопровождения не требуется; после закрытия `#114`, `#115`, `#116`, `#117`, `#118`, `#119` и `#120` текущий practical execution order на ближайшие сессии: **#121 -> #122 -> #123**.
 - **Keyring (HuggingFace):** Проверка, что ключ сохранён: `uv run python -c "from voiceforge.core.secrets import get_api_key; print('huggingface:', 'present' if get_api_key('huggingface') else 'absent')"`. Сохранение (один раз): `secret-tool store --label='voiceforge huggingface' service voiceforge key huggingface` → при запросе **Secret:** вставить токен (hf_...) с https://huggingface.co/settings/tokens. **Проверено:** ключ huggingface в keyring присутствует (present).
 - **OTel/Jaeger — кто управляет:** Агент не может сам запускать Jaeger, открывать браузер или смотреть трейсы. Запуск контейнера (podman/docker), открытие http://localhost:16686, установка/снятие переменных в сессии — делаете вы. Агент может только обновить доки и подсказать команды. ОTel — трассировка шагов пайплайна (длительности) в Jaeger для отладки. Если не нужны трейсы: `unset VOICEFORGE_OTEL_ENABLED OTEL_EXPORTER_OTLP_ENDPOINT`. Jaeger на хосте, команды в toolbox: `OTEL_EXPORTER_OTLP_ENDPOINT=http://10.0.2.2:4318`.
 - **#66 Async:** Реализован опциональный async-сервер (Starlette + uvicorn); см. ниже. Ничего подтверждать не нужно.
@@ -18,9 +18,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** закрыт **#119**. Добавлен focused anti-drift suite [tests/test_contract_batch119.py](../../tests/test_contract_batch119.py): он фиксирует parity для `GET /api/sessions/<id>`, проверяет, что sync HTTP 404 теперь совпадает с async/CLI message (`Сессия <id> не найдена.`), и даёт D-Bus envelope snapshots для ключей, которые реально читает desktop (`data.settings`, `data.session_detail`, `data.analytics`, `data.streaming_transcript`, `data.session_ids`, `data.events`). В [server.py](../../src/voiceforge/web/server.py) убран фактический drift по session-detail 404 message; в [server_async.py](../../src/voiceforge/web/server_async.py) вынесена общая validate-логика для analyze payload, чтобы async SSE `/api/analyze/stream` держал тот же `seconds/template` contract, что и обычный `/api/analyze`. Поверх нового suite перепроверен существующий subset (`test_web_contract_parity`, `test_dbus_contract_snapshot`, `test_dbus_service`, `test_web_status_export_action_items`, `test_hotspot_batch114`); граница batch явно зафиксирована: без redesign API, без frontend rewrite, без security/observability/release surfaces. Обновлены [web-api.md](web-api.md), [config-env-contract.md](config-env-contract.md) и [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md) по фактическому контракту; practical queue сдвинут на `#120 -> #121 -> #122`.
+**Сделано в сессии:** закрыт **#120**. Добавлен helper [fs.py](../../src/voiceforge/core/fs.py) с best-effort filesystem hardening для local data-at-rest: app/backup directories приводятся к `0700`, а local DB/cache/status/backup files — к `0600`. Этот baseline подключён в [transcript_log.py](../../src/voiceforge/core/transcript_log.py), [metrics.py](../../src/voiceforge/core/metrics.py), [cache.py](../../src/voiceforge/llm/cache.py), [gliner_ner.py](../../src/voiceforge/llm/gliner_ner.py), [indexer.py](../../src/voiceforge/rag/indexer.py) и [main.py](../../src/voiceforge/main.py) для backup/status paths. Добавлен focused suite [tests/test_security_batch120.py](../../tests/test_security_batch120.py), который фиксирует private permissions для local data/cache/backup artifacts; поверх него перепроверен существующий subset (`test_transcript_log`, `test_main_status_export_action_items`, `test_core_metrics`, `test_config_settings`). В [security-and-dependencies.md](security-and-dependencies.md), [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md) и [backlog-and-actions.md](../plans/backlog-and-actions.md) зафиксирована честная граница: filesystem privacy baseline теперь done, но encryption-at-rest остаётся accepted risk, а `#65` остаётся external wait-state с readiness checklist.
 
-**Следующий шаг:** брать **#120** как отдельный coherent batch только по security hardening beyond accepted-risk baseline. Цель: подготовить decision-complete path по `#65` readiness и local data-at-rest posture, синхронизировать security docs/summary/backlog по фактической границе done vs accepted risk. Не смешивать этот batch с web/desktop parity, observability или release/docs.
+**Следующий шаг:** брать **#121** как отдельный coherent batch только по observability evidence. Цель: собрать reproducible Jaeger/runtime proof path, обновить observability docs/summary по фактическому manual evidence, и не смешивать этот batch с security, release или broad docs sweep.
 
 ---
 
@@ -29,7 +29,7 @@
 **Полный чеклист:** [pre-beta-sonar-github.md](pre-beta-sonar-github.md).
 
 - **PR #81, #79:** закрыты с комментарием «Applied in main» (2026-03-07).
-- **Открытые issues:** #65 (CVE — ждём upstream) и стратегическая очередь **#120-#123**. `#114`, `#115`, `#116`, `#117`, `#118` и `#119` уже закрыты; следующий code-heavy кандидат — `#120`, затем `#121`, затем `#122`. #50 (macOS/WSL2) закрыт 2026-03-07 — снят с активного скоупа.
+- **Открытые issues:** #65 (CVE — ждём upstream) и стратегическая очередь **#121-#123**. `#114`, `#115`, `#116`, `#117`, `#118`, `#119` и `#120` уже закрыты; следующий candidate — `#121`, затем `#122`, затем `#123`. #50 (macOS/WSL2) закрыт 2026-03-07 — снят с активного скоупа.
 
 **Sonar:** S7721, S2737, S3776, S7735 закрыты в 9b92a46. Проверить остаток: `uv run python scripts/sonar_fetch_issues.py` в toolbox 43. **Mypy:** в scope verify_pr — 0 ошибок. **verify_pr:** Ruff + Mypy OK; bandit — зелёный (nosec B310/B608). **Gitleaks:** allowlist .hypothesis/ + .gitignore; шаг [8/8] в CI проходит (workflow Gitleaks зелёный после 270b7e2/42f904c).
 
@@ -48,7 +48,7 @@
 
 Режим: максимальные объёмы, автопилот. Делай всё сам, без лишних вопросов. Запрашивай пользователя только если нужен явный выбор, подтверждение или данные вне keyring. Ключи в keyring (keyring-keys-reference.md). Fedora Atomic/toolbox/uv; uv sync --extra all. В конце сессии: тесты (uv run pytest tests/ -q --tb=line), коммит и пуш из корня репо (Conventional Commits, Closes #N где уместно), обновить next-iteration-focus (следующий шаг + дата), выдать промпт для следующего чата.
 
-Задача: взять верхний coherent batch из блока «Следующий шаг» и GitHub Project. На сейчас это **#120**: security hardening beyond accepted-risk baseline. Подготовь decision-complete path по `#65` и local data-at-rest posture, и удержи security docs/summary строго по фактическому risk boundary.
+Задача: взять верхний coherent batch из блока «Следующий шаг» и GitHub Project. На сейчас это **#121**: observability evidence. Собери reproducible Jaeger/runtime proof path и удержи observability docs/summary строго по фактической manual boundary.
 ```
 
 ---
@@ -68,7 +68,7 @@
 
 В конце сессии обязательно: (1) targeted tests по изменённой поверхности, (2) commit/push из корня репо (Conventional Commits, `Closes #N` где уместно), (3) обновить next-iteration-focus (блоки «Сделано в сессии», «Следующий шаг», дата), (4) выдать готовый prompt для следующего чата.
 
-Задача: выполнить следующий coherent batch из блока «Следующий шаг» и GitHub Project, сохраняя batching discipline: один subsystem, один verification loop, один честный handoff. На сейчас это **#120** по security hardening; `#121` и `#122` трогать только в следующих сессиях.
+Задача: выполнить следующий coherent batch из блока «Следующий шаг» и GitHub Project, сохраняя batching discipline: один subsystem, один verification loop, один честный handoff. На сейчас это **#121** по observability evidence; `#122` и `#123` трогать только в следующих сессиях.
 ```
 
 ---
@@ -106,7 +106,7 @@
 | Priority | Issues | Описание |
 |----------|--------|----------|
 | **P0** | - | Текущий P0 structural queue закрыт batches `#114-#116` |
-| **P1 code-heavy** | #120 | Security hardening |
+| **P1 code-heavy** | - | Текущий code-heavy security batch `#120` закрыт |
 | **P1 evidence/manual** | #121, #122, #123 | Jaeger/runtime evidence, release proof, docs/governance sweep |
 
 ---

@@ -11,6 +11,7 @@
 | Тема | Что нужно от вас | Статус |
 |------|-------------------|--------|
 | **#65 CVE** | Пока ничего. Когда в upstream (diskcache/instructor) будет фикс — обновить зависимости, убрать `--ignore-vuln` по [security-and-dependencies.md](../runbooks/security-and-dependencies.md) разд. 4. Dependabot-алерт отклонить: «No fix version yet. See docs/runbooks/security-and-dependencies.md. Revisit when upstream fixes.» или скрипт `uv run python scripts/dependabot_dismiss_moderate.py`. | Ждём upstream |
+| **Local data-at-rest posture** | Дополнительного решения сейчас не требуется: filesystem privacy baseline уже усилен (`0700/0600` для local data/cache/backup artifacts), но encryption-at-rest по-прежнему не реализован. При новых требованиях конфиденциальности — отдельный batch/решение про LUKS или SQLCipher, см. [security-and-dependencies.md](../runbooks/security-and-dependencies.md) §5, §7. | Accepted risk зафиксирован |
 | **Keyring (HuggingFace)** | Один раз сохранить токен, если ещё не сохранён. Проверка: `uv run python -c "from voiceforge.core.secrets import get_api_key; print('huggingface:', 'present' if get_api_key('huggingface') else 'absent')"`. Сохранение: `secret-tool store --label='voiceforge huggingface' service voiceforge key huggingface`. | По доке проверено |
 | **OTel/Jaeger** | Запуск контейнера (podman/docker), открытие http://localhost:16686, при необходимости выставить переменные в сессии. Агент только подсказывает команды. | По желанию |
 | **#66 Async** | Ничего подтверждать не нужно. | — |

@@ -7,6 +7,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol, cast
 
+from voiceforge.core.fs import ensure_private_dir
+
 PII_LABELS = [
     "PERSON",
     "EMAIL",
@@ -51,7 +53,7 @@ def _get_detector() -> object | None:
         from gliner import GLiNER
 
         cache = _model_cache_dir()
-        cache.mkdir(parents=True, exist_ok=True)
+        ensure_private_dir(cache)
         _class_detector = GLiNER.from_pretrained(MODEL_ID, cache_dir=cache)
         return _class_detector
     except ImportError:

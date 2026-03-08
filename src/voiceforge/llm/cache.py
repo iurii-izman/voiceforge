@@ -13,6 +13,8 @@ from typing import Any, TypeVar
 
 from pydantic import BaseModel
 
+from voiceforge.core.fs import ensure_private_dir, ensure_private_file
+
 T = TypeVar("T", bound=BaseModel)
 
 TABLE_DDL = """
@@ -37,9 +39,10 @@ def _cache_db_path() -> Path:
 
 def _get_conn() -> sqlite3.Connection:
     path = _cache_db_path()
-    path.parent.mkdir(parents=True, exist_ok=True)
+    ensure_private_dir(path.parent)
     db_str = str(path)
     conn = sqlite3.connect(db_str)
+    ensure_private_file(path)
     if db_str not in _init_done_paths:
         with _init_lock:
             if db_str not in _init_done_paths:

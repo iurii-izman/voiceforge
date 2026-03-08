@@ -14,6 +14,8 @@ from typing import Any
 
 import structlog
 
+from voiceforge.core.fs import ensure_private_dir, ensure_private_file
+
 log = structlog.get_logger()
 
 DB_NAME = "transcripts.db"
@@ -58,6 +60,7 @@ def _backup_before_migration(db_path: Path) -> None:
     backup_path = Path(str(db_path) + ".bak")
     try:
         shutil.copy2(db_path, backup_path)
+        ensure_private_file(backup_path)
         log.info("migration.backup", path=str(backup_path))
     except Exception as e:
         log.warning("migration.backup_failed", path=str(backup_path), error=str(e))
@@ -254,12 +257,13 @@ class TranscriptLog:
 
     def __init__(self, db_path: str | Path | None = None) -> None:
         self.db_path = Path(db_path or _db_path())
-        self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        ensure_private_dir(self.db_path.parent)
         self._conn: sqlite3.Connection | None = None
 
     def _get_conn(self) -> sqlite3.Connection:
         if self._conn is None:
             self._conn = sqlite3.connect(str(self.db_path))
+            ensure_private_file(self.db_path)
             self._conn.row_factory = sqlite3.Row
             _init_db(self._conn)
             _ensure_migrated(self._conn, self.db_path)

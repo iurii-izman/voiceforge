@@ -44,6 +44,7 @@ from voiceforge.core.contracts import (
     build_cli_success_payload,
     extract_error_message,
 )
+from voiceforge.core.fs import ensure_private_dir, ensure_private_file
 from voiceforge.core.tracing import bind_trace_id
 from voiceforge.i18n import t
 
@@ -816,8 +817,9 @@ def _load_action_item_status() -> dict[str, str]:
 
 def _save_action_item_status(data: dict[str, str]) -> None:
     path = _action_item_status_path()
-    path.parent.mkdir(parents=True, exist_ok=True)
+    ensure_private_dir(path.parent)
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2))  # NOSONAR S2083: path under home
+    ensure_private_file(path)
 
 
 def _action_items_update_validate(log_db: Any, from_session: int, next_session: int) -> tuple[Any, Any, Any, str]:
@@ -1397,11 +1399,11 @@ def backup_cmd(
     """Создать бэкап transcripts.db, metrics.db, rag.db в каталог с меткой времени (#63)."""
     data_dir = _backup_data_dir()
     out = output_dir or (data_dir / "backups")
-    out.mkdir(parents=True, exist_ok=True)
+    ensure_private_dir(out)
     cfg = _get_config()
     timestamp = time.strftime("%Y%m%d-%H%M%S")
     backup_sub = out / f"voiceforge-backup-{timestamp}"
-    backup_sub.mkdir(parents=True, exist_ok=True)
+    ensure_private_dir(backup_sub)
     copied = []
     for name, src_path in [
         ("transcripts.db", data_dir / "transcripts.db"),
@@ -1411,6 +1413,7 @@ def backup_cmd(
         if src_path.exists():
             dest = backup_sub / name
             shutil.copy2(src_path, dest)
+            ensure_private_file(dest)
             copied.append(name)
     if not copied:
         typer.echo(t("backup.no_files"), err=True)
