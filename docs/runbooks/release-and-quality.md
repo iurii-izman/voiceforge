@@ -116,13 +116,13 @@ git push origin v0.2.0-alpha.2
 
 ---
 
-## 4. Alpha0.1 Definition of Done
+## 4. Alpha0.1 Definition of Done (исторический baseline)
 
 Сборка готова к alpha0.1, когда выполнено:
 
 **Baseline:** git baseline + тег; дерево src/, tests/, docs/, scripts/; файлы .gitignore, .bandit.yaml, .gitleaks.toml, .pre-commit-config.yaml, .semgrepignore; workflows test, semgrep, gitleaks, codeql, release.
 
-**CLI/API:** `voiceforge --help` — 9 команд (listen, analyze, status, history, index, watch, daemon, install-service, uninstall-service); удалённые команды — "No such command"; JSON status: schema_version, ok, data (ram, cost_today_usd, ollama_available).
+**CLI/API:** исторический alpha0.1 baseline. Текущий `voiceforge --help` на alpha 0.2 уже показывает 19 команд (включая `version`, `rag-export`, `cost`, `sessions-to-ical`, `weekly-report`, `export`, `backup`, `web`, `action-items`, `calendar`); удалённые команды по-прежнему должны давать "No such command"; JSON status: schema_version, ok, data (ram, cost_today_usd, ollama_available).
 
 **Качество и безопасность:** verify_pr.sh, smoke_clean_env.sh, check_cli_contract.sh — OK; тесты db_migrations — OK; check_new_code_coverage.sh; CVE-2025-69872 временно в ignore до фикса upstream.
 

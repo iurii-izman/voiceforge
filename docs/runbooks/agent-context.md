@@ -8,7 +8,7 @@
 
 ## Проект
 
-**VoiceForge** — локальный ассистент для аудио-встреч на Linux: PipeWire → STT → diarization → RAG → LLM. Alpha 0.2, 17+ CLI-команд (cost, export, action-items, web, doctor, backup, calendar и др.).
+**VoiceForge** — локальный ассистент для аудио-встреч на Linux: PipeWire → STT → diarization → RAG → LLM. Alpha 0.2, 19 CLI-команд (`voiceforge --help`: version, listen, analyze, index, watch, rag-export, daemon, install-service, uninstall-service, cost, status, sessions-to-ical, weekly-report, export, backup, history, web, action-items, calendar).
 
 ---
 

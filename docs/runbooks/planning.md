@@ -49,7 +49,7 @@ gh auth refresh -s project
 
 После этого агент может: создавать issue, добавлять в проект (`gh project item-add`), переводить карточку в другую колонку (`gh project item-edit` с полем Status). Примеры: «создай issue на CalDAV и добавь в проект», «перенеси #17 в Done».
 
-**Текущий проект:** [GitHub Project #1](https://github.com/users/iurii-izman/projects/1) — колонки Status: Todo, In Progress, Done. Рабочий вид: [View 1](https://github.com/users/iurii-izman/projects/1/views/1). Задачи: issues #55–73 (audit map), #82–86 (бэклог A–E), #96–101 (deep audit 2026-03-08: tracking + critical path batches). Поля: Phase, Priority, Effort, Area — для визуализации и фильтрации.
+**Текущий проект:** [GitHub Project #1](https://github.com/users/iurii-izman/projects/1) — колонки Status: Todo, In Progress, Done. Рабочий вид: [View 1](https://github.com/users/iurii-izman/projects/1/views/1). На доске остаётся история (`#55-#73`, `#82-#86`, `#96-#123`), но практический execution order для новых сессий задают `next-iteration-focus.md` и `PROJECT-STATUS-SUMMARY.md`: batches `#114-#122` уже закрыты, текущий live item — `#123`. Поля: Phase, Priority, Effort, Area — для визуализации и фильтрации.
 
 **Обновление доски (обязательно для агента):**
 - При старте работы по issue — перевести карточку в **In Progress**.

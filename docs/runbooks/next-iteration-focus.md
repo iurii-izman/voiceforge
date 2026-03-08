@@ -2,14 +2,14 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-08 (closed #122; следующий batch = #123 docs/governance sweep)
+**Обновлено:** 2026-03-08 (closed #123; следующий batch = Sonar hotspot triage)
 
 ---
 
 ## Что требуется от вас (подтверждения и действия)
 
 - **#65 CVE:** Фикса в upstream (diskcache/instructor) **пока нет — делать ничего не нужно**. Когда появится версия с фиксом: обновить зависимости и убрать `--ignore-vuln` по чеклисту в [security-and-dependencies.md](security-and-dependencies.md) разд. 4. Dependabot-алерт можно отклонить с комментарием «No fix yet; см. runbook».
-- **Новая стратегическая очередь #114-#123:** ручных действий для её сопровождения не требуется; после закрытия `#114`, `#115`, `#116`, `#117`, `#118`, `#119`, `#120`, `#121` и `#122` текущий practical execution order на ближайшие сессии: **#123**.
+- **Стратегическая очередь #114-#123:** закрыта полностью; ручных действий для её сопровождения не требуется. Из открытых GitHub issues остаётся только **#65** (external wait-state до upstream fix).
 - **Keyring (HuggingFace):** Проверка, что ключ сохранён: `uv run python -c "from voiceforge.core.secrets import get_api_key; print('huggingface:', 'present' if get_api_key('huggingface') else 'absent')"`. Сохранение (один раз): `secret-tool store --label='voiceforge huggingface' service voiceforge key huggingface` → при запросе **Secret:** вставить токен (hf_...) с https://huggingface.co/settings/tokens. **Проверено:** ключ huggingface в keyring присутствует (present).
 - **OTel/Jaeger — кто управляет:** Агент не может сам запускать Jaeger, открывать браузер или смотреть трейсы. Запуск контейнера (podman/docker), открытие http://localhost:16686, установка/снятие переменных в сессии — делаете вы. Агент может только обновить доки и подсказать команды. ОTel — трассировка шагов пайплайна (длительности) в Jaeger для отладки. Если не нужны трейсы: `unset VOICEFORGE_OTEL_ENABLED OTEL_EXPORTER_OTLP_ENDPOINT`. Jaeger на хосте, команды в toolbox: `OTEL_EXPORTER_OTLP_ENDPOINT=http://10.0.2.2:4318`.
 - **#66 Async:** Реализован опциональный async-сервер (Starlette + uvicorn); см. ниже. Ничего подтверждать не нужно.
@@ -18,9 +18,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** закрыт **#122**. Добавлен reproducible release-proof report `scripts/check_release_proof.py` с regression suite `tests/test_release_proof.py`: скрипт честно классифицирует release path как `blocking` / `advisory` / `manual`, отдельно показывает native desktop gate и updater state (`disabled`, `ready`, `invalid`). В [release-and-quality.md](release-and-quality.md), [desktop-release-gate-matrix.md](desktop-release-gate-matrix.md), [desktop-updater.md](desktop-updater.md) и [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md) синхронизирована фактическая boundary: `check_release_metadata.py` остаётся blocking repo contract, `cargo audit` остаётся advisory proof, `npm run e2e:native` остаётся local/native gate, а signed updater proof не требуется, пока repo state честно остаётся `disabled`. Локально дополнительно подтверждено: `uv run python scripts/check_release_metadata.py` зелёный; `uv run python scripts/check_release_proof.py --json` показывает `desktop_cargo_audit=missing-tool`; `cargo-audit` в этой сессии не установлен.
+**Сделано в сессии:** закрыт **#123**. Выполнен docs/governance sweep по live документам с самым высоким operational impact: в [cursor.md](cursor.md), [planning.md](planning.md) и [doc-governance.md](doc-governance.md) убраны stale ссылки на старую очередь `#97-#101` и зафиксировано, что практический execution order теперь берётся из `next-iteration-focus.md` / `PROJECT-STATUS-SUMMARY.md`; в [DOCS-INDEX.md](../DOCS-INDEX.md) и [runbooks/README.md](README.md) уточнена active-vs-archive boundary для `voiceforge-cursor-tz.md` и исторического alpha0.1 baseline; в [agent-context.md](agent-context.md) и [release-and-quality.md](release-and-quality.md) исправлен CLI drift по фактическому `voiceforge --help` (19 команд). Локально дополнительно подтверждено: `uv run voiceforge --help` показывает текущий CLI surface; `git diff --check` зелёный.
 
-**Следующий шаг:** брать **#123** как отдельный coherent batch только по docs/governance sweep for active/archive/version drift. Цель: пройтись по live runbooks и индексу с самым высоким operational impact, убрать stale refs/version drift после закрытия `#122`, синхронизировать active-vs-archive boundary и не смешивать этот batch с release proof, observability или security.
+**Следующий шаг:** взять отдельный coherent quality batch по **Sonar S3776 hotspot triage** без смешивания с release/observability/security: выбрать один top hotspot (`main.py`, `server.py` или `desktop/src/main.js`), решить `fix vs accept`, и если это дешёвый путь, сделать небольшой refactor с targeted tests и docs sync.
 
 ---
 
@@ -29,7 +29,7 @@
 **Полный чеклист:** [pre-beta-sonar-github.md](pre-beta-sonar-github.md).
 
 - **PR #81, #79:** закрыты с комментарием «Applied in main» (2026-03-07).
-- **Открытые issues:** #65 (CVE — ждём upstream) и стратегическая очередь **#123**. `#114`, `#115`, `#116`, `#117`, `#118`, `#119`, `#120`, `#121` и `#122` уже закрыты; следующий candidate — `#123`. #50 (macOS/WSL2) закрыт 2026-03-07 — снят с активного скоупа.
+- **Открытые issues:** только **#65** (CVE — ждём upstream). Стратегическая очередь `#114-#123` закрыта полностью; `#50` (macOS/WSL2) закрыт 2026-03-07 и снят с активного скоупа.
 
 **Sonar:** S7721, S2737, S3776, S7735 закрыты в 9b92a46. Проверить остаток: `uv run python scripts/sonar_fetch_issues.py` в toolbox 43. **Mypy:** в scope verify_pr — 0 ошибок. **verify_pr:** Ruff + Mypy OK; bandit — зелёный (nosec B310/B608). **Gitleaks:** allowlist .hypothesis/ + .gitignore; шаг [8/8] в CI проходит (workflow Gitleaks зелёный после 270b7e2/42f904c).
 
@@ -48,7 +48,7 @@
 
 Режим: максимальные объёмы, автопилот. Делай всё сам, без лишних вопросов. Запрашивай пользователя только если нужен явный выбор, подтверждение или данные вне keyring. Ключи в keyring (keyring-keys-reference.md). Fedora Atomic/toolbox/uv; uv sync --extra all. В конце сессии: тесты (uv run pytest tests/ -q --tb=line), коммит и пуш из корня репо (Conventional Commits, Closes #N где уместно), обновить next-iteration-focus (следующий шаг + дата), выдать промпт для следующего чата.
 
-Задача: взять верхний coherent batch из блока «Следующий шаг» и GitHub Project. На сейчас это **#123**: docs and governance sweep for active/archive/version drift. Синхронизируй high-impact live docs и индекс по фактическому repo state после закрытия `#122`, сохраняя чёткую границу active-vs-archive и не смешивая batch с новым release/security work.
+Задача: взять верхний coherent batch из блока «Следующий шаг». После закрытия `#123` стратегическая очередь `#114-#123` завершена; следующий practical batch теперь локальный quality follow-up: отдельный Sonar S3776 hotspot triage (`main.py`, `server.py` или `desktop/src/main.js`) с честным решением `fix vs accept`, targeted tests и docs sync. Не смешивай его с CVE `#65`, release, observability или security work.
 ```
 
 ---
@@ -68,7 +68,7 @@
 
 В конце сессии обязательно: (1) targeted tests по изменённой поверхности, (2) commit/push из корня репо (Conventional Commits, `Closes #N` где уместно), (3) обновить next-iteration-focus (блоки «Сделано в сессии», «Следующий шаг», дата), (4) выдать готовый prompt для следующего чата.
 
-Задача: выполнить следующий coherent batch из блока «Следующий шаг» и GitHub Project, сохраняя batching discipline: один subsystem, один verification loop, один честный handoff. На сейчас это **#123** по docs/governance sweep; release proof `#122` уже закрыт и повторно не трогать без нового drift.
+Задача: выполнить следующий coherent batch из блока «Следующий шаг», сохраняя batching discipline: один subsystem, один verification loop, один честный handoff. После закрытия `#123` стратегическая очередь завершена; следующий candidate — отдельный Sonar S3776 hotspot triage с cheap refactor или fix-vs-accept decision по одному hotspot за итерацию.
 ```
 
 ---
@@ -107,7 +107,7 @@
 |----------|--------|----------|
 | **P0** | - | Текущий P0 structural queue закрыт batches `#114-#116` |
 | **P1 code-heavy** | - | Текущий code-heavy security batch `#120` закрыт |
-| **P1 evidence/manual** | #123 | Docs/governance sweep |
+| **P1 evidence/manual** | - | Стратегическая очередь `#114-#123` закрыта; дальше только отдельные quality quick wins |
 
 ---
 

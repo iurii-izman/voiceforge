@@ -35,7 +35,7 @@
 
 | Файл | Назначение |
 |------|------------|
-| [release-and-quality.md](release-and-quality.md) | **Единый документ:** релиз (чеклист, команды), откат, чеклист альфа2, Alpha0.1 DoD. Раньше: release.md, rollback-alpha-release.md, alpha2-checklist.md, alpha0.1-dod.md (теперь заглушки со ссылкой). |
+| [release-and-quality.md](release-and-quality.md) | **Единый документ:** релиз (чеклист, команды), откат, чеклист alpha2; Alpha0.1 DoD сохранён там как исторический baseline. Раньше: release.md, rollback-alpha-release.md, alpha2-checklist.md, alpha0.1-dod.md (теперь заглушки со ссылкой). |
 
 ---
 

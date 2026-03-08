@@ -2,7 +2,7 @@
 
 **Назначение:** один источник правды по тому, какой документ за что отвечает и актуален ли он. При изменении кода/фич обновлять соответствующий док и при необходимости этот индекс.
 
-**Обновлено:** 2026-03-08 (deep audit delta, max-autopilot batching, new next-step prompt)
+**Обновлено:** 2026-03-08 (#123 docs/governance sweep: live queue sync, active/archive boundary, CLI drift cleanup)
 
 ---
 
@@ -111,18 +111,19 @@
 | desktop-release-gate-matrix.md                                | Release gate matrix для desktop: automated vs native vs manual proof                    | Актуален                         |
 | quickstart.md                                                 | Краткий сценарий; полная версия — first-meeting-5min                                    | Актуален                         |
 | cli-commands-and-run.md                                       | Все CLI-команды, когда пересобирать, как запускать демон и полный стек (toolbox)        | Актуален                         |
-| planning.md                                                   | Канбан, audit map, next-iteration-focus; GitHub Project, gh и batching policy           | Актуален                         |
+| planning.md                                                   | Канбан, GitHub Project, batching policy; live execution order брать из next-iteration-focus и PROJECT-STATUS-SUMMARY | Актуален                         |
 | security-and-dependencies.md                                  | Безопасность, зависимости, Dependabot (объединённый runbook)                            | Актуален                         |
 | telegram-bot-setup.md, pyannote-version.md                    | Фичи                                                                                    | Актуален                         |
 | repo-and-git-governance.md                                    | Репо, main, Git, PR, теги, issues, Sonar                                                | Актуален                         |
-| release-and-quality.md                                        | Релиз, откат, чеклисты альфа, DoD                                                       | Актуален                         |
+| release-and-quality.md                                        | Релиз, откат, alpha2 checklist; Alpha0.1 DoD сохранён как исторический baseline         | Актуален                         |
 | lifecycle-smoke.md                                            | Smoke-шаги для audio/STT и RAG lifecycle (#105, #106)                                  | Актуален                         |
 | pre-beta-sonar-github.md                                      | Чеклист Sonar и GitHub перед бета-релизом (PR, issues, порядок)                         | Актуален                         |
 | PROJECT-STATUS-SUMMARY.md                                     | Итог по проекту (12 разделов): планы↔код, audit delta, critical path, риски, приоритеты | Актуален                         |
 | web-api.md, observability-alerts.md                           | API, мониторинг, трассировка Jaeger (#71)                                               | Актуален                         |
 | test-operations.md, sonar-pr-cleanup.md                       | Тесты и CI                                                                              | Актуален                         |
 | prompt-management.md, calendar-integration.md, rag-formats.md | Фичи и форматы                                                                          | Актуален                         |
-| cursor.md, voiceforge-cursor-tz.md                            | Cursor: настройка, тюнинг, prompts, coherent batching; расширенное ТЗ (архив)           | Актуален / заглушка              |
+| cursor.md                                                     | Cursor: настройка, тюнинг, prompts, coherent batching                                   | Актуален                         |
+| voiceforge-cursor-tz.md                                       | Заглушка → [archive/runbooks/voiceforge-cursor-tz-2026.md](archive/runbooks/voiceforge-cursor-tz-2026.md) | Заглушка / архив                 |
 | claude-proposal-alignment.md                                  | Заглушка → архив                                                                        | [archive/plans/](archive/plans/) |
 | git-github-practices-rule.md, agent-session-handoff-rule.md   | Копии для .cursor/rules/                                                                | Актуален                         |
 | offline-package.md                                            | Flatpak/AppImage (GA #73): сборка, установка, GA checklist                              | Актуален                         |

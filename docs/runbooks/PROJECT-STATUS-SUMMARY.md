@@ -69,7 +69,7 @@
 ## 6. GitHub: PR, issues, доска
 
 - **PR:** #81, #79 закрыты с комментарием «Applied in main» (2026-03-07).
-- **Issues:** открытый внешний риск по-прежнему **#65** (CVE — ждём upstream). В стратегическом queue для движения `76.5 -> 100` уже закрыты **#114** (`main.py` / `server_async.py` hotspot decomposition), **#115** (`llm/router.py` coverage batch), **#116** (`core/daemon.py` behavioral coverage batch), **#117** (`rag/*` lifecycle confidence batch), **#118** (`stt/*` lifecycle/perf confidence batch), **#119** (`web/API/desktop contract drift prevention batch), **#120** (`security hardening beyond accepted-risk baseline`), **#121** (`observability proof path and honest manual boundary`) и **#122** (`release proof beyond metadata contract`); открыт **#123**. **#50** (macOS/WSL2) закрыт и снят с активного скоупа.
+- **Issues:** открытый внешний риск по-прежнему только **#65** (CVE — ждём upstream). Стратегический queue для движения `76.5 -> 100` закрыт через **#114-#123**: docs/governance sweep **#123** завершил active runbook cleanup, live queue sync и active-vs-archive boundary. **#50** (macOS/WSL2) закрыт и снят с активного скоупа.
 - **Доска:** [VoiceForge Board](https://github.com/users/iurii-izman/projects/1). При работе по issue — In Progress; при Closes #N — Done. Команды и ID полей: [planning.md](planning.md).
 - **Dependabot:** при CVE #65 — отклонить с комментарием из security-and-dependencies.md или скрипт `uv run python scripts/dependabot_dismiss_moderate.py`.
 
@@ -77,8 +77,8 @@
 
 ## 7. Рекомендации по приоритетам
 
-1. **Первый ROI-приоритет:** взять **#123** (docs/governance sweep) как следующий coherent batch.
-2. **Следом:** после `#123` вернуться к узким quality quick wins только отдельными batches.
+1. **Первый ROI-приоритет:** взять один отдельный **Sonar S3776 hotspot triage** batch и не смешивать его с другими поверхностями.
+2. **Следом:** вернуться к узким quality quick wins только отдельными batches.
 3. **Параллельный внешний риск:** при появлении фикса CVE **#65** обновить зависимости и убрать `--ignore-vuln`.
 4. **Для manual/evidence batches:** держать ту же честную границу, что в `#121`: reproducible path в доках допустим, но без optimistic claims про внешние ручные шаги.
 
@@ -87,7 +87,7 @@
 ## 8. Критичные/важные проблемы на следующую итерацию
 
 - **#65 CVE:** следить за upstream (diskcache/instructor); при фиксе — обновить и убрать ignore.
-- **Новый practical queue:** сначала **#123** (docs/governance sweep); release proof batch **#122** уже закрыт.
+- **Новый practical queue:** стратегический queue `#114-#123` закрыт; следующий локальный candidate — Sonar S3776 hotspot triage отдельным batch.
 - **Sonar S3776:** 8 мест с высокой когнитивной сложностью — рефакторинг по одному или принять по решению. После уже закрытого `#104` следующий structural hotspot batch теперь зафиксирован отдельным issue **#114**.
 - **Coverage blind spots:** после `server.py`, `rag/watcher.py`, закрытых **#115**, **#116** и cheap extraction в **#114** главным heavy confidence gap смещается в `rag/*`, `stt/diarizer.py`, `llm/local_llm.py` и manual runtime/release evidence.
 - **verify_pr/bandit:** при желании полного зелёного — доработать оставшиеся предупреждения bandit.
@@ -102,7 +102,7 @@
 
 Режим: автопилот. Ключи только в keyring (сервис voiceforge). Fedora Atomic, toolbox 43; uv sync --extra all. В конце сессии: тесты (uv run pytest … -q --tb=line или лёгкое подмножество при OOM), коммит и пуш из корня репо (Conventional Commits, Closes #N где уместно), обновить next-iteration-focus, выдать промпт для следующего чата.
 
-Задача: взять верхний coherent batch из новой стратегической очереди. Первый приоритет: **#123** — docs and governance sweep for active/archive/version drift. Не смешивать этот batch с release proof, observability или security surfaces.
+Задача: взять следующий coherent quality batch после закрытия стратегической очереди `#114-#123`. Первый приоритет: отдельный Sonar S3776 hotspot triage (`main.py`, `server.py` или `desktop/src/main.js`) с честным решением `fix vs accept`. Не смешивать этот batch с CVE `#65`, release proof, observability или security surfaces.
 ```
 
 ---
@@ -124,7 +124,7 @@
 | CI/CD & release / packaging | 81 | 87 | 6 | `#112` усилил release proof beyond metadata contract, но signed updater/native release evidence всё ещё не автоматизированы |
 | Documentation & governance | 75 | 86 | 11 | После `#113` summary/runbooks стали ближе к коду, но drift ещё не нулевой и DOCS hygiene требует регулярной поддержки |
 
-**Deep-audit follow-up blocks:** [#104](https://github.com/iurii-izman/voiceforge/issues/104), [#105](https://github.com/iurii-izman/voiceforge/issues/105), [#106](https://github.com/iurii-izman/voiceforge/issues/106), [#107](https://github.com/iurii-izman/voiceforge/issues/107), [#108](https://github.com/iurii-izman/voiceforge/issues/108), [#109](https://github.com/iurii-izman/voiceforge/issues/109), [#110](https://github.com/iurii-izman/voiceforge/issues/110), [#111](https://github.com/iurii-izman/voiceforge/issues/111), [#112](https://github.com/iurii-izman/voiceforge/issues/112), [#113](https://github.com/iurii-izman/voiceforge/issues/113) уже закрыты и остаются историей предыдущего цикла. В стратегическом score-to-100 queue уже закрыты [#114](https://github.com/iurii-izman/voiceforge/issues/114) (`tests/test_hotspot_batch114.py` + existing web/CLI contracts), [#115](https://github.com/iurii-izman/voiceforge/issues/115) (`tests/test_llm_router_batch115.py`, 91% router-local coverage), [#116](https://github.com/iurii-izman/voiceforge/issues/116) (`tests/test_daemon_batch116.py`, 75% daemon-local coverage), [#117](https://github.com/iurii-izman/voiceforge/issues/117) (`tests/test_rag_batch117.py` + existing CLI/integration subset для index/export/restore/search helpers), [#118](https://github.com/iurii-izman/voiceforge/issues/118) (`tests/test_stt_batch118.py` + existing streaming/CLI/pipeline subset, repeat listen/analyze smoke, cheap no-copy STT cleanup), [#119](https://github.com/iurii-izman/voiceforge/issues/119) (`tests/test_contract_batch119.py`, sync `/api/sessions/<id>` 404 parity, async analyze-stream validation reuse, D-Bus desktop envelope snapshots, docs contract sync), [#120](https://github.com/iurii-izman/voiceforge/issues/120) (`tests/test_security_batch120.py`, private `0700/0600` filesystem baseline for local data-at-rest, docs/status sync around accepted risk), [#121](https://github.com/iurii-izman/voiceforge/issues/121) (`observability-alerts.md` reproducible Jaeger/runtime proof path, expected evidence artifacts, failure signatures, honest manual boundary) и [#122](https://github.com/iurii-izman/voiceforge/issues/122) (`scripts/check_release_proof.py`, `tests/test_release_proof.py`, release docs sync for blocking/advisory/native/manual boundary); активными остаются [#123](https://github.com/iurii-izman/voiceforge/issues/123); новый practical execution order: **#123**.
+**Deep-audit follow-up blocks:** [#104](https://github.com/iurii-izman/voiceforge/issues/104), [#105](https://github.com/iurii-izman/voiceforge/issues/105), [#106](https://github.com/iurii-izman/voiceforge/issues/106), [#107](https://github.com/iurii-izman/voiceforge/issues/107), [#108](https://github.com/iurii-izman/voiceforge/issues/108), [#109](https://github.com/iurii-izman/voiceforge/issues/109), [#110](https://github.com/iurii-izman/voiceforge/issues/110), [#111](https://github.com/iurii-izman/voiceforge/issues/111), [#112](https://github.com/iurii-izman/voiceforge/issues/112), [#113](https://github.com/iurii-izman/voiceforge/issues/113) уже закрыты и остаются историей предыдущего цикла. В стратегическом score-to-100 queue закрыты [#114](https://github.com/iurii-izman/voiceforge/issues/114) (`tests/test_hotspot_batch114.py` + existing web/CLI contracts), [#115](https://github.com/iurii-izman/voiceforge/issues/115) (`tests/test_llm_router_batch115.py`, 91% router-local coverage), [#116](https://github.com/iurii-izman/voiceforge/issues/116) (`tests/test_daemon_batch116.py`, 75% daemon-local coverage), [#117](https://github.com/iurii-izman/voiceforge/issues/117) (`tests/test_rag_batch117.py` + existing CLI/integration subset для index/export/restore/search helpers), [#118](https://github.com/iurii-izman/voiceforge/issues/118) (`tests/test_stt_batch118.py` + existing streaming/CLI/pipeline subset, repeat listen/analyze smoke, cheap no-copy STT cleanup), [#119](https://github.com/iurii-izman/voiceforge/issues/119) (`tests/test_contract_batch119.py`, sync `/api/sessions/<id>` 404 parity, async analyze-stream validation reuse, D-Bus desktop envelope snapshots, docs contract sync), [#120](https://github.com/iurii-izman/voiceforge/issues/120) (`tests/test_security_batch120.py`, private `0700/0600` filesystem baseline for local data-at-rest, docs/status sync around accepted risk), [#121](https://github.com/iurii-izman/voiceforge/issues/121) (`observability-alerts.md` reproducible Jaeger/runtime proof path, expected evidence artifacts, failure signatures, honest manual boundary), [#122](https://github.com/iurii-izman/voiceforge/issues/122) (`scripts/check_release_proof.py`, `tests/test_release_proof.py`, release docs sync for blocking/advisory/native/manual boundary) и [#123](https://github.com/iurii-izman/voiceforge/issues/123) (docs/governance sweep for live queue sync, active/archive boundary, CLI drift cleanup). Из GitHub issues активным остаётся только внешний wait-state [#65](https://github.com/iurii-izman/voiceforge/issues/65); следующий practical execution order теперь начинается не с новой стратегической карточки, а с отдельного local quality batch.
 
 **Подтверждённые hotspots:** [src/voiceforge/main.py](/home/user/Projects/voiceforge/src/voiceforge/main.py), [src/voiceforge/core/daemon.py](/home/user/Projects/voiceforge/src/voiceforge/core/daemon.py), [src/voiceforge/web/server.py](/home/user/Projects/voiceforge/src/voiceforge/web/server.py), [src/voiceforge/web/server_async.py](/home/user/Projects/voiceforge/src/voiceforge/web/server_async.py), [src/voiceforge/llm/router.py](/home/user/Projects/voiceforge/src/voiceforge/llm/router.py), [desktop/src/main.js](/home/user/Projects/voiceforge/desktop/src/main.js).
 
@@ -136,15 +136,15 @@
 
 **Critical Path (в порядке, актуализировано):**
 
-1. **#123**: сделать docs/governance sweep по active/archive/version drift.
-2. После `#123`: возвращаться к узким manual/evidence gaps только отдельными batches.
+1. Взять один **Sonar S3776 hotspot triage** batch и пройти его до решения `fix vs accept`.
+2. После этого возвращаться к узким manual/evidence gaps только отдельными batches.
 3. `#65` CVE: дождаться фикса upstream и снять `--ignore-vuln` без регресса CI.
 4. Manual evidence blocks: `cargo-audit`, live Jaeger traces, signed updater path, desktop native release gate на реальном окружении.
 5. Prompt caching для non-Claude (roadmap 19 / block 66 continuation): пока research/documented, но не productized.
 
 **Quick Wins (1-2 часа):**
 
-1. Взять **#123** как docs/governance sweep.
+1. Взять один top Sonar S3776 hotspot (`main.py`, `server.py` или `desktop/src/main.js`) как отдельный coherent batch.
 2. После этого при желании полного quality signal добрать оставшиеся bandit/Sonar quick-fixes без cross-cutting rewrite.
 3. При появлении upstream fix для `#65` снять `--ignore-vuln` и обновить dependency docs одним отдельным batch.
 
@@ -164,5 +164,5 @@
 - **Лучший формат batches:** `bugfix + regression tests + docs`, `coverage hotspot + refactor + targeted tests`, `version sync + release docs + install smoke`.
 - **Худший формат batches:** desktop packaging + RAG + calendar; security + UI polish + infra refactor в одной сессии.
 - **Источник очереди работ:** сначала [next-iteration-focus.md](next-iteration-focus.md), затем [planning.md](planning.md) / [GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1), затем `plans.md` / `audit.md`.
-- **Актуальные strategic items на board:** [#123](https://github.com/iurii-izman/voiceforge/issues/123) плюс внешний риск [#65](https://github.com/iurii-izman/voiceforge/issues/65). [#114](https://github.com/iurii-izman/voiceforge/issues/114), [#115](https://github.com/iurii-izman/voiceforge/issues/115), [#116](https://github.com/iurii-izman/voiceforge/issues/116), [#117](https://github.com/iurii-izman/voiceforge/issues/117), [#118](https://github.com/iurii-izman/voiceforge/issues/118), [#119](https://github.com/iurii-izman/voiceforge/issues/119), [#120](https://github.com/iurii-izman/voiceforge/issues/120), [#121](https://github.com/iurii-izman/voiceforge/issues/121) и [#122](https://github.com/iurii-izman/voiceforge/issues/122) уже закрыты; practical queue теперь начинается с **#123**.
+- **Актуальные strategic items на board:** стратегическая очередь `#114-#123` закрыта; на GitHub остаётся только внешний риск [#65](https://github.com/iurii-izman/voiceforge/issues/65). Следующий practical queue для Cursor теперь формируется из отдельных local quality batches, начиная с Sonar S3776 hotspot triage.
 - **Готовый prompt и batching strategy:** [cursor.md](cursor.md), [next-iteration-focus.md](next-iteration-focus.md), [agent-context.md](agent-context.md).
