@@ -116,6 +116,7 @@
 | telegram-bot-setup.md, pyannote-version.md                    | Фичи                                                                                    | Актуален                         |
 | repo-and-git-governance.md                                    | Репо, main, Git, PR, теги, issues, Sonar                                                | Актуален                         |
 | release-and-quality.md                                        | Релиз, откат, чеклисты альфа, DoD                                                       | Актуален                         |
+| lifecycle-smoke.md                                            | Smoke-шаги для audio/STT и RAG lifecycle (#105, #106)                                  | Актуален                         |
 | pre-beta-sonar-github.md                                      | Чеклист Sonar и GitHub перед бета-релизом (PR, issues, порядок)                         | Актуален                         |
 | PROJECT-STATUS-SUMMARY.md                                     | Итог по проекту (12 разделов): планы↔код, audit delta, critical path, риски, приоритеты | Актуален                         |
 | web-api.md, observability-alerts.md                           | API, мониторинг, трассировка Jaeger (#71)                                               | Актуален                         |
@@ -183,4 +184,3 @@
 1. **Добавление документа:** внести в индекс с ролью и статусом.
 2. **Устаревание:** сменить статус на «Справочно» или перенести в [archive/](archive/) (заглушка в старом месте с ссылкой на архив).
 3. **После большой итерации:** обновить актуальные доки (next-iteration-focus, runbooks при изменении поведения); завершённые планы перенести в docs/archive/; обновить этот индекс (см. [runbooks/doc-governance.md](runbooks/doc-governance.md)).
-
