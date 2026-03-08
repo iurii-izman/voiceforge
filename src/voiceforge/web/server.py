@@ -633,7 +633,8 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
         if detail_next is None:
             self._send_error_json("session not found: " + str(next_session), 404)
             return
-        segments_next, analysis_from = detail_next, detail_from[1]
+        segments_next, _ = detail_next
+        analysis_from = detail_from[1]
         if analysis_from is None:
             self._send_error_json("no analysis (action items) in session " + str(from_session), 400)
             return

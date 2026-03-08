@@ -278,7 +278,8 @@ def _sync_action_items_update(data: dict) -> tuple[int, str, bytes]:
         return _err(404, "session not found: " + str(from_session))
     if detail_next is None:
         return _err(404, "session not found: " + str(next_session))
-    segments_next, analysis_from = detail_next, detail_from[1]
+    segments_next, _ = detail_next
+    analysis_from = detail_from[1]
     if analysis_from is None:
         return _err(400, "no analysis (action items) in session " + str(from_session))
     action_items = analysis_from.action_items
