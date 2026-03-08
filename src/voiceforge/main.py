@@ -406,6 +406,7 @@ def run_analyze_pipeline(
     diar_segments = result.diar_segments
     context = result.context
     transcript_redacted = result.transcript_redacted
+    pipeline_warnings: list[str] = getattr(result, "warnings", None) or []
 
     segments_for_log = [
         {
@@ -425,8 +426,9 @@ def run_analyze_pipeline(
         return (msg, segments_for_log, {})
 
     try:
-        from voiceforge.llm.router import analyze_meeting, analyze_meeting_stream
+        from voiceforge.llm.router import analyze_meeting, analyze_meeting_stream, get_budget_warning_if_near_limit
 
+        budget_warn = get_budget_warning_if_near_limit(cfg)
         if stream_callback is not None:
             llm_result, cost_usd = analyze_meeting_stream(
                 transcript,
@@ -461,15 +463,19 @@ def run_analyze_pipeline(
         log.warning("analyze.llm_failed", error=str(e))
         return (t(_I18N_ERROR_LLM_FAILED, e=str(e)), [], {})
 
+    header_lines: list[str] = list(pipeline_warnings)
+    if budget_warn:
+        header_lines.append(budget_warn)
+
     if template and hasattr(llm_result, "model_dump"):
         lines, analysis_for_log = _format_template_result(template, llm_result)
         analysis_for_log["model"] = cfg.default_llm
         analysis_for_log["cost_usd"] = cost_usd
-        return ("\n".join(lines), segments_for_log, analysis_for_log)
+        return ("\n".join(header_lines + lines), segments_for_log, analysis_for_log)
 
     lines = _format_meeting_analysis_lines(llm_result)
     analysis_for_log = _build_analysis_for_log_default(llm_result, cfg, cost_usd)
-    return ("\n".join(lines), segments_for_log, analysis_for_log)
+    return ("\n".join(header_lines + lines), segments_for_log, analysis_for_log)
 
 
 def run_live_summary_pipeline(seconds: int) -> tuple[list[str], float]:

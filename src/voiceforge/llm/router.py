@@ -457,6 +457,23 @@ def _complete_structured_cached(key: str, response_model: type[TModel], ttl: int
     return None
 
 
+def get_budget_warning_if_near_limit(cfg: Any, estimate_usd: float = 0.03) -> str | None:
+    """E4 (#127): Return user-facing warning when daily cost >= 80% of limit; else None."""
+    from voiceforge.core.metrics import get_cost_today
+    from voiceforge.i18n import t
+
+    cost_today = get_cost_today()
+    daily_limit = cfg.daily_budget_limit_usd or 0.0
+    if daily_limit <= 0 or cost_today < 0.8 * daily_limit:
+        return None
+    return t(
+        "feedback.budget_warning",
+        cost_today=f"${cost_today:.2f}",
+        limit=f"${daily_limit:.2f}",
+        estimate=f"${estimate_usd:.2f}",
+    )
+
+
 def _complete_structured_check_budget(cfg: Any) -> None:
     """Raise BudgetExceeded or log warning if near limit."""
     from voiceforge.core.metrics import get_cost_today

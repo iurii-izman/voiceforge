@@ -39,8 +39,8 @@ class ModelManager:
     def get_llm_model_id(self) -> str:
         return self._llm_model_id
 
-    def get_transcriber(self) -> Any:
-        """Return Transcriber for current STT model (lazy load). Reuse if same size."""
+    def get_transcriber(self, warnings: list[str] | None = None) -> Any:
+        """Return Transcriber for current STT model (lazy load). E4 (#127): optional warnings for download messages."""
         from voiceforge.stt.transcriber import Transcriber
 
         if self._transcriber is not None and getattr(self._transcriber, "_model_size", None) == self._stt_model_size:
@@ -49,6 +49,7 @@ class ModelManager:
             model_size=self._stt_model_size,
             compute_type="int8",
             device="cpu",
+            warnings=warnings,
         )
         return self._transcriber
 

@@ -103,5 +103,11 @@
   "calendar.poll_no_events": "Нет событий, начавшихся за последние {minutes} мин.",
   "calendar.poll_error": "Ошибка опроса календаря: {msg}",
   "calendar.poll_events": "События за последние {minutes} мин:",
-  "calendar.poll_line": "  • {summary} ({start_iso})"
+  "calendar.poll_line": "  • {summary} ({start_iso})",
+  "feedback.diarization_skipped_hf": "⚠ Метки спикеров недоступны: отсутствует токен HuggingFace. Решение: keyring set voiceforge huggingface",
+  "feedback.diarization_skipped_ram": "⚠ Метки спикеров недоступны: недостаточно RAM ({available_gb} ГБ < {required_gb} ГБ). Решение: keyring set voiceforge huggingface",
+  "feedback.rag_no_index": "ℹ База знаний не проиндексирована. Выполните: voiceforge index",
+  "feedback.model_downloading": "Модель {model_size} не в кэше, загрузка (~{size_mb} МБ)...",
+  "feedback.model_ready": "Модель загружена.",
+  "feedback.budget_warning": "⚠ Дневной бюджет: {cost_today}/{limit} использовано. Этот анализ ~{estimate}."
 }

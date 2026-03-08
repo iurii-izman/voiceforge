@@ -5,7 +5,7 @@ from __future__ import annotations
 import threading
 import time
 from concurrent.futures import Future, ThreadPoolExecutor, wait
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -49,13 +49,15 @@ def _resample_to_16k(audio: np.ndarray, from_rate: int) -> np.ndarray:
 
 @dataclass
 class PipelineResult:
-    """Result of steps 1–2 (STT + parallel diarization, RAG, PII). Step 3 (LLM) in main."""
+    """Result of steps 1–2 (STT + parallel diarization, RAG, PII). Step 3 (LLM) in main.
+    E4 (#127): warnings — user-facing messages for diarization skip, RAG empty, etc."""
 
     segments: list[Any]  # Transcriber.Segment
     transcript: str
     diar_segments: list[Any]
     context: str
     transcript_redacted: str | None  # None = use redact(transcript) in router
+    warnings: list[str] = field(default_factory=list)  # E4 (#127): diarization skip, RAG empty, etc.
 
 
 def _step1_stt(
@@ -64,8 +66,9 @@ def _step1_stt(
     model_size: str,
     language_hint: str | None = None,
     cfg: Any = None,
+    out_warnings: list[str] | None = None,
 ) -> tuple[list[Any], str]:
-    """Step 1: STT only. Returns (segments, transcript). stt_backend=openai uses Whisper API (#93)."""
+    """Step 1: STT only. Returns (segments, transcript). E4 (#127): optional out_warnings for model download messages."""
     from voiceforge.core.model_manager import get_model_manager
     from voiceforge.stt.transcriber import Transcriber
 
@@ -79,9 +82,9 @@ def _step1_stt(
     else:
         manager = get_model_manager()
         if manager is not None:
-            transcriber = manager.get_transcriber()
+            transcriber = manager.get_transcriber(warnings=out_warnings)
         else:
-            transcriber = Transcriber(model_size=model_size)
+            transcriber = Transcriber(model_size=model_size, warnings=out_warnings)
     segments = transcriber.transcribe(audio, sample_rate=sample_rate, language=language_hint)
     transcript = " ".join(s.text for s in segments if s.text).strip() or t("pipeline.silence")
     duration_sec = time.monotonic() - t0
@@ -120,10 +123,11 @@ def _step2_diarization(
     audio_f: np.ndarray,
     sample_rate: int,
     pyannote_restart_hours: int,
-) -> list[Any]:
-    """Diarization (pyannote). Runs in thread. Skips if available RAM < 2GB (#37). Reuses cached Diarizer (#100)."""
+) -> tuple[list[Any], list[str]]:
+    """Diarization (pyannote). Returns (segments, warnings). E4 (#127): user-facing skip reason."""
     t0 = time.monotonic()
     out: list[Any] = []
+    warnings: list[str] = []
     try:
         vm = psutil.virtual_memory()
         if vm.available < MIN_AVAILABLE_FOR_DIARIZATION_BYTES:
@@ -132,9 +136,10 @@ def _step2_diarization(
                 available_mb=round(vm.available / 1024**2, 1),
                 threshold_mb=MIN_AVAILABLE_FOR_DIARIZATION_BYTES // (1024**2),
             )
+            warnings.append(t("feedback.diarization_skipped_ram", available_gb=round(vm.available / 1024**3, 1), required_gb=2))
             duration_sec = time.monotonic() - t0
             log.info("pipeline.step2_diarization", count=0, duration_sec=round(duration_sec, 2))
-            return out
+            return (out, warnings)
         try:
             import keyring as _keyring
 
@@ -142,17 +147,20 @@ def _step2_diarization(
         except Exception:
             auth_token = ""  # nosec B105 -- fallback when keyring unavailable, not a password
         if not auth_token:
-            return out
+            warnings.append(t("feedback.diarization_skipped_hf"))
+            duration_sec = time.monotonic() - t0
+            log.info("pipeline.step2_diarization", count=0, duration_sec=round(duration_sec, 2))
+            return (out, warnings)
         diarizer = _get_cached_diarizer(auth_token, pyannote_restart_hours)
         try:
             out = diarizer.diarize(audio_f, sample_rate=sample_rate)
         except MemoryError as e:
             log.warning("pipeline.diarization.oom", error=str(e))
-            out = []
+            warnings.append(t("feedback.diarization_skipped_ram", available_gb=0, required_gb=2))
         except RuntimeError as e:
             if "out of memory" in str(e).lower():
                 log.warning("pipeline.diarization.oom", error=str(e))
-                out = []
+                warnings.append(t("feedback.diarization_skipped_ram", available_gb=0, required_gb=2))
             else:
                 raise
     except ImportError:
@@ -167,7 +175,7 @@ def _step2_diarization(
         record_diarization_duration(duration_sec)
     except ImportError:
         pass
-    return out
+    return (out, warnings)
 
 
 def _rag_merge_results(queries: list[str], searcher: Any) -> str:
@@ -183,21 +191,28 @@ def _rag_merge_results(queries: list[str], searcher: Any) -> str:
     return "\n".join(r.content[:300] for r in merged)
 
 
-def _step2_rag(transcript: str, rag_db_path: str) -> str:
-    """RAG search. Runs in thread. C2 (#42): multi-query from transcript segments, merge and dedupe. Reuses cached HybridSearcher (#100)."""
+def _step2_rag(transcript: str, rag_db_path: str) -> tuple[str, list[str]]:
+    """RAG search. Returns (context, warnings). E4 (#127): warn when no DB or 0 results."""
     t0 = time.monotonic()
     context = ""
+    warnings: list[str] = []
     try:
-        if Path(rag_db_path).is_file():
-            from voiceforge.rag.query_keywords import extract_keyword_queries
+        if not Path(rag_db_path).is_file():
+            warnings.append(t("feedback.rag_no_index"))
+            duration_sec = time.monotonic() - t0
+            log.info("pipeline.step2_rag", context_len=0, duration_sec=round(duration_sec, 2))
+            return (context, warnings)
+        from voiceforge.rag.query_keywords import extract_keyword_queries
 
-            queries = extract_keyword_queries(transcript)
-            if not queries:
-                queries = [transcript[:RAG_QUERY_MAX_CHARS] or "meeting"]
-            searcher = _get_cached_searcher(rag_db_path)
-            context = _rag_merge_results(queries, searcher)
+        queries = extract_keyword_queries(transcript)
+        if not queries:
+            queries = [transcript[:RAG_QUERY_MAX_CHARS] or "meeting"]
+        searcher = _get_cached_searcher(rag_db_path)
+        context = _rag_merge_results(queries, searcher)
+        if not context.strip():
+            warnings.append(t("feedback.rag_no_index"))
     except ImportError:
-        pass
+        warnings.append(t("feedback.rag_no_index"))
     except Exception as e:
         log.warning("pipeline.rag.failed", error=str(e))
     duration_sec = time.monotonic() - t0
@@ -208,7 +223,7 @@ def _step2_rag(transcript: str, rag_db_path: str) -> str:
         record_rag_duration(duration_sec)
     except ImportError:
         pass
-    return context
+    return (context, warnings)
 
 
 def _get_language_hint(cfg: Any) -> str | None:
@@ -255,12 +270,22 @@ def _prepare_audio(cfg: Any, seconds: int) -> tuple[np.ndarray, int] | tuple[Non
     return (audio, effective_rate)
 
 
-def _step1_or_error(audio: np.ndarray, effective_rate: int, cfg: Any) -> tuple[list[Any], str] | tuple[None, str]:
-    """Run STT; return (segments, transcript) or (None, error_str)."""
+def _step1_or_error(
+    audio: np.ndarray,
+    effective_rate: int,
+    cfg: Any,
+    out_warnings: list[str] | None = None,
+) -> tuple[list[Any], str] | tuple[None, str]:
+    """Run STT; return (segments, transcript) or (None, error_str). E4: out_warnings for model download messages."""
     language_hint = _get_language_hint(cfg)
     try:
         segments, transcript = _step1_stt(
-            audio, sample_rate=effective_rate, model_size=cfg.model_size, language_hint=language_hint, cfg=cfg
+            audio,
+            sample_rate=effective_rate,
+            model_size=cfg.model_size,
+            language_hint=language_hint,
+            cfg=cfg,
+            out_warnings=out_warnings,
         )
         return (segments, transcript)
     except ImportError:
@@ -288,8 +313,8 @@ def _gather_step2(
     audio_f: np.ndarray,
     transcript: str,
     effective_rate: int,
-) -> tuple[list[Any], str, str]:
-    """Run step2 parallel tasks; return (diar_segments, context, transcript_redacted)."""
+) -> tuple[list[Any], str, str, list[str]]:
+    """Run step2 parallel tasks; return (diar_segments, context, transcript_redacted, warnings)."""
     timeout_sec = max(1.0, float(getattr(cfg, "pipeline_step2_timeout_sec", 25.0)))
     futures: dict[str, Future[Any]] = {
         "diarization": executor.submit(_step2_diarization, audio_f, effective_rate, cfg.pyannote_restart_hours),
@@ -302,10 +327,15 @@ def _gather_step2(
         futures[name].cancel()
     if timed_out:
         log.warning("pipeline.step2_timeout", timeout_sec=timeout_sec, timed_out=timed_out)
-    diar_segments = futures["diarization"].result() if futures["diarization"] in done else []
-    context = futures["rag"].result() if futures["rag"] in done else ""
+    diar_res = futures["diarization"].result() if futures["diarization"] in done else ([], [])
+    rag_res = futures["rag"].result() if futures["rag"] in done else ("", [])
     transcript_redacted = futures["pii"].result() if futures["pii"] in done else transcript
-    return (diar_segments, context, transcript_redacted)
+    diar_segments = diar_res[0] if isinstance(diar_res, tuple) else diar_res
+    diar_warnings = diar_res[1] if isinstance(diar_res, tuple) and len(diar_res) > 1 else []
+    context = rag_res[0] if isinstance(rag_res, tuple) else rag_res
+    rag_warnings = rag_res[1] if isinstance(rag_res, tuple) and len(rag_res) > 1 else []
+    warnings: list[str] = list(diar_warnings) + list(rag_warnings)
+    return (diar_segments, context, transcript_redacted, warnings)
 
 
 def _with_calendar_context(context: str, cfg: Any) -> str:
@@ -349,15 +379,16 @@ class AnalysisPipeline:
             if prep[0] is None:
                 return (None, prep[1])
             audio, effective_rate = prep
+            step1_warnings: list[str] = []
             with span("pipeline.step1_stt"):
-                stt_result = _step1_or_error(audio, effective_rate, self._cfg)
+                stt_result = _step1_or_error(audio, effective_rate, self._cfg, out_warnings=step1_warnings)
             if stt_result[0] is None:
                 return (None, stt_result[1])
             segments, transcript = stt_result
             step2_start = time.monotonic()
             audio_f = audio.astype(np.float32) / 32768.0
             with span("pipeline.step2_parallel"):
-                diar_segments, context, transcript_redacted = _gather_step2(
+                diar_segments, context, transcript_redacted, step2_warnings = _gather_step2(
                     self._executor, self._cfg, audio_f, transcript, effective_rate
                 )
             step2_duration = time.monotonic() - step2_start
@@ -369,6 +400,7 @@ class AnalysisPipeline:
             except ImportError:
                 pass
             context = _with_calendar_context(context, self._cfg)
+            all_warnings = step1_warnings + step2_warnings
             return (
                 PipelineResult(
                     segments=segments,
@@ -376,6 +408,7 @@ class AnalysisPipeline:
                     diar_segments=diar_segments,
                     context=context,
                     transcript_redacted=transcript_redacted,
+                    warnings=all_warnings,
                 ),
                 None,
             )
