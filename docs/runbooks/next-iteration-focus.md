@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-08 (rag/watcher coverage batch completed, next ROI shifts to daemon)
+**Обновлено:** 2026-03-08 (daemon helper/smoke batch #109 completed)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** завершён следующий P1 coverage batch по [#99](https://github.com/iurii-izman/voiceforge/issues/99) без смешивания surfaces: отдельный subsystem `src/voiceforge/rag/watcher.py` выведен из blind spot. Добавлен узкий CLI helper `src/voiceforge/cli/watch_helpers.py`, а `watch` в `main.py` теперь использует helper для banner/signal contract вместо inline-обвязки. `src/voiceforge/rag/watcher.py` разбит на тестируемые helper-paths вокруг debounce/hash/indexing/stop semantics (`WatchIndexResult`, `_normalize_pdf_path`, testable `_on_pdf_event(..., now=...)`, `_process_pending(..., now=...)`, `pending_count()`). Добавлен новый suite `tests/test_rag_watcher.py`; существующий smoke `tests/test_cli_e2e_smoke.py` переиспользован как соседняя CLI проверка, а `tests/test_cli_helpers_contracts.py` расширен на watch banner/signal handlers. Targeted verify зелёный: `uv run pytest tests/test_rag_watcher.py tests/test_cli_helpers_contracts.py tests/test_cli_e2e_smoke.py -q --tb=line` → `30 passed`; `uv run ruff check src/voiceforge/rag/watcher.py src/voiceforge/cli/watch_helpers.py src/voiceforge/main.py tests/test_rag_watcher.py tests/test_cli_helpers_contracts.py` → `All checks passed`. Честная policy-проверка с временно снятым `omit` для `voiceforge.rag.watcher` дала `91%`, поэтому `src/voiceforge/rag/watcher.py` удалён из `tool.coverage.run.omit`; `docs/runbooks/release-and-quality.md` и `docs/audit/audit.md` синхронизированы.
+**Сделано в сессии:** выполнен coverage-driven batch по [#109](https://github.com/iurii-izman/voiceforge/issues/109) (Testing & QA) для `src/voiceforge/core/daemon.py`. Добавлен suite `tests/test_daemon_helpers.py`: хелперы `_streaming_language_hint`, `_pid_path`, `_event_start_in_window`; методы daemon get_settings, get_streaming_transcript, get_api_version, get_capabilities, status, get_sessions, get_session_detail, get_indexed_paths, search_rag (empty query), get_analytics с моками; `_retention_purge_at_startup`, `_wire_daemon_iface`. Переиспользованы паттерны из test_dbus_service, test_dbus_contract_snapshot, test_coverage_hotspots_batch99. Targeted verify: `uv run pytest tests/test_daemon_helpers.py tests/test_dbus_service.py tests/test_dbus_contract_snapshot.py tests/test_coverage_hotspots_batch99.py -q --tb=line` → 85 passed. Покрытие `voiceforge.core.daemon` при этом subset — ~29%; pyproject.toml не меняли (честный процент для вывода из hotspot пока не достигнут). Обновлён `docs/runbooks/release-and-quality.md`. Карточка #109 переведена в Done.
 
-**Следующий шаг:** Переключиться на следующий isolated ROI-candidate из текущего `omit`: `src/voiceforge/core/daemon.py`. Не возвращаться к `main.py` или RAG в той же итерации. Цель: взять дешёвый helper/smoke batch вокруг `analyze/listen/status/settings` или retention/backup-adjacent paths в `daemon.py`, переиспользуя уже существующие daemon/dbus tests (`tests/test_dbus_service.py`, `tests/test_dbus_contract_snapshot.py`, `tests/test_coverage_hotspots_batch99.py`) и добавить только узкие unit helpers там, где это реально снижает blind spot; после этого локально проверить coverage с временно снятым `omit` именно для `core/daemon.py` и править `pyproject.toml` только при честном проценте.
+**Следующий шаг:** Взять следующий practical queue из follow-up блоков на доске (#104–#113): либо продолжение coverage для daemon (listen/analyze paths или второй batch), либо следующий ROI — `llm/router.py` (helper-level tests без тяжёлого LLM loop), либо другой P1 из PROJECT-STATUS-SUMMARY (Sonar S3776, security/docs). Не смешивать с main.py, RAG, release/docs в одной итерации. Targeted subset для проверки: те же daemon/dbus тесты плюс новый subset под выбранный модуль.
 
 ---
 
