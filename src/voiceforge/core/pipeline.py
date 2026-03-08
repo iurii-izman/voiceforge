@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import threading
 import time
 from concurrent.futures import Future, ThreadPoolExecutor, wait
 from dataclasses import dataclass
@@ -22,6 +23,12 @@ MIN_AVAILABLE_FOR_DIARIZATION_BYTES = 2 * 1024**3
 
 TARGET_SAMPLE_RATE = 16000  # faster-whisper expects 16 kHz
 RAG_QUERY_MAX_CHARS = 1000  # W3: max transcript prefix for RAG search (was 200)
+
+# Process-scoped caches for Diarizer and HybridSearcher (#100: reuse lifecycle, less warmup/jitter)
+_diarizer_cache: dict[tuple[str, int], Any] = {}
+_diarizer_cache_lock = threading.Lock()
+_searcher_cache: dict[str, Any] = {}
+_searcher_cache_lock = threading.Lock()
 
 
 def _resample_to_16k(audio: np.ndarray, from_rate: int) -> np.ndarray:
@@ -88,12 +95,33 @@ def _step1_stt(
     return (segments, transcript)
 
 
+def _get_cached_diarizer(auth_token: str, restart_hours: int) -> Any:
+    """Return process-scoped Diarizer for (auth_token, restart_hours). #100."""
+    key = (auth_token, restart_hours)
+    with _diarizer_cache_lock:
+        if key not in _diarizer_cache:
+            from voiceforge.stt.diarizer import Diarizer
+
+            _diarizer_cache[key] = Diarizer(auth_token=auth_token, restart_hours=restart_hours)
+        return _diarizer_cache[key]
+
+
+def _get_cached_searcher(rag_db_path: str) -> Any:
+    """Return process-scoped HybridSearcher for rag_db_path. Caller must not close. #100."""
+    with _searcher_cache_lock:
+        if rag_db_path not in _searcher_cache:
+            from voiceforge.rag.searcher import HybridSearcher
+
+            _searcher_cache[rag_db_path] = HybridSearcher(rag_db_path)
+        return _searcher_cache[rag_db_path]
+
+
 def _step2_diarization(
     audio_f: np.ndarray,
     sample_rate: int,
     pyannote_restart_hours: int,
 ) -> list[Any]:
-    """Diarization (pyannote). Runs in thread. Skips if available RAM < 2GB (#37)."""
+    """Diarization (pyannote). Runs in thread. Skips if available RAM < 2GB (#37). Reuses cached Diarizer (#100)."""
     t0 = time.monotonic()
     out: list[Any] = []
     try:
@@ -115,9 +143,7 @@ def _step2_diarization(
             auth_token = ""  # nosec B105 -- fallback when keyring unavailable, not a password
         if not auth_token:
             return out
-        from voiceforge.stt.diarizer import Diarizer
-
-        diarizer = Diarizer(auth_token=auth_token, restart_hours=pyannote_restart_hours)
+        diarizer = _get_cached_diarizer(auth_token, pyannote_restart_hours)
         try:
             out = diarizer.diarize(audio_f, sample_rate=sample_rate)
         except MemoryError as e:
@@ -158,20 +184,18 @@ def _rag_merge_results(queries: list[str], searcher: Any) -> str:
 
 
 def _step2_rag(transcript: str, rag_db_path: str) -> str:
-    """RAG search. Runs in thread. C2 (#42): multi-query from transcript segments, merge and dedupe."""
+    """RAG search. Runs in thread. C2 (#42): multi-query from transcript segments, merge and dedupe. Reuses cached HybridSearcher (#100)."""
     t0 = time.monotonic()
     context = ""
     try:
         if Path(rag_db_path).is_file():
             from voiceforge.rag.query_keywords import extract_keyword_queries
-            from voiceforge.rag.searcher import HybridSearcher
 
             queries = extract_keyword_queries(transcript)
             if not queries:
                 queries = [transcript[:RAG_QUERY_MAX_CHARS] or "meeting"]
-            searcher = HybridSearcher(rag_db_path)
+            searcher = _get_cached_searcher(rag_db_path)
             context = _rag_merge_results(queries, searcher)
-            searcher.close()
     except ImportError:
         pass
     except Exception as e:
@@ -338,6 +362,12 @@ class AnalysisPipeline:
                 )
             step2_duration = time.monotonic() - step2_start
             log.info("pipeline.step2_total", duration_sec=round(step2_duration, 2))
+            try:
+                from voiceforge.core.observability import record_pipeline_step2_total
+
+                record_pipeline_step2_total(step2_duration)
+            except ImportError:
+                pass
             context = _with_calendar_context(context, self._cfg)
             return (
                 PipelineResult(

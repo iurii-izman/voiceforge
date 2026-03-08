@@ -84,6 +84,10 @@ class Settings(BaseSettings):
         description="Daily LLM budget USD; default budget_limit_usd/30 (#38).",
     )
     ring_seconds: float = Field(default=300.0, description="Ring buffer length seconds")
+    ring_persist_interval_sec: float = Field(
+        default=10.0,
+        description="Interval (seconds) between full ring file writes in listen loop; reduces I/O (#100).",
+    )
     ring_file_path: str | None = Field(
         default=None,
         description="Ring file path; default XDG_RUNTIME_DIR/voiceforge/ring.raw",
@@ -232,6 +236,13 @@ class Settings(BaseSettings):
     def _ring_seconds_positive(cls, v: float) -> float:
         if v <= 0:
             raise ValueError("ring_seconds must be positive")
+        return v
+
+    @field_validator("ring_persist_interval_sec")
+    @classmethod
+    def _ring_persist_interval_positive(cls, v: float) -> float:
+        if v < 1.0:
+            raise ValueError("ring_persist_interval_sec must be >= 1")
         return v
 
     @field_validator("pyannote_restart_hours")

@@ -13,6 +13,7 @@ from voiceforge.core.pipeline import (
     TARGET_SAMPLE_RATE,
     AnalysisPipeline,
     PipelineResult,
+    _get_cached_searcher,
     _get_language_hint,
     _prepare_audio,
     _rag_merge_results,
@@ -103,6 +104,14 @@ def test_resample_to_16k_resamples_when_scipy_available() -> None:
     assert out is not None
     assert out.dtype == np.int16
     assert len(out) == 16000
+
+
+def test_get_cached_searcher_returns_same_instance(tmp_path: Path) -> None:
+    """_get_cached_searcher returns same process-scoped instance for same path (#100)."""
+    path = str(tmp_path / "rag.db")
+    s1 = _get_cached_searcher(path)
+    s2 = _get_cached_searcher(path)
+    assert s1 is s2
 
 
 def test_get_language_hint_auto_returns_none() -> None:

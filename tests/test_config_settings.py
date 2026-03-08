@@ -119,3 +119,15 @@ def test_config_rag_db_path_explicit(monkeypatch, tmp_path) -> None:
     monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path))
     cfg = Settings(rag_db_path="/custom/rag.db")
     assert cfg.get_rag_db_path() == "/custom/rag.db"
+
+
+def test_settings_ring_persist_interval_default_and_validation() -> None:
+    """ring_persist_interval_sec defaults to 10.0 and must be >= 1 (#100)."""
+    from voiceforge.core.config import Settings
+
+    cfg = Settings()
+    assert cfg.ring_persist_interval_sec == pytest.approx(10.0)
+    with pytest.raises(ValueError, match="ring_persist_interval_sec must be >= 1"):
+        Settings(ring_persist_interval_sec=0.5)
+    cfg_custom = Settings(ring_persist_interval_sec=15.0)
+    assert cfg_custom.ring_persist_interval_sec == pytest.approx(15.0)

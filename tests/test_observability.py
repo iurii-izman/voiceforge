@@ -18,6 +18,11 @@ def test_record_rag_duration() -> None:
     observability.record_rag_duration(0.1)
 
 
+def test_record_pipeline_step2_total() -> None:
+    """record_pipeline_step2_total records step2 duration (#100 stage-level metric)."""
+    observability.record_pipeline_step2_total(3.5)
+
+
 def test_record_pipeline_error() -> None:
     observability.record_pipeline_error("stt")
     observability.record_pipeline_error("rag")

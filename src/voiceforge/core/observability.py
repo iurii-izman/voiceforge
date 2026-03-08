@@ -20,6 +20,11 @@ rag_query_duration_seconds = Histogram(
     "RAG search duration",
     buckets=(0.01, 0.05, 0.1, 0.25, 0.5, 1.0),
 )
+pipeline_step2_total_seconds = Histogram(
+    "voiceforge_pipeline_step2_total_seconds",
+    "Step2 parallel (diarization + RAG + PII) total duration (#100 stage-level metric)",
+    buckets=(0.5, 1.0, 2.0, 5.0, 10.0, 25.0, 60.0),
+)
 
 # Counters
 llm_cost_usd_total = Counter(
@@ -60,6 +65,11 @@ def record_diarization_duration(seconds: float) -> None:
 
 def record_rag_duration(seconds: float) -> None:
     rag_query_duration_seconds.observe(seconds)
+
+
+def record_pipeline_step2_total(seconds: float) -> None:
+    """Record step2 (diarization + RAG + PII) total duration. #100."""
+    pipeline_step2_total_seconds.observe(seconds)
 
 
 def record_pipeline_error(step: str) -> None:

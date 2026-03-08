@@ -20,6 +20,7 @@ Priority order:
 | `budget_limit_usd` | `VOICEFORGE_BUDGET_LIMIT_USD` | `75.0` | Monthly API budget |
 | `daily_budget_limit_usd` | `VOICEFORGE_DAILY_BUDGET_LIMIT_USD` | `budget_limit_usd/30` | Daily LLM budget; pre-call enforcement (#38) |
 | `ring_seconds` | `VOICEFORGE_RING_SECONDS` | `300.0` | Ring buffer duration |
+| `ring_persist_interval_sec` | `VOICEFORGE_RING_PERSIST_INTERVAL_SEC` | `10.0` | Interval (s) between full ring file writes in listen loop; reduces I/O (#100) |
 | `ring_file_path` | `VOICEFORGE_RING_FILE_PATH` | auto (`XDG_RUNTIME_DIR`/`~/.cache`) | Ring PCM path |
 | `rag_db_path` | `VOICEFORGE_RAG_DB_PATH` | auto (`XDG_DATA_HOME`/`~/.local/share`) | RAG SQLite path |
 | `smart_trigger` | `VOICEFORGE_SMART_TRIGGER` | `false` | Auto-analyze mode. **Default policy (roadmap 15):** remains `false` until user feedback on false positives; when enabling by default, update default here and in config source, and note in release. |
@@ -45,7 +46,7 @@ Priority order:
 | `VOICEFORGE_OTEL_ENABLED` | unset | Set to `1` to enable OTel tracing (requires `voiceforge[otel]`). Spans: pipeline.run, prepare_audio, step1_stt, step2_parallel. |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | `http://localhost:4318` | OTLP HTTP endpoint (e.g. Jaeger collector). When set, OTel is enabled even without VOICEFORGE_OTEL_ENABLED. |
 
-**Validation:** Settings validates `model_size` (allowed: tiny, base, small, medium, large-v2, large-v3, large), `sample_rate` (1..192000), `default_llm` (non-empty), `budget_limit_usd` (≥ 0), `daily_budget_limit_usd` (≥ 0 when set), `pipeline_step2_timeout_sec` (positive), `analyze_timeout_sec` (positive), `ollama_model` (non-empty), `ring_seconds` (positive), `pyannote_restart_hours` (≥ 1), `live_summary_interval_sec` (≥ 1), `retention_days` (≥ 0), `response_cache_ttl_seconds` (≥ 0). Invalid values raise at load.
+**Validation:** Settings validates `model_size` (allowed: tiny, base, small, medium, large-v2, large-v3, large), `sample_rate` (1..192000), `default_llm` (non-empty), `budget_limit_usd` (≥ 0), `daily_budget_limit_usd` (≥ 0 when set), `pipeline_step2_timeout_sec` (positive), `analyze_timeout_sec` (positive), `ollama_model` (non-empty), `ring_seconds` (positive), `ring_persist_interval_sec` (≥ 1), `pyannote_restart_hours` (≥ 1), `live_summary_interval_sec` (≥ 1), `retention_days` (≥ 0), `response_cache_ttl_seconds` (≥ 0). Invalid values raise at load.
 
 ## Runtime / Non-Settings Environment
 

@@ -12,6 +12,7 @@ import os
 import queue
 import signal
 import threading
+import time
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FuturesTimeoutError
@@ -355,33 +356,30 @@ class VoiceForgeDaemon:
             return "[]"
 
     def search_rag(self, query: str, top_k: int = 10) -> str:
-        """Return JSON array of RAG search hits: chunk_id, content, source, page, chunk_index, timestamp, score (block 75)."""
+        """Return JSON array of RAG search hits: chunk_id, content, source, page, chunk_index, timestamp, score (block 75). Uses cached HybridSearcher (#100)."""
         if not query or not query.strip():
             return "[]"
         try:
-            from voiceforge.rag.searcher import HybridSearcher
+            from voiceforge.core.pipeline import _get_cached_searcher
 
             db_path = self._cfg.get_rag_db_path()
             if not Path(db_path).is_file():
                 return "[]"
-            searcher = HybridSearcher(db_path)
-            try:
-                results = searcher.search(query.strip(), top_k=min(top_k, 25))
-                out = [
-                    {
-                        "chunk_id": r.chunk_id,
-                        "content": r.content,
-                        "source": r.source,
-                        "page": r.page,
-                        "chunk_index": r.chunk_index,
-                        "timestamp": r.timestamp,
-                        "score": round(r.score, 6),
-                    }
-                    for r in results
-                ]
-                return json.dumps(out, ensure_ascii=False)
-            finally:
-                searcher.close()
+            searcher = _get_cached_searcher(db_path)
+            results = searcher.search(query.strip(), top_k=min(top_k, 25))
+            out = [
+                {
+                    "chunk_id": r.chunk_id,
+                    "content": r.content,
+                    "source": r.source,
+                    "page": r.page,
+                    "chunk_index": r.chunk_index,
+                    "timestamp": r.timestamp,
+                    "score": round(r.score, 6),
+                }
+                for r in results
+            ]
+            return json.dumps(out, ensure_ascii=False)
         except Exception as e:
             log.warning("daemon.search_rag_failed", error=str(e))
             return "[]"
@@ -598,14 +596,19 @@ class VoiceForgeDaemon:
             self._streaming_capture = capture
             self._streaming_thread = threading.Thread(target=self._streaming_loop, daemon=True)
             self._streaming_thread.start()
+        persist_interval = max(1.0, getattr(self._cfg, "ring_persist_interval_sec", 10.0))
+        last_persist_at: float = 0.0
         try:
             while not self._listen_stop.wait(timeout=2.0):
                 mic, _ = capture.get_chunk(self._cfg.ring_seconds)
                 if mic.size > 0:
-                    ring = Path(ring_path)
-                    tmp = ring.with_suffix(".tmp")
-                    tmp.write_bytes(mic.tobytes())
-                    os.replace(tmp, ring)
+                    now = time.monotonic()
+                    if now - last_persist_at >= persist_interval:
+                        ring = Path(ring_path)
+                        tmp = ring.with_suffix(".tmp")
+                        tmp.write_bytes(mic.tobytes())
+                        os.replace(tmp, ring)
+                        last_persist_at = now
         finally:
             # Stop streaming thread before capture so it doesn't call get_chunk on stopped device
             if self._streaming_thread:

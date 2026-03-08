@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-08 (#99 coverage ≥60%, server.py выведен из omit)
+**Обновлено:** 2026-03-08 (#100 performance debt закрыт)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** [#99](https://github.com/iurii-izman/voiceforge/issues/99) закрыт: full coverage поднят до **61.37%** (≥60%), **server.py выведен из omit**. Добавлены 6 тестов для **router** в `test_coverage_hotspots_batch99.py`: _is_claude_model, _template_schema, _content_from_llm_response, _usage_and_cost_from_response, _system_prompt fallback, _template_prompts fallback. router 25%→34%. В pyproject.toml: server.py убран из omit, fail_under=60. Обновлены [release-and-quality.md](release-and-quality.md), [audit/audit.md](../audit/audit.md). Verify: `uv run pytest tests/ -q -m "not integration" --cov=src/voiceforge --cov-report=term --cov-fail-under=60`.
+**Сделано в сессии:** [#100](https://github.com/iurii-izman/voiceforge/issues/100) закрыт: убран performance debt — (1) Diarizer и HybridSearcher переиспользуются на уровне процесса (кэш в pipeline); (2) daemon.search_rag использует кэшированный searcher; (3) ring buffer пишется не каждые 2 с, а по интервалу `ring_persist_interval_sec` (по умолчанию 10 с); (4) добавлена метрика `voiceforge_pipeline_step2_total_seconds`. Конфиг: `ring_persist_interval_sec` (≥1), доки config-env-contract, тесты (cache, config, observability). Карточка #100 переведена в Done.
 
-**Следующий шаг:** Поднять coverage к 75% (router/daemon/server_async/main helpers) и fail_under к 75. Либо по доске взять **#100** (performance debt). Verify: полный coverage — `uv run pytest tests/ -q -m "not integration" --cov=src/voiceforge --cov-report=term`.
+**Следующий шаг:** Поднять coverage к 75% (router/daemon/server_async/main helpers) и fail_under к 75. Либо по доске взять **#101** (packaging/updater). Verify: `uv run pytest tests/ -q -m "not integration" --cov=src/voiceforge --cov-report=term`.
 
 ---
 
