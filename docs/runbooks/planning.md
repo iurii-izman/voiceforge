@@ -6,7 +6,7 @@
 
 ## Единый источник текущих задач
 
-- **Канбан и приоритеты:** [GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1).
+- **Канбан и приоритеты:** [GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1), рабочее представление для итераций: [View 1](https://github.com/users/iurii-izman/projects/1/views/1).
 - **Единый бэклог (ваши решения и ручные шаги):** [backlog-and-actions.md](../plans/backlog-and-actions.md) — блоки A–E; issues #82–86 на доске.
 - **Задачи Phase A–D (issues #55–73):** [audit/audit.md](../audit/audit.md) — статус W1–W20, маппинг на issues.
 - **Следующий шаг и фокус итерации:** [next-iteration-focus.md](next-iteration-focus.md) — обновляет агент в конце сессии.
@@ -49,7 +49,7 @@ gh auth refresh -s project
 
 После этого агент может: создавать issue, добавлять в проект (`gh project item-add`), переводить карточку в другую колонку (`gh project item-edit` с полем Status). Примеры: «создай issue на CalDAV и добавь в проект», «перенеси #17 в Done».
 
-**Текущий проект:** [GitHub Project #1](https://github.com/users/iurii-izman/projects/1) — колонки Status: Todo, In Progress, Done. Задачи: issues #55–73 (audit map), #82–86 (бэклог A–E). Поля: Phase, Priority, Effort, Area — для визуализации и фильтрации.
+**Текущий проект:** [GitHub Project #1](https://github.com/users/iurii-izman/projects/1) — колонки Status: Todo, In Progress, Done. Рабочий вид: [View 1](https://github.com/users/iurii-izman/projects/1/views/1). Задачи: issues #55–73 (audit map), #82–86 (бэклог A–E), #96–101 (deep audit 2026-03-08: tracking + critical path batches). Поля: Phase, Priority, Effort, Area — для визуализации и фильтрации.
 
 **Обновление доски (обязательно для агента):**
 - При старте работы по issue — перевести карточку в **In Progress**.

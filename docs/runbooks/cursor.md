@@ -80,11 +80,11 @@
 **Готовый prompt для max autopilot:**
 
 ```text
-Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Режим Cursor и batching: @docs/runbooks/cursor.md. При работе по issues и GitHub Project: @docs/runbooks/planning.md. Сводный статус и приоритеты: @docs/runbooks/PROJECT-STATUS-SUMMARY.md.
+Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Режим Cursor и batching: @docs/runbooks/cursor.md. При работе по issues и GitHub Project: @docs/runbooks/planning.md. Сводный статус и приоритеты: @docs/runbooks/PROJECT-STATUS-SUMMARY.md. Рабочая доска: https://github.com/users/iurii-izman/projects/1/views/1
 
 Режим: максимальный автопилот и максимум согласованных блоков за итерацию. Выбирай 1 главный P0/P1 блок и до 2 соседних подблоков только если это тот же subsystem, те же файлы или те же проверки. Не смешивай unrelated surfaces. Делай полный цикл: код, targeted tests, docs/контракты, GitHub Project status, commit/push, обновление next-iteration-focus.
 
-Источники правды по порядку: agent-context, next-iteration-focus, PROJECT-STATUS-SUMMARY, planning, plans, audit. Если есть доступ к GitHub Project, при старте переводи карточку в In Progress, при `Closes #N` — в Done. Не спрашивай пользователя, если ответ можно получить из кода/доков/board/keyring.
+Источники правды по порядку: agent-context, next-iteration-focus, PROJECT-STATUS-SUMMARY, planning, plans, audit. При старте сверяйся с board view и бери верхний coherent `Todo` batch из audit-issues: #97, затем #98, #99, #100, #101. При начале работы переводи карточку в In Progress, при `Closes #N` — в Done. Не спрашивай пользователя, если ответ можно получить из кода/доков/board/keyring.
 
 Среда: Fedora Atomic/toolbox/uv. Базово `uv sync --extra all`; при необходимости подключай профильные extras. Полный `pytest tests/` не запускать по умолчанию из-за OOM-risk; использовать safe subsets из next-iteration-focus и запускать ровно те проверки, которые подтверждают текущий batch.
 
