@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-08 (daemon helper/smoke batch #109 completed)
+**Обновлено:** 2026-03-08 (closed #107, #108, #113; router, web contract, docs sweep)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** выполнен coverage-driven batch по [#109](https://github.com/iurii-izman/voiceforge/issues/109) (Testing & QA) для `src/voiceforge/core/daemon.py`. Добавлен suite `tests/test_daemon_helpers.py`: хелперы `_streaming_language_hint`, `_pid_path`, `_event_start_in_window`; методы daemon get_settings, get_streaming_transcript, get_api_version, get_capabilities, status, get_sessions, get_session_detail, get_indexed_paths, search_rag (empty query), get_analytics с моками; `_retention_purge_at_startup`, `_wire_daemon_iface`. Переиспользованы паттерны из test_dbus_service, test_dbus_contract_snapshot, test_coverage_hotspots_batch99. Targeted verify: `uv run pytest tests/test_daemon_helpers.py tests/test_dbus_service.py tests/test_dbus_contract_snapshot.py tests/test_coverage_hotspots_batch99.py -q --tb=line` → 85 passed. Покрытие `voiceforge.core.daemon` при этом subset — ~29%; pyproject.toml не меняли (честный процент для вывода из hotspot пока не достигнут). Обновлён `docs/runbooks/release-and-quality.md`. Карточка #109 переведена в Done.
+**Сделано в сессии:** закрыты три задачи с подтверждённым кодом/тестами/доками. **#107** (router coverage): расширен test_coverage_hotspots_batch99 — _live_summary_system/_status_update_system fallback, _try_ollama_faq при is_available False, _complete_structured_check_budget (BudgetExceeded), _complete_structured_cached (cache miss). **#113** (docs sweep): исправлен version drift в release-and-quality.md (Release readiness 0.2.0a2 / v0.2.0-alpha.2), в doc-governance добавлена секция Sweep (версия, устаревшие ссылки). **#108** (interface parity): добавлен tests/test_web_contract_parity.py — контракт JSON для status, ready, health, sessions, cost, error (sync/async используют одни _sync_*). Карточки #107, #108, #113 переведены в Done. Проверка: `uv run pytest tests/test_coverage_hotspots_batch99.py tests/test_web_contract_parity.py -q --tb=line` и коммиты с Closes #107, #108, #113.
 
-**Следующий шаг:** Взять следующий practical queue из follow-up блоков на доске (#104–#113): либо продолжение coverage для daemon (listen/analyze paths или второй batch), либо следующий ROI — `llm/router.py` (helper-level tests без тяжёлого LLM loop), либо другой P1 из PROJECT-STATUS-SUMMARY (Sonar S3776, security/docs). Не смешивать с main.py, RAG, release/docs в одной итерации. Targeted subset для проверки: те же daemon/dbus тесты плюс новый subset под выбранный модуль.
+**Следующий шаг:** Оставшиеся открытые на доске: #104 (hotspot boundaries), #105 (audio/STT), #106 (RAG lifecycle), #110 (security/deps), #111 (observability evidence), #112 (release/packaging proof), #90 (prompt caching), #65 (CVE — ждём upstream). Брать один coherent batch: например #104 (рефакторинг одной функции из hotspot для S3776) или #110/#111 (доки/чеклисты). Не смешивать поверхности. Полный pytest tests/ не гонять по умолчанию (OOM-risk).
 
 ---
 
