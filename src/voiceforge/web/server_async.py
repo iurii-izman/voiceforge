@@ -29,6 +29,28 @@ def _err(status: int, message: str) -> tuple[int, str, bytes]:
     return (status, _CONTENT_TYPE_JSON, body)
 
 
+def _invalid_json_body() -> bytes:
+    return json.dumps({"error": {"code": "BAD_REQUEST", "message": _ERR_INVALID_JSON}}).encode("utf-8")
+
+
+def _response_from_sync_result(response_cls: Any, result: tuple[int, str, bytes]):
+    status, content_type, body = result
+    return response_cls(body, status_code=status, media_type=content_type)
+
+
+async def _to_thread_response(response_cls: Any, sync_fn: Any, *args: Any):
+    result = await asyncio.to_thread(sync_fn, *args)
+    return _response_from_sync_result(response_cls, result)
+
+
+async def _json_request_to_response(request: Any, response_cls: Any, sync_fn: Any):
+    try:
+        data = await request.json()
+    except Exception:
+        return response_cls(_invalid_json_body(), status_code=400, media_type=_CONTENT_TYPE_JSON)
+    return await _to_thread_response(response_cls, sync_fn, data)
+
+
 def _sync_index() -> tuple[int, str, bytes]:
     from voiceforge.web.server import _html_index
 
@@ -357,64 +379,48 @@ def _build_app():  # NOSONAR S3776 — single place wiring all async routes; spl
         return response
 
     async def get_index(_request: Request) -> Response:
-        status, ct, body = await asyncio.to_thread(_sync_index)
-        return Response(body, status_code=status, media_type=ct)
+        return await _to_thread_response(Response, _sync_index)
 
     async def get_status(_request: Request) -> Response:
-        status, ct, body = await asyncio.to_thread(_sync_status)
-        return Response(body, status_code=status, media_type=ct)
+        return await _to_thread_response(Response, _sync_status)
 
     async def get_sessions(_request: Request) -> Response:
-        status, ct, body = await asyncio.to_thread(_sync_sessions)
-        return Response(body, status_code=status, media_type=ct)
+        return await _to_thread_response(Response, _sync_sessions)
 
     async def get_session_id(request: Request) -> Response:
         sid = request.path_params["sid"]
-        status, ct, body = await asyncio.to_thread(_sync_session_by_id, sid)
-        return Response(body, status_code=status, media_type=ct)
+        return await _to_thread_response(Response, _sync_session_by_id, sid)
 
     async def get_cost(request: Request) -> Response:
         q = request.query_params
-        status, ct, body = await asyncio.to_thread(
+        return await _to_thread_response(
+            Response,
             _sync_cost,
             q.get("days", "30") or "30",
             q.get("from", "") or "",
             q.get("to", "") or "",
         )
-        return Response(body, status_code=status, media_type=ct)
 
     async def get_export(request: Request) -> Response:
         q = request.query_params
-        status, ct, body = await asyncio.to_thread(
+        return await _to_thread_response(
+            Response,
             _sync_export,
             q.get("id", "") or "",
             (q.get("format", "md") or "md").lower(),
         )
-        return Response(body, status_code=status, media_type=ct)
 
     async def get_health(_request: Request) -> Response:
-        status, ct, body = await asyncio.to_thread(_sync_health)
-        return Response(body, status_code=status, media_type=ct)
+        return await _to_thread_response(Response, _sync_health)
 
     async def get_ready(_request: Request) -> Response:
-        status, ct, body = await asyncio.to_thread(_sync_ready)
-        return Response(body, status_code=status, media_type=ct)
+        return await _to_thread_response(Response, _sync_ready)
 
     async def get_metrics(_request: Request) -> Response:
-        status, ct, body = await asyncio.to_thread(_sync_metrics)
-        return Response(body, status_code=status, media_type=ct)
+        return await _to_thread_response(Response, _sync_metrics)
 
     async def post_analyze(request: Request) -> Response:
-        try:
-            data = await request.json()
-        except Exception:
-            return Response(
-                json.dumps({"error": {"code": "BAD_REQUEST", "message": _ERR_INVALID_JSON}}).encode("utf-8"),
-                status_code=400,
-                media_type=_CONTENT_TYPE_JSON,
-            )
-        status, ct, body = await asyncio.to_thread(_sync_analyze, data)
-        return Response(body, status_code=status, media_type=ct)
+        return await _json_request_to_response(request, Response, _sync_analyze)
 
     async def post_analyze_stream(request: Request):
         """SSE stream of LLM analyze output (#91). POST body: {seconds, template?}."""
@@ -467,21 +473,11 @@ def _build_app():  # NOSONAR S3776 — single place wiring all async routes; spl
         )
 
     async def post_action_items(request: Request) -> Response:
-        try:
-            data = await request.json()
-        except Exception:
-            return Response(
-                json.dumps({"error": {"code": "BAD_REQUEST", "message": _ERR_INVALID_JSON}}).encode("utf-8"),
-                status_code=400,
-                media_type=_CONTENT_TYPE_JSON,
-            )
-        status, ct, body = await asyncio.to_thread(_sync_action_items_update, data)
-        return Response(body, status_code=status, media_type=ct)
+        return await _json_request_to_response(request, Response, _sync_action_items_update)
 
     async def post_telegram_webhook(request: Request) -> Response:
         body_bytes = await request.body()
-        status, ct, body = await asyncio.to_thread(_sync_telegram_webhook, body_bytes)
-        return Response(body, status_code=status, media_type=ct)
+        return await _to_thread_response(Response, _sync_telegram_webhook, body_bytes)
 
     from starlette.middleware.base import BaseHTTPMiddleware
 

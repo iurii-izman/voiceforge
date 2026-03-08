@@ -111,6 +111,32 @@ def _calendar_export_ical_fail(err: str) -> None:
     raise SystemExit(1)
 
 
+def _emit_success(output: str, data: dict[str, Any], text: str) -> None:
+    """Emit CLI success payload as json or plain text."""
+    if output == "json":
+        typer.echo(json.dumps(_cli_success_payload(data), ensure_ascii=False))
+        return
+    typer.echo(text)
+
+
+def _calendar_poll_emit(output: str, minutes: int, events: list[dict[str, Any]]) -> None:
+    """Emit calendar poll result as json or text."""
+    if output == "json":
+        typer.echo(json.dumps(_cli_success_payload({"events": events, "minutes": minutes}), ensure_ascii=False))
+        return
+    if not events:
+        typer.echo(t("calendar.poll_no_events", minutes=minutes))
+        return
+    typer.echo(t("calendar.poll_events", minutes=minutes))
+    for ev in events:
+        typer.echo(t("calendar.poll_line", summary=ev.get("summary", ""), start_iso=ev.get("start_iso", "")))
+
+
+def _calendar_create_emit(output: str, event_uid: str) -> None:
+    """Emit create-from-session success as json or text."""
+    _emit_success(output, {"event_uid": event_uid}, f"Created calendar event: {event_uid}")
+
+
 def _sessions_to_ical_fetch_sessions(log_db: Any, from_date: str | None, to_date: str | None, limit: int) -> list[Any]:
     """Return sessions for iCal export; on date parse error echo and raise SystemExit(1). S3776."""
     from datetime import date as date_type
@@ -1162,27 +1188,17 @@ def status(
 ) -> None:
     """Show RAM and cost snapshot."""
     if doctor:
-        if output == "json":
-            typer.echo(json.dumps(_cli_success_payload(get_doctor_data()), ensure_ascii=False))
-        else:
-            typer.echo(get_doctor_text())
+        _emit_success(output, get_doctor_data(), get_doctor_text())
         return
     if detailed:
         cfg = _get_config()
-        if output == "json":
-            typer.echo(
-                json.dumps(
-                    _cli_success_payload(get_status_detailed_data(cfg.budget_limit_usd)),
-                    ensure_ascii=False,
-                )
-            )
-        else:
-            typer.echo(get_status_detailed_text(cfg.budget_limit_usd))
+        _emit_success(
+            output,
+            get_status_detailed_data(cfg.budget_limit_usd),
+            get_status_detailed_text(cfg.budget_limit_usd),
+        )
         return
-    if output == "json":
-        typer.echo(json.dumps(_cli_success_payload(get_status_data()), ensure_ascii=False))
-    else:
-        typer.echo(get_status_text())
+    _emit_success(output, get_status_data(), get_status_text())
 
 
 @app.command("sessions-to-ical")
@@ -1670,15 +1686,7 @@ def calendar_poll(
             if hint:
                 typer.echo(hint, err=True)
         raise SystemExit(1)
-    if output == "json":
-        typer.echo(json.dumps(_cli_success_payload({"events": events, "minutes": minutes}), ensure_ascii=False))
-        return
-    if not events:
-        typer.echo(t("calendar.poll_no_events", minutes=minutes))
-        return
-    typer.echo(t("calendar.poll_events", minutes=minutes))
-    for ev in events:
-        typer.echo(t("calendar.poll_line", summary=ev.get("summary", ""), start_iso=ev.get("start_iso", "")))
+    _calendar_poll_emit(output, minutes, events)
 
 
 def _calendar_event_description_from_detail(detail: Any, sid: int) -> str:
@@ -1745,10 +1753,7 @@ def calendar_create_from_session(
             if hint:
                 typer.echo(hint, err=True)
         raise SystemExit(1)
-    if output == "json":
-        typer.echo(json.dumps(_cli_success_payload({"event_uid": event_uid}), ensure_ascii=False))
-    else:
-        typer.echo(f"Created calendar event: {event_uid}")
+    _calendar_create_emit(output, event_uid)
 
 
 def main() -> None:
