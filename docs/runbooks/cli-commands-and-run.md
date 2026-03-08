@@ -46,7 +46,7 @@ for name in ('anthropic','openai','huggingface'):
 | Что меняли | Действие |
 |------------|----------|
 | Только Python (backend, CLI) | Перезапуск демона и/или `uv run voiceforge ...`; **ребилд десктопа не нужен**. |
-| Зависимости Python (pyproject.toml) | `uv sync --extra all` (или нужный extra). |
+| Зависимости Python (pyproject.toml) | `uv sync --extra all` (full-stack: `rag,llm,pii,calendar,otel,web-async`) или нужный extra. |
 | Frontend (Vite/TS в `desktop/`) или Tauri (Rust в `desktop/src-tauri/`) | Ребилд десктопа: `cd desktop && npm run build && cargo tauri build`. Для разработки: `cd desktop && npm run tauri dev` (hot reload при изменении фронта). |
 | Конфиг Tauri / npm / Cargo | `cd desktop && npm install` при смене npm-зависимостей; при необходимости обновить Cargo, затем полный билд. |
 

@@ -21,7 +21,7 @@ alwaysApply: true
 
 ## Теги
 
-- Формат v0.2.0-alpha.1, только аннотированные. Когда ставить: по release-and-quality.md.
+- Формат v0.2.0-alpha.2, только аннотированные. Когда ставить: по release-and-quality.md.
 
 ## GitHub Issues и Project
 

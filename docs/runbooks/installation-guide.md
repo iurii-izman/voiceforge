@@ -116,7 +116,7 @@ uv run voiceforge status   # или voiceforge doctor — диагностика
   ```bash
   cd /var/home/user/Projects/voiceforge
   ./scripts/bootstrap.sh   # один раз
-  uv sync --extra all      # при изменении зависимостей
+  uv sync --extra all      # full-stack extras: rag,llm,pii,calendar,otel,web-async
   uv run voiceforge <команда>
   ```
 - **Запуск на хосте:** те же команды можно выполнять на хосте, если в этой среде установлены `uv`, Python и ключи в keyring (сервис `voiceforge`, имена `anthropic`, `openai`, `huggingface`). Для единого окружения лучше только toolbox — тогда на хосте ничего не ставим.

@@ -42,8 +42,8 @@
 
 ## 4. Теги
 
-- **Формат:** `v<major>.<minor>.<patch>-<prerelease>` (напр. `v0.2.0-alpha.1`). SemVer; альфа — суффикс `-alpha.N`.
-- Только аннотированные: `git tag -a v0.2.0-alpha.1 -m "VoiceForge alpha2: ..."`. Пуш: `git push origin v0.2.0-alpha.1`.
+- **Формат:** `v<major>.<minor>.<patch>-<prerelease>` (напр. `v0.2.0-alpha.2`). SemVer; альфа — суффикс `-alpha.N`.
+- Только аннотированные: `git tag -a v0.2.0-alpha.2 -m "VoiceForge alpha2: ..."`. Пуш: `git push origin v0.2.0-alpha.2`.
 - Когда ставить: по [release-and-quality.md](release-and-quality.md) после чеклиста и CHANGELOG/версии.
 
 ---

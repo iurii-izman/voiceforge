@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-08 (#97 web action-items batch closed)
+**Обновлено:** 2026-03-08 (#98 release/install contract aligned)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Закрыт coherent P0 web batch по issue [#97](https://github.com/iurii-izman/voiceforge/issues/97): исправлен tuple-unpack bug в `POST /api/action-items/update` для sync/async web (`server.py`, `server_async.py`), добавлены web regression tests на happy path и nested error envelope (`tests/test_web_action_items_update.py`), обновлён `web-api.md` под фактический error envelope и async-only `/api/analyze/stream`.
+**Сделано в сессии:** Закрыт coherent P1 release/install batch по issue [#98](https://github.com/iurii-izman/voiceforge/issues/98): `uv sync --extra all` теперь действительно full-stack и включает `web-async`; синхронизированы active version metadata между Python/Desktop/Tauri/Flatpak (`0.2.0a2` / `0.2.0-alpha.2`); обновлены active release/install runbooks и README под фактический setup path; добавлены `scripts/check_release_metadata.py`, `tests/test_release_metadata.py` и CI-step против нового version drift.
 
-**Следующий шаг:** Взять **coherent P1 release/install batch** по issue [#98](https://github.com/iurii-izman/voiceforge/issues/98) из [GitHub Project VoiceForge view](https://github.com/users/iurii-izman/projects/1/views/1): (1) решить contract для `uv sync --extra all` vs `web-async` extra, (2) синхронизировать version metadata между Python/Desktop/Tauri/Flatpak файлами, (3) обновить release/install docs под фактический setup path, (4) добавить лёгкую consistency-проверку или script на release metadata. После #98 идти строго по board order: [#99](https://github.com/iurii-izman/voiceforge/issues/99) → [#100](https://github.com/iurii-izman/voiceforge/issues/100) → [#101](https://github.com/iurii-izman/voiceforge/issues/101). Для verify использовать targeted subset по изменённой поверхности; при отсутствии hypothesis — `pytest tests/ --ignore=tests/test_rag_parsers_hypothesis.py`. Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
+**Следующий шаг:** Взять **coherent P1 coverage batch** по issue [#99](https://github.com/iurii-izman/voiceforge/issues/99) из [GitHub Project VoiceForge view](https://github.com/users/iurii-izman/projects/1/views/1): (1) сократить blind spots для `server.py`, `server_async.py`, `daemon.py`, `router.py`, `main.py`, (2) добавить targeted smoke/regression tests на самый узкий hotspot без OOM-risk, (3) подготовить честный incremental путь для подъёма coverage policy без cross-cutting rewrite. После #99 идти строго по board order: [#100](https://github.com/iurii-izman/voiceforge/issues/100) → [#101](https://github.com/iurii-izman/voiceforge/issues/101). Для verify использовать targeted subset по изменённой поверхности; при отсутствии hypothesis — `pytest tests/ --ignore=tests/test_rag_parsers_hypothesis.py`. Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
 
 ---
 

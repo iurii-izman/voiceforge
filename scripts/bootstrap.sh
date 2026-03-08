@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "VoiceForge alpha0.1 bootstrap"
+echo "VoiceForge bootstrap (alpha2 line)"
 
 if ! command -v uv >/dev/null 2>&1; then
   echo "uv is required. Install uv first." >&2

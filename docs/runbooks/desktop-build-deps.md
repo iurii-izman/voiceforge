@@ -166,7 +166,7 @@ desktop/src-tauri/target/release/voiceforge-desktop
 **Установка пакетом (Fedora/RHEL):**
 
 ```bash
-sudo dnf install desktop/src-tauri/target/release/bundle/rpm/VoiceForge-0.2.0-alpha.1-1.x86_64.rpm
+sudo dnf install desktop/src-tauri/target/release/bundle/rpm/VoiceForge-0.2.0-alpha.2-1.x86_64.rpm
 ```
 
 После установки приложение доступно в меню или по команде `voiceforge-desktop` (или «VoiceForge», в зависимости от .desktop).
@@ -174,7 +174,7 @@ sudo dnf install desktop/src-tauri/target/release/bundle/rpm/VoiceForge-0.2.0-al
 **Установка пакетом (Debian/Ubuntu):**
 
 ```bash
-sudo dpkg -i desktop/src-tauri/target/release/bundle/deb/VoiceForge_0.2.0-alpha.1_amd64.deb
+sudo dpkg -i desktop/src-tauri/target/release/bundle/deb/VoiceForge_0.2.0-alpha.2_amd64.deb
 ```
 
 Версию в путях подставьте свою, если собирали другую.

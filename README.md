@@ -2,7 +2,7 @@
 
 VoiceForge is a local-first assistant for audio meetings on Linux.
 
-Baseline: `0.1.0-alpha.1` (`0.1.0a1` Python package version).
+Current alpha line: `0.2.0-alpha.2` (`0.2.0a2` Python package version).
 
 ## Alpha0.1 Core
 
@@ -33,6 +33,8 @@ Core CLI commands:
 uv sync --extra all
 uv run voiceforge status
 ```
+
+`uv sync --extra all` is the full-stack install profile: RAG, LLM, PII, calendar, OTel, and async web (`web-async`).
 
 Core flow:
 

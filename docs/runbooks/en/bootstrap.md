@@ -16,6 +16,8 @@ uv run voiceforge status
 ./scripts/smoke_clean_env.sh
 ```
 
+`uv sync --extra all` installs the full-stack extras: `rag`, `llm`, `pii`, `calendar`, `otel`, `web-async`.
+
 Optional service mode:
 
 ```bash

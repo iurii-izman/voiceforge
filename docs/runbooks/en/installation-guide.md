@@ -116,7 +116,7 @@ Summary: **on the host** you only enter the container (`toolbox enter`). **Every
   ```bash
   cd /var/home/user/Projects/voiceforge
   ./scripts/bootstrap.sh   # once
-  uv sync --extra all      # when dependencies change
+  uv sync --extra all      # full-stack extras: rag,llm,pii,calendar,otel,web-async
   uv run voiceforge <command>
   ```
 - **Running on host:** the same commands can be run on the host if `uv`, Python, and keyring keys (service `voiceforge`, names `anthropic`, `openai`, `huggingface`) are set up there. For a single environment, toolbox-only is better — then nothing is installed on the host.

@@ -6,7 +6,7 @@
 
 ## 1. Release runbook
 
-**Версии:** Python package `0.1.0a1`; тег `v0.1.0-alpha.1`. Для альфа2: `0.2.0a1` / `v0.2.0-alpha.1`.
+**Версии:** текущая alpha2-линия — Python package `0.2.0a2`; тег `v0.2.0-alpha.2`.
 
 **Чеклист перед релизом:**
 1. `./scripts/verify_pr.sh` — OK
@@ -22,15 +22,16 @@
 
 **Coverage #56:** текущий fail_under=72 (pyproject.toml). Цель 75→80%. Запуск полного отчёта: `make coverage` (рекомендуется в toolbox — в Cursor полный pytest может OOM). При достижении ≥75% выставить в pyproject.toml `fail_under = 75`.
 
-**Для альфа2 (с десктопом):** версия 0.2.0a1; сборка десктопа: `cd desktop && npm run build && cargo tauri build`; артефакты в `desktop/src-tauri/target/release/bundle/`. Чеклист: сценарий «демон → Tauri → анализ → сессия»; CHANGELOG обновлён.
+**Для alpha2 (с десктопом):** версия `0.2.0a2`; сборка десктопа: `cd desktop && npm run build && cargo tauri build`; артефакты в `desktop/src-tauri/target/release/bundle/`. Чеклист: сценарий «демон → Tauri → анализ → сессия»; CHANGELOG обновлён.
 
 **Команды:**
 ```bash
 ./scripts/verify_pr.sh && ./scripts/smoke_clean_env.sh && ./scripts/check_cli_contract.sh
 uv run pytest tests/test_db_migrations.py -q && uv build --wheel
 ./scripts/check_repo_governance.sh && ./scripts/check_new_code_coverage.sh
-git tag -a v0.2.0-alpha.1 -m "VoiceForge alpha2: ..."
-git push origin v0.2.0-alpha.1
+python scripts/check_release_metadata.py
+git tag -a v0.2.0-alpha.2 -m "VoiceForge alpha2: ..."
+git push origin v0.2.0-alpha.2
 ```
 
 **Ожидаемые артефакты:** `dist/*.whl`, Release workflow загружает SBOM (`dist/sbom.cdx.json`).
@@ -54,9 +55,9 @@ git push origin v0.2.0-alpha.1
 
 ## 3. Чеклист альфа2
 
-Версия **0.2.0a1** / тег **v0.2.0-alpha.1**.
+Версия **0.2.0a2** / тег **v0.2.0-alpha.2**.
 
-**Перед тегом:** тесты CLI/демона; десктоп собирается (`./scripts/check-desktop-deps.sh`, `cd desktop && npm install && npm run build && cargo tauri build`); сценарий «демон → Tauri → анализ → сессия» вручную; CHANGELOG обновлён; версии в pyproject.toml, desktop/package.json, tauri.conf.json согласованы.
+**Перед тегом:** тесты CLI/демона; десктоп собирается (`./scripts/check-desktop-deps.sh`, `cd desktop && npm install && npm run build && cargo tauri build`); сценарий «демон → Tauri → анализ → сессия» вручную; CHANGELOG обновлён; версии в `pyproject.toml`, `desktop/package.json`, `desktop/src-tauri/tauri.conf.json`, `desktop/src-tauri/Cargo.toml`, Flatpak manifest согласованы; `python scripts/check_release_metadata.py` возвращает `release metadata OK`.
 
 **Релиз:** по разделу 1 этого runbook.
 

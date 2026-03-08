@@ -123,7 +123,7 @@ Or from `desktop/`: `./src-tauri/target/release/voiceforge-desktop`.
 **Install via package (Fedora/RHEL):**
 
 ```bash
-sudo dnf install desktop/src-tauri/target/release/bundle/rpm/VoiceForge-0.2.0-alpha.1-1.x86_64.rpm
+sudo dnf install desktop/src-tauri/target/release/bundle/rpm/VoiceForge-0.2.0-alpha.2-1.x86_64.rpm
 ```
 
 After install the app is available from the menu or via `voiceforge-desktop` (or “VoiceForge”, depending on .desktop).
@@ -131,7 +131,7 @@ After install the app is available from the menu or via `voiceforge-desktop` (or
 **Install via package (Debian/Ubuntu):**
 
 ```bash
-sudo dpkg -i desktop/src-tauri/target/release/bundle/deb/VoiceForge_0.2.0-alpha.1_amd64.deb
+sudo dpkg -i desktop/src-tauri/target/release/bundle/deb/VoiceForge_0.2.0-alpha.2_amd64.deb
 ```
 
 Adjust the version in paths if you built a different one.
