@@ -72,7 +72,7 @@
 | # | Issue | Блок | Priority | Effort | Area | Impact |
 |---|---|---|---|---|---|---|
 | E1 | [#124](https://github.com/iurii-izman/voiceforge/issues/124) | Quick Wins: Sensible Defaults & Notifications | P0 | S | Backend | +10% DDR ✓ |
-| E2 | [#125](https://github.com/iurii-izman/voiceforge/issues/125) | One-Shot Meeting Mode: `voiceforge meeting` | P0 | M | Backend | +15% DDR |
+| E2 | [#125](https://github.com/iurii-izman/voiceforge/issues/125) | One-Shot Meeting Mode: `voiceforge meeting` | P0 | M | Backend | +15% DDR ✓ |
 | E3 | [#126](https://github.com/iurii-izman/voiceforge/issues/126) | Error Pre-Flight Checks: PipeWire, Disk, Network | P0 | M | Backend | +15% ER |
 | E4 | [#127](https://github.com/iurii-izman/voiceforge/issues/127) | Explicit Failure Feedback: Diarization, RAG, Models | P0 | S | Backend | +12% ER |
 | E5 | [#128](https://github.com/iurii-izman/voiceforge/issues/128) | Daemon Hardening: Auto-Start, Watchdog, Log, Shutdown | P0 | M | Backend | +12% DDR |
@@ -102,7 +102,7 @@
 
 **Wave 1 — P0 блокеры (2-3 недели, DDR 35→55):**
 ```
-E1 ✓ → E2 → E3 → E4 → E5
+E1 ✓ → E2 ✓ → E3 → E4 → E5
 ```
 
 **Wave 2 — P1 core (3-4 недели, DDR 55→70):**
@@ -152,7 +152,7 @@ E11 → E16 → E17
 |---|----------|----------|-----------------|
 | F1 | Keyring setup — 3+ ручных команды + HF license | 🔴 | E7 (wizard) |
 | F2 | Первый download моделей без прогресса | 🔴 | E8, E3 |
-| F3 | Два терминала для daemon + listen | 🟡 | E2 (meeting) |
+| F3 | Два терминала для daemon + listen | 🟢 | E2 (meeting) ✓ |
 | F4 | Нет guided wizard / post-install guidance | 🟡 | E7 (setup) |
 | F5 | OOM при diarization — тихий skip | 🟡 | E4 (feedback) |
 | F6 | Нет auto-start daemon | 🟡 | E5 (systemd) |

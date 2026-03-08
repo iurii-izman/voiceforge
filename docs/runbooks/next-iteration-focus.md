@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-08 (E1 #124 закрыт; следующий — E2 #125)
+**Обновлено:** 2026-03-08 (E2 #125 закрыт; следующий — E3 #126)
 
 ---
 
@@ -18,9 +18,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Deep Project Analysis → Phase E productization roadmap. Создано 21 issue (#124-#144) на GitHub Project Board с labels, priority, effort, area. Docs реструктурированы: 14 stale файлов в архив, PROJECT-STATUS-SUMMARY полностью переписан с таблицами оценок (Engineering 80/100, Daily Driver 35/100), friction map, confidence checklist, wave execution plan. next-iteration-focus обновлён на Phase E.
+**Сделано в сессии:** E2 (#125) One-Shot Meeting Mode: команда `voiceforge meeting`, модуль `cli/meeting.py`, listen + smart trigger (если включён) + analyze по Ctrl+C, флаги --template, --no-analyze, --seconds, desktop notification. Тесты test_meeting_mode.py, обновлён test_cli_surface (meeting в списке команд), контракт и i18n.
 
-**Следующий шаг:** начать **Wave 1** Phase E — взять **E1 (#124) Quick Wins: Sensible Defaults & Notifications** как первый coherent batch. Это 5 targeted изменений (~3 часа): smart_trigger=true, analyze без --seconds, PipeWire check в bootstrap, voiceforge.yaml.example, notify-send. После E1 → E2 → E3 → E4 → E5 (строго по порядку).
+**Следующий шаг:** взять **E3 (#126) Error Pre-Flight Checks: PipeWire, Disk, Network** — следующий блок Wave 1. После E3 → E4 → E5 (строго по порядку).
 
 ---
 
@@ -30,7 +30,7 @@
 
 | Wave | Issues | Статус | Что делать |
 |------|--------|--------|------------|
-| **Wave 1 (P0)** | #124✓→#125→#126→#127→#128 | **In progress** | E2 следующий. DDR 35→55 |
+| **Wave 1 (P0)** | #124✓→#125✓→#126→#127→#128 | **In progress** | E3 следующий. DDR 35→55 |
 | **Wave 2 (P1 core)** | #129→#130→#131→#132→#133→#141 | Todo | DDR 55→70 |
 | **Wave 3 (P1 quality)** | #135→#136→#137→#138 | Todo | Testing + Core + CLI + Obs |
 | **Wave 4 (P2 polish)** | #134→#139→#140 | Todo | Calendar + CI/CD + Security |
@@ -52,7 +52,7 @@
 
 Задача: взять верхний незакрытый E-блок из текущего Wave. Перевести issue в In Progress на доске. Реализовать по чеклисту в issue body. Targeted tests. Commit с `Closes #N` (Conventional Commits). Done на доске. Обновить docs. Выдать prompt для следующего чата.
 
-Текущий блок: E2 (#125) — One-Shot Meeting Mode: `voiceforge meeting`.
+Текущий блок: E3 (#126) — Error Pre-Flight Checks: PipeWire, Disk, Network.
 ```
 
 ---

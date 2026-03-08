@@ -45,6 +45,7 @@
   "index.chunks_pruned": "Удалено чанков (файлы удалены): {n}",
   "index.specify_file_or_dir": "Укажите файл или папку.",
   "watch.banner": "VoiceForge watch: {path} -> {db_path} (Ctrl+C для остановки)",
+  "meeting.listening_hint": "Слушаю... Нажмите Ctrl+C для остановки и анализа.",
   "install_service.copied": "Скопировано: {path}",
   "install_service.enabled": "Сервис включён. Логи: journalctl --user -u voiceforge -f",
   "uninstall_service.done": "Сервис voiceforge отключён и остановлен.",

@@ -28,6 +28,7 @@ from voiceforge.cli.history_helpers import (
     history_session_detail_result,
     session_not_found_message,
 )
+from voiceforge.cli.meeting import run_meeting
 from voiceforge.cli.status_helpers import (
     get_doctor_data,
     get_doctor_text,
@@ -693,6 +694,32 @@ def listen(
 
 
 _TEMPLATE_CHOICES = ["standup", "sprint_review", "one_on_one", "brainstorm", "interview"]
+
+
+@app.command()
+def meeting(
+    template: str | None = typer.Option(
+        None,
+        "--template",
+        help="Meeting template: standup, sprint_review, one_on_one, brainstorm, interview (passed to analyze).",
+    ),
+    no_analyze: bool = typer.Option(
+        False,
+        "--no-analyze",
+        help="Only listen; do not run analyze on Ctrl+C.",
+    ),
+    seconds: int | None = typer.Option(
+        None,
+        "--seconds",
+        help="Analyze last N seconds on exit; default: entire buffer.",
+    ),
+) -> None:
+    """One-shot meeting: listen, optional smart-trigger auto-analyze, then analyze on Ctrl+C."""
+    cfg = _get_config()
+    if template is not None and template not in _TEMPLATE_CHOICES:
+        typer.echo(t("analyze.unknown_template", template=template, choices=", ".join(_TEMPLATE_CHOICES)), err=True)
+        raise SystemExit(1)
+    run_meeting(cfg, template=template, no_analyze=no_analyze, seconds=seconds)
 
 
 def _analyze_echo_success(

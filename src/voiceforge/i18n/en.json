@@ -45,6 +45,7 @@
   "index.chunks_pruned": "Chunks pruned (files removed): {n}",
   "index.specify_file_or_dir": "Specify a file or directory.",
   "watch.banner": "VoiceForge watch: {path} -> {db_path} (Ctrl+C to stop)",
+  "meeting.listening_hint": "Listening... Press Ctrl+C to stop and analyze.",
   "install_service.copied": "Copied: {path}",
   "install_service.enabled": "Service enabled. Logs: journalctl --user -u voiceforge -f",
   "uninstall_service.done": "VoiceForge service disabled and stopped.",
