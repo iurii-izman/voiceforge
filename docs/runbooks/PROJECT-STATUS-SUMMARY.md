@@ -1,168 +1,238 @@
-# Итог по проекту VoiceForge (12 разделов)
+# VoiceForge: Project Status & Productization Roadmap
 
-Единый свод: планы vs код, что сделано, что осталось вам, Sonar/GitHub, приоритеты. Обновлено: 2026-03-08 (сверено по текущему репо).
-
----
-
-## 1. Что подтверждено по репо
-
-- **Сверка планов с кодом:** подтверждено, что блоки 44 (история буфера), 46 (слайд-панель настроек), 49 (виджет «Последний анализ»), 68 (streaming LLM), 71 (Whisper API), 75 (поиск RAG), 79 (создание события из сессии) уже реализованы в коде.
-- **Обновлены документы:** в [backlog-and-actions.md](../plans/backlog-and-actions.md) отмечены как реализованные блоки 44, 46, 49 (плюс ранее 35, 68, 71, 75, 79). В [roadmap-100-blocks.md](../plans/roadmap-100-blocks.md) секция «Не реализовано» приведена в соответствие (66 — только prompt caching; 68, 71, 79 — зачёркнуты).
-- **Правки по Sonar:** optional chain в `desktop/src/main.js` (S6582); dict comprehension в `scripts/git_credential_keyring_pat.py` (S7494); NOSONAR для неиспользуемых параметров интерфейса в `stt/openai_whisper.py` (S1172) и для вызова fixture в `tests/test_benchmark_pipeline.py` (S5864).
-- **После audit-driven batches дополнительно подтверждено:** `#97` закрыт кодом и regression tests для `/api/action-items/update`; `#98` закрыт через `web-async` в full-stack extras и `scripts/check_release_metadata.py`; `#99` продвинут дальше и из `omit` теперь выведены `server.py` и `rag/watcher.py`; `#100` подтверждён process-scoped cache для `Diarizer`/`HybridSearcher` и редкой ring persistence; `#101` подтверждён desktop release gate (`desktop-release-gate-matrix.md`, `npm run e2e:native`, updater contract check).
-- **Follow-up blocks по deep audit тоже подтверждены:** `#104` закрыт extraction в `core/daemon.py` (`_event_description_from_detail` + tests), `#105` и `#106` закрыты runbook [lifecycle-smoke.md](lifecycle-smoke.md), `#107` подтверждён helper-level router tests, `#108` — parity suite `tests/test_web_contract_parity.py`, `#109` — `tests/test_daemon_helpers.py`, `#110` — раздел data-at-rest/dependency hygiene в `security-and-dependencies.md`, `#111` — trace evidence checklist в `observability-alerts.md`, `#112` — release proof section в `release-and-quality.md`, `#113` — docs/status sync sweep в runbooks.
-- **Новый стратегический batch уже подтверждён:** `#115` закрыт behavioral/router coverage suite в `tests/test_llm_router_batch115.py`; локальная targeted coverage-проверка для `voiceforge.llm.router` даёт **91%**. `pyproject.toml` не менялся, потому что `router.py` уже был в coverage report и batch не требовал честного снятия из `omit`.
-- **Следующий стратегический batch тоже подтверждён:** `#116` закрыт behavioral daemon suite в `tests/test_daemon_batch116.py`; локальная targeted coverage-проверка для `voiceforge.core.daemon` на daemon/dbus subset поднимает модуль до **75%** (с baseline `38%`). `pyproject.toml` не менялся, потому что `daemon.py` уже был в coverage report и batch не требовал честного снятия из `omit`.
-- **Structural hotspot batch тоже подтверждён:** `#114` закрыт cheap extraction/refactor в `src/voiceforge/web/server_async.py` и `src/voiceforge/main.py`: async web glue вынесен в общие response/request helpers, а CLI status/calendar emit paths — в общие helpers. Контракт удержан targeted suite `tests/test_hotspot_batch114.py` плюс существующие web/CLI tests.
-- **Security hardening batch тоже подтверждён:** `#120` закрыт через filesystem privacy baseline для local data-at-rest: добавлен helper [src/voiceforge/core/fs.py](/home/user/Projects/voiceforge/src/voiceforge/core/fs.py), который приводит app/backup directories к `0700`, а local DB/cache/status/backup files к `0600`; это подключено в transcript log, metrics DB, LLM cache, RAG indexer, GLiNER model cache и backup/status paths в CLI. Focused suite `tests/test_security_batch120.py` фиксирует новый baseline; encryption-at-rest честно остаётся accepted risk, а `#65` остаётся external wait-state с readiness checklist.
-- **Observability evidence batch тоже подтверждён:** `#121` закрыт через единый reproducible Jaeger/runtime proof path в [observability-alerts.md](observability-alerts.md): runbook теперь фиксирует preflight (`tests/test_otel.py` + `tests/test_observability.py`), environment topology для host/toolbox, expected spans (`pipeline.run`, `pipeline.prepare_audio`, `pipeline.step1_stt`, `pipeline.step2_parallel`), expected evidence artifacts и failure signatures. Граница осталась честной: live Jaeger запуск, runtime trigger и UI verification по-прежнему manual и выполняются пользователем, а не агентом.
-- **Release proof batch тоже подтверждён:** `#122` закрыт через reproducible report `scripts/check_release_proof.py` + `tests/test_release_proof.py`. Release docs теперь разводят `blocking` (`check_release_metadata.py`), `advisory` (`npm audit`, `cargo audit`), local/native desktop gate (`npm run e2e:native`) и updater state (`disabled` vs `ready`) без optimistic claims. В текущем repo updater честно остаётся `disabled`, поэтому signed updater proof не требуется до появления ключей и endpoint.
+**Обновлено:** 2026-03-08. **Версия:** 0.2.0-alpha.2. **Стадия:** Phase E — Daily Driver.
+**Предыдущий цикл (#97-#123):** закрыт полностью; архив: [history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
 
 ---
 
-## 2. Соответствие планов и кода (что реализовано)
+## 1. Текущее состояние: Engineering Score vs Daily Driver Score
 
-| Источник | Реализовано в коде |
-|----------|---------------------|
-| **backlog-and-actions блок B** | 35, 44, 46, 49, 66 (cache_control есть), 68, 71, 75, 79 |
-| **roadmap 1–19 (plans.md)** | 1–18 реализованы; 19 (prompt caching для не-Claude) — research |
-| **Phase A–D (Steps 1–19)** | Большинство закрыто; #65 (CVE) ждёт upstream; Phase D #70–#73 реализованы |
-| **roadmap-100-blocks «Не реализовано»** | Остаётся только 66 (prompt caching — доработка по API) |
+Проект прошёл Phase A-D (Stabilize → Hardening → Scale → Productize). Техническая база зрелая. Главный gap — **продуктовый, не технический.**
 
-Файлы-подтверждения: `desktop/src/main.js` (clipboard_history, last-analysis, settings_as_panel, streaming-analysis-chunk, add-to-calendar), `stt/openai_whisper.py`, `llm/router.py` (stream_completion, analyze_meeting_stream), `core/pipeline.py` (_step1_stt stt_backend), демон/D-Bus (CreateEventFromSession, StreamingAnalysisChunk, SearchRag).
+### Engineering Score (оценка по коду/инфраструктуре)
 
----
-
-## 3. Что осталось реализовать (кодом)
-
-- **По приоритету (на усмотрение):**
-  - Блок 66: prompt caching для Claude реализован (cache_control в router); для не-Claude документировано в prompt-management.md, доработка по API провайдеров.
-  - ~~Блок 69~~: реализовано — retry с backoff в circuit_breaker. ~~Блок 72~~: уже было — подсказка «Analyzing… (≈ N–M s)» в CLI.
-  - Phase D: ~~#70~~ (A/B), ~~#71~~ (OTel: core/otel.py + observability-alerts.md), ~~#72~~ (custom templates), ~~#73~~ (packaging: offline-package.md, make flatpak-build) — реализованы.
-- **Из roadmap-100 списка:** часть пунктов (45, 50, 51–54, 57–65, 67, 70, 73–78, 80–100) уже есть в коде или в доке; остальное — по приоритету из планов и backlog.
-
----
-
-## 4. Что осталось сделать вам (ручные шаги и решения)
-
-- **Блок A (подтверждения):** #65 CVE — пока ничего; при появлении фикса upstream обновить зависимости и убрать `--ignore-vuln` по [security-and-dependencies.md](security-and-dependencies.md). Keyring (HuggingFace) — по доке проверено. OTel/Jaeger — запуск контейнера и просмотр трейсов у вас.
-- **Блок C (ручные шаги):** сборка/запуск десктопа (`cd desktop && npm run tauri build/dev`); ключи в keyring; при необходимости — updater (ключи подписи, сервер обновлений); релизы и распространение; ручное тестирование с человеком. Чеклист: [MANUAL-AND-CANNOT-DO.md](../plans/MANUAL-AND-CANNOT-DO.md).
-- **Блок D (GitHub):** #65 оставить открытым до фикса upstream; стратегическую очередь вести через `#114-#123` на Project `#1`. `#50` уже закрыт и в активный queue не возвращать. По verify_pr/bandit — решить, добиваться ли полного зелёного (см. блок E).
-- **Блок E (опционально):** поручить агенту доработку bandit и оставшихся замечаний Sonar по приоритету.
-
----
-
-## 5. Sonar: замечания и что исправлено
-
-**Получить актуальный список:** `uv run python scripts/sonar_fetch_issues.py` (нужен `sonar_token` в keyring).
-
-**На 2026-03-07 (выборка):**
-- **Исправлено в сессии:** S6582 (optional chain в main.js), S7494 (dict comprehension в git_credential_keyring_pat.py), S1172 (NOSONAR в openai_whisper.py), S5864 (NOSONAR в test_benchmark_pipeline.py).
-- **Остаются (требуют рефакторинга или принятия):**
-  - **S3776 (Cognitive Complexity):** daemon.py:418, main.py:1680, main.py:1143, daemon.py:520, router.py:210, router.py:560, server_async.py:343, desktop main.js:2184 — рефакторинг функций для снижения сложности.
-  - **Прочие:** S3358 (test_caldav_poll.py), S7735/S4624/S6582 (desktop main.js) — по желанию; принять или править по приоритету.
-
-Чеклист перед бета: [pre-beta-sonar-github.md](pre-beta-sonar-github.md).
-
----
-
-## 6. GitHub: PR, issues, доска
-
-- **PR:** #81, #79 закрыты с комментарием «Applied in main» (2026-03-07).
-- **Issues:** открытый внешний риск по-прежнему только **#65** (CVE — ждём upstream). Стратегический queue для движения `76.5 -> 100` закрыт через **#114-#123**: docs/governance sweep **#123** завершил active runbook cleanup, live queue sync и active-vs-archive boundary. **#50** (macOS/WSL2) закрыт и снят с активного скоупа.
-- **Доска:** [VoiceForge Board](https://github.com/users/iurii-izman/projects/1). При работе по issue — In Progress; при Closes #N — Done. Команды и ID полей: [planning.md](planning.md).
-- **Dependabot:** при CVE #65 — отклонить с комментарием из security-and-dependencies.md или скрипт `uv run python scripts/dependabot_dismiss_moderate.py`.
-
----
-
-## 7. Рекомендации по приоритетам
-
-1. **Первый ROI-приоритет:** взять один отдельный **Sonar S3776 hotspot triage** batch и не смешивать его с другими поверхностями.
-2. **Следом:** вернуться к узким quality quick wins только отдельными batches.
-3. **Параллельный внешний риск:** при появлении фикса CVE **#65** обновить зависимости и убрать `--ignore-vuln`.
-4. **Для manual/evidence batches:** держать ту же честную границу, что в `#121`: reproducible path в доках допустим, но без optimistic claims про внешние ручные шаги.
-
----
-
-## 8. Критичные/важные проблемы на следующую итерацию
-
-- **#65 CVE:** следить за upstream (diskcache/instructor); при фиксе — обновить и убрать ignore.
-- **Новый practical queue:** стратегический queue `#114-#123` закрыт; следующий локальный candidate — Sonar S3776 hotspot triage отдельным batch.
-- **Sonar S3776:** 8 мест с высокой когнитивной сложностью — рефакторинг по одному или принять по решению. После уже закрытого `#104` следующий structural hotspot batch теперь зафиксирован отдельным issue **#114**.
-- **Coverage blind spots:** после `server.py`, `rag/watcher.py`, закрытых **#115**, **#116** и cheap extraction в **#114** главным heavy confidence gap смещается в `rag/*`, `stt/diarizer.py`, `llm/local_llm.py` и manual runtime/release evidence.
-- **verify_pr/bandit:** при желании полного зелёного — доработать оставшиеся предупреждения bandit.
-- **Pre-commit на хосте:** без Python 3.12 использовать `git commit/push --no-verify`; полный pre-commit в toolbox 43.
-
----
-
-## 9. Промпт для следующего чата
-
-```
-Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md (правила, конфиг, приоритеты). Фокус: @docs/runbooks/next-iteration-focus.md. Итог по проекту: @docs/runbooks/PROJECT-STATUS-SUMMARY.md.
-
-Режим: автопилот. Ключи только в keyring (сервис voiceforge). Fedora Atomic, toolbox 43; uv sync --extra all. В конце сессии: тесты (uv run pytest … -q --tb=line или лёгкое подмножество при OOM), коммит и пуш из корня репо (Conventional Commits, Closes #N где уместно), обновить next-iteration-focus, выдать промпт для следующего чата.
-
-Задача: взять следующий coherent quality batch после закрытия стратегической очереди `#114-#123`. Первый приоритет: отдельный Sonar S3776 hotspot triage (`main.py`, `server.py` или `desktop/src/main.js`) с честным решением `fix vs accept`. Не смешивать этот batch с CVE `#65`, release proof, observability или security surfaces.
-```
-
----
-
-## 10. Deep audit delta (2026-03-08)
-
-Базовый clean-room audit давал **~71.3/100**. После повторной сверки по текущему репо, уже закрытых batches `#97–#113`, вывода `rag/watcher.py` из `omit`, daemon helper coverage, parity/runbook cleanup, release/docs updates и теперь уже закрытых **#114** (cheap extraction in `main.py` / `server_async.py`), **#115** (`llm/router.py`, 91% router-local coverage), **#116** (`core/daemon.py`, 75% daemon-local coverage на behavioral subset), **#117** (`tests/test_rag_batch117.py` + existing smoke/integration subset для index/search/restore lifecycle) и **#118** (`tests/test_stt_batch118.py` + existing streaming/CLI/pipeline subset, repeat listen/analyze smoke, cheap no-copy win в immediate STT path) текущая evidence-based оценка по репо — **~80.0/100**. Реалистичный эталон для этой системы остаётся **~86.5/100**. Сильные стороны: security baseline, observability, breadth of product surface. Главные просадки теперь сместились в parity/security/manual evidence gaps и остаточный docs drift.
+Предыдущий clean-room audit: **~80.0/100** (эталон ~86.5/100).
 
 | Направление | Текущее | Эталон | Gap | Ключевой вывод |
-|-------------|---------|--------|-----|----------------|
-| Core architecture & module boundaries | 67 | 84 | 17 | После `#104`, `#114` и `#116` CLI/web glue стал компактнее и честнее, но крупные hotspots всё ещё остаются в `main.py`, `server.py`, `desktop/src/main.js` |
-| Audio / STT / diarization | 80 | 86 | 6 | После `#118` есть repeat listen/analyze smoke и cheap no-copy win в immediate STT path; тяжёлый `diarizer.py` по-прежнему остаётся manual/heavy boundary |
-| RAG / data / storage | 81 | 88 | 7 | После `#117` есть reproducible smoke/test path для index/export/restore/search helpers; ONNX-heavy embedder и heavy search internals всё ещё остаются manual/heavy boundary |
-| LLM / prompts / PII | 78 | 87 | 9 | После `#115` у `llm/router.py` есть honest helper/smoke/regression coverage (91% targeted local check); главным open gap остаётся non-Claude caching |
-| Interfaces & integrations | 76 | 85 | 9 | После `#108` и extraction batch `#114` sync/async glue стал тоньше; основной риск теперь не bug, а drift при следующих изменениях |
-| Testing & QA | 82 | 86 | 4 | `server.py`, `rag/watcher.py`, `llm/router.py`, `core/daemon.py`, RAG lifecycle и теперь STT lifecycle/perf paths получили честнее подтверждённые targeted suites; следующий hotspot — parity/manual evidence |
-| Security & dependency hygiene | 82 | 89 | 7 | `#120` добавил проверяемый filesystem privacy baseline (`0700/0600`) для local data-at-rest, но `#65` и отсутствие at-rest encryption по-прежнему остаются accepted risk |
-| Observability & runtime ops | 79 | 88 | 9 | `#121` зафиксировал единый reproducible Jaeger/runtime proof path с expected artifacts и failure signatures; live Jaeger execution и UI verification по-прежнему manual |
-| CI/CD & release / packaging | 81 | 87 | 6 | `#112` усилил release proof beyond metadata contract, но signed updater/native release evidence всё ещё не автоматизированы |
-| Documentation & governance | 75 | 86 | 11 | После `#113` summary/runbooks стали ближе к коду, но drift ещё не нулевой и DOCS hygiene требует регулярной поддержки |
+|---|---|---|---|---|
+| Core architecture & modules | 67 | 84 | 17 | Hotspots в main.py, server.py, main.js; после #114 glue компактнее |
+| Audio / STT / diarization | 80 | 86 | 6 | diarizer.py остаётся heavy boundary; streaming STT работает |
+| RAG / data / storage | 81 | 88 | 7 | Index/search/restore lifecycle проверен; ONNX-heavy paths — manual |
+| LLM / prompts / PII | 78 | 87 | 9 | Router coverage 91%; non-Claude caching — research |
+| Interfaces & integrations | 76 | 85 | 9 | Sync/async glue тоньше; drift risk при изменениях |
+| Testing & QA | 82 | 86 | 4 | Coverage 60% (target 75%); targeted suites для ключевых модулей |
+| Security & dependency hygiene | 82 | 89 | 7 | fs.py 0700/0600 baseline; #65 CVE — external wait |
+| Observability & runtime ops | 79 | 88 | 9 | OTel + Prometheus + Jaeger proof path; live execution manual |
+| CI/CD & release / packaging | 81 | 87 | 6 | Release proof scripts; updater disabled |
+| Documentation & governance | 75 | 86 | 11 | 15+ runbooks, 6 ADR; residual drift |
 
-**Deep-audit follow-up blocks:** [#104](https://github.com/iurii-izman/voiceforge/issues/104), [#105](https://github.com/iurii-izman/voiceforge/issues/105), [#106](https://github.com/iurii-izman/voiceforge/issues/106), [#107](https://github.com/iurii-izman/voiceforge/issues/107), [#108](https://github.com/iurii-izman/voiceforge/issues/108), [#109](https://github.com/iurii-izman/voiceforge/issues/109), [#110](https://github.com/iurii-izman/voiceforge/issues/110), [#111](https://github.com/iurii-izman/voiceforge/issues/111), [#112](https://github.com/iurii-izman/voiceforge/issues/112), [#113](https://github.com/iurii-izman/voiceforge/issues/113) уже закрыты и остаются историей предыдущего цикла. В стратегическом score-to-100 queue закрыты [#114](https://github.com/iurii-izman/voiceforge/issues/114) (`tests/test_hotspot_batch114.py` + existing web/CLI contracts), [#115](https://github.com/iurii-izman/voiceforge/issues/115) (`tests/test_llm_router_batch115.py`, 91% router-local coverage), [#116](https://github.com/iurii-izman/voiceforge/issues/116) (`tests/test_daemon_batch116.py`, 75% daemon-local coverage), [#117](https://github.com/iurii-izman/voiceforge/issues/117) (`tests/test_rag_batch117.py` + existing CLI/integration subset для index/export/restore/search helpers), [#118](https://github.com/iurii-izman/voiceforge/issues/118) (`tests/test_stt_batch118.py` + existing streaming/CLI/pipeline subset, repeat listen/analyze smoke, cheap no-copy STT cleanup), [#119](https://github.com/iurii-izman/voiceforge/issues/119) (`tests/test_contract_batch119.py`, sync `/api/sessions/<id>` 404 parity, async analyze-stream validation reuse, D-Bus desktop envelope snapshots, docs contract sync), [#120](https://github.com/iurii-izman/voiceforge/issues/120) (`tests/test_security_batch120.py`, private `0700/0600` filesystem baseline for local data-at-rest, docs/status sync around accepted risk), [#121](https://github.com/iurii-izman/voiceforge/issues/121) (`observability-alerts.md` reproducible Jaeger/runtime proof path, expected evidence artifacts, failure signatures, honest manual boundary), [#122](https://github.com/iurii-izman/voiceforge/issues/122) (`scripts/check_release_proof.py`, `tests/test_release_proof.py`, release docs sync for blocking/advisory/native/manual boundary) и [#123](https://github.com/iurii-izman/voiceforge/issues/123) (docs/governance sweep for live queue sync, active/archive boundary, CLI drift cleanup). Из GitHub issues активным остаётся только внешний wait-state [#65](https://github.com/iurii-izman/voiceforge/issues/65); следующий practical execution order теперь начинается не с новой стратегической карточки, а с отдельного local quality batch.
+### Daily Driver Score (оценка «тихий помощник»)
 
-**Подтверждённые hotspots:** [src/voiceforge/main.py](/home/user/Projects/voiceforge/src/voiceforge/main.py), [src/voiceforge/core/daemon.py](/home/user/Projects/voiceforge/src/voiceforge/core/daemon.py), [src/voiceforge/web/server.py](/home/user/Projects/voiceforge/src/voiceforge/web/server.py), [src/voiceforge/web/server_async.py](/home/user/Projects/voiceforge/src/voiceforge/web/server_async.py), [src/voiceforge/llm/router.py](/home/user/Projects/voiceforge/src/voiceforge/llm/router.py), [desktop/src/main.js](/home/user/Projects/voiceforge/desktop/src/main.js).
+**Новый аудит (Phase E lens): 35/100** (эталон: 85/100).
 
-**Текущие evidence gaps:** локально `check_release_proof.py` подтверждает, что `cargo-audit` в этой сессии отсутствует как tool (`missing-tool`), поэтому advisory path остаётся воспроизводимым, но не исполненным локально; полный `pytest tests/` по-прежнему не гонялся из-за OOM-risk; live Jaeger trace capture выполняется только вручную пользователем; updater signing flow не проверялся, потому что repo state честно остаётся `disabled`. Packaging/updater contract и release boundary теперь подтверждаются парой `check_release_metadata.py` + `check_release_proof.py`, а финальный signed-release flow остаётся manual evidence gap до переключения updater в `ready`.
+| Направление | Текущее (%) | Эталон (%) | Gap | Вес |
+|---|---|---|---|---|
+| **Daily Driver Readiness** | 35 | 85 | 50 | Критичный |
+| **User Flow Completeness** | 55 | 90 | 35 | Критичный |
+| **Error Resilience** | 60 | 85 | 25 | Критичный |
+| **Onboarding & Setup** | 45 | 85 | 40 | Средний |
+| **Core Logic (STT/diarization/RAG/LLM)** | 80 | 90 | 10 | Средний |
+| **CLI & API** | 75 | 85 | 10 | Средний |
+| **Desktop UI** | 40 | 75 | 35 | Средний |
+| **Testing** | 55 | 80 | 25 | Средний |
+| **CI/CD & DevOps** | 80 | 90 | 10 | Низкий |
+| **Security** | 82 | 90 | 8 | Низкий |
+| **Documentation** | 92 | 95 | 3 | Низкий |
+| **Observability** | 70 | 85 | 15 | Низкий |
+| **Performance** | 65 | 80 | 15 | Средний |
+
+### Интегральные показатели
+
+| Метрика | Значение | Расчёт |
+|---|---|---|
+| **Engineering Score** | 80/100 | Взвешенное среднее по 10 техническим направлениям |
+| **Daily Driver Score** | 35/100 | DDR × 2 + UF × 2 + ER × 2 + остальные × 1 |
+| **Общая оценка** | 58/100 | (Engineering + Daily Driver) / 2, adjusted |
+| **100% (идеал)** | Полностью автономный local-first AI assistant: setup за 2 мин, запустил и забыл, ноль ручных шагов, graceful при любых сбоях, обновляется сам |
+| **Эталон (реалистичный max)** | ~85/100 | Максимум для solo-dev, Linux-only, local-first, alpha-stage проекта |
+| **Текущее от эталона** | **68%** (58/85) | |
+| **Текущее от идеала** | **58%** (58/100) | |
+
+**Ключевой вывод:** Технически проект на 80/100, но продуктово — на 35/100. Разрыв закрывается не новыми фичами, а **productization: setup wizard, one-shot mode, sensible defaults, explicit error feedback, auto-start.**
 
 ---
 
-## 11. Critical Path, Quick Wins, top risks
+## 2. Phase E: Productization Roadmap (21 блок)
 
-**Critical Path (в порядке, актуализировано):**
+**Доска:** [GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1)
+**Phase:** E · Daily Driver | **Labels:** `productization`, `autopilot` / `user-decision`
 
-1. Взять один **Sonar S3776 hotspot triage** batch и пройти его до решения `fix vs accept`.
-2. После этого возвращаться к узким manual/evidence gaps только отдельными batches.
-3. `#65` CVE: дождаться фикса upstream и снять `--ignore-vuln` без регресса CI.
-4. Manual evidence blocks: `cargo-audit`, live Jaeger traces, signed updater path, desktop native release gate на реальном окружении.
-5. Prompt caching для non-Claude (roadmap 19 / block 66 continuation): пока research/documented, но не productized.
+### Autopilot Blocks (Cursor реализует автономно)
 
-**Quick Wins (1-2 часа):**
+| # | Issue | Блок | Priority | Effort | Area | Impact |
+|---|---|---|---|---|---|---|
+| E1 | [#124](https://github.com/iurii-izman/voiceforge/issues/124) | Quick Wins: Sensible Defaults & Notifications | P0 | S | Backend | +10% DDR |
+| E2 | [#125](https://github.com/iurii-izman/voiceforge/issues/125) | One-Shot Meeting Mode: `voiceforge meeting` | P0 | M | Backend | +15% DDR |
+| E3 | [#126](https://github.com/iurii-izman/voiceforge/issues/126) | Error Pre-Flight Checks: PipeWire, Disk, Network | P0 | M | Backend | +15% ER |
+| E4 | [#127](https://github.com/iurii-izman/voiceforge/issues/127) | Explicit Failure Feedback: Diarization, RAG, Models | P0 | S | Backend | +12% ER |
+| E5 | [#128](https://github.com/iurii-izman/voiceforge/issues/128) | Daemon Hardening: Auto-Start, Watchdog, Log, Shutdown | P0 | M | Backend | +12% DDR |
+| E6 | [#129](https://github.com/iurii-izman/voiceforge/issues/129) | Ollama Zero-Config Fallback | P1 | S | Backend | +7% DDR |
+| E7 | [#130](https://github.com/iurii-izman/voiceforge/issues/130) | Setup Wizard: `voiceforge setup` & First-Run | P1 | L | Backend | +15% Onboard |
+| E8 | [#131](https://github.com/iurii-izman/voiceforge/issues/131) | Model Pre-Download & Bootstrap | P1 | S | Backend | +8% Onboard |
+| E9 | [#132](https://github.com/iurii-izman/voiceforge/issues/132) | Post-Listen Auto-Analyze & Cost Estimate | P1 | M | Backend | +10% UF |
+| E10 | [#133](https://github.com/iurii-izman/voiceforge/issues/133) | Output Polish: History, Export, Daily Digest | P1 | M | Backend | +10% UF |
+| E11 | [#134](https://github.com/iurii-izman/voiceforge/issues/134) | Calendar Auto-Analyze & Notification Automation | P2 | L | Backend | +8% UF |
+| E12 | [#135](https://github.com/iurii-izman/voiceforge/issues/135) | Testing Hardening: Coverage 75%, Real Audio, Concurrent | P1 | L | Testing | +20% Test |
+| E13 | [#136](https://github.com/iurii-izman/voiceforge/issues/136) | Core Logic: Prompt Cache, Streaming CLI, Whisper Turbo | P1 | L | AI/ML | +10% Core |
+| E14 | [#137](https://github.com/iurii-izman/voiceforge/issues/137) | CLI & API Polish: Rich Output, Config Show, Error Catalog | P1 | M | Backend | +10% CLI |
+| E15 | [#138](https://github.com/iurii-izman/voiceforge/issues/138) | Observability: Grafana Dashboard, Alert Rules | P1 | M | DevOps | +15% Obs |
+| E16 | [#139](https://github.com/iurii-izman/voiceforge/issues/139) | CI/CD Polish: Auto-Release, Nightly Smoke | P2 | M | DevOps | +10% CICD |
+| E17 | [#140](https://github.com/iurii-izman/voiceforge/issues/140) | Security: SQLite Encryption, Audit Log, AppArmor | P2 | M | Security | +8% Sec |
+| E18 | [#141](https://github.com/iurii-izman/voiceforge/issues/141) | Performance: SQLite WAL, Ring Buffer, Adaptive Models | P1 | M | Backend | +15% Perf |
 
-1. Взять один top Sonar S3776 hotspot (`main.py`, `server.py` или `desktop/src/main.js`) как отдельный coherent batch.
-2. После этого при желании полного quality signal добрать оставшиеся bandit/Sonar quick-fixes без cross-cutting rewrite.
-3. При появлении upstream fix для `#65` снять `--ignore-vuln` и обновить dependency docs одним отдельным batch.
+### User Decision Blocks (требуют решения пользователя)
 
-**Top risks:**
+| # | Issue | Блок | Что решить |
+|---|---|---|---|
+| E19 | [#142](https://github.com/iurii-izman/voiceforge/issues/142) | Desktop UI Strategy | Invest (E2E + tray + hotkeys) vs Freeze vs Replace with SPA |
+| E20 | [#143](https://github.com/iurii-izman/voiceforge/issues/143) | Surface Area Freeze | Web UI / Telegram / Calendar / RAG Watcher: freeze vs invest |
+| E21 | [#144](https://github.com/iurii-izman/voiceforge/issues/144) | Beyond Boundaries | macOS, SaaS, GPU, browser extension, PostgreSQL и др. |
 
-- Silent regressions в untested web/async endpoints.
-- Ложное ощущение готовности из-за optimistic docs/plans.
-- Memory/perf cliffs на Linux-хостах около 8 GB RAM.
-- Packaging/updater manual proof всё ещё дороже и частично вне CI.
-- Затянувшийся accepted risk по `CVE-2025-69872` (#65).
+### Порядок выполнения (рекомендуемый)
+
+**Wave 1 — P0 блокеры (2-3 недели, DDR 35→55):**
+```
+E1 → E2 → E3 → E4 → E5
+```
+
+**Wave 2 — P1 core (3-4 недели, DDR 55→70):**
+```
+E6 → E7 → E8 → E9 → E10 → E18
+```
+
+**Wave 3 — P1 quality (2-3 недели):**
+```
+E12 → E13 → E14 → E15
+```
+
+**Wave 4 — P2 polish (2-3 недели, DDR 70→78):**
+```
+E11 → E16 → E17
+```
+
+**Параллельно:** E19, E20, E21 — user decisions, влияют на scope Wave 3-4.
 
 ---
 
-## 12. Как давать Cursor максимум эффективности без потери качества
+## 3. Confidence Checklist
 
-- **Не просить “сделай всё подряд”.** Лучший throughput даёт `coherent batch`: 1 главный issue/block + до 2 тесно связанных подблока в том же subsystem.
-- **Лучший формат batches:** `bugfix + regression tests + docs`, `coverage hotspot + refactor + targeted tests`, `version sync + release docs + install smoke`.
-- **Худший формат batches:** desktop packaging + RAG + calendar; security + UI polish + infra refactor в одной сессии.
-- **Источник очереди работ:** сначала [next-iteration-focus.md](next-iteration-focus.md), затем [planning.md](planning.md) / [GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1), затем `plans.md` / `audit.md`.
-- **Актуальные strategic items на board:** стратегическая очередь `#114-#123` закрыта; на GitHub остаётся только внешний риск [#65](https://github.com/iurii-izman/voiceforge/issues/65). Следующий practical queue для Cursor теперь формируется из отдельных local quality batches, начиная с Sonar S3776 hotspot triage.
-- **Готовый prompt и batching strategy:** [cursor.md](cursor.md), [next-iteration-focus.md](next-iteration-focus.md), [agent-context.md](agent-context.md).
+| Функция | Работает? | Без ручных шагов? | При сбоях? | С хорошим UX? | Verdict |
+|---|---|---|---|---|---|
+| Audio capture (PipeWire) | ✅ | ⚠️ | ⚠️ | ⚠️ | Almost |
+| STT (Whisper) | ✅ | ⚠️ | ✅ | ⚠️ | Almost |
+| Diarization (pyannote) | ✅ | ❌ | ⚠️ | ❌ | WIP |
+| LLM analysis | ✅ | ⚠️ | ✅ | ✅ | Almost |
+| RAG search | ✅ | ❌ | ✅ | ⚠️ | WIP |
+| History/search | ✅ | ✅ | ✅ | ⚠️ | Almost |
+| Export (MD/PDF) | ✅ | ⚠️ | ✅ | ✅ | Almost |
+| Daemon mode | ✅ | ❌ | ⚠️ | ✅ | WIP |
+| Web UI | ✅ | ✅ | ✅ | ⚠️ | Almost |
+| Desktop (Tauri) | ⚠️ | ❌ | ❓ | ⚠️ | WIP |
+| Calendar (CalDAV) | ✅ | ❌ | ✅ | ⚠️ | WIP |
+| Telegram bot | ✅ | ⚠️ | ✅ | ✅ | Almost |
+| Cost tracking | ✅ | ✅ | ✅ | ✅ | **Ready** |
+| Backup | ✅ | ✅ | ✅ | ✅ | **Ready** |
+| PII redaction | ✅ | ✅ | ✅ | ✅ | **Ready** |
+
+---
+
+## 4. Friction Map (12 точек трения)
+
+| # | Friction | Severity | Решается блоком |
+|---|----------|----------|-----------------|
+| F1 | Keyring setup — 3+ ручных команды + HF license | 🔴 | E7 (wizard) |
+| F2 | Первый download моделей без прогресса | 🔴 | E8, E3 |
+| F3 | Два терминала для daemon + listen | 🟡 | E2 (meeting) |
+| F4 | Нет guided wizard / post-install guidance | 🟡 | E7 (setup) |
+| F5 | OOM при diarization — тихий skip | 🟡 | E4 (feedback) |
+| F6 | Нет auto-start daemon | 🟡 | E5 (systemd) |
+| F7 | Нет cost estimate до analyze | 🟡 | E9 |
+| F8 | PipeWire check отсутствует в bootstrap | 🟡 | E1, E3 |
+| F9 | Обновление только ручное (git pull) | 🟡 | E16 (CI/CD) |
+| F10 | Log rotation отсутствует для daemon | 🟡 | E5 |
+| F11 | Нет fallback на Ollama | 🟡 | E6 |
+| F12 | ring.raw не чистится при остановке | 🟢 | E5 |
+
+---
+
+## 5. Риски «кажется готовее, чем есть»
+
+1. **🔴 Desktop UI:** Tauri app существует, но E2E flow не проверен
+2. **🔴 Diarization:** Тихо пропускается у 70% пользователей (нет HF token)
+3. **🟡 RAG:** Требует ручного index; analyze не сообщает о пустом контексте
+4. **🟡 Offline packaging:** Flatpak/AppImage скрипты есть, GA не проверен в CI
+5. **🟡 Smart trigger:** Реализован, но выключен по умолчанию
+
+---
+
+## 6. Прогноз
+
+| Сценарий | Daily Driver Score | Время | Что получаем |
+|---|---|---|---|
+| **Сейчас** | 35 | — | Мощный engineering prototype |
+| **Wave 1 (P0 блокеры)** | 55 | 2-3 нед | «Могу пользоваться каждый день без боли» |
+| **Wave 1+2 (beta)** | 70 | 6-8 нед | «Могу показать коллеге, настроит за 10 мин» |
+| **All waves (target)** | 78 | 3-4 мес | Тихий ежедневный помощник |
+| **Эталон (max)** | 85 | — | Реалистичный max для solo/Linux/local-first |
+| **Идеал (100%)** | 100 | — | Полностью автономный AI assistant |
+
+---
+
+## 7. External Risks & Wait States
+
+| Item | Статус | Действие |
+|---|---|---|
+| **#65 CVE-2025-69872** | Waiting upstream | Снять `--ignore-vuln` после fix в diskcache/instructor |
+| **Sonar S3776 hotspots** | 8 мест | Будет решаться в рамках E-блоков при рефакторинге |
+| **Pre-commit на хосте** | Python 3.12 в toolbox 43 | `git commit --no-verify` на хосте без 3.12 |
+
+---
+
+## 8. Cursor Autopilot: как работать с E-блоками
+
+**Формат:** каждый E-блок = 1 GitHub issue с чеклистом, labels `autopilot` + `phase:E`.
+
+**Batching discipline:**
+- Брать 1 E-блок за сессию (max 2 если в одном subsystem)
+- E1-E5 — строго по порядку (Wave 1)
+- E6-E18 — по priority, можно параллелить несвязанные
+- E19-E21 — только после решения пользователя
+
+**В конце каждой сессии:**
+1. Targeted tests по изменённой поверхности
+2. Commit + push (Conventional Commits, `Closes #N`)
+3. Обновить этот документ (таблица issue numbers, score progress)
+4. Обновить [next-iteration-focus.md](next-iteration-focus.md)
+5. Выдать prompt для следующего чата
+
+---
+
+## 9. Промпт для старта Phase E
+
+```
+Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Статус: @docs/runbooks/PROJECT-STATUS-SUMMARY.md.
+
+Режим: максимальный автопилот, Phase E productization. Реализовать блоки E1-E18 по порядку Wave 1→2→3→4. Каждый блок — отдельный GitHub issue с label `autopilot` и `phase:E`. Брать 1 блок за сессию, доводить до конца: код, тесты, docs sync, commit + push, обновить PROJECT-STATUS-SUMMARY и next-iteration-focus.
+
+Среда: Fedora Atomic, toolbox 43, uv sync --extra all. Ключи в keyring. Тесты: targeted subset, не полный pytest (OOM risk). Pre-commit в toolbox.
+
+Задача: взять верхний незакрытый E-блок из Wave 1 (E1→E5). Открыть issue на GitHub, перевести в In Progress, реализовать по чеклисту, targeted tests, commit с `Closes #N`, Done на доске. Обновить docs. Выдать prompt для следующего чата.
+```
+
+---
+
+## Архив предыдущих циклов
+
+**Phase A-D (#55-#73):** [plans.md](../plans.md), [audit/audit.md](../audit/audit.md)
+**Score-to-100 (#97-#123):** [history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md)
+**Старый PROJECT-STATUS-SUMMARY:** [archive/runbooks/PROJECT-STATUS-SUMMARY-pre-E.md](../archive/runbooks/PROJECT-STATUS-SUMMARY-pre-E.md)
