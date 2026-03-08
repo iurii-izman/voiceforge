@@ -96,6 +96,6 @@ git push origin v0.2.0-alpha.2
 
 **Качество и безопасность:** verify_pr.sh, smoke_clean_env.sh, check_cli_contract.sh — OK; тесты db_migrations — OK; check_new_code_coverage.sh; CVE-2025-69872 временно в ignore до фикса upstream.
 
-**Release readiness:** версия 0.1.0a1 / тег v0.1.0-alpha.1; шаги release runbook выполнены; CHANGELOG актуален.
+**Release readiness:** версия 0.2.0a2 / тег v0.2.0-alpha.2; шаги release runbook выполнены; CHANGELOG актуален.
 
 **Перед бета-релизом:** привести в порядок Sonar и GitHub по чеклисту [pre-beta-sonar-github.md](pre-beta-sonar-github.md).

@@ -33,6 +33,14 @@
 
 ---
 
+## Sweep: устаревшие ссылки и версии
+
+**Версия (единый источник):** `pyproject.toml` (Python package), `desktop/package.json` и `desktop/src-tauri/tauri.conf.json` (desktop). При смене версии обновить release-and-quality.md, CHANGELOG и при необходимости примеры в runbook’ах (desktop-build-deps, desktop-updater). Не дублировать номер версии в тексте «Release readiness» — брать из release-and-quality.md.
+
+**Устаревшие ссылки:** при sweep проверять DOCS-INDEX.md, заглушки в docs/ (PROJECT_AUDIT_AND_ROADMAP.md → archive), пути audit/audit.md и plans.md (относительно docs/). Сломанные внутренние ссылки править в том же коммите, что и изменение целевого документа.
+
+---
+
 ## Ссылки
 
 - Полный индекс: [DOCS-INDEX.md](../DOCS-INDEX.md).
