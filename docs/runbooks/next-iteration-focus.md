@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-08 (closed #90, #110, #111, #112; checklists and prompt caching status)
+**Обновлено:** 2026-03-08 (closed #104, #105, #106; hotspot extraction + lifecycle smoke)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** закрыты четыре задачи документацией и чеклистами. **#110** (dependency risk и data-at-rest): в security-and-dependencies.md добавлен раздел 7 — чеклист по рискам зависимостей и данным на диске. **#111** (observability evidence): в observability-alerts.md добавлен чеклист доказательства трейсов (Jaeger, ручные шаги). **#112** (release/packaging proof): в release-and-quality.md добавлен §1.3 — доказательство релиза и упаковки (ручные шаги: сборка, cargo audit, e2e:native, подпись). **#90** (prompt caching): в prompt-management.md зафиксирован статус — реализовано для Claude, для остальных провайдеров документировано. Коммит с Closes #90, #110, #111, #112; карточки переведены в Done.
+**Сделано в сессии:** закрыты задачи #104, #105, #106. **#104** (hotspot boundaries): из daemon.py вынесена `_event_description_from_detail` в уровень модуля (create_event_from_session), добавлены тесты в test_daemon_helpers; в PROJECT-STATUS-SUMMARY зафиксирован следующий structural hotspot (main.py/server_async). **#105** (audio/STT lifecycle): добавлен runbook [lifecycle-smoke.md](lifecycle-smoke.md) — воспроизводимые шаги для listen/analyze и targeted tests. **#106** (RAG lifecycle): в lifecycle-smoke.md задокументирован smoke для index/search и restore. Коммиты с Closes #104, #105, #106; карточки переведены в Done.
 
-**Следующий шаг:** Открыты только #65 (CVE — ждём upstream, не закрывать), #104 (hotspot boundaries), #105 (audio/STT), #106 (RAG lifecycle). Брать один coherent batch: #104 (рефакторинг одной функции для S3776) или #105/#106 (тесты/жизненный цикл). Полный pytest tests/ не гонять по умолчанию (OOM-risk).
+**Следующий шаг:** Открыта только **#65** (CVE diskcache/instructor — ждём upstream; не закрывать до фикса). Все остальные задачи по доске закрыты с подтверждением (код, тесты, доки). При появлении фикса для #65 — выполнить чеклист в [security-and-dependencies.md](security-and-dependencies.md) разд. 4. Полный pytest tests/ не гонять по умолчанию (OOM-risk).
 
 ---
 
