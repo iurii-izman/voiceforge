@@ -22,6 +22,8 @@
 
 **Coverage #56:** текущий fail_under=72 (pyproject.toml). Цель 75→80%. Запуск полного отчёта: `make coverage` (рекомендуется в toolbox — в Cursor полный pytest может OOM). При достижении ≥75% выставить в pyproject.toml `fail_under = 75`.
 
+**Coverage #99 incremental path:** для hotspot-модулей `server.py`, `server_async.py`, `daemon.py`, `router.py`, `main.py` сначала добавлять дешёвые helper/smoke/regression tests без OOM-risk, затем выводить модуль из `omit` по одному, только когда targeted subset стабилен и не просаживает общий `fail_under`. Не делать cross-cutting rewrite только ради отчёта покрытия; сначала сужать blind spots, потом поднимать policy.
+
 **Для alpha2 (с десктопом):** версия `0.2.0a2`; сборка десктопа: `cd desktop && npm run build && cargo tauri build`; артефакты в `desktop/src-tauri/target/release/bundle/`. Чеклист: сценарий «демон → Tauri → анализ → сессия»; CHANGELOG обновлён.
 
 **Команды:**
