@@ -15,6 +15,8 @@ from voiceforge.core.daemon import (
     _calendar_autostart_try_start,
     _cancel_purge_then_service_reraise,
     _run_one_retention_purge,
+    _sd_notify,
+    _watchdog_task,
 )
 from voiceforge.core.dbus_service import DaemonVoiceForgeInterface
 
@@ -250,7 +252,10 @@ def test_daemon_search_rag_get_ids_and_upcoming_events_success(monkeypatch, tmp_
         def close(self) -> None:
             pass
 
-    monkeypatch.setattr("voiceforge.core.pipeline._get_cached_searcher", lambda db_path: SimpleNamespace(search=lambda query, top_k: search_results))
+    monkeypatch.setattr(
+        "voiceforge.core.pipeline._get_cached_searcher",
+        lambda db_path: SimpleNamespace(search=lambda query, top_k: search_results),
+    )
     monkeypatch.setattr("voiceforge.core.transcript_log.TranscriptLog", FakeLogDb)
     monkeypatch.setattr("voiceforge.calendar.get_upcoming_events", lambda hours_ahead=48: ([{"summary": "Demo"}], None))
 
@@ -509,3 +514,29 @@ def test_calendar_autostart_try_start_starts_only_for_window(monkeypatch) -> Non
     monkeypatch.setattr("voiceforge.calendar.get_upcoming_events", lambda hours_ahead=1: ([], None))
     _calendar_autostart_try_start(daemon, 15)
     assert started == [1]
+
+
+# --- E5 #128: Daemon hardening (watchdog, shutdown, ring cleanup) ---
+
+
+def test_sd_notify_no_socket_returns_false(monkeypatch) -> None:
+    """Without NOTIFY_SOCKET, _sd_notify does nothing and returns False."""
+    monkeypatch.delenv("NOTIFY_SOCKET", raising=False)
+    assert _sd_notify("READY=1") is False
+    assert _sd_notify("WATCHDOG=1") is False
+
+
+def test_sd_notify_with_invalid_socket_returns_false(monkeypatch) -> None:
+    """With NOTIFY_SOCKET set to non-existent path, _sd_notify fails and returns False."""
+    monkeypatch.setenv("NOTIFY_SOCKET", "/nonexistent/notify.sock")
+    assert _sd_notify("WATCHDOG=1") is False
+
+
+@pytest.mark.asyncio
+async def test_watchdog_task_stops_on_event() -> None:
+    """_watchdog_task runs until stop_event is set."""
+    stop = asyncio.Event()
+    task = asyncio.create_task(_watchdog_task(stop))
+    await asyncio.sleep(0.05)
+    stop.set()
+    await task  # completes normally when stop is set

@@ -54,6 +54,7 @@
   "meeting.listening_hint": "Listening... Press Ctrl+C to stop and analyze.",
   "install_service.copied": "Copied: {path}",
   "install_service.enabled": "Service enabled. Logs: journalctl --user -u voiceforge -f",
+  "install_service.enabled_and_started": "Service installed, enabled and started. Logs: journalctl --user -u voiceforge -f",
   "uninstall_service.done": "VoiceForge service disabled and stopped.",
   "cost.date_invalid": "Invalid date format (expected YYYY-MM-DD): {e}",
   "cost.summary": "Cost: ${total:.4f} (calls: {calls})",

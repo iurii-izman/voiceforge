@@ -1192,8 +1192,9 @@ def install_service() -> None:
     shutil.copy2(unit_src, unit_dst)
     typer.echo(t("install_service.copied", path=str(unit_dst)))
     subprocess.run(["systemctl", "--user", "daemon-reload"], check=True)  # nosec B603 B607
-    subprocess.run(["systemctl", "--user", "enable", "--now", _SERVICE_UNIT_NAME], check=True)  # nosec B603 B607
-    typer.echo(t("install_service.enabled"))
+    subprocess.run(["systemctl", "--user", "enable", _SERVICE_UNIT_NAME], check=True)  # nosec B603 B607
+    subprocess.run(["systemctl", "--user", "start", _SERVICE_UNIT_NAME], check=True)  # nosec B603 B607
+    typer.echo(t("install_service.enabled_and_started"))
 
 
 @app.command("uninstall-service")

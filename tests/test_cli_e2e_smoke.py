@@ -163,7 +163,8 @@ def test_cli_service_install_uninstall_smoke(monkeypatch, tmp_path) -> None:
 
     assert calls == [
         ["systemctl", "--user", "daemon-reload"],
-        ["systemctl", "--user", "enable", "--now", "voiceforge.service"],
+        ["systemctl", "--user", "enable", "voiceforge.service"],
+        ["systemctl", "--user", "start", "voiceforge.service"],
         ["systemctl", "--user", "disable", "--now", "voiceforge.service"],
     ]
 

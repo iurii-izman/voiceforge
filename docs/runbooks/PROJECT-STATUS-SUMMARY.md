@@ -1,6 +1,6 @@
 # VoiceForge: Project Status & Productization Roadmap
 
-**Обновлено:** 2026-03-08. **Версия:** 0.2.0-alpha.2. **Стадия:** Phase E — Daily Driver.
+**Обновлено:** 2026-03-09. **Версия:** 0.2.0-alpha.2. **Стадия:** Phase E — Daily Driver.
 **Предыдущий цикл (#97-#123):** закрыт полностью; архив: [history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
 
 ---
@@ -75,7 +75,7 @@
 | E2 | [#125](https://github.com/iurii-izman/voiceforge/issues/125) | One-Shot Meeting Mode: `voiceforge meeting` | P0 | M | Backend | +15% DDR ✓ |
 | E3 | [#126](https://github.com/iurii-izman/voiceforge/issues/126) | Error Pre-Flight Checks: PipeWire, Disk, Network | P0 | M | Backend | +15% ER ✓ |
 | E4 | [#127](https://github.com/iurii-izman/voiceforge/issues/127) | Explicit Failure Feedback: Diarization, RAG, Models | P0 | S | Backend | +12% ER ✓ |
-| E5 | [#128](https://github.com/iurii-izman/voiceforge/issues/128) | Daemon Hardening: Auto-Start, Watchdog, Log, Shutdown | P0 | M | Backend | +12% DDR |
+| E5 | [#128](https://github.com/iurii-izman/voiceforge/issues/128) | Daemon Hardening: Auto-Start, Watchdog, Log, Shutdown | P0 | M | Backend | +12% DDR ✓ |
 | E6 | [#129](https://github.com/iurii-izman/voiceforge/issues/129) | Ollama Zero-Config Fallback | P1 | S | Backend | +7% DDR |
 | E7 | [#130](https://github.com/iurii-izman/voiceforge/issues/130) | Setup Wizard: `voiceforge setup` & First-Run | P1 | L | Backend | +15% Onboard |
 | E8 | [#131](https://github.com/iurii-izman/voiceforge/issues/131) | Model Pre-Download & Bootstrap | P1 | S | Backend | +8% Onboard |
@@ -102,7 +102,7 @@
 
 **Wave 1 — P0 блокеры (2-3 недели, DDR 35→55):**
 ```
-E1 ✓ → E2 ✓ → E3 ✓ → E4 ✓ → E5
+E1 ✓ → E2 ✓ → E3 ✓ → E4 ✓ → E5 ✓
 ```
 
 **Wave 2 — P1 core (3-4 недели, DDR 55→70):**
@@ -155,13 +155,13 @@ E11 → E16 → E17
 | F3 | Два терминала для daemon + listen | 🟢 | E2 (meeting) ✓ |
 | F4 | Нет guided wizard / post-install guidance | 🟡 | E7 (setup) |
 | F5 | OOM при diarization — тихий skip | 🟡 | E4 (feedback) |
-| F6 | Нет auto-start daemon | 🟡 | E5 (systemd) |
+| F6 | Нет auto-start daemon | 🟢 | E5 (systemd) ✓ |
 | F7 | Нет cost estimate до analyze | 🟡 | E9 |
 | F8 | PipeWire check отсутствует в bootstrap | 🟡 | E1, E3 |
 | F9 | Обновление только ручное (git pull) | 🟡 | E16 (CI/CD) |
-| F10 | Log rotation отсутствует для daemon | 🟡 | E5 |
+| F10 | Log rotation отсутствует для daemon | 🟢 | E5 (journald) ✓ |
 | F11 | Нет fallback на Ollama | 🟡 | E6 |
-| F12 | ring.raw не чистится при остановке | 🟢 | E5 |
+| F12 | ring.raw не чистится при остановке | 🟢 | E5 ✓ |
 
 ---
 

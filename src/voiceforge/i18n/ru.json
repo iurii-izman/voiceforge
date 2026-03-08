@@ -54,6 +54,7 @@
   "meeting.listening_hint": "Слушаю... Нажмите Ctrl+C для остановки и анализа.",
   "install_service.copied": "Скопировано: {path}",
   "install_service.enabled": "Сервис включён. Логи: journalctl --user -u voiceforge -f",
+  "install_service.enabled_and_started": "Сервис установлен, включён и запущен. Логи: journalctl --user -u voiceforge -f",
   "uninstall_service.done": "Сервис voiceforge отключён и остановлен.",
   "cost.date_invalid": "Неверный формат даты (ожидается YYYY-MM-DD): {e}",
   "cost.summary": "Затраты: ${total:.4f} (вызовов: {calls})",

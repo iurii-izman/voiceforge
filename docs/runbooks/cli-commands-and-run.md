@@ -20,8 +20,8 @@
 | **index** | Индексация каталога в RAG (добавление документов в базу). Опции: путь к папке, форматы по [rag-formats.md](rag-formats.md). |
 | **watch** | Слежение за каталогом и автоиндексация при изменениях. |
 | **daemon** | Запуск демона: D-Bus-сервис, запись в буфер, smart trigger (опционально). Один процесс на сессию. Для десктопа и Web UI демон должен быть запущен. |
-| **install-service** | Установка пользовательского systemd-юнита для демона. |
-| **uninstall-service** | Удаление пользовательского юнита. |
+| **install-service** | Установка пользовательского systemd-юнита для демона: копирование юнита, enable и start (E5 #128). Логи — journald: `journalctl --user -u voiceforge -f`. |
+| **uninstall-service** | Удаление пользовательского юнита (disable и stop). |
 | **web** | Локальный HTTP-сервер (Web UI): статус, сессии, анализ, затраты, action-items. Опции: `--port`, `--host`. С опцией `--async` (или `VOICEFORGE_WEB_ASYNC=1`) — Starlette+uvicorn (нужен `uv sync --extra web-async`). |
 | **backup** | Копирование БД (transcripts, metrics, RAG) в timestamped-каталог. Опция `--keep N` — оставить только последние N бэкапов. |
 | **calendar poll** | Опрос CalDAV (keyring: caldav_url, caldav_username, caldav_password). Опции: `--minutes`, `--output`. |

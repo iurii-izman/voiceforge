@@ -33,6 +33,26 @@ log = structlog.get_logger()
 
 PID_FILE_NAME = "voiceforge.pid"
 
+# E5 #128: systemd watchdog — send status via NOTIFY_SOCKET (no extra dependency)
+_WATCHDOG_INTERVAL_SEC = 30
+
+
+def _sd_notify(message: str) -> bool:
+    """Send message to systemd via NOTIFY_SOCKET. Returns True if sent."""
+    sock_path = os.environ.get("NOTIFY_SOCKET")
+    if not sock_path or not message:
+        return False
+    try:
+        import socket
+
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+        sock.connect(sock_path)
+        sock.sendall(message.encode("utf-8"))
+        sock.close()
+        return True
+    except Exception:
+        return False
+
 
 def _streaming_language_hint(cfg: object) -> str | None:
     """Language hint for streaming STT from config (auto → None)."""
@@ -763,7 +783,7 @@ def _event_description_from_detail(detail: Any, sid: int) -> str:
     _segments, analysis = detail
     if not (analysis and getattr(analysis, "action_items", None)):
         return f"Session {sid} (VoiceForge)"
-    for ai in (analysis.action_items or []):
+    for ai in analysis.action_items or []:
         desc = (ai.get("description") or ai.get("text") or "").strip()
         if not desc:
             continue
@@ -833,6 +853,16 @@ async def _periodic_purge_task(daemon: VoiceForgeDaemon, stop_event: asyncio.Eve
             log.warning("retention.purge_failed", error=str(e))
 
 
+async def _watchdog_task(stop_event: asyncio.Event) -> None:
+    """E5 #128: send WATCHDOG=1 to systemd every 30s so service is not restarted."""
+    while True:
+        with contextlib.suppress(TimeoutError):
+            await asyncio.wait_for(stop_event.wait(), timeout=_WATCHDOG_INTERVAL_SEC)
+        if stop_event.is_set():
+            return
+        _sd_notify("WATCHDOG=1")
+
+
 def _run_daemon_loop(
     iface: DaemonVoiceForgeInterface,
     daemon: VoiceForgeDaemon,
@@ -845,9 +875,15 @@ def _run_daemon_loop(
     async def _serve() -> None:
         service_task = asyncio.create_task(run_dbus_service(iface))
         purge_task = asyncio.create_task(_periodic_purge_task(daemon, stop_event))
+        watchdog_task = asyncio.create_task(_watchdog_task(stop_event))
         try:
+            # E5 #128: Type=notify — tell systemd we are ready after D-Bus is up
+            _sd_notify("READY=1")
             await stop_event.wait()
         finally:
+            watchdog_task.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await watchdog_task
             await _cancel_purge_then_service_reraise(purge_task, service_task)
 
     loop = asyncio.new_event_loop()
@@ -891,8 +927,16 @@ def run_daemon() -> None:
     loop_holder: list[asyncio.AbstractEventLoop | None] = [None]
 
     def on_sigterm(*args: object) -> None:
-        log.info("daemon.sigterm")
-        daemon.listen_stop()
+        log.info("daemon.shutting_down_gracefully")
+        daemon.listen_stop()  # flush ring buffer, stop capture
+        # E5 #128: clean up ring.raw on graceful shutdown (keep on crash for recovery)
+        try:
+            ring_path = Path(daemon._cfg.get_ring_file_path())
+            if ring_path.is_file():
+                ring_path.unlink()
+                log.debug("daemon.ring_cleaned_up", path=str(ring_path))
+        except Exception as e:
+            log.debug("daemon.ring_cleanup_skipped", error=str(e))
         pid_path.unlink(missing_ok=True)
         loop = loop_holder[0]
         if loop is not None and loop.is_running():
