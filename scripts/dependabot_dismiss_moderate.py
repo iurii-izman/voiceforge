@@ -50,7 +50,9 @@ def main() -> None:
     token = get_api_key("github_token") or get_api_key("github_token_pat")
     if not token:
         print("github_token / github_token_pat not in keyring (service=voiceforge)", file=sys.stderr)
+        print("Add: keyring set voiceforge github_token", file=sys.stderr)
         sys.exit(1)
+    print("Using token from keyring (voiceforge/github_token or github_token_pat).")
 
     dry_run = "--dry-run" in sys.argv
     headers = {
@@ -64,6 +66,11 @@ def main() -> None:
     except urllib.error.HTTPError as e:
         body = e.read().decode() if e.fp else ""
         print(f"GitHub API error {e.code}: {body[:500]}", file=sys.stderr)
+        if e.code == 401:
+            print(
+                "401: token in keyring but rejected. Check: token valid, not expired, scope includes repo (or security_events for Dependabot).",
+                file=sys.stderr,
+            )
         sys.exit(2)
     except Exception as e:
         print(f"Request failed: {e}", file=sys.stderr)
@@ -88,6 +95,8 @@ def main() -> None:
     except urllib.error.HTTPError as e:
         body_read = e.read().decode() if e.fp else ""
         print(f"Dismiss failed {e.code}: {body_read[:500]}", file=sys.stderr)
+        if e.code == 401:
+            print("401: token rejected. Ensure token has repo (or security_events) scope and is not expired.", file=sys.stderr)
         sys.exit(2)
 
 

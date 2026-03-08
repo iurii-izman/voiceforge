@@ -19,7 +19,7 @@
 
 **Сделано в сессии:** Выполнен новый deep audit по коду, тестам, CI/CD, security, packaging и docs; добавлены приоритеты `Critical Path`, `Quick Wins` и правила coherent batching для Cursor (`agent-context.md`, `cursor.md`, `planning.md`, `PROJECT-STATUS-SUMMARY.md`).
 
-**Следующий шаг:** Взять **coherent P0 web batch**: (1) исправить bug в `POST /api/action-items/update` в sync и async web (`server.py`, `server_async.py`), (2) добавить regression tests именно на web path, (3) обновить `web-api.md` под фактический error envelope и divergence async `/api/analyze/stream`. Если batch закрыт и проверки зелёные, затем отдельной итерацией брать install/release contract (`web-async` extra в `all`, sync version metadata, release docs). verify_pr: при отсутствии hypothesis — `pytest tests/ --ignore=tests/test_rag_parsers_hypothesis.py`. Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
+**Следующий шаг:** Взять **coherent P0 web batch** по issue [#97](https://github.com/iurii-izman/voiceforge/issues/97): (1) исправить bug в `POST /api/action-items/update` в sync и async web (`server.py`, `server_async.py`), (2) добавить regression tests именно на web path, (3) обновить `web-api.md` под фактический error envelope и divergence async `/api/analyze/stream`. Если batch закрыт и проверки зелёные, затем отдельной итерацией брать issue [#98](https://github.com/iurii-izman/voiceforge/issues/98): install/release contract (`web-async` extra в `all`, sync version metadata, release docs). verify_pr: при отсутствии hypothesis — `pytest tests/ --ignore=tests/test_rag_parsers_hypothesis.py`. Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
 
 ---
 
@@ -67,7 +67,7 @@
 
 В конце сессии обязательно: (1) targeted tests по изменённой поверхности, (2) commit/push из корня репо (Conventional Commits, `Closes #N` где уместно), (3) обновить next-iteration-focus (блоки «Сделано в сессии», «Следующий шаг», дата), (4) выдать готовый prompt для следующего чата.
 
-Задача: выполнить следующий coherent batch из блока «Следующий шаг». Если он закрыт, взять верхний P0/P1 batch из PROJECT-STATUS-SUMMARY: сначала web contract/coverage, потом install/release contract, затем hotspot coverage/refactor в `daemon.py`, `main.py`, `llm/router.py`.
+Задача: выполнить следующий coherent batch из блока «Следующий шаг», начиная с issue #97. Если он закрыт, взять верхний P0/P1 batch из PROJECT-STATUS-SUMMARY и GitHub Project: #98, затем #99, #100, #101.
 ```
 
 ---

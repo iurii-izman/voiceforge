@@ -1,0 +1,41 @@
+# Cursor: не индексировать (ускоряет поиск и агента)
+# Синтаксис как .gitignore
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.uv-cache/
+*.egg-info/
+
+# Build / артефакты
+dist/
+build/
+target/
+desktop/src-tauri/target/
+app/dist/
+app/build/
+
+# Node (если есть)
+node_modules/
+
+# Данные и кэши
+*.db
+*.db-wal
+*.onnx
+.uv-cache/
+data/
+
+# Отчёты и покрытие
+htmlcov/
+coverage.xml
+reports/
+
+# Локальные конфиги (не для поиска по коду)
+voiceforge.yaml
+.env
+tmp_config/
+tmp_plugins/

@@ -124,11 +124,11 @@
 
 **Critical Path (в порядке):**
 
-1. Исправить bug в `POST /api/action-items/update` для sync/async web и добавить regression tests.
-2. Закрыть install/release contract: `web-async` profile, version sync, release/docs drift.
-3. Сократить coverage blind spots в `server.py`, `server_async.py`, `daemon.py`, `router.py`, `main.py`.
-4. Убрать performance debt: new-per-analyze `Diarizer`/`HybridSearcher`, full ring rewrite каждые 2 сек.
-5. Довести packaging/updater до честного состояния: blocking checks, repeatable build, signed/update-ready или explicit disable.
+1. [#97](https://github.com/iurii-izman/voiceforge/issues/97) Исправить bug в `POST /api/action-items/update` для sync/async web и добавить regression tests.
+2. [#98](https://github.com/iurii-izman/voiceforge/issues/98) Закрыть install/release contract: `web-async` profile, version sync, release/docs drift.
+3. [#99](https://github.com/iurii-izman/voiceforge/issues/99) Сократить coverage blind spots в `server.py`, `server_async.py`, `daemon.py`, `router.py`, `main.py`.
+4. [#100](https://github.com/iurii-izman/voiceforge/issues/100) Убрать performance debt: new-per-analyze `Diarizer`/`HybridSearcher`, full ring rewrite каждые 2 сек.
+5. [#101](https://github.com/iurii-izman/voiceforge/issues/101) Довести packaging/updater до честного состояния: blocking checks, repeatable build, signed/update-ready или explicit disable.
 
 **Quick Wins (1-2 часа):**
 
@@ -154,4 +154,5 @@
 - **Лучший формат batches:** `bugfix + regression tests + docs`, `coverage hotspot + refactor + targeted tests`, `version sync + release docs + install smoke`.
 - **Худший формат batches:** desktop packaging + RAG + calendar; security + UI polish + infra refactor в одной сессии.
 - **Источник очереди работ:** сначала [next-iteration-focus.md](next-iteration-focus.md), затем [planning.md](planning.md) / [GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1), затем `plans.md` / `audit.md`.
+- **Актуальные audit-driven items на board:** [#96](https://github.com/iurii-izman/voiceforge/issues/96) tracking, [#97](https://github.com/iurii-izman/voiceforge/issues/97), [#98](https://github.com/iurii-izman/voiceforge/issues/98), [#99](https://github.com/iurii-izman/voiceforge/issues/99), [#100](https://github.com/iurii-izman/voiceforge/issues/100), [#101](https://github.com/iurii-izman/voiceforge/issues/101).
 - **Готовый prompt и batching strategy:** [cursor.md](cursor.md), [next-iteration-focus.md](next-iteration-focus.md), [agent-context.md](agent-context.md).

@@ -277,6 +277,35 @@ def test_daemon_get_api_version_and_capabilities_with_callbacks() -> None:
     assert "x" in out
 
 
+# --- Block 85: D-Bus API contract — all methods callable with safe args (no real bus) ---
+
+
+def test_daemon_iface_contract_safe_calls(monkeypatch: pytest.MonkeyPatch) -> None:
+    """DaemonVoiceForgeInterface: every method is callable with safe args and returns without crash."""
+    monkeypatch.setenv("VOICEFORGE_IPC_ENVELOPE", "1")
+    iface = _daemon_iface(
+        get_session_detail_fn=lambda sid: '{"segments":[],"analysis":null}',
+        get_indexed_paths_fn=lambda: "[]",
+        get_settings_fn=lambda: '{}',
+        get_session_ids_with_action_items_fn=lambda: "[]",
+        get_upcoming_events_fn=lambda: "[]",
+    )
+    # Sync methods
+    assert DaemonVoiceForgeInterface.Status.__wrapped__(iface) is not None
+    assert DaemonVoiceForgeInterface.GetSessions.__wrapped__(iface, 10) is not None
+    assert DaemonVoiceForgeInterface.GetSessionDetail.__wrapped__(iface, 1) is not None
+    assert DaemonVoiceForgeInterface.GetSettings.__wrapped__(iface) is not None
+    assert DaemonVoiceForgeInterface.GetIndexedPaths.__wrapped__(iface) is not None
+    assert DaemonVoiceForgeInterface.GetSessionIdsWithActionItems.__wrapped__(iface) is not None
+    assert DaemonVoiceForgeInterface.GetUpcomingEvents.__wrapped__(iface) is not None
+    assert DaemonVoiceForgeInterface.Ping.__wrapped__(iface) == "pong"
+    assert DaemonVoiceForgeInterface.GetApiVersion.__wrapped__(iface) is not None
+    assert DaemonVoiceForgeInterface.GetCapabilities.__wrapped__(iface) is not None
+    DaemonVoiceForgeInterface.ListenStart.__wrapped__(iface)
+    DaemonVoiceForgeInterface.ListenStop.__wrapped__(iface)
+    assert DaemonVoiceForgeInterface.IsListening.__wrapped__(iface) is False
+
+
 # --- run_dbus_service (mocked bus, no real D-Bus) ---
 
 

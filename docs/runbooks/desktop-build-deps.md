@@ -18,6 +18,8 @@ sudo dnf install -y \
   librsvg2-devel
 ```
 
+**linuxdeploy** — утилита для сборки AppImage: собирает бинарник, библиотеки и ресурсы в один переносимый файл. Tauri вызывает её при `cargo tauri build` с целью `appimage`. Распространяется как AppImage, ставится вручную (см. скрипт ниже).
+
 `librsvg2-devel` is required for AppImage bundling (linuxdeploy gtk plugin).
 
 Либо один скрипт из корня репо (внутри toolbox): `./scripts/setup-desktop-toolbox.sh`
@@ -129,6 +131,25 @@ cd desktop && npm run build && npm run tauri build
 ```
 
 Проверка: `which linuxdeploy` должен вывести путь (например `$HOME/.local/bin/linuxdeploy`). Артефакт: `desktop/src-tauri/target/release/bundle/appimage/VoiceForge_*_amd64.AppImage`.
+
+**Если сборка падает с ошибкой `failed to run linuxdeploy`:** установите linuxdeploy в toolbox (один раз):
+
+```bash
+toolbox enter
+cd /var/home/user/Projects/voiceforge
+./scripts/install_linuxdeploy_toolbox.sh
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+При необходимости добавьте `export PATH="$HOME/.local/bin:$PATH"` в `~/.bashrc` внутри toolbox. Затем снова запустите сборку (с переменными `NO_STRIP` и `APPIMAGE_EXTRACT_AND_RUN` по необходимости).
+
+Либо соберите только deb и rpm без AppImage:
+
+```bash
+cd desktop && npm run build && cargo tauri build --bundles deb,rpm
+```
+
+Артефакты будут в `bundle/deb/` и `bundle/rpm/`; бинарник — `target/release/voiceforge-desktop`.
 
 ## Установка и запуск после сборки
 

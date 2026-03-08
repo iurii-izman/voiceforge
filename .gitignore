@@ -43,8 +43,7 @@ desktop/flatpak/*.local.yaml
 tmp_config/
 tmp_plugins/
 
-# IDE metadata
+# IDE metadata (локальные настройки; .cursorignore коммитим для скорости индексации)
 .cursor/
 .cursorrules
-.cursorignore
 .claude/
