@@ -11,6 +11,84 @@
 3. **Запуск пайплайна:** демон или CLI (например `voiceforge daemon` и триггер analyze). Спаны: `pipeline.run`, `pipeline.prepare_audio`, `pipeline.step1_stt`, `pipeline.step2_parallel` — видны в Jaeger UI: http://localhost:16686.
 4. **Проверка:** выбрать сервис `voiceforge`, найти trace с операцией `pipeline.run` и дочерними spans с длительностями.
 
+## Reproducible Runtime Proof Path (#121)
+
+Этот раздел фиксирует **полный proof path**, который можно воспроизвести без догадок. Агент может подготовить команды и синхронизировать docs; **сам запуск Jaeger, старт runtime и просмотр UI делает пользователь**.
+
+### Что считается доказательством
+
+- `uv run pytest tests/test_otel.py tests/test_observability.py -q --tb=line` проходит локально.
+- Jaeger UI показывает сервис `voiceforge`.
+- Есть хотя бы один trace с root span `pipeline.run`.
+- Внутри trace видны дочерние spans `pipeline.prepare_audio`, `pipeline.step1_stt`, `pipeline.step2_parallel`.
+- Trace получен из реального runtime path, а не из synthetic snippet.
+
+### Топология окружения
+
+- Если Jaeger и runtime на **хосте**: `OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318`.
+- Если runtime в **toolbox**, а Jaeger на **хосте**: обычно `OTEL_EXPORTER_OTLP_ENDPOINT=http://10.0.2.2:4318`.
+- Если `10.0.2.2` не подходит: на хосте `hostname -I`, затем взять первый доступный IP хоста и подставить его в endpoint.
+
+### Preflight
+
+1. Проверить OTel deps: `uv sync --extra otel`.
+2. Проверить cheap local contract:
+   ```bash
+   uv run pytest tests/test_otel.py tests/test_observability.py -q --tb=line
+   ```
+3. Поднять Jaeger:
+   ```bash
+   podman run -d --name jaeger -p 16686:16686 -p 4318:4318 docker.io/jaegertracing/all-in-one
+   ```
+4. В том же окружении, где будет запущен VoiceForge runtime:
+   ```bash
+   export VOICEFORGE_OTEL_ENABLED=1
+   export OTEL_EXPORTER_OTLP_ENDPOINT=http://10.0.2.2:4318
+   ```
+
+### Runtime proof
+
+1. Запустить runtime-path, который реально создаёт пайплайн:
+   - `uv run voiceforge daemon` и затем trigger `analyze`, или
+   - другой существующий CLI path, который доходит до `AnalysisPipeline.run()`.
+2. Открыть Jaeger UI: `http://localhost:16686`.
+3. Выбрать сервис `voiceforge`.
+4. Найти свежий trace с root span `pipeline.run`.
+5. Подтвердить наличие дочерних spans:
+   - `pipeline.prepare_audio`
+   - `pipeline.step1_stt`
+   - `pipeline.step2_parallel`
+6. Зафиксировать evidence:
+   - screenshot trace tree, или
+   - exported trace JSON/ID, если удобнее хранить это вне репо.
+
+### Failure signatures
+
+- Нет сервиса `voiceforge` в Jaeger:
+  - OTel env не выставлен в том процессе, где реально крутится runtime.
+  - runtime отправляет в неверный OTLP endpoint.
+  - Jaeger container не поднят или порт `4318` не проброшен.
+- Есть сервис, но нет trace `pipeline.run`:
+  - запуск не дошёл до `AnalysisPipeline.run()`.
+  - runtime path завершился до analyze step.
+- Есть root span, но нет дочерних spans:
+  - выполнялся не тот pipeline path.
+  - runtime упал до Step 1 / Step 2.
+
+### Stop / cleanup
+
+После ручной проверки снять env, чтобы не слать трейсы в пустоту:
+
+```bash
+unset VOICEFORGE_OTEL_ENABLED OTEL_EXPORTER_OTLP_ENDPOINT
+```
+
+### Честная manual boundary
+
+- Агент **не** запускает Jaeger, **не** открывает браузер и **не** подтверждает визуально trace tree.
+- Агент **может** держать актуальными команды, expected spans, failure signatures и cheap local tests.
+- Поэтому `#121` закрывается как **documented reproducible proof path**, а не как автоматизированный GUI/runtime capture inside repo.
+
 ## Метрики
 
 - **voiceforge_llm_cost_usd_total** — накопленная стоимость по моделям.
@@ -57,7 +135,7 @@
 
 См. **`monitoring/README.md`** в корне репо: конфиги `prometheus.yml`, `alerts.yml`, `docker-compose.yml`, импорт дашборда Grafana из `docs/grafana-voiceforge-dashboard.json`. Issue [#64](https://github.com/iurii-izman/voiceforge/issues/64).
 
-## Чеклист доказательства трейсов (#111)
+## Чеклист доказательства трейсов (#111, #121)
 
 **Ручные шаги (evidence):** агент не запускает Jaeger и не открывает браузер. Выполняете вы.
 
@@ -66,7 +144,7 @@
 3. Запустить демон и выполнить analyze (или listen + trigger). Открыть http://localhost:16686, выбрать сервис `voiceforge`, убедиться в наличии trace с `pipeline.run` и дочерними spans.
 4. После проверки: `unset VOICEFORGE_OTEL_ENABLED OTEL_EXPORTER_OTLP_ENDPOINT`, чтобы не слать трейсы в пустоту.
 
-См. также раздел «Tracing: Jaeger» выше.
+См. также разделы «Tracing: Jaeger» и «Reproducible Runtime Proof Path (#121)» выше.
 
 ## Ссылки
 
