@@ -10,6 +10,7 @@
 - **Обновлены документы:** в [backlog-and-actions.md](../plans/backlog-and-actions.md) отмечены как реализованные блоки 44, 46, 49 (плюс ранее 35, 68, 71, 75, 79). В [roadmap-100-blocks.md](../plans/roadmap-100-blocks.md) секция «Не реализовано» приведена в соответствие (66 — только prompt caching; 68, 71, 79 — зачёркнуты).
 - **Правки по Sonar:** optional chain в `desktop/src/main.js` (S6582); dict comprehension в `scripts/git_credential_keyring_pat.py` (S7494); NOSONAR для неиспользуемых параметров интерфейса в `stt/openai_whisper.py` (S1172) и для вызова fixture в `tests/test_benchmark_pipeline.py` (S5864).
 - **После audit-driven batches дополнительно подтверждено:** `#97` закрыт кодом и regression tests для `/api/action-items/update`; `#98` закрыт через `web-async` в full-stack extras и `scripts/check_release_metadata.py`; `#99` продвинут дальше и из `omit` теперь выведены `server.py` и `rag/watcher.py`; `#100` подтверждён process-scoped cache для `Diarizer`/`HybridSearcher` и редкой ring persistence; `#101` подтверждён desktop release gate (`desktop-release-gate-matrix.md`, `npm run e2e:native`, updater contract check).
+- **Follow-up blocks по deep audit тоже подтверждены:** `#104` закрыт extraction в `core/daemon.py` (`_event_description_from_detail` + tests), `#105` и `#106` закрыты runbook [lifecycle-smoke.md](lifecycle-smoke.md), `#107` подтверждён helper-level router tests, `#108` — parity suite `tests/test_web_contract_parity.py`, `#109` — `tests/test_daemon_helpers.py`, `#110` — раздел data-at-rest/dependency hygiene в `security-and-dependencies.md`, `#111` — trace evidence checklist в `observability-alerts.md`, `#112` — release proof section в `release-and-quality.md`, `#113` — docs/status sync sweep в runbooks.
 
 ---
 
@@ -101,22 +102,22 @@
 
 ## 10. Deep audit delta (2026-03-08)
 
-Базовый clean-room audit давал **~71.3/100**. После уже подтверждённых закрытых batches `#97–#101`, вывода `rag/watcher.py` из `omit` и актуализации release/docs текущая evidence-based оценка по репо — **~75.0/100**. Реалистичный эталон для этой системы остаётся **~86.5/100**. Сильные стороны: security baseline, observability, breadth of product surface. Главные просадки теперь сместились в structural hotspots, honest coverage, manual release evidence и docs drift.
+Базовый clean-room audit давал **~71.3/100**. После повторной сверки по текущему репо, уже закрытых batches `#97–#113`, вывода `rag/watcher.py` из `omit`, daemon helper coverage, parity/runbook cleanup и release/docs updates текущая evidence-based оценка по репо — **~76.5/100**. Реалистичный эталон для этой системы остаётся **~86.5/100**. Сильные стороны: security baseline, observability, breadth of product surface. Главные просадки теперь сместились в structural hotspots, honest coverage, manual release evidence и остаточный docs drift.
 
 | Направление | Текущее | Эталон | Gap | Ключевой вывод |
 |-------------|---------|--------|-----|----------------|
-| Core architecture & module boundaries | 63 | 84 | 21 | Главный structural gap всё ещё в крупных hotspot-модулях: `main.py`, `daemon.py`, `server.py`, `router.py`, `desktop/src/main.js` |
-| Audio / STT / diarization | 76 | 86 | 10 | Path стал стабильнее, но lifecycle/perf доказан не полностью и diarization остаётся дорогим |
-| RAG / data / storage | 78 | 88 | 10 | RAG функционально силён; watcher покрыт честнее, но restore/search lifecycle ещё не fully proved |
-| LLM / prompts / PII | 75 | 87 | 12 | Guardrails хорошие; router coverage, policy centralization и non-Claude prompt caching всё ещё ограничивают зрелость |
-| Interfaces & integrations | 73 | 85 | 12 | Web bug и docs/API drift по `action-items/update` закрыты, но contract parity между sync/async/desktop надо удерживать тестами |
-| Testing & QA | 76 | 86 | 10 | Coverage policy стала честнее, но confidence всё ещё строится на targeted subsets и blind spots в hotspot-модулях |
-| Security & dependency hygiene | 79 | 89 | 10 | Baseline сильный; открытые риски не изменились: `#65` и local data-at-rest posture |
-| Observability & runtime ops | 78 | 88 | 10 | Инструментация хорошая для alpha, но live Jaeger/runtime evidence ещё не собран end-to-end |
-| CI/CD & release / packaging | 80 | 87 | 7 | Metadata/updater contract и desktop release gate оформлены лучше, но signed/manual release proof всё ещё вне CI |
-| Documentation & governance | 72 | 86 | 14 | Summary/runbooks стали ближе к коду, но stale refs, version drift и active-vs-archive hygiene ещё требуют sweep |
+| Core architecture & module boundaries | 64 | 84 | 20 | После `#104` есть один cheap extraction в `daemon.py`, но главные structural hotspots всё ещё в `main.py`, `daemon.py`, `server.py`, `router.py`, `desktop/src/main.js` |
+| Audio / STT / diarization | 77 | 86 | 9 | Lifecycle smoke уже задокументирован (`#105`), но perf/diarization path всё ещё дорогой и частично manual-only |
+| RAG / data / storage | 79 | 88 | 9 | `rag/watcher.py` покрыт честнее, lifecycle/restore smoke добавлен (`#106`), но search/indexer-heavy paths всё ещё не fully proved |
+| LLM / prompts / PII | 76 | 87 | 11 | Router helper coverage и policy fallback checks улучшены (`#107`), но `router.py` всё ещё вне report и non-Claude caching остаётся research |
+| Interfaces & integrations | 75 | 85 | 10 | После `#108` есть parity suite для sync/async contracts; основной риск теперь не bug, а drift при следующих изменениях |
+| Testing & QA | 78 | 86 | 8 | `server.py` и `rag/watcher.py` уже выведены из omit, `daemon.py` получил helper suite (`#109`), но общий confidence всё ещё subset-driven |
+| Security & dependency hygiene | 80 | 89 | 9 | `#110` добавил честкий dependency/data-at-rest checklist, но `#65` и отсутствие at-rest encryption по-прежнему открыты |
+| Observability & runtime ops | 79 | 88 | 9 | `#111` оформил trace evidence path, но live Jaeger/runtime proof всё ещё выполняется вручную и не собран в этом чате |
+| CI/CD & release / packaging | 81 | 87 | 6 | `#112` усилил release proof beyond metadata contract, но signed updater/native release evidence всё ещё не автоматизированы |
+| Documentation & governance | 75 | 86 | 11 | После `#113` summary/runbooks стали ближе к коду, но drift ещё не нулевой и DOCS hygiene требует регулярной поддержки |
 
-**Новые рабочие блоки на GitHub Project:** [#104](https://github.com/iurii-izman/voiceforge/issues/104) core architecture, [#105](https://github.com/iurii-izman/voiceforge/issues/105) audio/STT, [#106](https://github.com/iurii-izman/voiceforge/issues/106) RAG lifecycle, [#107](https://github.com/iurii-izman/voiceforge/issues/107) LLM/prompts/PII, [#108](https://github.com/iurii-izman/voiceforge/issues/108) interface parity, [#109](https://github.com/iurii-izman/voiceforge/issues/109) testing/QA, [#110](https://github.com/iurii-izman/voiceforge/issues/110) security hygiene, [#111](https://github.com/iurii-izman/voiceforge/issues/111) observability evidence, [#112](https://github.com/iurii-izman/voiceforge/issues/112) release/packaging proof, [#113](https://github.com/iurii-izman/voiceforge/issues/113) docs/governance sweep.
+**Deep-audit follow-up blocks:** [#104](https://github.com/iurii-izman/voiceforge/issues/104), [#105](https://github.com/iurii-izman/voiceforge/issues/105), [#106](https://github.com/iurii-izman/voiceforge/issues/106), [#107](https://github.com/iurii-izman/voiceforge/issues/107), [#108](https://github.com/iurii-izman/voiceforge/issues/108), [#109](https://github.com/iurii-izman/voiceforge/issues/109), [#110](https://github.com/iurii-izman/voiceforge/issues/110), [#111](https://github.com/iurii-izman/voiceforge/issues/111), [#112](https://github.com/iurii-izman/voiceforge/issues/112), [#113](https://github.com/iurii-izman/voiceforge/issues/113) уже закрыты; следующий рабочий queue надо строить не от этих tracking-блоков, а от оставшихся hotspot-модулей и manual evidence gaps.
 
 **Подтверждённые hotspots:** [src/voiceforge/main.py](/home/user/Projects/voiceforge/src/voiceforge/main.py), [src/voiceforge/core/daemon.py](/home/user/Projects/voiceforge/src/voiceforge/core/daemon.py), [src/voiceforge/web/server.py](/home/user/Projects/voiceforge/src/voiceforge/web/server.py), [src/voiceforge/web/server_async.py](/home/user/Projects/voiceforge/src/voiceforge/web/server_async.py), [src/voiceforge/llm/router.py](/home/user/Projects/voiceforge/src/voiceforge/llm/router.py), [desktop/src/main.js](/home/user/Projects/voiceforge/desktop/src/main.js).
 
