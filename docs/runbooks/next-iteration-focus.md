@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-08 (#99 coverage blind spots helper batch)
+**Обновлено:** 2026-03-08 (#99 policy batch: status/export/action-items suite)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** В issue [#99](https://github.com/iurii-izman/voiceforge/issues/99) выполнен первый coherent helper-level coverage batch без OOM-risk: добавлен `tests/test_coverage_hotspots_batch99.py` для `server.py`, `server_async.py`, `daemon.py`, `router.py`, `main.py`; добраны smoke/regression branches для Telegram webhook, cost/date validation, Claude prompt builder, stream delta parsing, action-item status helpers, daemon env/version fallback; в [release-and-quality.md](release-and-quality.md) зафиксирован честный incremental path для подъёма coverage policy без cross-cutting rewrite. Verify: `uv run pytest tests/test_coverage_hotspots_batch99.py tests/test_web_action_items_update.py tests/test_llm_router_helpers.py tests/test_daemon_streaming_smart_trigger_model_manager.py -q --tb=line` → зелёный.
+**Сделано в сессии:** В issue [#99](https://github.com/iurii-izman/voiceforge/issues/99) policy-facing batch: выбран кандидат **server.py** (ниже риска, чем main.py); добавлен узкий targeted suite `tests/test_web_status_export_action_items.py` (8 тестов: GET /api/export валидация id/format, 404, успех md; GET /api/status исключение→500; POST /api/action-items/update невалидные integers, session not found, пустые action_items→200). Полный прогон coverage дал 60% &lt; 75% — **server.py оставлен в omit**; pyproject.toml и fail_under не менялись. В [release-and-quality.md](release-and-quality.md) уточнён путь вывода server.py из omit (после подтверждения full run ≥75%). Verify: `uv run pytest tests/test_coverage_hotspots_batch99.py tests/test_web_action_items_update.py tests/test_web_status_export_action_items.py tests/test_web_smoke.py tests/test_llm_router_helpers.py tests/test_daemon_streaming_smart_trigger_model_manager.py -q --tb=line` → 81 passed, 2 skipped.
 
-**Следующий шаг:** Продолжить **тот же issue [#99](https://github.com/iurii-izman/voiceforge/issues/99)** и довести policy-facing часть batch: (1) выбрать один следующий кандидат на вывод из `omit` между `server.py` и `main.py` по наименьшему риску, начиная с helper/contract paths вокруг action-items/status/export, (2) добавить ещё один узкий targeted suite, достаточный чтобы модуль можно было честно считать в coverage, (3) только после локального подтверждения не просадить `fail_under` — обновлять `pyproject.toml`. К [#100](https://github.com/iurii-izman/voiceforge/issues/100) переходить только после явного завершения #99. Для verify использовать targeted subset по изменённой поверхности; при отсутствии hypothesis — `pytest tests/ --ignore=tests/test_rag_parsers_hypothesis.py`. Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
+**Следующий шаг:** Продолжить **#99**: при достижении full coverage ≥75% (или после подъёма по другим модулям) вывести `server.py` из omit и зафиксировать. Либо взять следующий кандидат (main.py или server_async.py) и повторить цикл: targeted suite → проверка full run → вывод из omit только при сохранении fail_under. К [#100](https://github.com/iurii-izman/voiceforge/issues/100) переходить по приоритету доски. Verify: targeted subset выше; полный — `pytest tests/ --ignore=tests/test_rag_parsers_hypothesis.py`. Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
 
 ---
 
