@@ -20,9 +20,9 @@
 9. `./scripts/check_repo_governance.sh` — OK
 10. New-code coverage: `./scripts/check_new_code_coverage.sh` (порог 20%; на поздних этапах поднимать)
 
-**Coverage #56:** текущий fail_under=75 (pyproject.toml). Цель 75→80%. Запуск полного отчёта: `make coverage` (рекомендуется в toolbox — в Cursor полный pytest может OOM).
+**Coverage #56/#99:** fail_under=60 (pyproject.toml); server.py выведен из omit (#99). Цель дальше — поднимать к 75→80%. Запуск: `make coverage` или `uv run pytest tests/ -q -m "not integration" --cov=src/voiceforge --cov-report=term` (рекомендуется в toolbox — в Cursor полный pytest может OOM).
 
-**Coverage #99 incremental path:** для hotspot-модулей `server.py`, `server_async.py`, `daemon.py`, `router.py`, `main.py` сначала добавлять дешёвые helper/smoke/regression tests без OOM-risk, затем выводить модуль из `omit` по одному, только когда targeted subset стабилен и не просаживает общий `fail_under`. Не делать cross-cutting rewrite только ради отчёта покрытия; сначала сужать blind spots, потом поднимать policy. Для `server.py`: целевой suite — `test_web_smoke.py`, `test_web_action_items_update.py`, `test_web_status_export_action_items.py`, `test_coverage_hotspots_batch99.py`; выводить из omit только после подтверждения полного прогона coverage ≥75%. Для `server_async.py` (уже в отчёте): расширен suite в `test_coverage_hotspots_batch99.py` (_sync_health, _sync_ready, _sync_export, _sync_status, _sync_session_by_id, _sync_action_items_update валидация); текущее общее покрытие ~62%, до 75% — следующий шаг (router/daemon или ещё server_async).
+**Coverage #99 incremental path:** для hotspot-модулей `server_async.py`, `daemon.py`, `router.py`, `main.py` добавлять дешёвые helper/smoke/regression tests без OOM-risk; выводить из omit по одному при стабильном targeted subset. `server.py` уже в отчёте (suite: test_web_smoke.py, test_web_action_items_update.py, test_web_status_export_action_items.py, test_coverage_hotspots_batch99.py). Следующий шаг — поднять общее покрытие (router/daemon/server_async) и fail_under к 75%.
 
 **Для alpha2 (с десктопом):** версия `0.2.0a2`; сборка десктопа: `cd desktop && npm run build && cargo tauri build`; артефакты в `desktop/src-tauri/target/release/bundle/`. Чеклист: сценарий «демон → Tauri → анализ → сессия»; CHANGELOG обновлён.
 

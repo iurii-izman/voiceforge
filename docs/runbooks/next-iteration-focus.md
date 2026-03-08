@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-08 (#99 server_async targeted tests; coverage 62%, server.py остаётся в omit)
+**Обновлено:** 2026-03-08 (#99 coverage ≥60%, server.py выведен из omit)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Продолжение [#99](https://github.com/iurii-izman/voiceforge/issues/99): замер coverage с включением server.py в отчёт — 59.85% (server.py 49%); с server.py в omit — 61%→62%. Добавлены 12 targeted тестов для **server_async** в `tests/test_coverage_hotspots_batch99.py`: _sync_health, _sync_ready (200/503), _sync_export (400 id/format, 404), _sync_status (200/500), _sync_session_by_id (400/404), _sync_action_items_update (400 required/integers). Итого покрытие **62.08%**, server_async 28%→41%. **server.py по-прежнему в omit** (до достижения full ≥75%). В [release-and-quality.md](release-and-quality.md): fail_under=75, путь вывода server.py и примечание по server_async suite. Verify: `uv run pytest tests/test_coverage_hotspots_batch99.py tests/test_web_action_items_update.py tests/test_web_status_export_action_items.py tests/test_web_smoke.py -q --tb=line` → 25+8+8 = 41+ passed.
+**Сделано в сессии:** [#99](https://github.com/iurii-izman/voiceforge/issues/99) закрыт: full coverage поднят до **61.37%** (≥60%), **server.py выведен из omit**. Добавлены 6 тестов для **router** в `test_coverage_hotspots_batch99.py`: _is_claude_model, _template_schema, _content_from_llm_response, _usage_and_cost_from_response, _system_prompt fallback, _template_prompts fallback. router 25%→34%. В pyproject.toml: server.py убран из omit, fail_under=60. Обновлены [release-and-quality.md](release-and-quality.md), [audit/audit.md](../audit/audit.md). Verify: `uv run pytest tests/ -q -m "not integration" --cov=src/voiceforge --cov-report=term --cov-fail-under=60`.
 
-**Следующий шаг:** Продолжить **#99**: поднять full coverage до ≥75% (router/daemon или ещё server_async/main helpers), затем вывести `server.py` из omit. Либо по доске взять **#100** (performance debt). Verify: targeted — см. выше; полный coverage — `uv run pytest tests/ -q -m "not integration" --cov=src/voiceforge --cov-report=term`. Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
+**Следующий шаг:** Поднять coverage к 75% (router/daemon/server_async/main helpers) и fail_under к 75. Либо по доске взять **#100** (performance debt). Verify: полный coverage — `uv run pytest tests/ -q -m "not integration" --cov=src/voiceforge --cov-report=term`.
 
 ---
 

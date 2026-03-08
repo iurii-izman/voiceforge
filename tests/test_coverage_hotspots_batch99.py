@@ -291,6 +291,74 @@ def test_router_stream_part_content_handles_dict_object_and_empty() -> None:
     assert router._stream_part_content(None) == ""
 
 
+def test_router_is_claude_model() -> None:
+    assert router._is_claude_model(router.MODEL_CLAUDE_HAIKU) is True
+    assert router._is_claude_model("anthropic/claude-sonnet-4") is True
+    assert router._is_claude_model(router.MODEL_GPT4O_MINI) is False
+    assert router._is_claude_model("anthropic/other") is False
+
+
+def test_router_template_schema_known_and_unknown(monkeypatch) -> None:
+    monkeypatch.setattr(
+        "voiceforge.llm.router._template_prompts",
+        lambda: {"standup": "prompt standup", "sprint_review": "prompt sr", "one_on_one": "1:1", "brainstorm": "bs", "interview": "iv"},
+    )
+    schema, prompt = router._template_schema("standup")
+    assert schema is not None
+    assert prompt == "prompt standup"
+    unknown_schema, unknown_prompt = router._template_schema("unknown_template")
+    assert unknown_schema is None
+    assert unknown_prompt is None
+
+
+def test_router_content_from_llm_response() -> None:
+    raw = SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content="hello"))])
+    content, raw_content = router._content_from_llm_response(raw, "test/model")
+    assert content == "hello"
+    assert raw_content == "hello"
+
+    raw_empty = SimpleNamespace(choices=[])
+    with pytest.raises(RuntimeError, match="empty choices"):
+        router._content_from_llm_response(raw_empty, "test/model")
+
+
+def test_router_usage_and_cost_from_response(monkeypatch) -> None:
+    raw = SimpleNamespace(
+        usage=SimpleNamespace(
+            input_tokens=10,
+            output_tokens=5,
+            prompt_tokens_details=SimpleNamespace(cached_tokens=2),
+            cache_creation_input_tokens=1,
+        ),
+        _hidden_params={"response_cost": 0.01},
+    )
+    try:
+        import litellm
+        monkeypatch.setattr(litellm, "completion_cost", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("mock")))
+    except ImportError:
+        pass
+    inp, out, cache_read, cache_creation, cost = router._usage_and_cost_from_response(raw, "test/model")
+    assert inp == 10
+    assert out == 5
+    assert cache_read == 2
+    assert cache_creation == 1
+    assert cost == 0.01
+
+
+def test_router_system_prompt_fallback(monkeypatch) -> None:
+    monkeypatch.setattr("voiceforge.llm.router.load_prompt", lambda _: None)
+    out = router._system_prompt()
+    assert "meeting analyst" in out
+    assert out == router._SYSTEM_PROMPT_FALLBACK
+
+
+def test_router_template_prompts_fallback(monkeypatch) -> None:
+    monkeypatch.setattr("voiceforge.llm.router.load_template_prompts", lambda: None)
+    out = router._template_prompts()
+    assert "standup" in out
+    assert out == router._TEMPLATE_PROMPTS_FALLBACK
+
+
 def test_router_update_action_item_statuses_short_circuits_empty_items() -> None:
     from voiceforge.llm.schemas import StatusUpdateResponse
 
