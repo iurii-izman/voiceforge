@@ -331,3 +331,145 @@ def test_main_export_via_pandoc_handles_missing_and_failure(monkeypatch, tmp_pat
         main._export_via_pandoc("docx", tmp_path / "session.docx", "# Report")
     assert exc_failed.value.code == 1
     assert any("pdf failed" in message for message, _ in echoed)
+
+
+def test_main_sessions_to_ical_command_writes_calendar(monkeypatch, tmp_path: Path) -> None:
+    from voiceforge import main
+
+    echoed: list[tuple[str, bool]] = []
+
+    class _FakeTranscriptLog:
+        def close(self) -> None:
+            return None
+
+    sessions = [
+        SimpleNamespace(id=1, started_at="2026-03-08T10:00:00+00:00", duration_sec=60),
+        SimpleNamespace(id=2, started_at="2026-03-08T11:00:00+00:00", duration_sec=120),
+    ]
+
+    monkeypatch.setattr("voiceforge.core.transcript_log.TranscriptLog", _FakeTranscriptLog)
+    monkeypatch.setattr(main, "_sessions_to_ical_fetch_sessions", lambda log_db, from_date, to_date, limit: sessions)
+    monkeypatch.setattr("typer.echo", lambda message, err=False: echoed.append((str(message), err)))
+
+    output = tmp_path / "exports" / "sessions.ics"
+    main.sessions_to_ical(output=output, limit=5, from_date="2026-03-01", to_date="2026-03-02")
+
+    content = output.read_text(encoding="utf-8")
+    assert "BEGIN:VCALENDAR" in content
+    assert content.count("BEGIN:VEVENT") == 2
+    assert any("Exported 2 sessions" in message for message, _ in echoed)
+
+
+def test_main_weekly_report_formats_and_stats_fallback(monkeypatch, tmp_path: Path) -> None:
+    from voiceforge import main
+
+    echoed: list[tuple[str, bool]] = []
+
+    class _FakeTranscriptLog:
+        def get_sessions_in_range(self, from_date, to_date):
+            return [SimpleNamespace(id=11), SimpleNamespace(id=12)]
+
+        def get_action_items(self, limit: int):
+            return [
+                SimpleNamespace(session_id=11, description="Ship feature", status="done"),
+                SimpleNamespace(session_id=99, description="Ignore", status="todo"),
+            ]
+
+        def close(self) -> None:
+            return None
+
+    monkeypatch.setattr("voiceforge.core.transcript_log.TranscriptLog", _FakeTranscriptLog)
+    monkeypatch.setattr("voiceforge.core.metrics.get_stats_range", lambda from_date, to_date: {"total_cost_usd": 3.5})
+    monkeypatch.setattr("typer.echo", lambda message, err=False: echoed.append((str(message), err)))
+
+    main.weekly_report(output=None, days=7, format="json")
+    payload = json.loads(echoed[-1][0])
+    assert payload["sessions_count"] == 2
+    assert payload["action_items_count"] == 1
+    assert payload["action_items"][0]["description"] == "Ship feature"
+
+    echoed.clear()
+    md_output = tmp_path / "weekly.md"
+    main.weekly_report(output=md_output, days=7, format="md")
+    md_text = md_output.read_text(encoding="utf-8")
+    assert "# Отчёт за 7 дн." in md_text
+    assert "Ship feature" in md_text
+    assert any(str(md_output) in message for message, _ in echoed)
+
+    echoed.clear()
+    monkeypatch.setattr("voiceforge.core.metrics.get_stats_range", lambda from_date, to_date: (_ for _ in ()).throw(RuntimeError("stats down")))
+    main.weekly_report(output=None, days=3, format="text")
+    assert "Cost (LLM): $0.00" in echoed[-1][0]
+
+
+def test_main_backup_data_dir_and_backup_cmd(monkeypatch, tmp_path: Path) -> None:
+    from voiceforge import main
+
+    data_home = tmp_path / "data-home"
+    monkeypatch.setenv("XDG_DATA_HOME", str(data_home))
+    assert main._backup_data_dir() == data_home / "voiceforge"
+
+    echoed: list[tuple[str, bool]] = []
+    copied: list[tuple[str, str]] = []
+    rotated: list[str] = []
+
+    data_dir = data_home / "voiceforge"
+    data_dir.mkdir(parents=True, exist_ok=True)
+    (data_dir / "transcripts.db").write_text("t", encoding="utf-8")
+    (data_dir / "metrics.db").write_text("m", encoding="utf-8")
+    rag_db = tmp_path / "rag.db"
+    rag_db.write_text("r", encoding="utf-8")
+    backups_root = tmp_path / "backups"
+    old_backup = backups_root / "voiceforge-backup-20240101-000000"
+    older_backup = backups_root / "voiceforge-backup-20230101-000000"
+    old_backup.mkdir(parents=True, exist_ok=True)
+    older_backup.mkdir(parents=True, exist_ok=True)
+
+    monkeypatch.setattr(main, "_get_config", lambda: SimpleNamespace(get_rag_db_path=lambda: str(rag_db)))
+    monkeypatch.setattr(main.time, "strftime", lambda fmt: "20260308-130000")
+    monkeypatch.setattr("typer.echo", lambda message, err=False: echoed.append((str(message), err)))
+    monkeypatch.setattr(main.shutil, "copy2", lambda src, dest: copied.append((str(src), str(dest))))
+    monkeypatch.setattr(main.shutil, "rmtree", lambda path, ignore_errors=True: rotated.append(str(path)))
+    monkeypatch.setattr(main.log, "info", lambda *args, **kwargs: None)
+
+    main.backup_cmd(output_dir=backups_root, keep=2)
+
+    assert len(copied) == 3
+    assert any("voiceforge-backup-20260308-130000" in dest for _, dest in copied)
+    assert rotated == [str(older_backup)]
+    assert echoed and echoed[0][1] is False
+
+
+def test_main_backup_cmd_no_files_and_history_resolve_purge(monkeypatch, tmp_path: Path) -> None:
+    from voiceforge import main
+
+    echoed: list[tuple[str, bool]] = []
+    monkeypatch.setattr("typer.echo", lambda message, err=False: echoed.append((str(message), err)))
+    monkeypatch.setattr(main, "_get_config", lambda: SimpleNamespace(get_rag_db_path=lambda: str(tmp_path / "missing-rag.db")))
+    monkeypatch.setattr(main.time, "strftime", lambda fmt: "20260308-130100")
+    monkeypatch.setattr(main, "_backup_data_dir", lambda: tmp_path / "empty-data")
+
+    with pytest.raises(SystemExit) as exc_no_files:
+        main.backup_cmd(output_dir=tmp_path / "backups", keep=0)
+    assert exc_no_files.value.code == 1
+    assert echoed[-1][1] is True
+
+    class _FakePurgeLogDb:
+        def purge_before(self, cutoff):
+            assert cutoff.isoformat() == "2026-03-01"
+            return 4
+
+    result = main._history_resolve(
+        _FakePurgeLogDb(),
+        "2026-03-01",
+        False,
+        None,
+        None,
+        None,
+        None,
+        None,
+        10,
+        "text",
+    )
+    assert result is None
+    assert echoed[-1][1] is False

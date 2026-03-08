@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-08 (main.py coverage batch for #99, policy unchanged)
+**Обновлено:** 2026-03-08 (main.py coverage batch continued, next ROI shifts to rag/watcher)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** продолжен P1 coverage batch по [#99](https://github.com/iurii-izman/voiceforge/issues/99) без смешивания surfaces. Выбран кандидат `main.py` (потому что `server.py` уже выведен из `omit`) и добавлен узкий regression suite `tests/test_main_status_export_action_items.py`, который закрывает дешёвые helper/CLI ветки вокруг `status`, `export`, `action-items update`, pandoc fallback, iCal/session helpers и template-format helpers. Verify зелёный: `uv run pytest tests/test_main_status_export_action_items.py tests/test_cli_e2e_smoke.py tests/test_cli_helpers_contracts.py tests/test_core_commands.py tests/test_coverage_hotspots_batch99.py -q --tb=line` → `65 passed`. Дополнительно выполнена честная policy-проверка с временно снятым `omit` для `main.py`: safe subset поднимает `main.py` только до `48%`, поэтому `pyproject.toml` намеренно **не** менялся.
+**Сделано в сессии:** продолжен P1 coverage batch по [#99](https://github.com/iurii-izman/voiceforge/issues/99) без смешивания surfaces. `tests/test_main_status_export_action_items.py` расширен на `weekly_report`, `sessions_to_ical`, `backup_cmd`, purge-ветку `history` и соседние export/status error branches. Targeted verify зелёный: `uv run pytest tests/test_main_status_export_action_items.py tests/test_cli_e2e_smoke.py tests/test_cli_helpers_contracts.py tests/test_core_commands.py tests/test_coverage_hotspots_batch99.py -q --tb=line` → `69 passed`; `uv run ruff check tests/test_main_status_export_action_items.py` → `All checks passed`. Дополнительно выполнена честная policy-проверка с временно снятым `omit` для `main.py`: safe subset поднимает `main.py` до `55%`, но этого всё ещё недостаточно для снятия из `omit`, поэтому `pyproject.toml` снова намеренно **не** менялся.
 
-**Следующий шаг:** Продолжить `main.py` coverage batch тем же дисциплинированным способом: добрать только дешёвые pure-helper/CLI ветки в одном subsystem, чтобы поднять `main.py` минимум до локально подтверждённого уровня, после которого снятие из `omit` не просаживает policy. Начать с соседних helpers в `main.py`, не требующих тяжёлого pipeline: `weekly_report`, `sessions_to_ical`, `backup/purge`, export/status error branches. Если после ещё одного узкого batch `main.py` всё ещё ниже честного порога, прекратить добивать его и переключиться на следующий ROI-candidate из `omit`.
+**Следующий шаг:** Переключиться на следующий ROI-candidate из текущего `omit`: `src/voiceforge/rag/watcher.py`. Взять только этот subsystem, не возвращаясь к `main.py` в той же итерации. Цель: добавить узкий helper/CLI batch вокруг watcher debounce/hash/indexing/stop semantics, переиспользуя уже существующий `watch` smoke из `tests/test_cli_e2e_smoke.py`; после этого локально проверить coverage с временно снятым `omit` именно для `rag/watcher.py` и только при честном уровне править `pyproject.toml`.
 
 ---
 
