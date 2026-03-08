@@ -57,6 +57,17 @@
 
 См. **`monitoring/README.md`** в корне репо: конфиги `prometheus.yml`, `alerts.yml`, `docker-compose.yml`, импорт дашборда Grafana из `docs/grafana-voiceforge-dashboard.json`. Issue [#64](https://github.com/iurii-izman/voiceforge/issues/64).
 
+## Чеклист доказательства трейсов (#111)
+
+**Ручные шаги (evidence):** агент не запускает Jaeger и не открывает браузер. Выполняете вы.
+
+1. Запустить Jaeger: `podman run -d --name jaeger -p 16686:16686 -p 4318:4318 docker.io/jaegertracing/all-in-one`.
+2. В окружении демона: `export VOICEFORGE_OTEL_ENABLED=1 OTEL_EXPORTER_OTLP_ENDPOINT=http://<host>:4318` (из toolbox — часто `http://10.0.2.2:4318`).
+3. Запустить демон и выполнить analyze (или listen + trigger). Открыть http://localhost:16686, выбрать сервис `voiceforge`, убедиться в наличии trace с `pipeline.run` и дочерними spans.
+4. После проверки: `unset VOICEFORGE_OTEL_ENABLED OTEL_EXPORTER_OTLP_ENDPOINT`, чтобы не слать трейсы в пустоту.
+
+См. также раздел «Tracing: Jaeger» выше.
+
 ## Ссылки
 
 - Issue [#36](https://github.com/iurii-izman/voiceforge/issues/36) — Observability (metrics/tracing).

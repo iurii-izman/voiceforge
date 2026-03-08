@@ -61,6 +61,21 @@ git push origin v0.2.0-alpha.2
 
 ---
 
+### 1.3 Доказательство релиза и упаковки (#112)
+
+**Автоматизировано:** `python scripts/check_release_metadata.py` — версии и контракт updater; CI job `quality` блокирует merge.
+
+**Ручные шаги (proof beyond metadata):** выполняет человек; агент не собирает артефакты и не подписывает.
+
+1. **Сборка десктопа:** `cd desktop && npm run build && cargo tauri build`; проверить артефакты в `target/release/bundle/` (deb/rpm/AppImage).
+2. **Аудит зависимостей (advisory):** `cd desktop && npm audit` (при необходимости `--audit-level=high`); `cargo audit` в `desktop/src-tauri/` — известные CVE без фикса допускаются с continue-on-error в CI (см. раздел 1.2).
+3. **Нативный smoke:** `cd desktop && npm run e2e:native` на Linux с GUI (см. [desktop-release-gate-matrix.md](desktop-release-gate-matrix.md)).
+4. **Подписанный релиз (когда настроен):** ключи подписи и сервер обновлений — по [desktop-updater.md](desktop-updater.md); контракт проверяется `check_release_metadata.py`.
+
+Чеклист перед тегом: раздел 1 и 3 этого runbook.
+
+---
+
 ## 2. Rollback (откат альфа-релиза)
 
 **Когда:** сломанный wheel/runtime после тега; неверные release notes; security-проблема в артефакте.

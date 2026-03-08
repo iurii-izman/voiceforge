@@ -33,6 +33,8 @@
 
 ## Prompt caching (block 66, #90)
 
+**Статус:** реализовано для Claude; для остальных провайдеров документировано; доработка по API — при появлении поддержки в LiteLLM/провайдерах.
+
 **Текущее состояние:** для моделей Claude в `router.py` при формировании сообщений используется `cache_control: {"type": "ephemeral"}` (system-контент) в `_build_analysis_messages`, `analyze_live_summary` и `update_action_item_statuses`. Это снижает стоимость и задержки при повторных вызовах с тем же системным промптом.
 
 **Не-Claude (Ollama, OpenAI и др.):** параметры кэширования зависят от провайдера и LiteLLM. Для расширения на другие модели нужно смотреть документацию LiteLLM и конкретного провайдера (например [Anthropic prompt caching](https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching), аналоги для других API) и при необходимости добавлять соответствующие поля в сообщения или опции вызова в `router.py`.

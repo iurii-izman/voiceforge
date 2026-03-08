@@ -65,6 +65,21 @@
 
 ---
 
+## 7. Риски зависимостей и данные на диске (#110)
+
+**Чеклист (dependency risk):**
+
+- Еженедельно: `uv run pip-audit --desc` (с учётом временного `--ignore-vuln` для #65 до фикса upstream).
+- При добавлении зависимости: проверить лицензию и известные CVE; обновлять через `./scripts/update_deps.sh`; коммитить pyproject.toml и uv.lock вместе.
+- Dependabot: не игнорировать алерты без решения; для #65 — Dismiss с комментарием по разделу 3.
+
+**Чеклист (data-at-rest):**
+
+- Локальные БД (transcripts, metrics, RAG) — в `XDG_DATA_HOME/voiceforge/` (или заданных путях); не шифруются (раздел 5). При требовании конфиденциальности — LUKS/каталог в зашифрованном разделе или будущий блок 96 (SQLCipher).
+- Секреты — только keyring (сервис `voiceforge`); не хранить в конфиг-файлах и не коммитить.
+
+---
+
 ## Ссылки
 
 - Ключи keyring: [keyring-keys-reference.md](keyring-keys-reference.md)
