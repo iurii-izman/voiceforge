@@ -10,6 +10,8 @@
 
 **Updater явно отключён.** В репозитории в `desktop/src-tauri/tauri.conf.json`: `pubkey: ""`, `endpoints: []`. Сборки не производят подписанные артефакты обновления; в приложении пользователь видит «Обновления отключены или недоступны». Это целевое состояние до появления ключей подписи и сервера обновлений (см. [Release validation](#release-validation) в release-and-quality.md).
 
+Текущее состояние можно быстро проверить командой `uv run python scripts/check_release_proof.py --json`: поле `updater.state` должно быть либо `disabled`, либо `ready`; `invalid` означает смешанный и недопустимый repo state.
+
 **Контракт упаковки (packaging contract):** допустимы только два состояния:
 - **Отключён:** `pubkey: ""` и `endpoints: []`.
 - **Готов к обновлениям:** `pubkey` непустой и `endpoints` — непустой массив URL.

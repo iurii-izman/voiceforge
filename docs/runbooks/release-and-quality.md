@@ -45,6 +45,7 @@ git push origin v0.2.0-alpha.2
 Перед тегом обязательны (blocking):
 
 - **Версии и контракт упаковки:** `python scripts/check_release_metadata.py` — проверяет синхронизацию версий (pyproject.toml → package.json, tauri.conf.json, Cargo.toml, Flatpak manifest) и **контракт updater**: допустимо только состояние «updater отключён» (`pubkey` и `endpoints` пустые) или «updater готов» (оба заданы). См. [desktop-updater.md](desktop-updater.md) § 0.
+- **Release proof report:** `python scripts/check_release_proof.py` — печатает текущий release path как `blocking` / `advisory` / `manual`, отдельно показывает native desktop gate и состояние updater (`disabled`, `ready`, `invalid`). Для машинного вывода: `python scripts/check_release_proof.py --json`.
 
 Рекомендуется для альфа2 с десктопом:
 
@@ -59,18 +60,32 @@ git push origin v0.2.0-alpha.2
 - **Advisory в CI:** jobs `desktop-audit` (npm audit, cargo audit) и `desktop-a11y` (pa11y) выполняются с `continue-on-error: true` из-за принятых рисков (известные CVE без фикса) и нестабильности окружения a11y. Они не блокируют merge и релиз. Политика: при появлении критичных уязвимостей — исправить или задокументировать allowlist в [security-and-dependencies.md](security-and-dependencies.md).
 - **Local release gate для desktop shell:** `cd desktop && npm run e2e:native` считается обязательным локальным Linux smoke перед desktop релизом, но пока не вынесен в CI из-за зависимости от `tauri-driver`, `WebKitWebDriver` и GUI-capable runner. Полная матрица automated/native/manual checks: [desktop-release-gate-matrix.md](desktop-release-gate-matrix.md).
 
+Практический порядок для release proof:
+
+1. `uv run python scripts/check_release_metadata.py`
+2. `uv run python scripts/check_release_proof.py`
+3. `cd desktop && npm run e2e:native`
+4. `cargo install cargo-audit && cd desktop/src-tauri && cargo audit`
+
+Интерпретация:
+
+- шаги 1-2 фиксируют repo-level contract и honest boundary;
+- шаг 3 остаётся local/native gate, а не CI-blocking;
+- шаг 4 остаётся advisory dependency proof: полезен для evidence и triage, но не блокирует релиз, пока CI policy держит `continue-on-error`.
+
 ---
 
 ### 1.3 Доказательство релиза и упаковки (#112)
 
-**Автоматизировано:** `python scripts/check_release_metadata.py` — версии и контракт updater; CI job `quality` блокирует merge.
+**Автоматизировано:** `python scripts/check_release_metadata.py` — версии и контракт updater; `python scripts/check_release_proof.py` — честная сводка release path beyond metadata; CI job `quality` блокирует merge только metadata contract.
 
 **Ручные шаги (proof beyond metadata):** выполняет человек; агент не собирает артефакты и не подписывает.
 
-1. **Сборка десктопа:** `cd desktop && npm run build && cargo tauri build`; проверить артефакты в `target/release/bundle/` (deb/rpm/AppImage).
-2. **Аудит зависимостей (advisory):** `cd desktop && npm audit` (при необходимости `--audit-level=high`); `cargo audit` в `desktop/src-tauri/` — известные CVE без фикса допускаются с continue-on-error в CI (см. раздел 1.2).
-3. **Нативный smoke:** `cd desktop && npm run e2e:native` на Linux с GUI (см. [desktop-release-gate-matrix.md](desktop-release-gate-matrix.md)).
-4. **Подписанный релиз (когда настроен):** ключи подписи и сервер обновлений — по [desktop-updater.md](desktop-updater.md); контракт проверяется `check_release_metadata.py`.
+1. **Зафиксировать baseline:** `uv run python scripts/check_release_metadata.py && uv run python scripts/check_release_proof.py`. Во второй команде должны явно читаться `blocking=release_metadata`, `native_gate=desktop_native_smoke` и текущее updater state.
+2. **Нативный smoke:** `cd desktop && npm run e2e:native` на Linux с GUI (см. [desktop-release-gate-matrix.md](desktop-release-gate-matrix.md)). Это обязательный local gate для desktop release, но не CI-blocking.
+3. **Аудит зависимостей (advisory):** `cd desktop && npm audit --audit-level=high`; `cargo install cargo-audit && cd desktop/src-tauri && cargo audit`. Если `cargo-audit` не установлен локально, `check_release_proof.py` пометит это как `missing-tool`, а не как blocking failure.
+4. **Сборка десктопа:** `cd desktop && npm run build && cargo tauri build`; проверить артефакты в `target/release/bundle/` (deb/rpm/AppImage).
+5. **Updater boundary:** пока `check_release_proof.py` показывает `updater=disabled`, signed updater proof не требуется. Если state станет `ready`, тогда обязательны ключи подписи, update endpoint и install-flow proof по [desktop-updater.md](desktop-updater.md).
 
 Чеклист перед тегом: раздел 1 и 3 этого runbook.
 

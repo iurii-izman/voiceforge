@@ -34,17 +34,20 @@ Playwright/autopilot и visual/a11y suite дают сильный regression sig
 
 Обязательный минимум:
 
-1. `cd desktop && npm run e2e`
-2. `cd desktop && npx playwright test e2e/a11y.spec.js --project=chromium`
-3. `cd desktop && npx playwright test e2e/visual.spec.js --project=chromium`
-4. `cd desktop && npm run e2e:native`
-5. `python scripts/check_release_metadata.py`
-6. `cd desktop && npm run tauri build`
+1. `uv run python scripts/check_release_metadata.py`
+2. `uv run python scripts/check_release_proof.py`
+3. `cd desktop && npm run e2e`
+4. `cd desktop && npx playwright test e2e/a11y.spec.js --project=chromium`
+5. `cd desktop && npx playwright test e2e/visual.spec.js --project=chromium`
+6. `cd desktop && npm run e2e:native`
+7. `cd desktop && npm run tauri build`
 
 Дополнительно для релиза с updater:
 
 - пройти checklist из [desktop-updater.md](desktop-updater.md)
 - приложить proof для signed artifact / update endpoint
+
+`check_release_proof.py` нужен здесь как честная фиксация boundary: что blocking, что advisory, и требуется ли updater evidence вообще.
 
 ---
 
