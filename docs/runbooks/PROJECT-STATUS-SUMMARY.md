@@ -1,14 +1,15 @@
 # Итог по проекту VoiceForge (12 разделов)
 
-Единый свод: планы vs код, что сделано, что осталось вам, Sonar/GitHub, приоритеты. Обновлено: 2026-03-08.
+Единый свод: планы vs код, что сделано, что осталось вам, Sonar/GitHub, приоритеты. Обновлено: 2026-03-08 (сверено по текущему репо).
 
 ---
 
-## 1. Что сделано агентом в этой сессии
+## 1. Что подтверждено по репо
 
 - **Сверка планов с кодом:** подтверждено, что блоки 44 (история буфера), 46 (слайд-панель настроек), 49 (виджет «Последний анализ»), 68 (streaming LLM), 71 (Whisper API), 75 (поиск RAG), 79 (создание события из сессии) уже реализованы в коде.
 - **Обновлены документы:** в [backlog-and-actions.md](../plans/backlog-and-actions.md) отмечены как реализованные блоки 44, 46, 49 (плюс ранее 35, 68, 71, 75, 79). В [roadmap-100-blocks.md](../plans/roadmap-100-blocks.md) секция «Не реализовано» приведена в соответствие (66 — только prompt caching; 68, 71, 79 — зачёркнуты).
 - **Правки по Sonar:** optional chain в `desktop/src/main.js` (S6582); dict comprehension в `scripts/git_credential_keyring_pat.py` (S7494); NOSONAR для неиспользуемых параметров интерфейса в `stt/openai_whisper.py` (S1172) и для вызова fixture в `tests/test_benchmark_pipeline.py` (S5864).
+- **После audit-driven batches дополнительно подтверждено:** `#97` закрыт кодом и regression tests для `/api/action-items/update`; `#98` закрыт через `web-async` в full-stack extras и `scripts/check_release_metadata.py`; `#99` продвинут дальше и из `omit` теперь выведены `server.py` и `rag/watcher.py`; `#100` подтверждён process-scoped cache для `Diarizer`/`HybridSearcher` и редкой ring persistence; `#101` подтверждён desktop release gate (`desktop-release-gate-matrix.md`, `npm run e2e:native`, updater contract check).
 
 ---
 
@@ -80,6 +81,7 @@
 
 - **#65 CVE:** следить за upstream (diskcache/instructor); при фиксе — обновить и убрать ignore.
 - **Sonar S3776:** 8 мест с высокой когнитивной сложностью — рефакторинг по одному или принять по решению.
+- **Coverage blind spots:** после `server.py` и `rag/watcher.py` в `omit` всё ещё остаются `main.py`, `core/daemon.py`, `llm/router.py`, `stt/diarizer.py`, тяжёлые `rag/*`, `llm/local_llm.py`.
 - **verify_pr/bandit:** при желании полного зелёного — доработать оставшиеся предупреждения bandit.
 - **Pre-commit на хосте:** без Python 3.12 использовать `git commit/push --no-verify`; полный pre-commit в toolbox 43.
 
@@ -92,58 +94,60 @@
 
 Режим: автопилот. Ключи только в keyring (сервис voiceforge). Fedora Atomic, toolbox 43; uv sync --extra all. В конце сессии: тесты (uv run pytest … -q --tb=line или лёгкое подмножество при OOM), коммит и пуш из корня репо (Conventional Commits, Closes #N где уместно), обновить next-iteration-focus, выдать промпт для следующего чата.
 
-Задача: По PROJECT-STATUS-SUMMARY разд. 3–4 и 7–8 — следующий приоритет: рефакторинг Sonar S3776, блоки 69/72, Phase D (#70–73) или ручные шаги из MANUAL-AND-CANNOT-DO.
+Задача: По PROJECT-STATUS-SUMMARY разд. 3–4 и 7–8 — следующий приоритет: coverage blind spots (`core/daemon.py` или `llm/router.py`) отдельным coherent batch, либо Sonar S3776, либо ручные release/desktop шаги из MANUAL-AND-CANNOT-DO.
 ```
 
 ---
 
 ## 10. Deep audit delta (2026-03-08)
 
-Новый независимый аудит показал: **интегральная оценка проекта ~71.3/100**, реалистичный эталон для этой системы — **~86.5/100**. Сильные стороны: security baseline, observability, docs coverage по breadth, breadth of product surface. Главные просадки: transport parity, effective coverage, release/packaging contract и docs drift.
+Базовый clean-room audit давал **~71.3/100**. После уже подтверждённых закрытых batches `#97–#101`, вывода `rag/watcher.py` из `omit` и актуализации release/docs текущая evidence-based оценка по репо — **~75.0/100**. Реалистичный эталон для этой системы остаётся **~86.5/100**. Сильные стороны: security baseline, observability, breadth of product surface. Главные просадки теперь сместились в structural hotspots, honest coverage, manual release evidence и docs drift.
 
 | Направление | Текущее | Эталон | Gap | Ключевой вывод |
 |-------------|---------|--------|-----|----------------|
-| Core architecture & module boundaries | 61 | 84 | 23 | Слишком много логики в `main.py`, `daemon.py`, `server.py`, `router.py`, `desktop/src/main.js` |
-| Audio / STT / diarization | 74 | 86 | 12 | Работает, но есть lifecycle/perf debt |
-| RAG / data / storage | 76 | 88 | 12 | Блок функционально сильный, lifecycle и restore confidence слабее |
-| LLM / prompts / PII | 73 | 87 | 14 | Good guardrails, но coverage router и policy centralization ограничены |
-| Interfaces & integrations | 64 | 85 | 21 | Найден реальный web bug + docs/API drift |
-| Testing & QA | 71 | 86 | 15 | Реальное coverage ~63.95%, а не то, что ощущается по docs |
-| Security & dependency hygiene | 78 | 89 | 11 | Сильный baseline; open risk — CVE #65 и local unencrypted DBs |
-| Observability & runtime ops | 77 | 88 | 11 | Хорошо для alpha, но часть paths не верифицирована end-to-end |
-| CI/CD & release / packaging | 74 | 87 | 13 | CI зрелый, packaging/updater contract пока inconsistent |
-| Documentation & governance | 68 | 86 | 18 | Доков много, но есть stale/broken refs и version drift |
+| Core architecture & module boundaries | 63 | 84 | 21 | Главный structural gap всё ещё в крупных hotspot-модулях: `main.py`, `daemon.py`, `server.py`, `router.py`, `desktop/src/main.js` |
+| Audio / STT / diarization | 76 | 86 | 10 | Path стал стабильнее, но lifecycle/perf доказан не полностью и diarization остаётся дорогим |
+| RAG / data / storage | 78 | 88 | 10 | RAG функционально силён; watcher покрыт честнее, но restore/search lifecycle ещё не fully proved |
+| LLM / prompts / PII | 75 | 87 | 12 | Guardrails хорошие; router coverage, policy centralization и non-Claude prompt caching всё ещё ограничивают зрелость |
+| Interfaces & integrations | 73 | 85 | 12 | Web bug и docs/API drift по `action-items/update` закрыты, но contract parity между sync/async/desktop надо удерживать тестами |
+| Testing & QA | 76 | 86 | 10 | Coverage policy стала честнее, но confidence всё ещё строится на targeted subsets и blind spots в hotspot-модулях |
+| Security & dependency hygiene | 79 | 89 | 10 | Baseline сильный; открытые риски не изменились: `#65` и local data-at-rest posture |
+| Observability & runtime ops | 78 | 88 | 10 | Инструментация хорошая для alpha, но live Jaeger/runtime evidence ещё не собран end-to-end |
+| CI/CD & release / packaging | 80 | 87 | 7 | Metadata/updater contract и desktop release gate оформлены лучше, но signed/manual release proof всё ещё вне CI |
+| Documentation & governance | 72 | 86 | 14 | Summary/runbooks стали ближе к коду, но stale refs, version drift и active-vs-archive hygiene ещё требуют sweep |
+
+**Новые рабочие блоки на GitHub Project:** [#104](https://github.com/iurii-izman/voiceforge/issues/104) core architecture, [#105](https://github.com/iurii-izman/voiceforge/issues/105) audio/STT, [#106](https://github.com/iurii-izman/voiceforge/issues/106) RAG lifecycle, [#107](https://github.com/iurii-izman/voiceforge/issues/107) LLM/prompts/PII, [#108](https://github.com/iurii-izman/voiceforge/issues/108) interface parity, [#109](https://github.com/iurii-izman/voiceforge/issues/109) testing/QA, [#110](https://github.com/iurii-izman/voiceforge/issues/110) security hygiene, [#111](https://github.com/iurii-izman/voiceforge/issues/111) observability evidence, [#112](https://github.com/iurii-izman/voiceforge/issues/112) release/packaging proof, [#113](https://github.com/iurii-izman/voiceforge/issues/113) docs/governance sweep.
 
 **Подтверждённые hotspots:** [src/voiceforge/main.py](/home/user/Projects/voiceforge/src/voiceforge/main.py), [src/voiceforge/core/daemon.py](/home/user/Projects/voiceforge/src/voiceforge/core/daemon.py), [src/voiceforge/web/server.py](/home/user/Projects/voiceforge/src/voiceforge/web/server.py), [src/voiceforge/web/server_async.py](/home/user/Projects/voiceforge/src/voiceforge/web/server_async.py), [src/voiceforge/llm/router.py](/home/user/Projects/voiceforge/src/voiceforge/llm/router.py), [desktop/src/main.js](/home/user/Projects/voiceforge/desktop/src/main.js).
 
-**Текущие evidence gaps:** локально не гонялся `cargo-audit`, не запускался полный `pytest tests/` из-за OOM-risk, не проверялись live Jaeger traces и updater signing flow. Desktop packaging/updater изменения в worktree считать `worktree-in-progress`, а не завершённым состоянием.
+**Текущие evidence gaps:** локально не гонялся `cargo-audit`, не запускался полный `pytest tests/` из-за OOM-risk, не проверялись live Jaeger traces и updater signing flow. Packaging/updater contract уже подтверждён runbook-ами и `check_release_metadata.py`, но финальный signed-release flow остаётся manual evidence gap.
 
 ---
 
 ## 11. Critical Path, Quick Wins, top risks
 
-**Critical Path (в порядке):**
+**Critical Path (в порядке, актуализировано):**
 
-1. [#97](https://github.com/iurii-izman/voiceforge/issues/97) Исправить bug в `POST /api/action-items/update` для sync/async web и добавить regression tests.
-2. [#98](https://github.com/iurii-izman/voiceforge/issues/98) Закрыть install/release contract: `web-async` profile, version sync, release/docs drift.
-3. [#99](https://github.com/iurii-izman/voiceforge/issues/99) Сократить coverage blind spots в `server.py`, `server_async.py`, `daemon.py`, `router.py`, `main.py`.
-4. [#100](https://github.com/iurii-izman/voiceforge/issues/100) Убрать performance debt: new-per-analyze `Diarizer`/`HybridSearcher`, full ring rewrite каждые 2 сек.
-5. [#101](https://github.com/iurii-izman/voiceforge/issues/101) Довести packaging/updater до честного состояния: blocking checks, repeatable build, signed/update-ready или explicit disable.
+1. Coverage blind spots после уже закрытого `#99`: `core/daemon.py`, `llm/router.py`, затем `main.py` отдельными cheap helper/smoke batches.
+2. `#65` CVE: дождаться фикса upstream и снять `--ignore-vuln` без регресса CI.
+3. Sonar S3776: постепенно выносить сложные ветки из `daemon.py`, `main.py`, `router.py`, `server_async.py`, `desktop/src/main.js`.
+4. Manual release evidence: `cargo-audit`, live Jaeger traces, signed updater path, desktop native release gate на реальном окружении.
+5. Prompt caching для non-Claude (roadmap 19 / block 66 continuation): пока research/documented, но не productized.
 
 **Quick Wins (1-2 часа):**
 
-1. Починить tuple unpack bug в sync/async web.
-2. Добавить web regression tests на `action-items/update`.
-3. Обновить `web-api.md` под nested error envelope и async `/api/analyze/stream`.
-4. Синхронизировать desktop version metadata (`package.json`, `tauri.conf.json`, `Cargo.toml`, Flatpak manifest).
-5. Сделать `uv sync --extra all` действительно full-stack или переименовать/уточнить профиль в docs.
+1. Взять `core/daemon.py` как следующий ROI-candidate из `omit` и добавить узкий helper/smoke batch.
+2. Либо взять `llm/router.py` тем же форматом: helper-level tests без тяжёлого LLM loop.
+3. При желании полного quality signal добрать оставшиеся bandit/Sonar quick-fixes без cross-cutting rewrite.
+4. Для release confidence отдельно прогнать `python scripts/check_release_metadata.py`.
+5. Для desktop confidence отдельно прогнать `cd desktop && npm run e2e:native` в toolbox/local release path.
 
 **Top risks:**
 
 - Silent regressions в untested web/async endpoints.
 - Ложное ощущение готовности из-за optimistic docs/plans.
 - Memory/perf cliffs на Linux-хостах около 8 GB RAM.
-- Packaging/updater ambiguity перед релизом.
+- Packaging/updater manual proof всё ещё дороже и частично вне CI.
 - Затянувшийся accepted risk по `CVE-2025-69872` (#65).
 
 ---
@@ -154,5 +158,5 @@
 - **Лучший формат batches:** `bugfix + regression tests + docs`, `coverage hotspot + refactor + targeted tests`, `version sync + release docs + install smoke`.
 - **Худший формат batches:** desktop packaging + RAG + calendar; security + UI polish + infra refactor в одной сессии.
 - **Источник очереди работ:** сначала [next-iteration-focus.md](next-iteration-focus.md), затем [planning.md](planning.md) / [GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1), затем `plans.md` / `audit.md`.
-- **Актуальные audit-driven items на board:** [#96](https://github.com/iurii-izman/voiceforge/issues/96) tracking, [#97](https://github.com/iurii-izman/voiceforge/issues/97), [#98](https://github.com/iurii-izman/voiceforge/issues/98), [#99](https://github.com/iurii-izman/voiceforge/issues/99), [#100](https://github.com/iurii-izman/voiceforge/issues/100), [#101](https://github.com/iurii-izman/voiceforge/issues/101).
+- **Актуальные audit-driven items на board:** [#96](https://github.com/iurii-izman/voiceforge/issues/96), [#97](https://github.com/iurii-izman/voiceforge/issues/97), [#98](https://github.com/iurii-izman/voiceforge/issues/98), [#99](https://github.com/iurii-izman/voiceforge/issues/99), [#100](https://github.com/iurii-izman/voiceforge/issues/100), [#101](https://github.com/iurii-izman/voiceforge/issues/101) уже закрыты; следующий practical queue теперь идёт не от этих карточек, а от оставшихся blind spots, Sonar debt и manual release evidence gaps.
 - **Готовый prompt и batching strategy:** [cursor.md](cursor.md), [next-iteration-focus.md](next-iteration-focus.md), [agent-context.md](agent-context.md).
