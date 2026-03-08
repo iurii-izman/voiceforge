@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-08 (closed #107, #108, #113; router, web contract, docs sweep)
+**Обновлено:** 2026-03-08 (closed #90, #110, #111, #112; checklists and prompt caching status)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** закрыты три задачи с подтверждённым кодом/тестами/доками. **#107** (router coverage): расширен test_coverage_hotspots_batch99 — _live_summary_system/_status_update_system fallback, _try_ollama_faq при is_available False, _complete_structured_check_budget (BudgetExceeded), _complete_structured_cached (cache miss). **#113** (docs sweep): исправлен version drift в release-and-quality.md (Release readiness 0.2.0a2 / v0.2.0-alpha.2), в doc-governance добавлена секция Sweep (версия, устаревшие ссылки). **#108** (interface parity): добавлен tests/test_web_contract_parity.py — контракт JSON для status, ready, health, sessions, cost, error (sync/async используют одни _sync_*). Карточки #107, #108, #113 переведены в Done. Проверка: `uv run pytest tests/test_coverage_hotspots_batch99.py tests/test_web_contract_parity.py -q --tb=line` и коммиты с Closes #107, #108, #113.
+**Сделано в сессии:** закрыты четыре задачи документацией и чеклистами. **#110** (dependency risk и data-at-rest): в security-and-dependencies.md добавлен раздел 7 — чеклист по рискам зависимостей и данным на диске. **#111** (observability evidence): в observability-alerts.md добавлен чеклист доказательства трейсов (Jaeger, ручные шаги). **#112** (release/packaging proof): в release-and-quality.md добавлен §1.3 — доказательство релиза и упаковки (ручные шаги: сборка, cargo audit, e2e:native, подпись). **#90** (prompt caching): в prompt-management.md зафиксирован статус — реализовано для Claude, для остальных провайдеров документировано. Коммит с Closes #90, #110, #111, #112; карточки переведены в Done.
 
-**Следующий шаг:** Оставшиеся открытые на доске: #104 (hotspot boundaries), #105 (audio/STT), #106 (RAG lifecycle), #110 (security/deps), #111 (observability evidence), #112 (release/packaging proof), #90 (prompt caching), #65 (CVE — ждём upstream). Брать один coherent batch: например #104 (рефакторинг одной функции из hotspot для S3776) или #110/#111 (доки/чеклисты). Не смешивать поверхности. Полный pytest tests/ не гонять по умолчанию (OOM-risk).
+**Следующий шаг:** Открыты только #65 (CVE — ждём upstream, не закрывать), #104 (hotspot boundaries), #105 (audio/STT), #106 (RAG lifecycle). Брать один coherent batch: #104 (рефакторинг одной функции для S3776) или #105/#106 (тесты/жизненный цикл). Полный pytest tests/ не гонять по умолчанию (OOM-risk).
 
 ---
 
