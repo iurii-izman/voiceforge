@@ -2,6 +2,13 @@
 
 Черновик для упаковки десктопного приложения VoiceForge (Tauri 2) в форматы, не требующие установки системных пакетов на целевой машине.
 
+## Воспроизводимая сборка (repeatable path)
+
+- **Версии:** синхронизация версий и контракт updater проверяются скриптом `scripts/check_release_metadata.py` (обязателен перед релизом, см. [release-and-quality.md](release-and-quality.md) § 1.1).
+- **Flatpak из корня репо:** `make flatpak-build` или `./scripts/build-flatpak.sh`. Требует: flatpak, flatpak-builder, org.gnome.Platform//46; при отсутствии .deb скрипт сначала собирает десктоп (см. [desktop-build-deps.md](desktop-build-deps.md)).
+- **Deb/RPM/AppImage:** из каталога `desktop/`: `npm run build && npm run tauri build` (зависимости и шаги — в [desktop-build-deps.md](desktop-build-deps.md)).
+- **Updater:** до настройки ключей и сервера обновлений — явно отключён (`pubkey` и `endpoints` пустые в tauri.conf.json). См. [desktop-updater.md](desktop-updater.md) § 0.
+
 ## GA checklist (#73)
 
 - **AppImage:** скачать `.AppImage` → `chmod +x VoiceForge_*.AppImage` → `./VoiceForge_*.AppImage` (приложение запускается).

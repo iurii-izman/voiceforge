@@ -2,7 +2,19 @@
 
 Настройка проверки и установки обновлений для десктопного приложения VoiceForge (Tauri 2, tauri-plugin-updater).
 
-**Связанные документы:** [desktop-build-deps.md](desktop-build-deps.md), [release.md](release.md). План блоков: [plans/roadmap-100-blocks.md](plans/roadmap-100-blocks.md) (блок 90–92).
+**Связанные документы:** [desktop-build-deps.md](desktop-build-deps.md), [release-and-quality.md](release-and-quality.md). План блоков: [plans/roadmap-100-blocks.md](../plans/roadmap-100-blocks.md) (блок 90–92).
+
+---
+
+## 0. Текущее состояние (honest status)
+
+**Updater явно отключён.** В репозитории в `desktop/src-tauri/tauri.conf.json`: `pubkey: ""`, `endpoints: []`. Сборки не производят подписанные артефакты обновления; в приложении пользователь видит «Обновления отключены или недоступны». Это целевое состояние до появления ключей подписи и сервера обновлений (см. [Release validation](#release-validation) в release-and-quality.md).
+
+**Контракт упаковки (packaging contract):** допустимы только два состояния:
+- **Отключён:** `pubkey: ""` и `endpoints: []`.
+- **Готов к обновлениям:** `pubkey` непустой и `endpoints` — непустой массив URL.
+
+Смешанное состояние (например, pubkey задан, endpoints пустой) считается недопустимым и ломает скрипт проверки `scripts/check_release_metadata.py` при релизе.
 
 ---
 

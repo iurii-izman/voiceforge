@@ -58,6 +58,28 @@ def collect_release_metadata_errors(repo_root: Path = REPO_ROOT) -> list[str]:
     if expected_deb_name not in flatpak_manifest:
         errors.append(f"desktop/flatpak/com.voiceforge.app.yaml: expected deb name {expected_deb_name}")
 
+    errors.extend(check_updater_contract(tauri_conf))
+    return errors
+
+
+def check_updater_contract(tauri_conf: dict) -> list[str]:
+    """Packaging/updater contract (#101): either both empty (disabled) or both set (ready)."""
+    errors: list[str] = []
+    updater = tauri_conf.get("plugins", {}).get("updater") or {}
+    pubkey = (updater.get("pubkey") or "").strip()
+    endpoints = updater.get("endpoints") or []
+    has_pubkey = bool(pubkey)
+    has_endpoints = bool(endpoints) and isinstance(endpoints, list)
+    if has_pubkey and not has_endpoints:
+        errors.append(
+            "desktop/src-tauri/tauri.conf.json: updater pubkey set but endpoints empty; "
+            "set endpoints or leave updater disabled (pubkey and endpoints empty)"
+        )
+    if not has_pubkey and has_endpoints:
+        errors.append(
+            "desktop/src-tauri/tauri.conf.json: updater endpoints set but pubkey empty; "
+            "set pubkey or leave updater disabled (pubkey and endpoints empty)"
+        )
     return errors
 
 

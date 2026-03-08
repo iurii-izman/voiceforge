@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-08 (#100 performance debt закрыт)
+**Обновлено:** 2026-03-08 (#101 packaging/updater закрыт)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** [#100](https://github.com/iurii-izman/voiceforge/issues/100) закрыт: убран performance debt — (1) Diarizer и HybridSearcher переиспользуются на уровне процесса (кэш в pipeline); (2) daemon.search_rag использует кэшированный searcher; (3) ring buffer пишется не каждые 2 с, а по интервалу `ring_persist_interval_sec` (по умолчанию 10 с); (4) добавлена метрика `voiceforge_pipeline_step2_total_seconds`. Конфиг: `ring_persist_interval_sec` (≥1), доки config-env-contract, тесты (cache, config, observability). Карточка #100 переведена в Done.
+**Сделано в сессии:** [#101](https://github.com/iurii-izman/voiceforge/issues/101) закрыт: packaging/updater приведён к честному состоянию — (1) в desktop-updater.md зафиксирован текущий статус «updater явно отключён» и контракт (либо оба пустые, либо оба заданы); (2) в check_release_metadata.py добавлена проверка контракта updater и тесты; (3) в release-and-quality.md добавлены § 1.1 Release validation (packaging/updater) и § 1.2 Desktop CI: blocking vs advisory; (4) в offline-package.md добавлена секция «Воспроизводимая сборка». Карточка #101 переведена в Done. *(Ранее #100: performance debt.)*
 
-**Следующий шаг:** Поднять coverage к 75% (router/daemon/server_async/main helpers) и fail_under к 75. Либо по доске взять **#101** (packaging/updater). Verify: `uv run pytest tests/ -q -m "not integration" --cov=src/voiceforge --cov-report=term`.
+**Следующий шаг:** Поднять coverage к 75% (router/daemon/server_async/main helpers) и fail_under к 75. Verify: `uv run pytest tests/ -q -m "not integration" --cov=src/voiceforge --cov-report=term`.
 
 ---
 

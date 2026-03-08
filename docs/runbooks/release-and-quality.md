@@ -40,6 +40,26 @@ git push origin v0.2.0-alpha.2
 
 ---
 
+### 1.1 Release validation (packaging/updater)
+
+Перед тегом обязательны (blocking):
+
+- **Версии и контракт упаковки:** `python scripts/check_release_metadata.py` — проверяет синхронизацию версий (pyproject.toml → package.json, tauri.conf.json, Cargo.toml, Flatpak manifest) и **контракт updater**: допустимо только состояние «updater отключён» (`pubkey` и `endpoints` пустые) или «updater готов» (оба заданы). См. [desktop-updater.md](desktop-updater.md) § 0.
+
+Рекомендуется для альфа2 с десктопом:
+
+- Сборка десктопа: `cd desktop && npm run build && cargo tauri build` или `make flatpak-build` (см. [offline-package.md](offline-package.md)).
+- Честный статус: до появления ключей подписи и сервера обновлений updater остаётся явно отключённым в репо.
+
+---
+
+### 1.2 Desktop CI: blocking vs advisory
+
+- **Blocking для релиза:** только `check_release_metadata.py` (включая packaging/updater contract). Он вызывается в CI job `quality` и должен проходить перед тегом.
+- **Advisory в CI:** jobs `desktop-audit` (npm audit, cargo audit) и `desktop-a11y` (pa11y) выполняются с `continue-on-error: true` из-за принятых рисков (известные CVE без фикса) и нестабильности окружения a11y. Они не блокируют merge и релиз. Политика: при появлении критичных уязвимостей — исправить или задокументировать allowlist в [security-and-dependencies.md](security-and-dependencies.md).
+
+---
+
 ## 2. Rollback (откат альфа-релиза)
 
 **Когда:** сломанный wheel/runtime после тега; неверные release notes; security-проблема в артефакте.
