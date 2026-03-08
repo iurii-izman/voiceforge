@@ -2,13 +2,14 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-08 (closed #104, #105, #106; hotspot extraction + lifecycle smoke)
+**Обновлено:** 2026-03-08 (создана стратегическая очередь #114-#123; следующий batch = #115 `llm/router.py`)
 
 ---
 
 ## Что требуется от вас (подтверждения и действия)
 
 - **#65 CVE:** Фикса в upstream (diskcache/instructor) **пока нет — делать ничего не нужно**. Когда появится версия с фиксом: обновить зависимости и убрать `--ignore-vuln` по чеклисту в [security-and-dependencies.md](security-and-dependencies.md) разд. 4. Dependabot-алерт можно отклонить с комментарием «No fix yet; см. runbook».
+- **Новая стратегическая очередь #114-#123:** ручных действий для её создания не требуется; карточки уже заведены и добавлены в Project `#1` со статусом `Todo`. Практический execution order на ближайшие сессии: **#115 -> #116 -> #114**.
 - **Keyring (HuggingFace):** Проверка, что ключ сохранён: `uv run python -c "from voiceforge.core.secrets import get_api_key; print('huggingface:', 'present' if get_api_key('huggingface') else 'absent')"`. Сохранение (один раз): `secret-tool store --label='voiceforge huggingface' service voiceforge key huggingface` → при запросе **Secret:** вставить токен (hf_...) с https://huggingface.co/settings/tokens. **Проверено:** ключ huggingface в keyring присутствует (present).
 - **OTel/Jaeger — кто управляет:** Агент не может сам запускать Jaeger, открывать браузер или смотреть трейсы. Запуск контейнера (podman/docker), открытие http://localhost:16686, установка/снятие переменных в сессии — делаете вы. Агент может только обновить доки и подсказать команды. ОTel — трассировка шагов пайплайна (длительности) в Jaeger для отладки. Если не нужны трейсы: `unset VOICEFORGE_OTEL_ENABLED OTEL_EXPORTER_OTLP_ENDPOINT`. Jaeger на хосте, команды в toolbox: `OTEL_EXPORTER_OTLP_ENDPOINT=http://10.0.2.2:4318`.
 - **#66 Async:** Реализован опциональный async-сервер (Starlette + uvicorn); см. ниже. Ничего подтверждать не нужно.
@@ -17,9 +18,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** закрыты задачи #104, #105, #106. **#104** (hotspot boundaries): из daemon.py вынесена `_event_description_from_detail` в уровень модуля (create_event_from_session), добавлены тесты в test_daemon_helpers; в PROJECT-STATUS-SUMMARY зафиксирован следующий structural hotspot (main.py/server_async). **#105** (audio/STT lifecycle): добавлен runbook [lifecycle-smoke.md](lifecycle-smoke.md) — воспроизводимые шаги для listen/analyze и targeted tests. **#106** (RAG lifecycle): в lifecycle-smoke.md задокументирован smoke для index/search и restore. Коммиты с Closes #104, #105, #106; карточки переведены в Done.
+**Сделано в сессии:** создан новый набор стратегических score-driven блоков **#114-#123** и сразу добавлен в GitHub Project `#1` как `Todo` с полями priority/phase/effort/area. Это не reopening `#104-#113`: предыдущие deep-audit follow-up blocks остаются закрытой историей, а новый queue разделяет code-heavy и manual/evidence work. Верхние practical блоки теперь зафиксированы так: **#115** (`llm/router.py` out of blind spot), **#116** (`core/daemon.py` behavioral coverage), **#114** (`main.py` + `server_async.py` hotspot decomposition). Одновременно обновлён [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md), чтобы он ссылался уже на `#114-#123`, а не на закрытые `#104-#113`.
 
-**Следующий шаг:** Открыта только **#65** (CVE diskcache/instructor — ждём upstream; не закрывать до фикса). Все остальные задачи по доске закрыты с подтверждением (код, тесты, доки). При появлении фикса для #65 — выполнить чеклист в [security-and-dependencies.md](security-and-dependencies.md) разд. 4. Полный pytest tests/ не гонять по умолчанию (OOM-risk).
+**Следующий шаг:** брать **#115** как отдельный coherent batch только по `src/voiceforge/llm/router.py`. Цель: узкий helper/smoke/regression suite вокруг provider selection, policy/fallback и error-shaping путей; переиспользовать существующие router/unit tests; локально проверить coverage с временно снятым `omit` именно для `llm/router.py`; менять `pyproject.toml` только при честном проценте. Не смешивать этот batch с `daemon.py`, `main.py`, release/docs или RAG.
 
 ---
 
@@ -28,7 +29,7 @@
 **Полный чеклист:** [pre-beta-sonar-github.md](pre-beta-sonar-github.md).
 
 - **PR #81, #79:** закрыты с комментарием «Applied in main» (2026-03-07).
-- **Открытые issues:** #65 (CVE — ждём upstream). #50 (macOS/WSL2) закрыт 2026-03-07 — снят с скоупа.
+- **Открытые issues:** #65 (CVE — ждём upstream) и стратегическая очередь **#114-#123**. `#115` сейчас первый code-heavy кандидат, затем `#116`, затем `#114`. #50 (macOS/WSL2) закрыт 2026-03-07 — снят с активного скоупа.
 
 **Sonar:** S7721, S2737, S3776, S7735 закрыты в 9b92a46. Проверить остаток: `uv run python scripts/sonar_fetch_issues.py` в toolbox 43. **Mypy:** в scope verify_pr — 0 ошибок. **verify_pr:** Ruff + Mypy OK; bandit — зелёный (nosec B310/B608). **Gitleaks:** allowlist .hypothesis/ + .gitignore; шаг [8/8] в CI проходит (workflow Gitleaks зелёный после 270b7e2/42f904c).
 
@@ -43,11 +44,11 @@
 Ключи: все в keyring (сервис `voiceforge`). Список: `docs/runbooks/keyring-keys-reference.md`. Для LLM/STT: `anthropic`, `openai`, `huggingface`; для CI: `sonar_token`, `github_token`. Проверка: `uv run python -c "from voiceforge.core.secrets import get_api_key; print([n for n in ('anthropic','openai','huggingface') if get_api_key(n)])"`.
 
 ```
-Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md (правила, конфиг, приоритеты). Фокус: @docs/runbooks/next-iteration-focus.md. Аудит и задачи: @docs/audit/audit.md. Планы и приоритеты: docs/plans.md.
+Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md (правила, конфиг, приоритеты). Фокус: @docs/runbooks/next-iteration-focus.md. Сводный статус и очередь: @docs/runbooks/PROJECT-STATUS-SUMMARY.md. Аудит и задачи: @docs/audit/audit.md. Планы и приоритеты: docs/plans.md.
 
 Режим: максимальные объёмы, автопилот. Делай всё сам, без лишних вопросов. Запрашивай пользователя только если нужен явный выбор, подтверждение или данные вне keyring. Ключи в keyring (keyring-keys-reference.md). Fedora Atomic/toolbox/uv; uv sync --extra all. В конце сессии: тесты (uv run pytest tests/ -q --tb=line), коммит и пуш из корня репо (Conventional Commits, Closes #N где уместно), обновить next-iteration-focus (следующий шаг + дата), выдать промпт для следующего чата.
 
-Задача: [из блока «Следующий шаг» выше] — взять текущий верхний coherent batch из next-iteration-focus и GitHub Project, не смешивая unrelated surfaces.
+Задача: взять верхний coherent batch из блока «Следующий шаг» и GitHub Project. На сейчас это **#115**: `src/voiceforge/llm/router.py` out of blind spot. Сделай узкий helper/smoke/regression batch, честно проверь локальный coverage только для `llm/router.py`, и меняй coverage policy только если процент реально держится.
 ```
 
 ---
@@ -67,7 +68,7 @@
 
 В конце сессии обязательно: (1) targeted tests по изменённой поверхности, (2) commit/push из корня репо (Conventional Commits, `Closes #N` где уместно), (3) обновить next-iteration-focus (блоки «Сделано в сессии», «Следующий шаг», дата), (4) выдать готовый prompt для следующего чата.
 
-Задача: выполнить следующий coherent batch из блока «Следующий шаг» и GitHub Project, сохраняя batching discipline: один subsystem, один verification loop, один честный handoff.
+Задача: выполнить следующий coherent batch из блока «Следующий шаг» и GitHub Project, сохраняя batching discipline: один subsystem, один verification loop, один честный handoff. На сейчас это **#115** по `llm/router.py`; `#116` и `#114` трогать только в следующих сессиях.
 ```
 
 ---
@@ -98,16 +99,15 @@
 
 ---
 
-## Текущий план: Phase A–D (19 задач)
+## Текущая стратегическая очередь: score `76.5 -> 100`
 
-**Единый источник:** [docs/plans.md](../plans.md) (Steps 1–19, оставшееся до 100%, критерии Phase D). Доска: [GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1). Статус W1–W20: [audit/audit.md](../audit/audit.md).
+**Единый источник:** [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md) разд. 10-12 + [planning.md](planning.md). Доска: [GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1). Исторический план Phase A-D закрыт; активный queue теперь ведётся отдельными стратегическими issues.
 
-| Phase | Issues | Описание |
-|-------|--------|----------|
-| **A · Stabilize** | #55–59 | Eval CI, coverage, Sonar/CodeQL blocking, version, .editorconfig |
-| **B · Hardening** | #60–64 | /ready, trace IDs, circuit breaker, purge/backup, monitoring |
-| **C · Scale** | #65–69 | CVE, async web, prompt hash, benchmarks, error format |
-| **D · Productize** | #70–73 | A/B testing, OTel (#71 в работе), plugins, packaging GA |
+| Priority | Issues | Описание |
+|----------|--------|----------|
+| **P0** | #114, #115, #116 | Hotspot decomposition + honest coverage для `main.py`, `server_async.py`, `llm/router.py`, `core/daemon.py` |
+| **P1 code-heavy** | #117, #118, #119, #120 | Heavy RAG confidence, audio/STT lifecycle/perf proof, contract drift prevention, security hardening |
+| **P1 evidence/manual** | #121, #122, #123 | Jaeger/runtime evidence, release proof, docs/governance sweep |
 
 ---
 
@@ -115,7 +115,7 @@
 
 Всё закрытое: [docs/history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
 
-Вкратце: Roadmap 1–18 реализован. Старые issues #32–49, #51–53 закрыты. Sonar ~25 замечаний закрыто. Аудит 2026-02-26 (архив: docs/archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md) выявил 20 Weaknesses — все 20 оформлены как issues #55–73.
+Вкратце: Roadmap 1–18 реализован. Старые issues #32–49, #51–53 закрыты. Sonar ~25 замечаний закрыто. Аудит 2026-02-26 (архив: docs/archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md) выявил 20 Weaknesses — они прошли через issues #55–73 и последующие follow-up batches #97–#113; текущий score-to-100 queue продолжен стратегическими блоками #114–#123.
 
 ---
 
