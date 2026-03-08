@@ -185,7 +185,7 @@ class StreamingTranscriber:
         if audio.dtype == np.int16:
             audio = audio.astype(np.float32) / 32768.0
         else:
-            audio = audio.astype(np.float32).copy()
+            audio = audio.astype(np.float32, copy=False)
         effective_rate: int | None = None
         if self._sample_rate != TARGET_SAMPLE_RATE:
             audio, effective_rate = _resample_float_to_16k(audio, self._sample_rate)

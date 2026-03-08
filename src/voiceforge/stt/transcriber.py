@@ -51,7 +51,7 @@ class Transcriber:
         if audio.dtype == np.int16:
             audio_f = audio.astype(np.float32) / 32768.0
         else:
-            audio_f = audio.astype(np.float32)
+            audio_f = audio.astype(np.float32, copy=False)
 
         if sample_rate != 16000:
             log.debug("transcribe.sample_rate_ignored", sample_rate=sample_rate, expected=16000)
