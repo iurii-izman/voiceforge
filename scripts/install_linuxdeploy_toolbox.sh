@@ -24,7 +24,13 @@ if [[ ! -x "$BIN_DIR/linuxdeploy" ]]; then
 fi
 
 echo "Done. Ensure $BIN_DIR is in your PATH (e.g. export PATH=\"$BIN_DIR:\$PATH\")."
-echo "Then: cd desktop && npm run build && cargo tauri build"
+echo ""
+echo "To build AppImage (from repo root):"
+echo "  export PATH=\"$BIN_DIR:\$PATH\""
+echo "  export NO_STRIP=true"
+echo "  export APPIMAGE_EXTRACT_AND_RUN=1   # required in toolbox (no FUSE)"
+echo "  cd desktop && npm run build && npm run tauri build"
+echo ""
 if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
   echo "Add to ~/.bashrc: export PATH=\"$BIN_DIR:\$PATH\""
 fi

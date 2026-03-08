@@ -102,15 +102,33 @@ cd /path/to/voiceforge/desktop && npm run build && npm run tauri build
 
 ### AppImage в toolbox (Fedora)
 
-На Fedora/rolling distros для успешной сборки AppImage нужны переменные окружения (из‑за linuxdeploy и секций `.relr.dyn`):
+Сборка AppImage требует **linuxdeploy** в PATH; без него шаг bundle выдаёт `failed to run linuxdeploy`.
+
+**Шаг 1 — установить linuxdeploy (один раз, в toolbox):**
+
+```bash
+cd /path/to/voiceforge
+./scripts/install_linuxdeploy_toolbox.sh
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+Убедитесь, что `~/.local/bin` в PATH при сборке (добавьте в `~/.bashrc` или вызывайте `export` перед сборкой).
+
+**Шаг 2 — системные пакеты:** установлен `librsvg2-devel` (см. раздел выше). Иначе плагин gtk для linuxdeploy может не найти библиотеки.
+
+**Шаг 3 — переменные окружения и сборка:**
+
+- `NO_STRIP=true` — обходит ошибки strip с современными библиотеками (`.relr.dyn`).
+- `APPIMAGE_EXTRACT_AND_RUN=1` — linuxdeploy сам поставляется как AppImage; в toolbox часто нет FUSE, поэтому нужен режим «распаковать и запустить».
 
 ```bash
 export NO_STRIP=true
 export APPIMAGE_EXTRACT_AND_RUN=1
+export PATH="$HOME/.local/bin:$PATH"
 cd desktop && npm run build && npm run tauri build
 ```
 
-Убедитесь, что установлен `librsvg2-devel` (см. системные пакеты выше). Артефакт: `desktop/src-tauri/target/release/bundle/appimage/VoiceForge_*_amd64.AppImage`.
+Проверка: `which linuxdeploy` должен вывести путь (например `$HOME/.local/bin/linuxdeploy`). Артефакт: `desktop/src-tauri/target/release/bundle/appimage/VoiceForge_*_amd64.AppImage`.
 
 ## Установка и запуск после сборки
 

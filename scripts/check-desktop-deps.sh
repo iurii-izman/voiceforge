@@ -68,6 +68,15 @@ else
   fail "desktop/ or desktop/src-tauri/Cargo.toml missing"
 fi
 
+# AppImage: linuxdeploy required if bundle targets include appimage
+if [[ -f "$DESKTOP_DIR/src-tauri/tauri.conf.json" ]] && grep -q '"appimage"' "$DESKTOP_DIR/src-tauri/tauri.conf.json" 2>/dev/null; then
+  if command -v linuxdeploy >/dev/null 2>&1; then
+    ok "linuxdeploy: $(linuxdeploy --version 2>/dev/null || echo 'found')"
+  else
+    warn "linuxdeploy not in PATH (AppImage bundle will fail). Run: ./scripts/install_linuxdeploy_toolbox.sh && export PATH=\"\$HOME/.local/bin:\$PATH\""
+  fi
+fi
+
 if [[ $errors -gt 0 ]]; then
   echo "--- $errors check(s) failed. Fix them before running: cd desktop && npm run tauri build"
   exit 1

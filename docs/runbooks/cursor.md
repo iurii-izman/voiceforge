@@ -33,7 +33,7 @@
 |------|-------------------|------|
 | **Новый чат, общий контекст** | `@docs/runbooks/agent-context.md` | Правила, keyring, чеклист конца сессии, roadmap. |
 | **Продолжить с последней задачи** | `@docs/runbooks/next-iteration-focus.md` | Следующий шаг и готовый промпт для копирования. |
-| **Максимум контекста (автопилот)** | Оба выше + при необходимости `@docs/audit/audit.md`, `@docs/plans.md` | Аудит и планы. |
+| **Максимум контекста (автопилот)** | Оба выше + `@docs/runbooks/PROJECT-STATUS-SUMMARY.md` + при необходимости `@docs/runbooks/planning.md`, `@docs/audit/audit.md`, `@docs/plans.md` | Аудит, board, batching strategy и планы. |
 | **Работа по задачам Phase A–D** | `@docs/audit/audit.md` | Статус W1–W20, issues #55–73. |
 
 Не прикреплять всё подряд: каждый большой файл увеличивает токены. AGENTS.md + один-два тематических документа обычно достаточно.
@@ -54,7 +54,46 @@
 
 ---
 
-## 6. OOM и тяжёлые тесты
+## 6. Max autopilot и coherent batching
+
+Чтобы Cursor делал **максимум работы за сессию**, но не деградировал по качеству:
+
+- **Стартовый порядок:** `agent-context` → `next-iteration-focus` → `PROJECT-STATUS-SUMMARY` → `planning` → `plans` / `audit`.
+- **Один основной блок за итерацию:** брать 1 P0/P1 задачу и максимум 2 соседних подблока только если это тот же subsystem, те же файлы или та же verification loop.
+- **Полный цикл в одной итерации:** код → targeted tests → docs/контракты → GitHub Project status → commit/push → новый `next-iteration-focus`.
+- **Не спрашивать пользователя**, если ответ можно получить из кода, runbook’ов, board или keyring.
+- **Останавливаться на смене поверхности:** если задача внезапно уходит в другой subsystem или требует другого стека/инструментов, закрыть текущий batch и сформировать следующий.
+
+**Рекомендуемые batch-паттерны:**
+
+- `bugfix + regression test + doc/contract update`
+- `coverage hotspot + refactor + targeted tests`
+- `version sync + release docs + install smoke`
+- `web/api drift + async parity + envelope snapshots`
+
+**Нежелательные batch-паттерны:**
+
+- `desktop packaging + RAG + calendar`
+- `LLM router + Tauri updater + CI refactor`
+- `большой cross-cutting rewrite` без локально воспроизводимой проверки
+
+**Готовый prompt для max autopilot:**
+
+```text
+Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Режим Cursor и batching: @docs/runbooks/cursor.md. При работе по issues и GitHub Project: @docs/runbooks/planning.md. Сводный статус и приоритеты: @docs/runbooks/PROJECT-STATUS-SUMMARY.md.
+
+Режим: максимальный автопилот и максимум согласованных блоков за итерацию. Выбирай 1 главный P0/P1 блок и до 2 соседних подблоков только если это тот же subsystem, те же файлы или те же проверки. Не смешивай unrelated surfaces. Делай полный цикл: код, targeted tests, docs/контракты, GitHub Project status, commit/push, обновление next-iteration-focus.
+
+Источники правды по порядку: agent-context, next-iteration-focus, PROJECT-STATUS-SUMMARY, planning, plans, audit. Если есть доступ к GitHub Project, при старте переводи карточку в In Progress, при `Closes #N` — в Done. Не спрашивай пользователя, если ответ можно получить из кода/доков/board/keyring.
+
+Среда: Fedora Atomic/toolbox/uv. Базово `uv sync --extra all`; при необходимости подключай профильные extras. Полный `pytest tests/` не запускать по умолчанию из-за OOM-risk; использовать safe subsets из next-iteration-focus и запускать ровно те проверки, которые подтверждают текущий batch.
+
+Старт: возьми следующий приоритет из next-iteration-focus. Если он закрыт, возьми верхний согласованный P0/P1 batch из PROJECT-STATUS-SUMMARY и planning. В конце сессии: tests, commit/push из корня репо, обновление next-iteration-focus, готовый prompt для следующего чата.
+```
+
+---
+
+## 7. OOM и тяжёлые тесты
 
 Если полный `pytest tests/` вылетает по памяти (pyannote/torch): запускать подмножество
 `uv run pytest tests/test_pipeline_integration.py tests/test_caldav_poll.py tests/test_calendar.py tests/test_transcript_log.py -q`
@@ -62,7 +101,7 @@
 
 ---
 
-## 7. Справка (кратко)
+## 8. Справка (кратко)
 
 **Keyring (сервис voiceforge):**
 `keyring set voiceforge anthropic`, `openai`, `huggingface`, `google` (опц.), `sonar_token`, `github_token`.

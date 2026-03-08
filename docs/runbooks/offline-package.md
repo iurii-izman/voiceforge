@@ -93,7 +93,7 @@ flatpak run com.voiceforge.app
 
 ## Next steps / чеклист
 
-1. **AppImage:** в `desktop/src-tauri/tauri.conf.json` в `bundle.targets` уже есть `"appimage"`. Сборка в toolbox: установить `librsvg2-devel`, затем `export NO_STRIP=true APPIMAGE_EXTRACT_AND_RUN=1` и `cd desktop && npm run build && cargo tauri build` (см. `desktop-build-deps.md`). Артефакт: `desktop/src-tauri/target/release/bundle/appimage/VoiceForge_*_amd64.AppImage`. GA: скачать → `chmod +x` → запуск.
+1. **AppImage:** в `desktop/src-tauri/tauri.conf.json` в `bundle.targets` уже есть `"appimage"`. Сборка в toolbox: (1) установить linuxdeploy: `./scripts/install_linuxdeploy_toolbox.sh`, добавить `~/.local/bin` в PATH; (2) установить `librsvg2-devel`; (3) `export NO_STRIP=true APPIMAGE_EXTRACT_AND_RUN=1` и `cd desktop && npm run build && npm run tauri build` (подробно: [desktop-build-deps.md](desktop-build-deps.md) § AppImage). Артефакт: `desktop/src-tauri/target/release/bundle/appimage/VoiceForge_*_amd64.AppImage`. GA: скачать → `chmod +x` → запуск.
 2. **Flatpak:** манифест `desktop/flatpak/com.voiceforge.app.yaml`, скрипт `scripts/build-flatpak.sh`; **сборка из корня репо:** `make flatpak-build`. Локальная установка после сборки: `flatpak-builder --user --install build desktop/flatpak/com.voiceforge.app.local.yaml && flatpak run com.voiceforge.app`. CI: при необходимости job в release.yml.
 3. **Воспроизводимость и glibc:** для совместимости со старыми дистрибутивами собирать AppImage в Docker (образ на базе Ubuntu 20.04/22.04) или в GitHub Actions.
 

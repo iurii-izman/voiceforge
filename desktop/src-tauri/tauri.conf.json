@@ -23,5 +23,10 @@
     "icon": ["icons/icon.png"],
     "targets": ["deb", "rpm", "appimage"]
   },
-  "plugins": {}
+  "plugins": {
+    "updater": {
+      "pubkey": "",
+      "endpoints": []
+    }
+  }
 }

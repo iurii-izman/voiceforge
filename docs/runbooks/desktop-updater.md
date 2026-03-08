@@ -28,6 +28,8 @@ cd desktop && npm run tauri signer generate -- -w ~/.tauri/voiceforge.key
 
 ## 3. Конфигурация в репозитории
 
+В `desktop/src-tauri/tauri.conf.json` должна быть секция `plugins.updater` (объект с полями `pubkey` и `endpoints`). Без неё приложение падает при старте с ошибкой десериализации. Для режима «обновления отключены» достаточно пустых значений: `"pubkey": ""`, `"endpoints": []`. Для работы обновлений укажите публичный ключ и URL сервера (см. ниже).
+
 В `desktop/src-tauri/tauri.conf.json` в секции `plugins.updater`:
 
 ```json

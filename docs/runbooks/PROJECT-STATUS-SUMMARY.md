@@ -1,6 +1,6 @@
-# Итог по проекту VoiceForge (9 разделов)
+# Итог по проекту VoiceForge (12 разделов)
 
-Единый свод: планы vs код, что сделано, что осталось вам, Sonar/GitHub, приоритеты. Обновлено: 2026-03-07.
+Единый свод: планы vs код, что сделано, что осталось вам, Sonar/GitHub, приоритеты. Обновлено: 2026-03-08.
 
 ---
 
@@ -94,3 +94,64 @@
 
 Задача: По PROJECT-STATUS-SUMMARY разд. 3–4 и 7–8 — следующий приоритет: рефакторинг Sonar S3776, блоки 69/72, Phase D (#70–73) или ручные шаги из MANUAL-AND-CANNOT-DO.
 ```
+
+---
+
+## 10. Deep audit delta (2026-03-08)
+
+Новый независимый аудит показал: **интегральная оценка проекта ~71.3/100**, реалистичный эталон для этой системы — **~86.5/100**. Сильные стороны: security baseline, observability, docs coverage по breadth, breadth of product surface. Главные просадки: transport parity, effective coverage, release/packaging contract и docs drift.
+
+| Направление | Текущее | Эталон | Gap | Ключевой вывод |
+|-------------|---------|--------|-----|----------------|
+| Core architecture & module boundaries | 61 | 84 | 23 | Слишком много логики в `main.py`, `daemon.py`, `server.py`, `router.py`, `desktop/src/main.js` |
+| Audio / STT / diarization | 74 | 86 | 12 | Работает, но есть lifecycle/perf debt |
+| RAG / data / storage | 76 | 88 | 12 | Блок функционально сильный, lifecycle и restore confidence слабее |
+| LLM / prompts / PII | 73 | 87 | 14 | Good guardrails, но coverage router и policy centralization ограничены |
+| Interfaces & integrations | 64 | 85 | 21 | Найден реальный web bug + docs/API drift |
+| Testing & QA | 71 | 86 | 15 | Реальное coverage ~63.95%, а не то, что ощущается по docs |
+| Security & dependency hygiene | 78 | 89 | 11 | Сильный baseline; open risk — CVE #65 и local unencrypted DBs |
+| Observability & runtime ops | 77 | 88 | 11 | Хорошо для alpha, но часть paths не верифицирована end-to-end |
+| CI/CD & release / packaging | 74 | 87 | 13 | CI зрелый, packaging/updater contract пока inconsistent |
+| Documentation & governance | 68 | 86 | 18 | Доков много, но есть stale/broken refs и version drift |
+
+**Подтверждённые hotspots:** [src/voiceforge/main.py](/home/user/Projects/voiceforge/src/voiceforge/main.py), [src/voiceforge/core/daemon.py](/home/user/Projects/voiceforge/src/voiceforge/core/daemon.py), [src/voiceforge/web/server.py](/home/user/Projects/voiceforge/src/voiceforge/web/server.py), [src/voiceforge/web/server_async.py](/home/user/Projects/voiceforge/src/voiceforge/web/server_async.py), [src/voiceforge/llm/router.py](/home/user/Projects/voiceforge/src/voiceforge/llm/router.py), [desktop/src/main.js](/home/user/Projects/voiceforge/desktop/src/main.js).
+
+**Текущие evidence gaps:** локально не гонялся `cargo-audit`, не запускался полный `pytest tests/` из-за OOM-risk, не проверялись live Jaeger traces и updater signing flow. Desktop packaging/updater изменения в worktree считать `worktree-in-progress`, а не завершённым состоянием.
+
+---
+
+## 11. Critical Path, Quick Wins, top risks
+
+**Critical Path (в порядке):**
+
+1. Исправить bug в `POST /api/action-items/update` для sync/async web и добавить regression tests.
+2. Закрыть install/release contract: `web-async` profile, version sync, release/docs drift.
+3. Сократить coverage blind spots в `server.py`, `server_async.py`, `daemon.py`, `router.py`, `main.py`.
+4. Убрать performance debt: new-per-analyze `Diarizer`/`HybridSearcher`, full ring rewrite каждые 2 сек.
+5. Довести packaging/updater до честного состояния: blocking checks, repeatable build, signed/update-ready или explicit disable.
+
+**Quick Wins (1-2 часа):**
+
+1. Починить tuple unpack bug в sync/async web.
+2. Добавить web regression tests на `action-items/update`.
+3. Обновить `web-api.md` под nested error envelope и async `/api/analyze/stream`.
+4. Синхронизировать desktop version metadata (`package.json`, `tauri.conf.json`, `Cargo.toml`, Flatpak manifest).
+5. Сделать `uv sync --extra all` действительно full-stack или переименовать/уточнить профиль в docs.
+
+**Top risks:**
+
+- Silent regressions в untested web/async endpoints.
+- Ложное ощущение готовности из-за optimistic docs/plans.
+- Memory/perf cliffs на Linux-хостах около 8 GB RAM.
+- Packaging/updater ambiguity перед релизом.
+- Затянувшийся accepted risk по `CVE-2025-69872` (#65).
+
+---
+
+## 12. Как давать Cursor максимум эффективности без потери качества
+
+- **Не просить “сделай всё подряд”.** Лучший throughput даёт `coherent batch`: 1 главный issue/block + до 2 тесно связанных подблока в том же subsystem.
+- **Лучший формат batches:** `bugfix + regression tests + docs`, `coverage hotspot + refactor + targeted tests`, `version sync + release docs + install smoke`.
+- **Худший формат batches:** desktop packaging + RAG + calendar; security + UI polish + infra refactor в одной сессии.
+- **Источник очереди работ:** сначала [next-iteration-focus.md](next-iteration-focus.md), затем [planning.md](planning.md) / [GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1), затем `plans.md` / `audit.md`.
+- **Готовый prompt и batching strategy:** [cursor.md](cursor.md), [next-iteration-focus.md](next-iteration-focus.md), [agent-context.md](agent-context.md).

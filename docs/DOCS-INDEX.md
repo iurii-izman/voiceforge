@@ -2,7 +2,7 @@
 
 **Назначение:** один источник правды по тому, какой документ за что отвечает и актуален ли он. При изменении кода/фич обновлять соответствующий док и при необходимости этот индекс.
 
-**Обновлено:** 2026-03-07 (backlog-and-actions.md, issues #82–86 на доске)
+**Обновлено:** 2026-03-08 (deep audit delta, max-autopilot batching, new next-step prompt)
 
 ---
 
@@ -19,7 +19,7 @@
 | Установка, сборка десктопа | [runbooks/installation-guide.md](runbooks/installation-guide.md), [runbooks/desktop-build-deps.md](runbooks/desktop-build-deps.md) |
 | Управление документацией | [runbooks/doc-governance.md](runbooks/doc-governance.md) |
 | Инструкции Cursor Agent (автозагрузка) | [AGENTS.md](../AGENTS.md) (корень репо) |
-| Тюнинг Cursor (промпты, правила, OOM) | [runbooks/cursor.md](runbooks/cursor.md) |
+| Тюнинг Cursor (промпты, правила, OOM, max-autopilot batching) | [runbooks/cursor.md](runbooks/cursor.md) |
 
 ---
 
@@ -30,7 +30,7 @@
 | **Начало работы** | [first-meeting-5min.md](first-meeting-5min.md), [runbooks/quickstart.md](runbooks/quickstart.md), [runbooks/installation-guide.md](runbooks/installation-guide.md) |
 | **Сборка и установка** | [runbooks/desktop-build-deps.md](runbooks/desktop-build-deps.md), [runbooks/offline-package.md](runbooks/offline-package.md), [runbooks/desktop-updater.md](runbooks/desktop-updater.md) |
 | **Конфигурация и ключи** | [runbooks/config-env-contract.md](runbooks/config-env-contract.md), [runbooks/keyring-keys-reference.md](runbooks/keyring-keys-reference.md) |
-| **Разработка и агент** | [AGENTS.md](../AGENTS.md), [runbooks/agent-context.md](runbooks/agent-context.md), [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md), [runbooks/cursor.md](runbooks/cursor.md), [architecture/README.md](architecture/README.md) |
+| **Разработка и агент** | [AGENTS.md](../AGENTS.md), [runbooks/agent-context.md](runbooks/agent-context.md), [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md), [runbooks/cursor.md](runbooks/cursor.md), [runbooks/PROJECT-STATUS-SUMMARY.md](runbooks/PROJECT-STATUS-SUMMARY.md), [architecture/README.md](architecture/README.md) |
 | **Релиз и качество** | [runbooks/release-and-quality.md](runbooks/release-and-quality.md), [runbooks/pre-beta-sonar-github.md](runbooks/pre-beta-sonar-github.md), [runbooks/repo-and-git-governance.md](runbooks/repo-and-git-governance.md), [audit/audit.md](audit/audit.md) |
 | **Безопасность и зависимости** | [runbooks/security-and-dependencies.md](runbooks/security-and-dependencies.md) |
 | **Фичи (календарь, RAG, Telegram)** | [runbooks/calendar-integration.md](runbooks/calendar-integration.md), [runbooks/rag-formats.md](runbooks/rag-formats.md), [runbooks/telegram-bot-setup.md](runbooks/telegram-bot-setup.md) |
@@ -87,24 +87,24 @@
 
 | Файл | Роль | Статус |
 |------|------|--------|
-| agent-context.md | Контекст агента, чеклист конца сессии | Актуален |
-| next-iteration-focus.md | Следующий шаг; обновляет агент | Актуален |
+| agent-context.md | Контекст агента, чеклист конца сессии, max-autopilot mode | Актуален |
+| next-iteration-focus.md | Следующий шаг; обновляет агент; готовые prompts | Актуален |
 | doc-governance.md | Порядок в доках: архив, источники правды, после итерации | Актуален |
 | config-env-contract.md, keyring-keys-reference.md | Конфиг и ключи | Актуален |
 | installation-guide.md, desktop-build-deps.md, bootstrap.md | Установка и сборка | Актуален |
 | quickstart.md | Краткий сценарий; полная версия — first-meeting-5min | Актуален |
 | cli-commands-and-run.md | Все CLI-команды, когда пересобирать, как запускать демон и полный стек (toolbox) | Актуален |
-| planning.md | Канбан, audit map, next-iteration-focus; GitHub Project и gh | Актуален |
+| planning.md | Канбан, audit map, next-iteration-focus; GitHub Project, gh и batching policy | Актуален |
 | security-and-dependencies.md | Безопасность, зависимости, Dependabot (объединённый runbook) | Актуален |
 | telegram-bot-setup.md, pyannote-version.md | Фичи | Актуален |
 | repo-and-git-governance.md | Репо, main, Git, PR, теги, issues, Sonar | Актуален |
 | release-and-quality.md | Релиз, откат, чеклисты альфа, DoD | Актуален |
 | pre-beta-sonar-github.md | Чеклист Sonar и GitHub перед бета-релизом (PR, issues, порядок) | Актуален |
-| PROJECT-STATUS-SUMMARY.md | Итог по проекту (9 разделов): планы↔код, что сделано/осталось, Sonar, GitHub, приоритеты | Актуален |
+| PROJECT-STATUS-SUMMARY.md | Итог по проекту (12 разделов): планы↔код, audit delta, critical path, риски, приоритеты | Актуален |
 | web-api.md, observability-alerts.md | API, мониторинг, трассировка Jaeger (#71) | Актуален |
 | test-operations.md, sonar-pr-cleanup.md | Тесты и CI | Актуален |
 | prompt-management.md, calendar-integration.md, rag-formats.md | Фичи и форматы | Актуален |
-| cursor.md, voiceforge-cursor-tz.md | Cursor: настройка, тюнинг; расширенное ТЗ (архив) | Актуален / заглушка |
+| cursor.md, voiceforge-cursor-tz.md | Cursor: настройка, тюнинг, prompts, coherent batching; расширенное ТЗ (архив) | Актуален / заглушка |
 | claude-proposal-alignment.md | Заглушка → архив | [archive/plans/](archive/plans/) |
 | git-github-practices-rule.md, agent-session-handoff-rule.md | Копии для .cursor/rules/ | Актуален |
 | offline-package.md | Flatpak/AppImage (GA #73): сборка, установка, GA checklist | Актуален |

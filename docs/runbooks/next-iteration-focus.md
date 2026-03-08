@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-07 (блок 66 prompt caching задокументирован)
+**Обновлено:** 2026-03-08 (deep audit + max-autopilot batching)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Уточнён «Следующий шаг»: кодовая часть по планам завершена; приоритеты — ручные шаги, Sonar S3776 по желанию, новые фичи по backlog.
+**Сделано в сессии:** Выполнен новый deep audit по коду, тестам, CI/CD, security, packaging и docs; добавлены приоритеты `Critical Path`, `Quick Wins` и правила coherent batching для Cursor (`agent-context.md`, `cursor.md`, `planning.md`, `PROJECT-STATUS-SUMMARY.md`).
 
-**Следующий шаг:** Кодовая реализация по текущим планам (Phase A–D, блоки 66–79) завершена. Дальше на выбор: (1) ручные шаги по чеклисту [MANUAL-AND-CANNOT-DO.md](../plans/MANUAL-AND-CANNOT-DO.md), (2) опционально — рефакторинг Sonar S3776 по одному месту за итерацию, (3) новые фичи из [backlog-and-actions.md](../plans/backlog-and-actions.md) или roadmap. verify_pr: при отсутствии hypothesis — `pytest tests/ --ignore=tests/test_rag_parsers_hypothesis.py`. Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
+**Следующий шаг:** Взять **coherent P0 web batch**: (1) исправить bug в `POST /api/action-items/update` в sync и async web (`server.py`, `server_async.py`), (2) добавить regression tests именно на web path, (3) обновить `web-api.md` под фактический error envelope и divergence async `/api/analyze/stream`. Если batch закрыт и проверки зелёные, затем отдельной итерацией брать install/release contract (`web-async` extra в `all`, sync version metadata, release docs). verify_pr: при отсутствии hypothesis — `pytest tests/ --ignore=tests/test_rag_parsers_hypothesis.py`. Pre-commit в toolbox 43: `cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files`.
 
 ---
 
@@ -52,20 +52,22 @@
 
 ---
 
-## Промпт: максимальный автопилот + максимальный объём
+## Промпт: максимальный автопилот + максимум согласованных блоков
 
-**Скопируй блок ниже в начало нового чата.** Агент делает максимум задач за сессию, без остановок и лишних вопросов. Обращаться к пользователю только при явном выборе стратегии, отсутствии данных в keyring или критичном решении.
+**Скопируй блок ниже в начало нового чата.** Агент делает максимум работы за сессию, но берёт только согласованные блоки в одном subsystem и доводит их до конца без лишних вопросов.
 
 ```
-Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Аудит: @docs/audit/audit.md. Планы: @docs/plans.md.
+Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Режим Cursor и batching: @docs/runbooks/cursor.md. При работе по issues и GitHub Project: @docs/runbooks/planning.md. Сводный статус и приоритеты: @docs/runbooks/PROJECT-STATUS-SUMMARY.md. При необходимости деталей: @docs/audit/audit.md и @docs/plans.md.
 
-Режим: максимальный автопилот, максимально большой объём работы за одну сессию. Бери несколько блоков подряд из «Следующий шаг» и plans.md (coverage #56, #66, W17, Phase D доработки). Делай всё сам: код, доки, доска (In Progress при старте по issue, Done при Closes #N — см. planning.md). Не спрашивай пользователя — действуй. Спрашивай только при явном выборе стратегии или данных вне keyring.
+Режим: максимальный автопилот и максимум согласованных блоков за итерацию. Выбирай 1 главный P0/P1 блок и до 2 соседних подблоков только если это тот же subsystem, те же файлы или те же проверки. Не смешивай unrelated surfaces. Делай полный цикл: код, targeted tests, docs/контракты, GitHub Project status, commit/push, обновление next-iteration-focus. Не спрашивай пользователя, если ответ можно получить из кода, docs, board или keyring.
 
-Среда: Fedora Atomic, toolbox, uv. Ключи только в keyring (voiceforge). Команды: uv sync --extra all. Тесты — только лёгкие (см. next-iteration-focus «Актуальные напоминания»), не полный pytest (риск OOM). Pre-commit в toolbox; на хосте без 3.12 — git commit/push с --no-verify.
+Источники правды по порядку: agent-context, next-iteration-focus, PROJECT-STATUS-SUMMARY, planning, plans, audit. Если есть доступ к GitHub Project, при старте переводи карточку в In Progress, при `Closes #N` — в Done.
 
-В конце сессии обязательно: (1) лёгкие тесты, (2) коммит и пуш из корня репо (Conventional Commits, Closes #N где закрыл issue), (3) обновить next-iteration-focus (блок «Сделано в сессии», «Следующий шаг», дата), (4) выдать готовый промпт для следующего чата (этот же формат).
+Среда: Fedora Atomic, toolbox, uv. Ключи только в keyring (voiceforge). Базово `uv sync --extra all`; при необходимости подключай профильные extras. Полный `pytest tests/` не запускать по умолчанию из-за OOM-risk; использовать safe subsets из next-iteration-focus и запускать ровно те проверки, которые подтверждают текущий batch. Pre-commit в toolbox; на хосте без 3.12 — git commit/push с --no-verify.
 
-Задача: выполнить следующий шаг из next-iteration-focus и по возможности следующие по порядку из plans.md/audit (coverage в toolbox и fail_under=75 #56; #66/W17; доработки Phase D #70–73). Работать максимальным объёмом без остановок.
+В конце сессии обязательно: (1) targeted tests по изменённой поверхности, (2) commit/push из корня репо (Conventional Commits, `Closes #N` где уместно), (3) обновить next-iteration-focus (блоки «Сделано в сессии», «Следующий шаг», дата), (4) выдать готовый prompt для следующего чата.
+
+Задача: выполнить следующий coherent batch из блока «Следующий шаг». Если он закрыт, взять верхний P0/P1 batch из PROJECT-STATUS-SUMMARY: сначала web contract/coverage, потом install/release contract, затем hotspot coverage/refactor в `daemon.py`, `main.py`, `llm/router.py`.
 ```
 
 ---

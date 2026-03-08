@@ -17,6 +17,17 @@
 
 ---
 
+## Режим Cursor: max throughput без потери качества
+
+- **Источник очереди работ:** сначала `next-iteration-focus.md`, затем [GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1), затем `plans.md` / `audit.md`.
+- **Правило batching:** брать **1 главный issue/block** и максимум **2 tightly-coupled подзадачи** только если они лежат в том же subsystem, тех же файлах или закрываются тем же набором тестов.
+- **Хорошие batches:** bugfix + regression tests + contract docs; hotspot refactor + coverage; version sync + packaging docs + release smoke.
+- **Плохие batches:** desktop packaging + RAG parser + calendar; security-only + unrelated UI polish; большие cross-cutting переделки без общей verification loop.
+- **После старта по issue:** перевести карточку в `In Progress`. После `Closes #N` и зелёных проверок — в `Done`.
+- **Подробный режим Cursor и готовые prompts:** [cursor.md](cursor.md), [next-iteration-focus.md](next-iteration-focus.md), [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md).
+
+---
+
 ## Вариант 1: Markdown в репо (backlog / план)
 
 Один файл в репо (например `docs/runbooks/backlog.md` или `docs/PLAN.md`) — список задач с чекбоксами. Агент читает и правит по просьбе; история в git.
