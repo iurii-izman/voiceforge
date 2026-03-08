@@ -404,14 +404,14 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
 
     def _handle_get_session_by_id(self, sid: str) -> None:
         try:
-            from voiceforge.cli.history_helpers import build_session_detail_payload
+            from voiceforge.cli.history_helpers import build_session_detail_payload, session_not_found_message
             from voiceforge.core.transcript_log import TranscriptLog
 
             log_db = TranscriptLog()
             try:
                 detail = log_db.get_session_detail(int(sid))
                 if detail is None:
-                    self._send_error_json("session not found", 404)
+                    self._send_error_json(session_not_found_message(int(sid)), 404)
                     return
                 segments, analysis = detail
                 payload = build_session_detail_payload(int(sid), segments, analysis)

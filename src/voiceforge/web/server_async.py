@@ -33,6 +33,20 @@ def _invalid_json_body() -> bytes:
     return json.dumps({"error": {"code": "BAD_REQUEST", "message": _ERR_INVALID_JSON}}).encode("utf-8")
 
 
+def _validate_analyze_request(data: dict[str, Any]) -> tuple[int, str | None] | tuple[None, tuple[int, str, bytes]]:
+    try:
+        seconds = int(data.get("seconds", 30))
+    except (TypeError, ValueError):
+        return None, _err(400, "seconds must be 1..600")
+    if seconds < 1 or seconds > 600:
+        return None, _err(400, "seconds must be 1..600")
+    template = (data.get("template") or "").strip() or None
+    valid = ("standup", "sprint_review", "one_on_one", "brainstorm", "interview")
+    if template is not None and template not in valid:
+        return None, _err(400, f"template must be one of: {', '.join(valid)}")
+    return seconds, template
+
+
 def _response_from_sync_result(response_cls: Any, result: tuple[int, str, bytes]):
     status, content_type, body = result
     return response_cls(body, status_code=status, media_type=content_type)
@@ -230,13 +244,10 @@ def _sync_export(sid_str: str, fmt: str) -> tuple[int, str, bytes]:
 
 
 def _sync_analyze(data: dict[str, Any]) -> tuple[int, str, bytes]:
-    seconds = int(data.get("seconds", 30))
-    if seconds < 1 or seconds > 600:
-        return _err(400, "seconds must be 1..600")
-    template = (data.get("template") or "").strip() or None
-    valid = ("standup", "sprint_review", "one_on_one", "brainstorm", "interview")
-    if template is not None and template not in valid:
-        return _err(400, f"template must be one of: {', '.join(valid)}")
+    seconds, validation = _validate_analyze_request(data)
+    if seconds is None:
+        return validation
+    template = validation
     try:
         from voiceforge.core.transcript_log import TranscriptLog
         from voiceforge.main import run_analyze_pipeline
@@ -432,14 +443,10 @@ def _build_app():  # NOSONAR S3776 — single place wiring all async routes; spl
                 status_code=400,
                 media_type=_CONTENT_TYPE_JSON,
             )
-        seconds = int(data.get("seconds", 30))
-        template = (data.get("template") or "").strip() or None
-        if seconds < 1 or seconds > 600:
-            return Response(
-                json.dumps({"error": {"code": "BAD_REQUEST", "message": "seconds must be 1..600"}}).encode("utf-8"),
-                status_code=400,
-                media_type=_CONTENT_TYPE_JSON,
-            )
+        seconds, validation = _validate_analyze_request(data)
+        if seconds is None:
+            return _response_from_sync_result(Response, validation)
+        template = validation
         queue: asyncio.Queue[str | None] = asyncio.Queue()
         loop = asyncio.get_running_loop()
 

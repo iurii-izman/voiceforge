@@ -1,6 +1,6 @@
 # Web UI API Contract
 
-Source of truth: `src/voiceforge/web/server.py` и `src/voiceforge/web/server_async.py`. Локальный sync HTTP-сервер работает на stdlib, async-сервер (Starlette + uvicorn) опционален.
+Source of truth: `src/voiceforge/web/server.py` и `src/voiceforge/web/server_async.py`. Локальный sync HTTP-сервер работает на stdlib, async-сервер (Starlette + uvicorn) опционален. Базовые JSON contracts (`/api/status`, `/api/sessions`, `/api/sessions/<id>`, `/api/cost`, `/api/export`, `/api/analyze`, `/api/action-items/update`, `/health`, `/ready`, `/metrics`) должны оставаться эквивалентными между sync и async; async добавляет только `/api/analyze/stream`.
 
 Запуск: `uv run voiceforge web --port 8765 --host 127.0.0.1`. Async: `uv sync --extra web-async` и затем `uv run voiceforge web --async` или `VOICEFORGE_WEB_ASYNC=1 uv run voiceforge web` — тот же базовый API плюс async-only `/api/analyze/stream`.
 
@@ -30,7 +30,7 @@ Source of truth: `src/voiceforge/web/server.py` и `src/voiceforge/web/server_as
 
 **Ответ (200):** `{ "session_id", "segments": [ { "start_sec", "end_sec", "speaker", "text" } ], "analysis": { "model", "questions", "answers", "recommendations", "action_items", "cost_usd", "template" } }`
 
-**Ошибки:** 400 (invalid id), 404 (session not found), 500.
+**Ошибки:** 400 (invalid id), 404 (`Сессия <id> не найдена.`), 500.
 
 ### POST /api/analyze
 
@@ -56,7 +56,7 @@ Source of truth: `src/voiceforge/web/server.py` и `src/voiceforge/web/server_as
 
 **Ответ (200):** `Content-Type: text/event-stream`, события вида `data: {"delta":"..."}` и финальное `event: done`.
 
-**Ошибки:** 400 (invalid JSON, seconds вне диапазона).
+**Ошибки:** 400 (invalid JSON, seconds вне диапазона, неверный template).
 
 ### GET /api/export
 

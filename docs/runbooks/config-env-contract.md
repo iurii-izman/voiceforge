@@ -64,6 +64,14 @@ Priority order:
 
 Полный контракт методов и сигналов: **`desktop/DBUS.md`**. При изменении D-Bus интерфейса обновлять `desktop/DBUS.md` и при необходимости этот раздел (например, новые поля в GetSettings).
 
+Desktop UI читает envelope-ключи как transport contract, а не только наличие `ok/schema_version`. Критичные ключи, которые должны оставаться стабильными и теперь удерживаются snapshot-тестами:
+- `GetSettings` → `data.settings`
+- `GetSessionDetail` → `data.session_detail`
+- `GetAnalytics` → `data.analytics`
+- `GetStreamingTranscript` → `data.streaming_transcript`
+- `GetSessionIdsWithActionItems` → `data.session_ids`
+- `GetUpcomingEvents` → `data.events`
+
 ## D-Bus GetSettings (W4)
 
 Method `GetSettings` returns a JSON object with settings for UI. It includes:

@@ -66,7 +66,7 @@
 ## 6. GitHub: PR, issues, доска
 
 - **PR:** #81, #79 закрыты с комментарием «Applied in main» (2026-03-07).
-- **Issues:** открытый внешний риск по-прежнему **#65** (CVE — ждём upstream). В стратегическом queue для движения `76.5 -> 100` уже закрыты **#114** (`main.py` / `server_async.py` hotspot decomposition), **#115** (`llm/router.py` coverage batch), **#116** (`core/daemon.py` behavioral coverage batch), **#117** (`rag/*` lifecycle confidence batch) и **#118** (`stt/*` lifecycle/perf confidence batch); открыты **#119-#123**. **#50** (macOS/WSL2) закрыт и снят с активного скоупа.
+- **Issues:** открытый внешний риск по-прежнему **#65** (CVE — ждём upstream). В стратегическом queue для движения `76.5 -> 100` уже закрыты **#114** (`main.py` / `server_async.py` hotspot decomposition), **#115** (`llm/router.py` coverage batch), **#116** (`core/daemon.py` behavioral coverage batch), **#117** (`rag/*` lifecycle confidence batch), **#118** (`stt/*` lifecycle/perf confidence batch) и **#119** (`web/API/desktop contract drift prevention batch); открыты **#120-#123**. **#50** (macOS/WSL2) закрыт и снят с активного скоупа.
 - **Доска:** [VoiceForge Board](https://github.com/users/iurii-izman/projects/1). При работе по issue — In Progress; при Closes #N — Done. Команды и ID полей: [planning.md](planning.md).
 - **Dependabot:** при CVE #65 — отклонить с комментарием из security-and-dependencies.md или скрипт `uv run python scripts/dependabot_dismiss_moderate.py`.
 
@@ -74,17 +74,17 @@
 
 ## 7. Рекомендации по приоритетам
 
-1. **Первый ROI-приоритет:** взять **#119** и укрепить sync/async/desktop contract drift prevention как следующий code-heavy subsystem batch.
-2. **Следом:** взять **#120** (security hardening beyond accepted baseline), затем **#121** (observability proof) без смешивания surfaces.
+1. **Первый ROI-приоритет:** взять **#120** и закрыть security hardening beyond accepted baseline как следующий code-heavy subsystem batch.
+2. **Следом:** взять **#121** (observability proof), затем **#122** (release proof) без смешивания surfaces.
 3. **Параллельный внешний риск:** при появлении фикса CVE **#65** обновить зависимости и убрать `--ignore-vuln`.
-4. **После code-heavy P0:** двигать manual/evidence blocks **#121** и **#122** и только затем более широкие P1 (`#119-#120`, `#123`) по capacity.
+4. **После code-heavy P0:** двигать manual/evidence blocks **#121** и **#122** и только затем docs/governance sweep `#123` по capacity.
 
 ---
 
 ## 8. Критичные/важные проблемы на следующую итерацию
 
 - **#65 CVE:** следить за upstream (diskcache/instructor); при фиксе — обновить и убрать ignore.
-- **Новый practical queue:** сначала **#119** (sync/async/desktop contract drift prevention), затем **#120** (security hardening beyond accepted baseline), затем **#121** (observability proof) как три верхних ROI-блока.
+- **Новый practical queue:** сначала **#120** (security hardening beyond accepted baseline), затем **#121** (observability proof), затем **#122** (release proof) как три верхних ROI-блока.
 - **Sonar S3776:** 8 мест с высокой когнитивной сложностью — рефакторинг по одному или принять по решению. После уже закрытого `#104` следующий structural hotspot batch теперь зафиксирован отдельным issue **#114**.
 - **Coverage blind spots:** после `server.py`, `rag/watcher.py`, закрытых **#115**, **#116** и cheap extraction в **#114** главным heavy confidence gap смещается в `rag/*`, `stt/diarizer.py`, `llm/local_llm.py` и manual runtime/release evidence.
 - **verify_pr/bandit:** при желании полного зелёного — доработать оставшиеся предупреждения bandit.
@@ -99,7 +99,7 @@
 
 Режим: автопилот. Ключи только в keyring (сервис voiceforge). Fedora Atomic, toolbox 43; uv sync --extra all. В конце сессии: тесты (uv run pytest … -q --tb=line или лёгкое подмножество при OOM), коммит и пуш из корня репо (Conventional Commits, Closes #N где уместно), обновить next-iteration-focus, выдать промпт для следующего чата.
 
-Задача: взять верхний coherent batch из новой стратегической очереди. Первый приоритет: **#119** — sync/async/desktop contract drift prevention в web/API/desktop surfaces. Не смешивать этот batch с STT, security или release surfaces.
+Задача: взять верхний coherent batch из новой стратегической очереди. Первый приоритет: **#120** — security hardening beyond accepted-risk baseline. Не смешивать этот batch с observability, release или docs/governance surfaces.
 ```
 
 ---
@@ -121,7 +121,7 @@
 | CI/CD & release / packaging | 81 | 87 | 6 | `#112` усилил release proof beyond metadata contract, но signed updater/native release evidence всё ещё не автоматизированы |
 | Documentation & governance | 75 | 86 | 11 | После `#113` summary/runbooks стали ближе к коду, но drift ещё не нулевой и DOCS hygiene требует регулярной поддержки |
 
-**Deep-audit follow-up blocks:** [#104](https://github.com/iurii-izman/voiceforge/issues/104), [#105](https://github.com/iurii-izman/voiceforge/issues/105), [#106](https://github.com/iurii-izman/voiceforge/issues/106), [#107](https://github.com/iurii-izman/voiceforge/issues/107), [#108](https://github.com/iurii-izman/voiceforge/issues/108), [#109](https://github.com/iurii-izman/voiceforge/issues/109), [#110](https://github.com/iurii-izman/voiceforge/issues/110), [#111](https://github.com/iurii-izman/voiceforge/issues/111), [#112](https://github.com/iurii-izman/voiceforge/issues/112), [#113](https://github.com/iurii-izman/voiceforge/issues/113) уже закрыты и остаются историей предыдущего цикла. В стратегическом score-to-100 queue уже закрыты [#114](https://github.com/iurii-izman/voiceforge/issues/114) (`tests/test_hotspot_batch114.py` + existing web/CLI contracts), [#115](https://github.com/iurii-izman/voiceforge/issues/115) (`tests/test_llm_router_batch115.py`, 91% router-local coverage), [#116](https://github.com/iurii-izman/voiceforge/issues/116) (`tests/test_daemon_batch116.py`, 75% daemon-local coverage), [#117](https://github.com/iurii-izman/voiceforge/issues/117) (`tests/test_rag_batch117.py` + existing CLI/integration subset для index/export/restore/search helpers) и [#118](https://github.com/iurii-izman/voiceforge/issues/118) (`tests/test_stt_batch118.py` + existing streaming/CLI/pipeline subset, repeat listen/analyze smoke, cheap no-copy STT cleanup); активными остаются [#119](https://github.com/iurii-izman/voiceforge/issues/119), [#120](https://github.com/iurii-izman/voiceforge/issues/120), [#121](https://github.com/iurii-izman/voiceforge/issues/121), [#122](https://github.com/iurii-izman/voiceforge/issues/122), [#123](https://github.com/iurii-izman/voiceforge/issues/123); новый practical execution order: **#119 -> #120 -> #121**.
+**Deep-audit follow-up blocks:** [#104](https://github.com/iurii-izman/voiceforge/issues/104), [#105](https://github.com/iurii-izman/voiceforge/issues/105), [#106](https://github.com/iurii-izman/voiceforge/issues/106), [#107](https://github.com/iurii-izman/voiceforge/issues/107), [#108](https://github.com/iurii-izman/voiceforge/issues/108), [#109](https://github.com/iurii-izman/voiceforge/issues/109), [#110](https://github.com/iurii-izman/voiceforge/issues/110), [#111](https://github.com/iurii-izman/voiceforge/issues/111), [#112](https://github.com/iurii-izman/voiceforge/issues/112), [#113](https://github.com/iurii-izman/voiceforge/issues/113) уже закрыты и остаются историей предыдущего цикла. В стратегическом score-to-100 queue уже закрыты [#114](https://github.com/iurii-izman/voiceforge/issues/114) (`tests/test_hotspot_batch114.py` + existing web/CLI contracts), [#115](https://github.com/iurii-izman/voiceforge/issues/115) (`tests/test_llm_router_batch115.py`, 91% router-local coverage), [#116](https://github.com/iurii-izman/voiceforge/issues/116) (`tests/test_daemon_batch116.py`, 75% daemon-local coverage), [#117](https://github.com/iurii-izman/voiceforge/issues/117) (`tests/test_rag_batch117.py` + existing CLI/integration subset для index/export/restore/search helpers), [#118](https://github.com/iurii-izman/voiceforge/issues/118) (`tests/test_stt_batch118.py` + existing streaming/CLI/pipeline subset, repeat listen/analyze smoke, cheap no-copy STT cleanup) и [#119](https://github.com/iurii-izman/voiceforge/issues/119) (`tests/test_contract_batch119.py`, sync `/api/sessions/<id>` 404 parity, async analyze-stream validation reuse, D-Bus desktop envelope snapshots, docs contract sync); активными остаются [#120](https://github.com/iurii-izman/voiceforge/issues/120), [#121](https://github.com/iurii-izman/voiceforge/issues/121), [#122](https://github.com/iurii-izman/voiceforge/issues/122), [#123](https://github.com/iurii-izman/voiceforge/issues/123); новый practical execution order: **#120 -> #121 -> #122**.
 
 **Подтверждённые hotspots:** [src/voiceforge/main.py](/home/user/Projects/voiceforge/src/voiceforge/main.py), [src/voiceforge/core/daemon.py](/home/user/Projects/voiceforge/src/voiceforge/core/daemon.py), [src/voiceforge/web/server.py](/home/user/Projects/voiceforge/src/voiceforge/web/server.py), [src/voiceforge/web/server_async.py](/home/user/Projects/voiceforge/src/voiceforge/web/server_async.py), [src/voiceforge/llm/router.py](/home/user/Projects/voiceforge/src/voiceforge/llm/router.py), [desktop/src/main.js](/home/user/Projects/voiceforge/desktop/src/main.js).
 
@@ -133,20 +133,19 @@
 
 **Critical Path (в порядке, актуализировано):**
 
-1. **#119**: укрепить sync/async/desktop contract drift prevention после structural cleanup в `server_async.py`.
-2. **#120**: решить security hardening beyond accepted-risk baseline, не смешивая этот блок с release/manual evidence.
-3. **#121**: собрать reproducible Jaeger/runtime evidence, не смешивая это с code-heavy refactor.
+1. **#120**: решить security hardening beyond accepted-risk baseline, не смешивая этот блок с release/manual evidence.
+2. **#121**: собрать reproducible Jaeger/runtime evidence, не смешивая это с code-heavy refactor.
+3. **#122**: собрать release proof beyond metadata contract, не смешивая это с security/observability.
 4. `#65` CVE: дождаться фикса upstream и снять `--ignore-vuln` без регресса CI.
 5. Manual evidence blocks **#121** и **#122**: `cargo-audit`, live Jaeger traces, signed updater path, desktop native release gate на реальном окружении.
 6. Prompt caching для non-Claude (roadmap 19 / block 66 continuation): пока research/documented, но не productized.
 
 **Quick Wins (1-2 часа):**
 
-1. Взять **#119** как contract drift prevention batch.
-2. Следом взять **#120** как security hardening batch.
-3. Для observability confidence отдельно оформить **#121** через Jaeger/runtime evidence checklist.
-4. Для release confidence отдельно прогнать **#122** lightweight proof steps: `python scripts/check_release_metadata.py` и manual/native gate checklist.
-5. При желании полного quality signal добрать оставшиеся bandit/Sonar quick-fixes без cross-cutting rewrite.
+1. Взять **#120** как security hardening batch.
+2. Следом взять **#121** как observability evidence batch.
+3. Для release confidence отдельно оформить **#122** вокруг metadata/native/updater proof.
+4. При желании полного quality signal добрать оставшиеся bandit/Sonar quick-fixes без cross-cutting rewrite.
 
 **Top risks:**
 
@@ -164,5 +163,5 @@
 - **Лучший формат batches:** `bugfix + regression tests + docs`, `coverage hotspot + refactor + targeted tests`, `version sync + release docs + install smoke`.
 - **Худший формат batches:** desktop packaging + RAG + calendar; security + UI polish + infra refactor в одной сессии.
 - **Источник очереди работ:** сначала [next-iteration-focus.md](next-iteration-focus.md), затем [planning.md](planning.md) / [GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1), затем `plans.md` / `audit.md`.
-- **Актуальные strategic items на board:** [#119](https://github.com/iurii-izman/voiceforge/issues/119), [#120](https://github.com/iurii-izman/voiceforge/issues/120), [#121](https://github.com/iurii-izman/voiceforge/issues/121), [#122](https://github.com/iurii-izman/voiceforge/issues/122), [#123](https://github.com/iurii-izman/voiceforge/issues/123) плюс внешний риск [#65](https://github.com/iurii-izman/voiceforge/issues/65). [#114](https://github.com/iurii-izman/voiceforge/issues/114), [#115](https://github.com/iurii-izman/voiceforge/issues/115), [#116](https://github.com/iurii-izman/voiceforge/issues/116), [#117](https://github.com/iurii-izman/voiceforge/issues/117) и [#118](https://github.com/iurii-izman/voiceforge/issues/118) уже закрыты; practical queue теперь начинается с **#119 -> #120 -> #121**.
+- **Актуальные strategic items на board:** [#120](https://github.com/iurii-izman/voiceforge/issues/120), [#121](https://github.com/iurii-izman/voiceforge/issues/121), [#122](https://github.com/iurii-izman/voiceforge/issues/122), [#123](https://github.com/iurii-izman/voiceforge/issues/123) плюс внешний риск [#65](https://github.com/iurii-izman/voiceforge/issues/65). [#114](https://github.com/iurii-izman/voiceforge/issues/114), [#115](https://github.com/iurii-izman/voiceforge/issues/115), [#116](https://github.com/iurii-izman/voiceforge/issues/116), [#117](https://github.com/iurii-izman/voiceforge/issues/117), [#118](https://github.com/iurii-izman/voiceforge/issues/118) и [#119](https://github.com/iurii-izman/voiceforge/issues/119) уже закрыты; practical queue теперь начинается с **#120 -> #121 -> #122**.
 - **Готовый prompt и batching strategy:** [cursor.md](cursor.md), [next-iteration-focus.md](next-iteration-focus.md), [agent-context.md](agent-context.md).
