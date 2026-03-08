@@ -34,7 +34,7 @@
 
 - **Где смотреть:** GitHub → Repository → Security → Dependabot alerts.
 - **Действия:** для каждого алерта — принять (мержить PR после проверки тестов) или отложить (Dismiss с комментарием).
-- **CVE-2025-69872 (diskcache):** фиксирующей версии нет. В CI уже `pip-audit --ignore-vuln CVE-2025-69872`. Рекомендуется отложить алерт: Dependabot → Dismiss → «Accept risk», комментарий: «No fix version yet. See docs/runbooks/security-and-dependencies.md. Revisit when upstream fixes.» Либо скрипт (нужен `github_token` в keyring с правом security_events): `uv run python scripts/dependabot_dismiss_moderate.py`. После появления фикса — выполнить чеклист ниже.
+- **CVE-2025-69872 (diskcache):** фиксирующей версии нет (проверено 2026-03: upstream не выпустил патч). В CI уже `pip-audit --ignore-vuln CVE-2025-69872`. Рекомендуется отложить алерт: Dependabot → Dismiss → «Accept risk», комментарий: «No fix version yet. See docs/runbooks/security-and-dependencies.md. Revisit when upstream fixes.» Либо скрипт (нужен `github_token` в keyring с правом security_events): `uv run python scripts/dependabot_dismiss_moderate.py`. После появления фикса — выполнить чеклист ниже.
 
 ---
 
