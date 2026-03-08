@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-08 (main.py coverage batch continued, next ROI shifts to rag/watcher)
+**Обновлено:** 2026-03-08 (rag/watcher coverage batch completed, next ROI shifts to daemon)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** продолжен P1 coverage batch по [#99](https://github.com/iurii-izman/voiceforge/issues/99) без смешивания surfaces. `tests/test_main_status_export_action_items.py` расширен на `weekly_report`, `sessions_to_ical`, `backup_cmd`, purge-ветку `history` и соседние export/status error branches. Targeted verify зелёный: `uv run pytest tests/test_main_status_export_action_items.py tests/test_cli_e2e_smoke.py tests/test_cli_helpers_contracts.py tests/test_core_commands.py tests/test_coverage_hotspots_batch99.py -q --tb=line` → `69 passed`; `uv run ruff check tests/test_main_status_export_action_items.py` → `All checks passed`. Дополнительно выполнена честная policy-проверка с временно снятым `omit` для `main.py`: safe subset поднимает `main.py` до `55%`, но этого всё ещё недостаточно для снятия из `omit`, поэтому `pyproject.toml` снова намеренно **не** менялся.
+**Сделано в сессии:** завершён следующий P1 coverage batch по [#99](https://github.com/iurii-izman/voiceforge/issues/99) без смешивания surfaces: отдельный subsystem `src/voiceforge/rag/watcher.py` выведен из blind spot. Добавлен узкий CLI helper `src/voiceforge/cli/watch_helpers.py`, а `watch` в `main.py` теперь использует helper для banner/signal contract вместо inline-обвязки. `src/voiceforge/rag/watcher.py` разбит на тестируемые helper-paths вокруг debounce/hash/indexing/stop semantics (`WatchIndexResult`, `_normalize_pdf_path`, testable `_on_pdf_event(..., now=...)`, `_process_pending(..., now=...)`, `pending_count()`). Добавлен новый suite `tests/test_rag_watcher.py`; существующий smoke `tests/test_cli_e2e_smoke.py` переиспользован как соседняя CLI проверка, а `tests/test_cli_helpers_contracts.py` расширен на watch banner/signal handlers. Targeted verify зелёный: `uv run pytest tests/test_rag_watcher.py tests/test_cli_helpers_contracts.py tests/test_cli_e2e_smoke.py -q --tb=line` → `30 passed`; `uv run ruff check src/voiceforge/rag/watcher.py src/voiceforge/cli/watch_helpers.py src/voiceforge/main.py tests/test_rag_watcher.py tests/test_cli_helpers_contracts.py` → `All checks passed`. Честная policy-проверка с временно снятым `omit` для `voiceforge.rag.watcher` дала `91%`, поэтому `src/voiceforge/rag/watcher.py` удалён из `tool.coverage.run.omit`; `docs/runbooks/release-and-quality.md` и `docs/audit/audit.md` синхронизированы.
 
-**Следующий шаг:** Переключиться на следующий ROI-candidate из текущего `omit`: `src/voiceforge/rag/watcher.py`. Взять только этот subsystem, не возвращаясь к `main.py` в той же итерации. Цель: добавить узкий helper/CLI batch вокруг watcher debounce/hash/indexing/stop semantics, переиспользуя уже существующий `watch` smoke из `tests/test_cli_e2e_smoke.py`; после этого локально проверить coverage с временно снятым `omit` именно для `rag/watcher.py` и только при честном уровне править `pyproject.toml`.
+**Следующий шаг:** Переключиться на следующий isolated ROI-candidate из текущего `omit`: `src/voiceforge/core/daemon.py`. Не возвращаться к `main.py` или RAG в той же итерации. Цель: взять дешёвый helper/smoke batch вокруг `analyze/listen/status/settings` или retention/backup-adjacent paths в `daemon.py`, переиспользуя уже существующие daemon/dbus tests (`tests/test_dbus_service.py`, `tests/test_dbus_contract_snapshot.py`, `tests/test_coverage_hotspots_batch99.py`) и добавить только узкие unit helpers там, где это реально снижает blind spot; после этого локально проверить coverage с временно снятым `omit` именно для `core/daemon.py` и править `pyproject.toml` только при честном проценте.
 
 ---
 

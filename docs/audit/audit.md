@@ -9,7 +9,7 @@
 | # | Weakness / Step | Статус | Доказательство |
 |---|-----------------|--------|----------------|
 | W1 / Step 1 | Eval harness в CI | **СДЕЛАНО** | test.yml: job `eval` — pytest tests/eval/ (ROUGE-L) |
-| W2 / Step 2 | Coverage omit, fail_under | **СДЕЛАНО** | fail_under=60 (#99). server.py выведен из omit; suite: test_web_*.py + test_coverage_hotspots_batch99. В omit остаются main, diarizer, rag/*, local_llm. |
+| W2 / Step 2 | Coverage omit, fail_under | **СДЕЛАНО** | fail_under=60 (#99). `server.py` и `rag/watcher.py` выведены из omit; suite: `test_web_*.py`, `test_coverage_hotspots_batch99.py`, `test_rag_watcher.py`, `test_cli_e2e_smoke.py`, `test_cli_helpers_contracts.py`. В omit остаются `main.py`, `stt/diarizer.py`, тяжёлые `rag/*` (indexer/embedder/searcher/_onnx_runner/dedup/incremental), `llm/local_llm.py`. |
 | W3 / Step 3 | Sonar blocking | **СДЕЛАНО** | sonar.yml: убран continue-on-error |
 | W4 / Step 5 | CodeQL blocking | **СДЕЛАНО** | codeql.yml: убран continue-on-error |
 | W5 | Pipeline integration test | **СДЕЛАНО** | test_pipeline_integration.py: _prepare_audio, run with mocked STT/_gather_step2 |

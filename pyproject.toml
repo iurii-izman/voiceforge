@@ -137,7 +137,7 @@ omit = [
     "src/voiceforge/rag/incremental.py",
     "src/voiceforge/rag/indexer.py",
     "src/voiceforge/rag/searcher.py",
-    "src/voiceforge/rag/watcher.py",
+    # rag/watcher removed from omit (#99): test_rag_watcher.py + watch CLI/helper smoke cover debounce/hash/index/stop paths
     "src/voiceforge/llm/local_llm.py",
     # transcript_log removed from omit (#56): test_transcript_log.py + test_db_migrations.py cover it
     # caldav_poll removed from omit (#56): test_caldav_poll.py + test_calendar.py cover it

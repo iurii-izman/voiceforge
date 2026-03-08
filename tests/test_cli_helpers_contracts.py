@@ -9,6 +9,7 @@ import pytest
 
 from voiceforge.cli import history_helpers as hh
 from voiceforge.cli import status_helpers as sh
+from voiceforge.cli import watch_helpers as wh
 from voiceforge.core import contracts
 
 
@@ -214,3 +215,26 @@ def test_doctor_check_rag_ring_optional(monkeypatch) -> None:
     assert len(results) == 2
     keys = [r[2] for r in results]
     assert "doctor.ring_ok" in keys or "doctor.ring_absent" in keys
+
+
+def test_watch_helpers_banner_and_stop_handlers() -> None:
+    signal_calls: list[tuple[int, object]] = []
+    stop_calls: list[str] = []
+
+    class FakeSignalModule:
+        SIGINT = 2
+        SIGTERM = 15
+
+        @staticmethod
+        def signal(sig: int, handler: object) -> None:
+            signal_calls.append((sig, handler))
+
+    banner = wh.get_watch_banner("/kb", "/db/rag.db", lambda key, **kwargs: f"{key}:{kwargs}")
+    assert banner == "watch.banner:{'path': '/kb', 'db_path': '/db/rag.db'}"
+
+    wh.install_watch_stop_signal_handlers(FakeSignalModule, lambda: stop_calls.append("stop"))
+
+    assert [sig for sig, _handler in signal_calls] == [FakeSignalModule.SIGINT, FakeSignalModule.SIGTERM]
+    for _sig, handler in signal_calls:
+        handler()
+    assert stop_calls == ["stop", "stop"]

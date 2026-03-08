@@ -36,6 +36,7 @@ from voiceforge.cli.status_helpers import (
     get_status_detailed_text,
     get_status_text,
 )
+from voiceforge.cli.watch_helpers import get_watch_banner, install_watch_stop_signal_handlers
 from voiceforge.core.config import Settings
 from voiceforge.core.contracts import (
     BudgetExceeded,
@@ -981,9 +982,8 @@ def watch(
         from voiceforge.rag.watcher import KBWatcher
 
         watcher = KBWatcher(watch_dir, Path(db_path))
-        typer.echo(t("watch.banner", path=path, db_path=db_path))
-        signal.signal(signal.SIGINT, lambda *a: watcher.stop())
-        signal.signal(signal.SIGTERM, lambda *a: watcher.stop())
+        typer.echo(get_watch_banner(path, db_path, t))
+        install_watch_stop_signal_handlers(signal, watcher.stop)
         watcher.run()
     except ImportError:
         typer.echo(t("error.rag_deps"), err=True)
