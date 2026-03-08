@@ -226,3 +226,13 @@ jobs:
       - run: cd desktop && npm ci && npm run build
       - run: cd desktop && npx playwright install chromium --with-deps
       - run: cd desktop && npm run e2e
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: desktop-playwright-report
+          path: desktop/playwright-report/
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: desktop-playwright-results
+          path: desktop/test-results/

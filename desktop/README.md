@@ -35,7 +35,42 @@ npm run tauri build  # релизный бинарник в src-tauri/target/rel
 ## Иконка и качество (альфа2)
 
 - Иконка приложения: в альфа2 можно не задавать (bundle.icon пустой); для релиза — добавить в `src-tauri/icons/` и обновить `tauri.conf.json` (или `tauri icon`).
-- E2E-тесты десктопа в альфа2 опциональны; достаточно ручной проверки и стабильного контракта D-Bus.
+- Для релизного quality signal больше не полагаться только на ручное “потыкать UI”: использовать desktop QA autopilot ниже.
+
+## Desktop QA Autopilot
+
+Стек без платных сервисов:
+
+- `Playwright` для пользовательских сценариев и HTML/trace reports
+- `window.__VOICEFORGE_TEST_HOOKS__` bridge для детерминированных mock-Tauri/mock-daemon flows
+- `@axe-core/playwright` для a11y smoke на ключевых экранах
+- `toHaveScreenshot()` для visual regression на базовых desktop states
+
+Запуск:
+
+```bash
+cd desktop
+npm ci
+npm run e2e
+npm run e2e:ui
+npm run e2e:update-snapshots
+npm run e2e:report
+```
+
+Что покрывается:
+
+- functional/autopilot flows: daemon ok, listen/analyze, sessions/detail, settings/autostart/updater
+- a11y smoke: home, sessions, settings panel
+- visual baselines: home dashboard, sessions list, settings slide-out panel
+
+Артефакты:
+
+- `desktop/playwright-report/` — HTML report
+- `desktop/test-results/` — JUnit + trace/video/screenshot artifacts on failure
+
+Ограничения:
+
+- этот слой тестирует реальный frontend и mocked Tauri runtime, но не заменяет отдельные native-shell smoke tests для tray, updater install, глобальных hotkeys, notifications UX и Wayland/X11 quirks
 
 ## После альфа2
 

@@ -1,14 +1,24 @@
-import { invoke } from "@tauri-apps/api/core";
-import { listen } from "@tauri-apps/api/event";
-import { getCurrentWindow, LogicalPosition, LogicalSize } from "@tauri-apps/api/window";
-import { isPermissionGranted, requestPermission, sendNotification } from "@tauri-apps/plugin-notification";
-import { register as registerShortcut, unregister as unregisterShortcut } from "@tauri-apps/plugin-global-shortcut";
-import { getCurrent, onOpenUrl } from "@tauri-apps/plugin-deep-link";
-import { enable as autostartEnable, disable as autostartDisable, isEnabled as autostartIsEnabled } from "@tauri-apps/plugin-autostart";
-import { Store } from "@tauri-apps/plugin-store";
-import { check as updaterCheck } from "@tauri-apps/plugin-updater";
-import { relaunch } from "@tauri-apps/plugin-process";
 import { Chart } from "chart.js/auto";
+import {
+  AppStore,
+  LogicalPosition,
+  LogicalSize,
+  autostartDisable,
+  autostartEnable,
+  autostartIsEnabled,
+  getCurrent,
+  getCurrentWindow,
+  invoke,
+  isPermissionGranted,
+  listen,
+  onOpenUrl,
+  registerShortcut,
+  relaunch,
+  requestPermission,
+  sendNotification,
+  unregisterShortcut,
+  updaterCheck,
+} from "./platform";
 
 let appStore = null;
 
@@ -312,7 +322,7 @@ function getValueToSetInStore(key, local) {
 
 async function loadStoreAndMigrate() {
   try {
-    appStore = await Store.load("voiceforge-settings.json");
+    appStore = await AppStore.load("voiceforge-settings.json");
     for (const key of STORE_KEYS) {
       const stored = await appStore.get(key);
       if (stored !== null && stored !== undefined) {
@@ -465,6 +475,8 @@ function openSettingsPanel() {
   const slot = document.getElementById("settings-panel-slot");
   const tabContent = document.getElementById("settings-tab-content");
   if (!panel || !slot || !tabContent) return;
+  panel.hidden = false;
+  panel.inert = false;
   slot.appendChild(tabContent);
   panel.classList.add("open");
   panel.setAttribute("aria-hidden", "false");
@@ -483,6 +495,8 @@ function closeSettingsPanel() {
   }
   panel.classList.remove("open");
   panel.setAttribute("aria-hidden", "true");
+  panel.inert = true;
+  panel.hidden = true;
 }
 
 function initSettingsPanelMode() {
@@ -1118,7 +1132,8 @@ function renderSessionsTable(sessions) {
       const dur = s.duration_sec == null ? "—" : s.duration_sec + " с";
       const isFav = fav.has(Number(id));
       const star = `<button type="button" class="favorite-star" data-id="${id}" aria-label="${isFav ? "Убрать из избранного" : "В избранное"}">${isFav ? "★" : "☆"}</button>`;
-      html += `<tr data-id="${id}" tabindex="0" role="button"><td>${star}</td><td>${id}</td><td>${start}</td><td>${dur}</td></tr>`;
+      const openBtn = `<button type="button" class="btn-link session-open-link" data-id="${id}" aria-label="Открыть сессию ${id}">${id}</button>`;
+      html += `<tr data-id="${id}"><td>${star}</td><td>${openBtn}</td><td>${start}</td><td>${dur}</td></tr>`;
     });
   });
   html += "</tbody></table>";
@@ -1129,20 +1144,20 @@ function renderSessionsTable(sessions) {
       toggleFavorite(Number(btn.dataset.id));
     });
   });
+  container.querySelectorAll(".session-open-link").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      showSessionDetail(Number.parseInt(btn.dataset.id, 10));
+    });
+  });
   container.querySelectorAll("tr[data-id]").forEach((row) => {
     const openDetail = () => showSessionDetail(Number.parseInt(row.dataset.id, 10));
     row.addEventListener("click", (e) => {
-      if (e.target.closest(".favorite-star")) return;
+      if (e.target.closest(".favorite-star, .session-open-link")) return;
       openDetail();
     });
-    row.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        openDetail();
-      }
-    });
     row.addEventListener("contextmenu", (e) => {
-      if (e.target.closest(".favorite-star")) return;
+      if (e.target.closest(".favorite-star, .session-open-link")) return;
       e.preventDefault();
       showSessionContextMenu(e.clientX, e.clientY, Number(row.dataset.id));
     });

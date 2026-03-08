@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-08 (#101 packaging/updater закрыт)
+**Обновлено:** 2026-03-08 (desktop QA autopilot baseline; next desktop QA batches #102/#103)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** [#101](https://github.com/iurii-izman/voiceforge/issues/101) закрыт: packaging/updater приведён к честному состоянию — (1) в desktop-updater.md зафиксирован текущий статус «updater явно отключён» и контракт (либо оба пустые, либо оба заданы); (2) в check_release_metadata.py добавлена проверка контракта updater и тесты; (3) в release-and-quality.md добавлены § 1.1 Release validation (packaging/updater) и § 1.2 Desktop CI: blocking vs advisory; (4) в offline-package.md добавлена секция «Воспроизводимая сборка». Карточка #101 переведена в Done. *(Ранее #100: performance debt.)*
+**Сделано в сессии:** внедрён open-source desktop QA autopilot baseline без платных сервисов: (1) добавлен Tauri/mock bridge `desktop/src/platform.js` и deterministic harness `desktop/e2e/helpers/desktopHarness.js`; (2) добавлены Playwright suites `desktop/e2e/autopilot.spec.js`, `desktop/e2e/a11y.spec.js`, `desktop/e2e/visual.spec.js` с functional, accessibility и visual regression coverage; (3) в `playwright.config.js` включены HTML/JUnit report и trace/video/screenshot artifacts, а в CI (`.github/workflows/test.yml`) — upload desktop artifacts; (4) исправлены реальные a11y defects в UI: скрытая focusable settings-panel, nested-interactive в списке сессий и contrast для secondary text; (5) обновлены `desktop/README.md`, `docs/runbooks/desktop-gui-testing.md`, `docs/DOCS-INDEX.md`. На GitHub Project добавлены follow-up issues [#102](https://github.com/iurii-izman/voiceforge/issues/102) и [#103](https://github.com/iurii-izman/voiceforge/issues/103) в `Todo`.
 
-**Следующий шаг:** Поднять coverage к 75% (router/daemon/server_async/main helpers) и fail_under к 75. Verify: `uv run pytest tests/ -q -m "not integration" --cov=src/voiceforge --cov-report=term`.
+**Следующий шаг:** Взять [#102](https://github.com/iurii-izman/voiceforge/issues/102) и поднять узкий native-shell smoke layer для Linux через `tauri-driver` + WebdriverIO, не смешивая его с текущим mocked Playwright suite. После этого — только затем переходить к [#103](https://github.com/iurii-izman/voiceforge/issues/103) и оформлять release-gate matrix для tray/updater/Wayland/X11. Verify текущего baseline перед началом: `cd desktop && npx playwright test --project=chromium`.
 
 ---
 
@@ -47,7 +47,7 @@
 
 Режим: максимальные объёмы, автопилот. Делай всё сам, без лишних вопросов. Запрашивай пользователя только если нужен явный выбор, подтверждение или данные вне keyring. Ключи в keyring (keyring-keys-reference.md). Fedora Atomic/toolbox/uv; uv sync --extra all. В конце сессии: тесты (uv run pytest tests/ -q --tb=line), коммит и пуш из корня репо (Conventional Commits, Closes #N где уместно), обновить next-iteration-focus (следующий шаг + дата), выдать промпт для следующего чата.
 
-Задача: [из блока «Следующий шаг» выше] — pre-commit/Dependabot или продолжение по аудиту (coverage, pipeline test, async web).
+Задача: [из блока «Следующий шаг» выше] — взять текущий верхний coherent batch из next-iteration-focus и GitHub Project, не смешивая unrelated surfaces.
 ```
 
 ---
@@ -61,13 +61,13 @@
 
 Режим: максимальный автопилот и максимум согласованных блоков за итерацию. Выбирай 1 главный P0/P1 блок и до 2 соседних подблоков только если это тот же subsystem, те же файлы или те же проверки. Не смешивай unrelated surfaces. Делай полный цикл: код, targeted tests, docs/контракты, GitHub Project status, commit/push, обновление next-iteration-focus. Не спрашивай пользователя, если ответ можно получить из кода, docs, board или keyring.
 
-Источники правды по порядку: agent-context, next-iteration-focus, PROJECT-STATUS-SUMMARY, planning, plans, audit. При старте всегда сверяйся с GitHub Project view и бери верхнюю `Todo` карточку из audit-batches: #97, затем #98, #99, #100, #101. При начале работы переводи карточку в In Progress, при `Closes #N` — в Done.
+Источники правды по порядку: agent-context, next-iteration-focus, PROJECT-STATUS-SUMMARY, planning, plans, audit. При старте всегда сверяйся с GitHub Project view и бери верхнюю `Todo` карточку, которая совпадает с блоком «Следующий шаг». При начале работы переводи карточку в In Progress, при `Closes #N` — в Done.
 
 Среда: Fedora Atomic, toolbox, uv. Ключи только в keyring (voiceforge). Базово `uv sync --extra all`; при необходимости подключай профильные extras. Полный `pytest tests/` не запускать по умолчанию из-за OOM-risk; использовать safe subsets из next-iteration-focus и запускать ровно те проверки, которые подтверждают текущий batch. Pre-commit в toolbox; на хосте без 3.12 — git commit/push с --no-verify.
 
 В конце сессии обязательно: (1) targeted tests по изменённой поверхности, (2) commit/push из корня репо (Conventional Commits, `Closes #N` где уместно), (3) обновить next-iteration-focus (блоки «Сделано в сессии», «Следующий шаг», дата), (4) выдать готовый prompt для следующего чата.
 
-Задача: выполнить следующий coherent batch из блока «Следующий шаг», начиная с issue #97. Если он закрыт, взять верхний P0/P1 batch из PROJECT-STATUS-SUMMARY и GitHub Project: #98, затем #99, #100, #101.
+Задача: выполнить следующий coherent batch из блока «Следующий шаг» и GitHub Project, сохраняя batching discipline: один subsystem, один verification loop, один честный handoff.
 ```
 
 ---
