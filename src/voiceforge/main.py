@@ -454,6 +454,10 @@ def run_analyze_pipeline(
         log.warning("analyze.budget_exceeded", error=str(e))
         return (t(_I18N_ERROR_BUDGET_EXCEEDED, msg=str(e)), [], {})
     except Exception as e:
+        from voiceforge.core.preflight import NetworkUnavailableError
+
+        if isinstance(e, NetworkUnavailableError):
+            return (t(e.i18n_key) + ". " + t("error.ollama_suggestion"), [], {})
         log.warning("analyze.llm_failed", error=str(e))
         return (t(_I18N_ERROR_LLM_FAILED, e=str(e)), [], {})
 
@@ -619,6 +623,20 @@ def listen(
 ) -> None:
     """Start microphone/system recording to ring buffer for analyze."""
     cfg = _get_config()
+    from voiceforge.core.preflight import check_disk_space, check_pipewire
+
+    pw_err = check_pipewire()
+    if pw_err:
+        typer.echo(t(pw_err), err=True)
+        typer.echo(t("error.pipewire_fix"), err=True)
+        raise SystemExit(1)
+    data_dir = cfg.get_data_dir()
+    disk_err, disk_warn = check_disk_space(data_dir)
+    if disk_err:
+        typer.echo(t(disk_err), err=True)
+        raise SystemExit(1)
+    if disk_warn:
+        typer.echo(t(disk_warn), err=True)
     try:
         from voiceforge.audio.capture import AudioCapture
     except ImportError:
@@ -774,6 +792,14 @@ def analyze(
     if template is not None and template not in _TEMPLATE_CHOICES:
         typer.echo(t("analyze.unknown_template", template=template, choices=", ".join(_TEMPLATE_CHOICES)), err=True)
         raise SystemExit(1)
+    from voiceforge.core.preflight import check_disk_space
+
+    disk_err, disk_warn = check_disk_space(cfg.get_data_dir())
+    if disk_err:
+        typer.echo(t(disk_err), err=True)
+        raise SystemExit(1)
+    if disk_warn:
+        typer.echo(t(disk_warn), err=True)
     if not dry_run and output == "text" and sys.stderr.isatty():
         # Block 72: rough estimate (transcribe + LLM) for user feedback
         est_lo = max(10, seconds // 5 + 5)

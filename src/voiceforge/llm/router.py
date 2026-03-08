@@ -532,6 +532,11 @@ def complete_structured(
     _complete_structured_check_budget(cfg)
     log_response_cache(False)
     set_env_keys_from_keyring()
+    from voiceforge.core.preflight import NetworkUnavailableError, check_network_for_llm
+
+    network_err = check_network_for_llm(model_id)
+    if network_err:
+        raise NetworkUnavailableError(network_err)
     try:
         import instructor
         from litellm import completion

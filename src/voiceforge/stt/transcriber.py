@@ -1,5 +1,6 @@
 """STT via faster-whisper (CTranslate2, INT8)."""
 
+import time
 from dataclasses import dataclass
 
 import numpy as np
@@ -11,6 +12,8 @@ log = structlog.get_logger()
 
 # RSS threshold above which we log a warning (bytes)
 RSS_WARNING_BYTES = 4 * 1024**3
+MAX_DOWNLOAD_ATTEMPTS = 3
+DOWNLOAD_BACKOFF_BASE_SEC = 1.0
 
 
 @dataclass
@@ -24,6 +27,27 @@ class Segment:
     confidence: float
 
 
+def _load_whisper_model(model_size: str, device: str, compute_type: str):
+    """Load Whisper model with download log and retry on network failure (E3 #126)."""
+    log.info("stt.downloading_model", size=model_size, message=f"Downloading Whisper model ({model_size})...")
+    last_error: Exception | None = None
+    for attempt in range(MAX_DOWNLOAD_ATTEMPTS):
+        try:
+            return WhisperModel(model_size, device=device, compute_type=compute_type)
+        except Exception as e:
+            last_error = e
+            if attempt < MAX_DOWNLOAD_ATTEMPTS - 1:
+                delay = DOWNLOAD_BACKOFF_BASE_SEC * (2**attempt)
+                log.warning(
+                    "stt.model_download_retry",
+                    attempt=attempt + 1,
+                    error=str(e),
+                    retry_sec=delay,
+                )
+                time.sleep(delay)
+    raise last_error
+
+
 class Transcriber:
     """Wrapper around faster-whisper. Model loaded once and reused."""
 
@@ -33,7 +57,7 @@ class Transcriber:
         compute_type: str = "int8",
         device: str = "cpu",
     ) -> None:
-        self._model = WhisperModel(model_size, device=device, compute_type=compute_type)
+        self._model = _load_whisper_model(model_size, device, compute_type)
         self._model_size = model_size
         self._process = psutil.Process()  # cache once — Process() does a syscall per call
 

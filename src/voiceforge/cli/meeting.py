@@ -25,6 +25,20 @@ def run_meeting(
     seconds: int | None = None,
 ) -> None:
     """Run standalone listen loop; on Ctrl+C run analyze and exit. Smart trigger in background if enabled."""
+    from voiceforge.core.preflight import check_disk_space, check_pipewire
+
+    pw_err = check_pipewire()
+    if pw_err:
+        typer.echo(t(pw_err), err=True)
+        typer.echo(t("error.pipewire_fix"), err=True)
+        raise SystemExit(1)
+    data_dir = cfg.get_data_dir()
+    disk_err, disk_warn = check_disk_space(data_dir)
+    if disk_err:
+        typer.echo(t(disk_err), err=True)
+        raise SystemExit(1)
+    if disk_warn:
+        typer.echo(t(disk_warn), err=True)
     try:
         from voiceforge.audio.capture import AudioCapture
     except ImportError:
