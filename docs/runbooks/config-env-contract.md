@@ -7,7 +7,7 @@ Source of truth: `src/voiceforge/core/config.py`.
 Priority order:
 1. CLI/runtime explicit values (when applicable)
 2. Environment variables (`VOICEFORGE_*`)
-3. `voiceforge.yaml` (`$XDG_CONFIG_HOME/voiceforge/voiceforge.yaml` or `./voiceforge.yaml`)
+3. `voiceforge.yaml` (`$XDG_CONFIG_HOME/voiceforge/voiceforge.yaml` or `./voiceforge.yaml`). Example: `voiceforge.yaml.example` in repo root (E1).
 4. Built-in defaults
 
 ## Settings Fields
@@ -23,7 +23,7 @@ Priority order:
 | `ring_persist_interval_sec` | `VOICEFORGE_RING_PERSIST_INTERVAL_SEC` | `10.0` | Interval (s) between full ring file writes in listen loop; reduces I/O (#100) |
 | `ring_file_path` | `VOICEFORGE_RING_FILE_PATH` | auto (`XDG_RUNTIME_DIR`/`~/.cache`) | Ring PCM path |
 | `rag_db_path` | `VOICEFORGE_RAG_DB_PATH` | auto (`XDG_DATA_HOME`/`~/.local/share`) | RAG SQLite path |
-| `smart_trigger` | `VOICEFORGE_SMART_TRIGGER` | `false` | Auto-analyze mode. **Default policy (roadmap 15):** remains `false` until user feedback on false positives; when enabling by default, update default here and in config source, and note in release. |
+| `smart_trigger` | `VOICEFORGE_SMART_TRIGGER` | `true` | Auto-analyze on semantic pause (E1: sensible default). Set to `false` to disable. |
 | `smart_trigger_template` | `VOICEFORGE_SMART_TRIGGER_TEMPLATE` | `null` | Optional template for smart-trigger analyze (e.g. `standup`, `one_on_one`). Only when `smart_trigger` is true. |
 | `monitor_source` | `VOICEFORGE_MONITOR_SOURCE` | `null` | PipeWire monitor source |
 | `aggressive_memory` | `VOICEFORGE_AGGRESSIVE_MEMORY` | `false` | Unload models after analyze |

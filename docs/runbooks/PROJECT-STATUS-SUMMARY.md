@@ -71,7 +71,7 @@
 
 | # | Issue | Блок | Priority | Effort | Area | Impact |
 |---|---|---|---|---|---|---|
-| E1 | [#124](https://github.com/iurii-izman/voiceforge/issues/124) | Quick Wins: Sensible Defaults & Notifications | P0 | S | Backend | +10% DDR |
+| E1 | [#124](https://github.com/iurii-izman/voiceforge/issues/124) | Quick Wins: Sensible Defaults & Notifications | P0 | S | Backend | +10% DDR ✓ |
 | E2 | [#125](https://github.com/iurii-izman/voiceforge/issues/125) | One-Shot Meeting Mode: `voiceforge meeting` | P0 | M | Backend | +15% DDR |
 | E3 | [#126](https://github.com/iurii-izman/voiceforge/issues/126) | Error Pre-Flight Checks: PipeWire, Disk, Network | P0 | M | Backend | +15% ER |
 | E4 | [#127](https://github.com/iurii-izman/voiceforge/issues/127) | Explicit Failure Feedback: Diarization, RAG, Models | P0 | S | Backend | +12% ER |
@@ -102,7 +102,7 @@
 
 **Wave 1 — P0 блокеры (2-3 недели, DDR 35→55):**
 ```
-E1 → E2 → E3 → E4 → E5
+E1 ✓ → E2 → E3 → E4 → E5
 ```
 
 **Wave 2 — P1 core (3-4 недели, DDR 55→70):**

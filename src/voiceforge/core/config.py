@@ -98,7 +98,7 @@ class Settings(BaseSettings):
         description="Block 74: glob patterns to exclude paths from RAG indexing (e.g. *.tmp, */.git/*).",
     )
     smart_trigger: bool = Field(
-        default=False,
+        default=True,
         description="Block 4.4: auto-analyze on semantic pause (silence > 3s after >= 30s speech)",
     )
     smart_trigger_template: str | None = Field(

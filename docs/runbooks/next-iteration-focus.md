@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-08 (Phase E productization launch; 21 issues #124-#144 создано на доске)
+**Обновлено:** 2026-03-08 (E1 #124 закрыт; следующий — E2 #125)
 
 ---
 
@@ -30,7 +30,7 @@
 
 | Wave | Issues | Статус | Что делать |
 |------|--------|--------|------------|
-| **Wave 1 (P0)** | #124→#125→#126→#127→#128 | **Todo** | Строго по порядку. DDR 35→55 |
+| **Wave 1 (P0)** | #124✓→#125→#126→#127→#128 | **In progress** | E2 следующий. DDR 35→55 |
 | **Wave 2 (P1 core)** | #129→#130→#131→#132→#133→#141 | Todo | DDR 55→70 |
 | **Wave 3 (P1 quality)** | #135→#136→#137→#138 | Todo | Testing + Core + CLI + Obs |
 | **Wave 4 (P2 polish)** | #134→#139→#140 | Todo | Calendar + CI/CD + Security |
@@ -52,7 +52,7 @@
 
 Задача: взять верхний незакрытый E-блок из текущего Wave. Перевести issue в In Progress на доске. Реализовать по чеклисту в issue body. Targeted tests. Commit с `Closes #N` (Conventional Commits). Done на доске. Обновить docs. Выдать prompt для следующего чата.
 
-Текущий блок: E1 (#124) — Quick Wins: Sensible Defaults & Notifications.
+Текущий блок: E2 (#125) — One-Shot Meeting Mode: `voiceforge meeting`.
 ```
 
 ---

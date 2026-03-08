@@ -1,0 +1,52 @@
+# VoiceForge config example (copy to voiceforge.yaml in $XDG_CONFIG_HOME/voiceforge/ or cwd).
+# Source of truth: src/voiceforge/core/config.py. Override with VOICEFORGE_* env vars.
+
+# STT & audio
+model_size: small          # faster-whisper: tiny, base, small, medium, large-v2, large-v3, large
+stt_backend: local         # local (faster-whisper) | openai (Whisper API; key 'openai' in keyring)
+sample_rate: 16000         # Audio sample rate Hz
+
+# LLM & budget
+default_llm: anthropic/claude-haiku-4-5
+budget_limit_usd: 75.0     # Monthly API budget USD
+# daily_budget_limit_usd: null   # default: budget_limit_usd/30
+
+# Ring buffer (listen)
+ring_seconds: 300.0        # Ring buffer length seconds; also default for `analyze` when --seconds omitted
+ring_persist_interval_sec: 10.0
+# ring_file_path: null     # default: XDG_RUNTIME_DIR/voiceforge/ring.raw
+
+# RAG
+# rag_db_path: null       # default: XDG_DATA_HOME/voiceforge/rag.db
+# rag_exclude_patterns: [] # e.g. ["*.tmp", "*/.git/*"]
+
+# Smart trigger (daemon): auto-analyze on semantic pause
+smart_trigger: true       # E1: sensible default
+# smart_trigger_template: null  # e.g. standup, one_on_one
+
+# PipeWire
+# monitor_source: null    # e.g. VoiceForge_Monitor.monitor
+
+# Memory & timeouts
+aggressive_memory: false   # unload models after each analyze
+pyannote_restart_hours: 2
+pipeline_step2_timeout_sec: 25.0
+analyze_timeout_sec: 120.0
+
+# Streaming & live
+streaming_stt: false
+live_summary_interval_sec: 90
+
+# Locale & PII
+language: auto            # auto | ru | en
+ollama_model: phi3:mini   # Ollama for local classify/simple_answer
+pii_mode: ON              # OFF | ON | EMAIL_ONLY
+
+# Retention & cache
+retention_days: 90        # 0 = disable auto-cleanup
+response_cache_ttl_seconds: 86400  # 0 = disable LLM response cache
+
+# Calendar (CalDAV; keyring: caldav_*)
+calendar_context_enabled: false
+calendar_autostart_enabled: false
+calendar_autostart_minutes: 5

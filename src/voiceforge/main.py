@@ -723,7 +723,11 @@ def _analyze_echo_success(
 
 @app.command()
 def analyze(
-    seconds: int = typer.Option(30, help="Последние N секунд"),
+    seconds: int | None = typer.Option(
+        None,
+        "--seconds",
+        help="Last N seconds of ring buffer; omit to analyze entire buffer (ring_seconds from config).",
+    ),
     output: str = typer.Option("text", "--output", help=_HELP_OUTPUT_TEXT_JSON),
     template: str | None = typer.Option(
         None,
@@ -737,6 +741,9 @@ def analyze(
     ),
 ) -> None:
     """Analyze ring-buffer fragment: transcribe -> diarize -> rag -> llm."""
+    cfg = _get_config()
+    if seconds is None:
+        seconds = int(cfg.ring_seconds)
     if template is not None and template not in _TEMPLATE_CHOICES:
         typer.echo(t("analyze.unknown_template", template=template, choices=", ".join(_TEMPLATE_CHOICES)), err=True)
         raise SystemExit(1)
@@ -792,6 +799,13 @@ def analyze(
         notify_analyze_done(session_id, (display_text or "")[:400])
     except Exception as e:
         log.debug("analyze.telegram_notify_failed", error=str(e))
+
+    try:
+        from voiceforge.core.desktop_notify import notify_analyze_done as desktop_notify_analyze_done
+
+        desktop_notify_analyze_done((display_text or "")[:80])
+    except Exception:
+        pass  # notify-send optional (E1)
 
     _analyze_echo_success(session_id, display_text, analysis_for_log, output)
 

@@ -8,6 +8,13 @@ if ! command -v uv >/dev/null 2>&1; then
   exit 1
 fi
 
+if ! command -v pw-record >/dev/null 2>&1; then
+  echo "⚠ PipeWire not found. Install: sudo dnf install pipewire pipewire-utils" >&2
+fi
+if command -v pipewire >/dev/null 2>&1; then
+  pipewire --version 2>/dev/null || true
+fi
+
 uv sync --extra all
 
 echo "Ensuring pre-commit env (python3.12 + hooks)..."
