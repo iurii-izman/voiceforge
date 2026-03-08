@@ -18,6 +18,7 @@ test.beforeEach(async ({ page }) => {
   await installDesktopMocks(page);
   await page.goto("/");
   await dismissOnboarding(page);
+  await expect(page.locator("#quick-analyze-60")).toBeVisible();
 });
 
 test.describe("Desktop QA autopilot", () => {

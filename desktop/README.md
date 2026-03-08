@@ -52,6 +52,7 @@ npm run tauri build  # релизный бинарник в src-tauri/target/rel
 cd desktop
 npm ci
 npm run e2e
+npm run e2e:native
 npm run e2e:ui
 npm run e2e:update-snapshots
 npm run e2e:report
@@ -71,6 +72,7 @@ npm run e2e:report
 Ограничения:
 
 - этот слой тестирует реальный frontend и mocked Tauri runtime, но не заменяет отдельные native-shell smoke tests для tray, updater install, глобальных hotkeys, notifications UX и Wayland/X11 quirks
+- native-shell smoke вынесен отдельно: `npm run e2e:native` (если `WebKitWebDriver` не находится автоматически, задать `TAURI_NATIVE_DRIVER=/path/to/WebKitWebDriver`; см. `docs/runbooks/desktop-gui-testing.md` и `docs/runbooks/desktop-release-gate-matrix.md`)
 
 ## После альфа2
 

@@ -57,6 +57,7 @@ git push origin v0.2.0-alpha.2
 
 - **Blocking для релиза:** только `check_release_metadata.py` (включая packaging/updater contract). Он вызывается в CI job `quality` и должен проходить перед тегом.
 - **Advisory в CI:** jobs `desktop-audit` (npm audit, cargo audit) и `desktop-a11y` (pa11y) выполняются с `continue-on-error: true` из-за принятых рисков (известные CVE без фикса) и нестабильности окружения a11y. Они не блокируют merge и релиз. Политика: при появлении критичных уязвимостей — исправить или задокументировать allowlist в [security-and-dependencies.md](security-and-dependencies.md).
+- **Local release gate для desktop shell:** `cd desktop && npm run e2e:native` считается обязательным локальным Linux smoke перед desktop релизом, но пока не вынесен в CI из-за зависимости от `tauri-driver`, `WebKitWebDriver` и GUI-capable runner. Полная матрица automated/native/manual checks: [desktop-release-gate-matrix.md](desktop-release-gate-matrix.md).
 
 ---
 

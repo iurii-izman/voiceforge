@@ -28,7 +28,7 @@
 | Сценарий | Документы |
 |----------|-----------|
 | **Начало работы** | [first-meeting-5min.md](first-meeting-5min.md), [runbooks/quickstart.md](runbooks/quickstart.md), [runbooks/installation-guide.md](runbooks/installation-guide.md) |
-| **Сборка и установка** | [runbooks/desktop-build-deps.md](runbooks/desktop-build-deps.md), [runbooks/offline-package.md](runbooks/offline-package.md), [runbooks/desktop-updater.md](runbooks/desktop-updater.md), [runbooks/desktop-gui-testing.md](runbooks/desktop-gui-testing.md) (тесты GUI) |
+| **Сборка и установка** | [runbooks/desktop-build-deps.md](runbooks/desktop-build-deps.md), [runbooks/offline-package.md](runbooks/offline-package.md), [runbooks/desktop-updater.md](runbooks/desktop-updater.md), [runbooks/desktop-gui-testing.md](runbooks/desktop-gui-testing.md) (тесты GUI), [runbooks/desktop-release-gate-matrix.md](runbooks/desktop-release-gate-matrix.md) |
 | **Конфигурация и ключи** | [runbooks/config-env-contract.md](runbooks/config-env-contract.md), [runbooks/keyring-keys-reference.md](runbooks/keyring-keys-reference.md) |
 | **Разработка и агент** | [AGENTS.md](../AGENTS.md), [runbooks/agent-context.md](runbooks/agent-context.md), [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md), [runbooks/cursor.md](runbooks/cursor.md), [runbooks/PROJECT-STATUS-SUMMARY.md](runbooks/PROJECT-STATUS-SUMMARY.md), [architecture/README.md](architecture/README.md) |
 | **Релиз и качество** | [runbooks/release-and-quality.md](runbooks/release-and-quality.md), [runbooks/pre-beta-sonar-github.md](runbooks/pre-beta-sonar-github.md), [runbooks/repo-and-git-governance.md](runbooks/repo-and-git-governance.md), [audit/audit.md](audit/audit.md) |
@@ -92,7 +92,8 @@
 | doc-governance.md | Порядок в доках: архив, источники правды, после итерации | Актуален |
 | config-env-contract.md, keyring-keys-reference.md | Конфиг и ключи | Актуален |
 | installation-guide.md, desktop-build-deps.md, bootstrap.md | Установка и сборка | Актуален |
-| desktop-gui-testing.md | Тестирование GUI десктопа: Tier 1 (Playwright vs preview), Tier 2 (tauri-driver + WebdriverIO), a11y, чек-лист | Актуален |
+| desktop-gui-testing.md | Тестирование GUI десктопа: mocked autopilot, native smoke, a11y, visual regression | Актуален |
+| desktop-release-gate-matrix.md | Release gate matrix для desktop: automated vs native vs manual proof | Актуален |
 | quickstart.md | Краткий сценарий; полная версия — first-meeting-5min | Актуален |
 | cli-commands-and-run.md | Все CLI-команды, когда пересобирать, как запускать демон и полный стек (toolbox) | Актуален |
 | planning.md | Канбан, audit map, next-iteration-focus; GitHub Project, gh и batching policy | Актуален |

@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-08 (desktop QA autopilot baseline; next desktop QA batches #102/#103)
+**Обновлено:** 2026-03-08 (desktop native smoke + release gate batch closed)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** внедрён open-source desktop QA autopilot baseline без платных сервисов: (1) добавлен Tauri/mock bridge `desktop/src/platform.js` и deterministic harness `desktop/e2e/helpers/desktopHarness.js`; (2) добавлены Playwright suites `desktop/e2e/autopilot.spec.js`, `desktop/e2e/a11y.spec.js`, `desktop/e2e/visual.spec.js` с functional, accessibility и visual regression coverage; (3) в `playwright.config.js` включены HTML/JUnit report и trace/video/screenshot artifacts, а в CI (`.github/workflows/test.yml`) — upload desktop artifacts; (4) исправлены реальные a11y defects в UI: скрытая focusable settings-panel, nested-interactive в списке сессий и contrast для secondary text; (5) обновлены `desktop/README.md`, `docs/runbooks/desktop-gui-testing.md`, `docs/DOCS-INDEX.md`. На GitHub Project добавлены follow-up issues [#102](https://github.com/iurii-izman/voiceforge/issues/102) и [#103](https://github.com/iurii-izman/voiceforge/issues/103) в `Todo`.
+**Сделано в сессии:** закрыт coherent desktop QA batch по [#102](https://github.com/iurii-izman/voiceforge/issues/102) и [#103](https://github.com/iurii-izman/voiceforge/issues/103): (1) добавлен реальный Linux native-shell smoke layer в `desktop/e2e-native/` на `tauri-driver` + WebdriverIO; (2) `desktop/package.json` получил команды `npm run e2e:native` и `npm run e2e:native:headless`; (3) `desktop/e2e-native/wdio.conf.js` теперь сам собирает debug Tauri binary, поднимает `tauri-driver` и автоищет `WebKitWebDriver` в env, system paths и Flatpak runtime; (4) `desktop/e2e-native/specs/native-smoke.e2e.js` проверяет реальное окно, daemon-off banner, navigation, settings slide panel, persistence для `close-to-tray`/`updater-check-on-launch` и retry path; (5) оформлен честный release-gate runbook `docs/runbooks/desktop-release-gate-matrix.md`, синхронизированы `docs/runbooks/desktop-gui-testing.md`, `docs/runbooks/release-and-quality.md`, `desktop/README.md`, `docs/DOCS-INDEX.md`. Verify: `cd desktop && npx playwright test --project=chromium` и `cd desktop && npm run e2e:native` зелёные.
 
-**Следующий шаг:** Взять [#102](https://github.com/iurii-izman/voiceforge/issues/102) и поднять узкий native-shell smoke layer для Linux через `tauri-driver` + WebdriverIO, не смешивая его с текущим mocked Playwright suite. После этого — только затем переходить к [#103](https://github.com/iurii-izman/voiceforge/issues/103) и оформлять release-gate matrix для tray/updater/Wayland/X11. Verify текущего baseline перед началом: `cd desktop && npx playwright test --project=chromium`.
+**Следующий шаг:** Вернуться к верхнему P1 batch из `next-iteration-focus` и GitHub Project вне desktop surface. Начать с coverage-политики по [#99](https://github.com/iurii-izman/voiceforge/issues/99): выбрать один кандидат на вывод из `omit` между `server.py` и `main.py`, добавить ещё один узкий targeted suite вокруг action-items/status/export и только после локального подтверждения без просадки `fail_under` править `pyproject.toml`.
 
 ---
 
