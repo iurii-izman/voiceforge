@@ -220,9 +220,7 @@ def _stream_accumulate_and_parse(
             stream_callback(delta)
     if stream_callback:
         stream_callback(None)
-    empty = response_model(
-        questions=[], answers=[], recommendations=[], next_directions=[], action_items=[]
-    )
+    empty = response_model(questions=[], answers=[], recommendations=[], next_directions=[], action_items=[])
     if not accumulated.strip():
         return (empty, 0.0)
     try:
@@ -377,9 +375,7 @@ def update_action_item_statuses(
             {"role": "system", "content": sys_text},
             {"role": "user", "content": user_content},
         ]
-    result, cost = complete_structured(
-        cast(list[dict[str, Any]], prompt), response_model=StatusUpdateResponse, model=model_id
-    )
+    result, cost = complete_structured(cast(list[dict[str, Any]], prompt), response_model=StatusUpdateResponse, model=model_id)
     return (result, cost)
 
 

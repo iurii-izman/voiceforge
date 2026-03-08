@@ -1716,7 +1716,9 @@ def calendar_create_from_session(
         meta = log_db.get_session_meta(session_id)
         if not meta:
             if output == "json":
-                typer.echo(json.dumps(_cli_error_payload("SESSION_NOT_FOUND", f"Session {session_id} not found"), ensure_ascii=False))
+                typer.echo(
+                    json.dumps(_cli_error_payload("SESSION_NOT_FOUND", f"Session {session_id} not found"), ensure_ascii=False)
+                )
             else:
                 typer.echo(session_not_found_message(session_id), err=True)
             raise SystemExit(1)

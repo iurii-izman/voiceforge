@@ -286,7 +286,7 @@ def test_daemon_iface_contract_safe_calls(monkeypatch: pytest.MonkeyPatch) -> No
     iface = _daemon_iface(
         get_session_detail_fn=lambda sid: '{"segments":[],"analysis":null}',
         get_indexed_paths_fn=lambda: "[]",
-        get_settings_fn=lambda: '{}',
+        get_settings_fn=lambda: "{}",
         get_session_ids_with_action_items_fn=lambda: "[]",
         get_upcoming_events_fn=lambda: "[]",
     )
