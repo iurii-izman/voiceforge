@@ -7,7 +7,7 @@ Linear scenario for alpha testers. Full version: [../../en/first-meeting-5min.md
 1. **Dependencies and keys**
    - `./scripts/bootstrap.sh` → `uv sync --extra all`
    - Check: `uv run voiceforge status` or `uv run voiceforge status --doctor`
-   - Keys in keyring: `keyring set voiceforge anthropic`, `openai`, `huggingface` (see [config-env-contract.md](config-env-contract.md))
+   - Keys in keyring: `keyring set voiceforge anthropic`, `openai`, `huggingface` (see [../config-env-contract.md](../config-env-contract.md))
 
 2. **Recording**
    - `uv run voiceforge listen` — record to ring buffer (last 5 min). Stop: Ctrl+C.
@@ -35,5 +35,5 @@ Linear scenario for alpha testers. Full version: [../../en/first-meeting-5min.md
 
 7. **Next steps**
    - Action items: `uv run voiceforge action-items update --from-session 1 --next-session 2`
-   - Config and env: [config-env-contract.md](config-env-contract.md)
+   - Config and env: [../config-env-contract.md](../config-env-contract.md)
    - Feature priorities: [../../plans.md](../../plans.md)

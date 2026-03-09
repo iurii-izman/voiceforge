@@ -1,6 +1,6 @@
 # Полный аудит VoiceForge: реализация, документация, код (2026)
 
-Дата: 2026-03-04. Дополняет снимок аудита [archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](../archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md) и [audit-to-github-map.md](audit-to-github-map.md). Цель: оценка степени реализации по всем «фронтам» и 10 блоков по усилению до 100%.
+Дата: 2026-03-04. Дополняет снимок аудита [PROJECT_AUDIT_AND_ROADMAP_2026.md](PROJECT_AUDIT_AND_ROADMAP_2026.md) и [audit-to-github-map_2026_snapshot.md](audit-to-github-map_2026_snapshot.md). Цель: оценка степени реализации по всем «фронтам» и 10 блоков по усилению до 100%.
 
 ---
 

@@ -30,5 +30,5 @@ alwaysApply: true
 
 ## Ссылки
 
-- docs/runbooks/release-and-quality.md, repo-and-git-governance.md, planning.md
+- docs/runbooks/release-and-quality.md, repo-and-git-governance.md, planning.md, phase-e-decision-log.md
 ```

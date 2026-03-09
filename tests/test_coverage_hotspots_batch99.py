@@ -172,7 +172,7 @@ def test_server_async_sync_ready_503_when_db_raises(monkeypatch) -> None:
             pass
 
     monkeypatch.setattr("voiceforge.core.transcript_log.TranscriptLog", lambda: FakeLog())
-    status, content_type, body = server_async._sync_ready()
+    status, _content_type, body = server_async._sync_ready()
     assert status == 503
     assert json.loads(body.decode("utf-8"))["ready"] is False
 
@@ -241,7 +241,7 @@ def test_server_async_sync_session_by_id_404_not_found(monkeypatch) -> None:
             pass
 
     monkeypatch.setattr("voiceforge.core.transcript_log.TranscriptLog", lambda: FakeLog())
-    status, _, body = server_async._sync_session_by_id("999")
+    status, _, _body = server_async._sync_session_by_id("999")
     assert status == 404
 
 
@@ -253,9 +253,7 @@ def test_server_async_sync_action_items_update_400_missing_params() -> None:
 
 
 def test_server_async_sync_action_items_update_400_not_integers() -> None:
-    status, _, body = server_async._sync_action_items_update(
-        {"from_session": "x", "next_session": 2}
-    )
+    status, _, body = server_async._sync_action_items_update({"from_session": "x", "next_session": 2})
     assert status == 400
     payload = json.loads(body.decode("utf-8"))
     assert "integer" in payload["error"]["message"].lower()
@@ -301,7 +299,13 @@ def test_router_is_claude_model() -> None:
 def test_router_template_schema_known_and_unknown(monkeypatch) -> None:
     monkeypatch.setattr(
         "voiceforge.llm.router._template_prompts",
-        lambda: {"standup": "prompt standup", "sprint_review": "prompt sr", "one_on_one": "1:1", "brainstorm": "bs", "interview": "iv"},
+        lambda: {
+            "standup": "prompt standup",
+            "sprint_review": "prompt sr",
+            "one_on_one": "1:1",
+            "brainstorm": "bs",
+            "interview": "iv",
+        },
     )
     schema, prompt = router._template_schema("standup")
     assert schema is not None
@@ -334,6 +338,7 @@ def test_router_usage_and_cost_from_response(monkeypatch) -> None:
     )
     try:
         import litellm
+
         monkeypatch.setattr(litellm, "completion_cost", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("mock")))
     except ImportError:
         pass

@@ -183,5 +183,5 @@ VoiceForge has **one daemon** — the `voiceforge daemon` process. It serves bot
 
 - [quickstart.md](quickstart.md) — quick steps for the first meeting
 - [desktop-build-deps.md](desktop-build-deps.md) — dependencies and environment check for desktop build
-- [config-env-contract.md](config-env-contract.md) — environment variables and keyring
-- [pyannote-version.md](pyannote-version.md) — on OOM or diarization crashes (rollback to 3.3.2)
+- [../config-env-contract.md](../config-env-contract.md) — environment variables and keyring
+- [../pyannote-version.md](../pyannote-version.md) — on OOM or diarization crashes (rollback path)

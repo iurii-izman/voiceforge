@@ -2,7 +2,7 @@
 
 **Назначение:** один источник правды по тому, какой документ за что отвечает и актуален ли он. При изменении кода/фич обновлять соответствующий док и при необходимости этот индекс.
 
-**Обновлено:** 2026-03-09 (Phase E decision log added: E19-E21 locked for autopilot)
+**Обновлено:** 2026-03-09 (docs/config drift cleaned; stubs restored; Phase E scope synchronized)
 
 ---
 
@@ -122,7 +122,8 @@
 | PROJECT-STATUS-SUMMARY.md                                     | Итог по проекту (12 разделов): планы↔код, audit delta, critical path, риски, приоритеты | Актуален                         |
 | phase-e-decision-log.md                                       | Зафиксированные решения по E19-E21; scope guard для автопилота                          | Актуален                         |
 | web-api.md, observability-alerts.md                           | API, мониторинг, трассировка Jaeger (#71)                                               | Актуален                         |
-| test-operations.md, sonar-pr-cleanup.md                       | Тесты и CI                                                                              | Актуален                         |
+| test-operations.md                                            | Тесты и CI                                                                              | Актуален                         |
+| sonar-pr-cleanup.md                                           | Заглушка → [archive/runbooks/sonar-pr-cleanup.md](archive/runbooks/sonar-pr-cleanup.md) | Заглушка / архив                 |
 | prompt-management.md, calendar-integration.md, rag-formats.md | Фичи и форматы                                                                          | Актуален                         |
 | cursor.md                                                     | Cursor: настройка, тюнинг, prompts, coherent batching                                   | Актуален                         |
 | voiceforge-cursor-tz.md                                       | Заглушка → [archive/runbooks/voiceforge-cursor-tz-2026.md](archive/runbooks/voiceforge-cursor-tz-2026.md) | Заглушка / архив                 |
@@ -137,11 +138,11 @@
 
 | Файл                                                                     | Роль                                                                                                                                                                | Статус        |
 | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
-| [desktop-gui-phase2-10-blocks.md](plans/desktop-gui-phase2-10-blocks.md) | Следующие 10 блоков UI (11–20): горячие клавиши, темы, графики, поиск сессий, закрытие в трей, экспорт, онбординг, клавиатура, компактный режим, виджеты            | Актуален      |
-| [roadmap-100-blocks.md](plans/roadmap-100-blocks.md)                     | 100 блоков улучшений по всем направлениям (Desktop 31–50, CLI 51–60, D-Bus 61–65, пайплайн, RAG, календарь, экспорт, тесты, CI, доки, безопасность, i18n, упаковка) | Актуален      |
+| [desktop-gui-phase2-10-blocks.md](plans/desktop-gui-phase2-10-blocks.md) | Исторический desktop backlog Phase 2; текущий desktop-first execution order задают PROJECT-STATUS-SUMMARY и phase-e-decision-log                                      | Заглушка / архив |
+| [roadmap-100-blocks.md](plans/roadmap-100-blocks.md)                     | Исторический 100-блочный backlog; текущий источник правды — plans.md, audit.md, PROJECT-STATUS-SUMMARY.md                                                           | Заглушка / архив |
 | [MANUAL-AND-CANNOT-DO.md](plans/MANUAL-AND-CANNOT-DO.md)                 | Что сделать вручную после автопилота и что агент не может сделать сам                                                                                               | Актуален      |
-| [backlog-and-actions.md](plans/backlog-and-actions.md)                   | Единый бэклог: подтверждения, решения по приоритетам, ручные шаги, GitHub; блоки A–E; issues #82–86 на доске                                                        | Актуален      |
-| [video-meetings-integration.md](plans/video-meetings-integration.md)     | Заглушка: интеграция с видеовстречами (Jitsi/Meet) — roadmap блок 80                                                                                                | Запланировано |
+| [backlog-and-actions.md](plans/backlog-and-actions.md)                   | Исторический consolidated backlog; текущий live order — next-iteration-focus, planning, PROJECT-STATUS-SUMMARY, phase-e-decision-log                                 | Заглушка / архив |
+| [video-meetings-integration.md](plans/video-meetings-integration.md)     | Заглушка: интеграция с видеовстречами (Jitsi/Meet) — вынесено в архив до нового product decision                                                                    | Заглушка / архив |
 
 
 ### docs/adr/

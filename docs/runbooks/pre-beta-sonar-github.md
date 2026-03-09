@@ -2,7 +2,7 @@
 
 Чеклист: привести в порядок SonarCloud и GitHub (PR, issues), затем закрыть оставшиеся проблемы в отдельном чате и выкатить следующую бету.
 
-**Связь:** [release-and-quality.md](release-and-quality.md) (релиз), [sonar-pr-cleanup.md](sonar-pr-cleanup.md) (очистка PR/Sonar), [security-and-dependencies.md](security-and-dependencies.md) (CVE, Dependabot).
+**Связь:** [release-and-quality.md](release-and-quality.md) (релиз), [sonar-pr-cleanup.md](sonar-pr-cleanup.md) (исторический runbook по очистке PR/Sonar), [security-and-dependencies.md](security-and-dependencies.md) (CVE, Dependabot).
 
 ---
 

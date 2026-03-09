@@ -65,21 +65,38 @@ else
     fail "ruleset enforcement expected active, got ${enforcement}"
   fi
 
-  pr_required="$(gh api "repos/${repo}/rulesets/${ruleset_id}" --jq '.rules[] | select(.type=="pull_request") | .parameters.required_approving_review_count')"
-  if [[ "${pr_required}" == "0" ]]; then
-    ok "solo PR mode enabled (required approvals=0)"
-  else
-    fail "required approvals expected 0, got ${pr_required}"
-  fi
-
-  mapfile -t checks < <(gh api "repos/${repo}/rulesets/${ruleset_id}" --jq '.rules[] | select(.type=="required_status_checks") | .parameters.required_status_checks[].context')
-  for expected in "${expected_checks[@]}"; do
-    if contains_line "${expected}" "${checks[@]}"; then
-      ok "required check present: ${expected}"
+  mapfile -t rule_types < <(gh api "repos/${repo}/rulesets/${ruleset_id}" --jq '.rules[].type')
+  for expected_rule in deletion non_fast_forward required_linear_history; do
+    if contains_line "${expected_rule}" "${rule_types[@]}"; then
+      ok "baseline rule present: ${expected_rule}"
     else
-      fail "required check missing: ${expected}"
+      fail "baseline rule missing: ${expected_rule}"
     fi
   done
+
+  if contains_line "pull_request" "${rule_types[@]}"; then
+    pr_required="$(gh api "repos/${repo}/rulesets/${ruleset_id}" --jq '.rules[] | select(.type=="pull_request") | .parameters.required_approving_review_count')"
+    if [[ "${pr_required}" == "0" ]]; then
+      ok "extended PR mode enabled (required approvals=0)"
+    else
+      fail "required approvals expected 0, got ${pr_required}"
+    fi
+  else
+    ok "minimal direct-push mode enabled (no pull_request rule)"
+  fi
+
+  if contains_line "required_status_checks" "${rule_types[@]}"; then
+    mapfile -t checks < <(gh api "repos/${repo}/rulesets/${ruleset_id}" --jq '.rules[] | select(.type=="required_status_checks") | .parameters.required_status_checks[].context')
+    for expected in "${expected_checks[@]}"; do
+      if contains_line "${expected}" "${checks[@]}"; then
+        ok "required check present: ${expected}"
+      else
+        fail "required check missing: ${expected}"
+      fi
+    done
+  else
+    ok "no required_status_checks rule (matches minimal direct-push mode)"
+  fi
 fi
 
 dependabot_updates="$(gh api "repos/${repo}" --jq '.security_and_analysis.dependabot_security_updates.status')"

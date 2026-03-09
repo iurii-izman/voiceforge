@@ -2,7 +2,7 @@
 
 Единый план развития по всем направлениям после реализации блоков 1–30 (Desktop GUI Phase 2). Блоки сгруппированы по доменам; порядок выполнения — по приоритету внутри группы.
 
-**Связь:** [desktop-gui-phase2-10-blocks.md](desktop-gui-phase2-10-blocks.md) (блоки 1–20), план блоков 21–30 (single instance, deep link, store, FTS, CalDAV, updater и др.) реализован.
+**Связь:** [../../plans/desktop-gui-phase2-10-blocks.md](../../plans/desktop-gui-phase2-10-blocks.md) (блоки 1–20), план блоков 21–30 (single instance, deep link, store, FTS, CalDAV, updater и др.) реализован.
 
 ---
 
@@ -250,7 +250,7 @@
 - **85** — Тесты D-Bus из Python: test_daemon_iface_contract_safe_calls (вызов всех методов с безопасными аргументами), run_dbus_service с mock bus.
 - **86** — Property-based тесты: Hypothesis для parse_txt и parse_markdown (test_rag_parsers_hypothesis.py).
 - **88** — Бенчмарк: test_benchmark_pipeline.py (get_sessions на 100 сессиях), маркер @pytest.mark.benchmark.
-- **92** — Runbook [desktop-updater.md](../runbooks/desktop-updater.md).
+- **92** — Runbook [../../runbooks/desktop-updater.md](../../runbooks/desktop-updater.md).
 - **93** — Секция «Ключевые решения» в docs/architecture/README.md со ссылками на ADR.
 - **94** — DOCS-INDEX обновлён (roadmap, desktop-updater, MANUAL-AND-CANNOT-DO).
 - **89** — Сборка десктопа в CI: job desktop-build (npm run tauri build, артефакт desktop-bundle-linux).

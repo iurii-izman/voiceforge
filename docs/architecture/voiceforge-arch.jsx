@@ -1,15 +1,15 @@
 import { useState } from "react";
 
 const STATUS = {
-  done: { label: "alpha0.1", color: "#00ff9d", bg: "rgba(0,255,157,0.08)" },
-  alpha2: { label: "alpha2", color: "#f59e0b", bg: "rgba(245,158,11,0.08)" },
-  planned: { label: "roadmap", color: "#6366f1", bg: "rgba(99,102,241,0.08)" },
+  done: { label: "implemented", color: "#00ff9d", bg: "rgba(0,255,157,0.08)" },
+  alpha2: { label: "current", color: "#f59e0b", bg: "rgba(245,158,11,0.08)" },
+  planned: { label: "future", color: "#6366f1", bg: "rgba(99,102,241,0.08)" },
 };
 
 const RAM = [
   { name: "Fedora COSMIC + PipeWire", mb: 2200, color: "#334155" },
   { name: "faster-whisper small INT8", mb: 1000, color: "#0ea5e9" },
-  { name: "pyannote 3.3.2 (окно 30с)", mb: 1300, color: "#f59e0b" },
+  { name: "pyannote 4.0.4 (guarded)", mb: 1400, color: "#f59e0b" },
   { name: "all-MiniLM ONNX + SQLite-vec", mb: 200, color: "#00ff9d" },
   { name: "Tauri WebKitGTK", mb: 80, color: "#6366f1" },
   { name: "Python runtime + буферы", mb: 250, color: "#64748b" },
@@ -53,13 +53,13 @@ const PIPELINE = [
     status: "done",
     ram: "~1.0–1.4 ГБ",
     details: [
-      "pyannote-audio==3.3.2 (НЕ 4.x!)",
-      "speaker-diarization-3.1",
-      "Окна по 30 сек",
-      "gc.collect() после каждого вызова",
-      "Перезапуск каждые 2 ч (memory leak)",
+      "pyannote-audio==4.0.4",
+      "HF token + accepted model license",
+      "Memory guard + graceful skip on OOM",
+      "gc.collect() после тяжёлых вызовов",
+      "Rollback path documented in pyannote-version.md",
     ],
-    note: "4.x = 9.5 ГБ RAM = OOM. Не обновлять.",
+    note: "Текущий baseline: 4.0.4; при OOM есть documented rollback path.",
   },
   {
     id: "rag",
@@ -137,7 +137,7 @@ const UI_LAYERS = [
     label: "TAURI DESKTOP",
     status: "alpha2",
     commands: ["Главная: запись + анализ", "Сессии: список + детали", "Затраты: аналитика", "Настройки (read-only)", "Экспорт MD/PDF", "D-Bus only (нет HTTP внутри)"],
-    note: "Rust + WebKitGTK. D-Bus client → демон. Flatpak/AppImage для альфа2.",
+    note: "Rust + WebKitGTK. D-Bus client → демон. Current primary GUI track for Phase E.",
   },
 ];
 
@@ -149,16 +149,16 @@ const ROADMAP = [
   { n: 5, label: "Документация first-5min", status: "done" },
   { n: 6, label: "Cost report", status: "done" },
   { n: 7, label: "STT language hint", status: "done" },
-  { n: 8, label: "E2E тесты", status: "alpha2" },
-  { n: 9, label: "Streaming STT в CLI", status: "alpha2" },
-  { n: 10, label: "Live summary listen", status: "planned" },
+  { n: 8, label: "E2E тесты", status: "done" },
+  { n: 9, label: "Streaming STT в CLI", status: "done" },
+  { n: 10, label: "Live summary listen", status: "done" },
   { n: 11, label: "PII управление", status: "done" },
   { n: 12, label: "Web UI", status: "done" },
   { n: 13, label: "Tauri Desktop", status: "alpha2" },
-  { n: 14, label: "Flatpak/AppImage", status: "alpha2" },
-  { n: 15, label: "Smart trigger default", status: "planned" },
-  { n: 16, label: "Telegram/Slack бот", status: "planned" },
-  { n: 17, label: "Интеграция с календарём", status: "planned" },
+  { n: 14, label: "Flatpak/AppImage", status: "done" },
+  { n: 15, label: "Smart trigger default", status: "done" },
+  { n: 16, label: "Telegram бот", status: "planned" },
+  { n: 17, label: "Интеграция с календарём", status: "alpha2" },
 ];
 
 const totalRam = RAM.reduce((s, r) => s + r.mb, 0);
@@ -197,7 +197,7 @@ export default function App() {
             VoiceForge
           </span>
           <span style={{ fontSize: 11, color: "#475569", background: "#111827", padding: "2px 8px", borderRadius: 3, border: "1px solid #1e293b" }}>
-            v0.1.0-alpha.1 → alpha2
+            v0.2.0-alpha.2 · Phase E
           </span>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
@@ -327,7 +327,7 @@ export default function App() {
               <div style={{ fontSize: 10, color: "#00ff9d", marginBottom: 10, fontWeight: 700, letterSpacing: 1 }}>КРИТИЧЕСКИЕ ОГРАНИЧЕНИЯ</div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 32px" }}>
                 {[
-                  "pyannote-audio СТРОГО 3.3.2 (4.x = OOM)",
+                  "pyannote-audio 4.0.4 baseline; rollback path documented",
                   "STT и диаризация ПОСЛЕДОВАТЕЛЬНО (не параллельно)",
                   "НЕ ChromaDB (HNSW целиком в RAM)",
                   "Горячие клавиши → D-Bus → COSMIC Settings",
@@ -486,7 +486,7 @@ export default function App() {
             <div style={{ background: "#0a0f1c", border: "1px solid #1e293b", borderRadius: 6, padding: "14px 18px" }}>
               <div style={{ fontSize: 10, color: "#f59e0b", marginBottom: 10, fontWeight: 700, letterSpacing: 1 }}>ПРАВИЛА УПРАВЛЕНИЯ ПАМЯТЬЮ</div>
               {[
-                ["pyannote 4.x", "9.5 ГБ → OOM", "Строго 3.3.2"],
+                ["pyannote 4.0.4", "OOM risk on weak RAM", "Use memory guard + rollback path"],
                 ["STT + diarize параллельно", "OOM при >3.5 ГБ app RAM", "Только последовательно"],
                 ["ChromaDB", "HNSW весь в RAM", "SQLite-vec (disk-backed)"],
                 ["aggressive_memory=True", "Выгружать модели после analyze", "Для экономии RAM"],
@@ -507,7 +507,7 @@ export default function App() {
         {tab === "roadmap" && (
           <div>
             <div style={{ fontSize: 11, color: "#475569", marginBottom: 20 }}>
-              Статус по роадмапу · docs/roadmap-priority.md
+              Статус по роадмапу · docs/plans.md
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
               {ROADMAP.map(r => {
@@ -538,17 +538,17 @@ export default function App() {
 
             {/* Alpha2 focus */}
             <div style={{ marginTop: 20, padding: "16px 20px", background: "#0a0f1c", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 6 }}>
-              <div style={{ fontSize: 10, color: "#f59e0b", marginBottom: 12, fontWeight: 700, letterSpacing: 1 }}>ФОКУС ALPHA2 (v0.2.0-alpha.1)</div>
+              <div style={{ fontSize: 10, color: "#f59e0b", marginBottom: 12, fontWeight: 700, letterSpacing: 1 }}>CURRENT FOCUS (Phase E)</div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 32px" }}>
                 {[
-                  "Сборка Tauri desktop: toolbox + webkit2gtk4.1-devel",
-                  "D-Bus сигналы: ListenStateChanged, AnalysisDone",
-                  "Подписка на TranscriptChunk (live transcript)",
-                  "Streaming STT в CLI listen (--stream флаг)",
-                  "Flatpak манифест (desktop/flatpak/)",
-                  "Версия 0.2.0a1 в pyproject.toml + tauri.conf.json",
-                  "E2E тесты: export, analyze --template, action-items",
-                  "alpha2-checklist.md → все пункты зелёные",
+                  "Wave 3: E13 → E15 (core logic, CLI, observability)",
+                  "Wave 3.5: E19 desktop-first Tauri track",
+                  "Tauri remains primary GUI surface",
+                  "Web UI / Telegram / RAG watcher = maintenance-only",
+                  "Calendar scope stays narrow on CalDAV",
+                  "Managed packaging accepted later, not now",
+                  "Current release baseline: v0.2.0-alpha.2",
+                  "Scope guard: phase-e-decision-log.md",
                 ].map((t) => (
                   <div key={t} style={{ fontSize: 11, color: "#94a3b8", display: "flex", gap: 8 }}>
                     <span style={{ color: "#f59e0b" }}>→</span>{t}
@@ -557,11 +557,11 @@ export default function App() {
               </div>
             </div>
 
-            {/* Next after alpha2 */}
+            {/* Near-term expansion */}
             <div style={{ marginTop: 12, padding: "14px 20px", background: "#0a0f1c", border: "1px solid rgba(99,102,241,0.2)", borderRadius: 6 }}>
-              <div style={{ fontSize: 10, color: "#6366f1", marginBottom: 10, fontWeight: 700, letterSpacing: 1 }}>ПОСЛЕ ALPHA2</div>
+              <div style={{ fontSize: 10, color: "#6366f1", marginBottom: 10, fontWeight: 700, letterSpacing: 1 }}>ПОСЛЕ ТЕКУЩЕГО WAVE</div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                {["Live summary (listen --live-summary)", "Smart trigger template", "ExportSession → D-Bus (убрать CLI subprocess)", "System tray с Старт/Стоп", "Notification при AnalysisDone", "Telegram bot", "Интеграция с календарём"].map(t => (
+                {["Desktop E2E flow", "Tray polish + hotkeys", "Calendar auto-listen/auto-analyze", "Managed packaging track", "Prompt cache beyond Claude", "Performance follow-ups", "Release proof hardening"].map(t => (
                   <span key={t} style={{ fontSize: 10, color: "#6366f1", background: "rgba(99,102,241,0.07)", border: "1px solid rgba(99,102,241,0.2)", padding: "3px 10px", borderRadius: 3 }}>
                     {t}
                   </span>

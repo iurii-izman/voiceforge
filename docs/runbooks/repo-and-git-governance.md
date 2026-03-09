@@ -6,7 +6,7 @@
 
 ## 1. Main branch и правила репозитория
 
-**Минимальный ruleset (target: main):**
+**Минимальный ruleset (target: main, текущий default):**
 1. **deletion** — запрет удаления ветки main
 2. **non_fast_forward** — запрет force-push (только fast-forward)
 3. **required_linear_history** — линейная история
@@ -22,6 +22,8 @@
 **Alpha0.1 milestone:** см. [release-and-quality.md](release-and-quality.md) (раздел 4). Helper: `scripts/create_alpha_milestone_issues.sh` (нужен gh auth).
 
 **SonarCloud:** Quality Gate — только Sonar way (Default). Скан в CI (sonar.yml); отчёт в SonarCloud. Локально: `uv run python scripts/sonar_fetch_issues.py` (токен keyring `voiceforge/sonar_token`). Используем как справочную информацию: не блокируем merge. Порядок при множестве анализов: [sonar-pr-cleanup.md](sonar-pr-cleanup.md).
+
+**Проверка governance:** `./scripts/check_repo_governance.sh` должен проходить и для текущего минимального режима, и для расширенного PR-режима. Скрипт валидирует базовые правила всегда, а PR/status-checks считает опциональным расширением.
 
 ---
 

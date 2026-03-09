@@ -85,7 +85,9 @@ def test_release_proof_report_requires_manual_updater_when_ready(tmp_path: Path)
 
     report = collect_release_proof_report(
         tmp_path,
-        which=lambda command: {"cargo": "/usr/bin/cargo", "cargo-audit": "/usr/bin/cargo-audit", "npm": "/usr/bin/npm"}.get(command),
+        which=lambda command: {"cargo": "/usr/bin/cargo", "cargo-audit": "/usr/bin/cargo-audit", "npm": "/usr/bin/npm"}.get(
+            command
+        ),
     )
 
     assert report["updater"]["state"] == "ready"

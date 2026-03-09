@@ -2,7 +2,7 @@
 
 Один список всего отложенного и ручного: подтверждения, решения по приоритетам, ручные шаги, GitHub. Используется для трекинга в [GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1).
 
-**Источники:** [next-iteration-focus.md](../runbooks/next-iteration-focus.md), [roadmap-100-blocks.md](roadmap-100-blocks.md), [MANUAL-AND-CANNOT-DO.md](MANUAL-AND-CANNOT-DO.md), [pre-beta-sonar-github.md](../runbooks/pre-beta-sonar-github.md).
+**Источники:** [../../runbooks/next-iteration-focus.md](../../runbooks/next-iteration-focus.md), [../../plans/roadmap-100-blocks.md](../../plans/roadmap-100-blocks.md), [../../plans/MANUAL-AND-CANNOT-DO.md](../../plans/MANUAL-AND-CANNOT-DO.md), [../../runbooks/pre-beta-sonar-github.md](../../runbooks/pre-beta-sonar-github.md).
 
 ---
 
@@ -10,8 +10,8 @@
 
 | Тема | Что нужно от вас | Статус |
 |------|-------------------|--------|
-| **#65 CVE** | Пока ничего. Когда в upstream (diskcache/instructor) будет фикс — обновить зависимости, убрать `--ignore-vuln` по [security-and-dependencies.md](../runbooks/security-and-dependencies.md) разд. 4. Dependabot-алерт отклонить: «No fix version yet. See docs/runbooks/security-and-dependencies.md. Revisit when upstream fixes.» или скрипт `uv run python scripts/dependabot_dismiss_moderate.py`. | Ждём upstream |
-| **Local data-at-rest posture** | Дополнительного решения сейчас не требуется: filesystem privacy baseline уже усилен (`0700/0600` для local data/cache/backup artifacts), но encryption-at-rest по-прежнему не реализован. При новых требованиях конфиденциальности — отдельный batch/решение про LUKS или SQLCipher, см. [security-and-dependencies.md](../runbooks/security-and-dependencies.md) §5, §7. | Accepted risk зафиксирован |
+| **#65 CVE** | Пока ничего. Когда в upstream (diskcache/instructor) будет фикс — обновить зависимости, убрать `--ignore-vuln` по [../../runbooks/security-and-dependencies.md](../../runbooks/security-and-dependencies.md) разд. 4. Dependabot-алерт отклонить: «No fix version yet. See docs/runbooks/security-and-dependencies.md. Revisit when upstream fixes.» или скрипт `uv run python scripts/dependabot_dismiss_moderate.py`. | Ждём upstream |
+| **Local data-at-rest posture** | Дополнительного решения сейчас не требуется: filesystem privacy baseline уже усилен (`0700/0600` для local data/cache/backup artifacts), но encryption-at-rest по-прежнему не реализован. При новых требованиях конфиденциальности — отдельный batch/решение про LUKS или SQLCipher, см. [../../runbooks/security-and-dependencies.md](../../runbooks/security-and-dependencies.md) §5, §7. | Accepted risk зафиксирован |
 | **Keyring (HuggingFace)** | Один раз сохранить токен, если ещё не сохранён. Проверка: `uv run python -c "from voiceforge.core.secrets import get_api_key; print('huggingface:', 'present' if get_api_key('huggingface') else 'absent')"`. Сохранение: `secret-tool store --label='voiceforge huggingface' service voiceforge key huggingface`. | По доке проверено |
 | **OTel/Jaeger** | Запуск контейнера (podman/docker), открытие http://localhost:16686, при необходимости выставить переменные в сессии. Агент только подсказывает команды. | По желанию |
 | **#66 Async** | Ничего подтверждать не нужно. | — |
@@ -30,7 +30,7 @@
 | ~~44~~ | ~~История буфера обмена~~ | Реализовано (#88): voiceforge_clipboard_history, кнопка «История копирований», поповер в деталях сессии. |
 | ~~46~~ | ~~Слайд-панель настроек~~ | Реализовано (#89): voiceforge_settings_as_panel, settings-slide-panel, чекбокс в настройках. |
 | ~~49~~ | ~~Виджет «Последний анализ»~~ | Реализовано (#92): карточка last-analysis на главной, get_sessions + get_session_detail, кнопка «Открыть». |
-| 66 | Prompt caching | В router.py cache_control (ephemeral) для Claude; для не-Claude — по API провайдера. Документация: [prompt-management.md](../runbooks/prompt-management.md) § Prompt caching (block 66). |
+| 66 | Prompt caching | В router.py cache_control (ephemeral) для Claude; для не-Claude — по API провайдера. Документация: [../../runbooks/prompt-management.md](../../runbooks/prompt-management.md) § Prompt caching (block 66). |
 | ~~68~~ | ~~Streaming LLM в UI~~ | Реализовано (#91): stream_completion, analyze_meeting_stream, D-Bus StreamingAnalysisChunk, UI #analyze-streaming-output. |
 | ~~71~~ | ~~Whisper API (OpenAI)~~ | Реализовано (#93): stt_backend local\|openai, OpenAIWhisperTranscriber, pipeline и демон по конфигу. |
 | ~~75~~ | ~~Поиск по RAG из UI~~ | Реализовано: search_rag в демоне, D-Bus SearchRag, поле и результаты в UI (#94). |
@@ -48,17 +48,17 @@
 
 ## Блок C. Ручные шаги (без вас агент не сделает)
 
-По [MANUAL-AND-CANNOT-DO.md](MANUAL-AND-CANNOT-DO.md).
+По [../../plans/MANUAL-AND-CANNOT-DO.md](../../plans/MANUAL-AND-CANNOT-DO.md).
 
 | Действие | Кто |
 |----------|-----|
 | **Сборка/запуск десктопа** | `cd desktop && npm run tauri build`, `npm run tauri dev` — у вас на машине; проверка в окне. |
 | **Ключи и секреты** | Keyring (в т.ч. CalDAV для виджета «Ближайшие встречи»); агент не видит секреты. |
-| **Updater** | Сгенерировать ключи подписи (`npm run tauri signer generate -- -w ~/.tauri/voiceforge.key`), настроить сервер обновлений, при необходимости CI и `TAURI_SIGNING_PRIVATE_KEY`. См. [desktop-updater.md](../runbooks/desktop-updater.md). |
+| **Updater** | Сгенерировать ключи подписи (`npm run tauri signer generate -- -w ~/.tauri/voiceforge.key`), настроить сервер обновлений, при необходимости CI и `TAURI_SIGNING_PRIVATE_KEY`. См. [../../runbooks/desktop-updater.md](../../runbooks/desktop-updater.md). |
 | **Релизы и распространение** | Создание GitHub Release, загрузка артефактов; при желании — Flatpak/Flathub. |
 | **Тестирование с человеком** | E2E в среде с GUI, a11y с реальными пользователями/скринридерами, ручные сценарии (second instance, deep link, автозапуск). |
 
-Чеклист ручных шагов зафиксирован в [MANUAL-AND-CANNOT-DO.md](MANUAL-AND-CANNOT-DO.md) (раздел «Чеклист ручных шагов»). (#84)
+Чеклист ручных шагов зафиксирован в [../../plans/MANUAL-AND-CANNOT-DO.md](../../plans/MANUAL-AND-CANNOT-DO.md) (раздел «Чеклист ручных шагов»). (#84)
 
 ---
 
@@ -67,7 +67,7 @@
 | Что | Действие | Статус |
 |-----|----------|--------|
 | **PR #81, #79** | Изменения уже в main. Закрыть PR с комментарием «Applied in main». | ✓ Закрыты 2026-03-07 |
-| **Issue #65** | Оставить открытым до фикса upstream; при желании отклонить Dependabot с комментарием из runbook. | Решение: оставить открытым; см. [security-and-dependencies.md](../runbooks/security-and-dependencies.md) §3–4 |
+| **Issue #65** | Оставить открытым до фикса upstream; при желании отклонить Dependabot с комментарием из runbook. | Решение: оставить открытым; см. [../../runbooks/security-and-dependencies.md](../../runbooks/security-and-dependencies.md) §3–4 |
 | **Issue #50** (macOS/WSL2) | Снят с текущего скоупа (фокус только Linux). | ✓ Закрыт 2026-03-07 |
 | **verify_pr и bandit** | Добиться зелёного verify_pr (mypy, bandit, hypothesis в dev deps). | ✓ Mypy исправлен, hypothesis добавлен в dev; bandit зелёный |
 
@@ -90,10 +90,10 @@
 1. **Один issue — одна задача.** Крупные блоки (например «Решения по приоритетам») можно вести одним issue со ссылкой на этот документ; отдельные фичи (блок 35, 44, …) — отдельными issues с метками и привязкой к проекту.
 2. **При старте работы по issue** — перевести карточку в **In Progress** (через веб или `gh project item-edit`).
 3. **При коммите с `Closes #N`** — перенести карточку в **Done**.
-4. **Агент:** при работе по issue переводит в In Progress; при закрытии — в Done. Нужен scope `project`: `gh auth refresh -s project`. Команды и ID полей — в [planning.md](../runbooks/planning.md).
+4. **Агент:** при работе по issue переводит в In Progress; при закрытии — в Done. Нужен scope `project`: `gh auth refresh -s project`. Команды и ID полей — в [../../runbooks/planning.md](../../runbooks/planning.md).
 5. **Раз в итерацию** просматривать доску: что в Todo, что застряло в In Progress, что можно закрыть или переприоритизировать.
 
-Связь с репо: [repo-and-git-governance.md](../runbooks/repo-and-git-governance.md), [planning.md](../runbooks/planning.md).
+Связь с репо: [../../runbooks/repo-and-git-governance.md](../../runbooks/repo-and-git-governance.md), [../../runbooks/planning.md](../../runbooks/planning.md).
 
 ---
 

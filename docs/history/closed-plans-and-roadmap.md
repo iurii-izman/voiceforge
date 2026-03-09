@@ -25,7 +25,7 @@
 
 ## План развития (development-plan-post-audit-2026) — Часть I
 
-Все 10 пунктов **реализованы** (сверка: claude-proposal-alignment.md и код):
+Все 10 пунктов **реализованы** (сверка: [runbooks/claude-proposal-alignment.md](../runbooks/claude-proposal-alignment.md) и код):
 
 - 1. `analyze --template` — см. roadmap #1.
 - 2. Streaming в CLI listen — см. roadmap #9.
@@ -43,7 +43,7 @@
 ## Блоки Alpha2 (A–D) и слабые места W1–W10
 
 - **A–D:** Tauri каркас, D-Bus, UI (Главная/Сессии/Затраты/Настройки), streaming CLI — реализованы.
-- **W1–W10:** по claude-proposal-alignment.md закрыты (budget из Settings, ресэмплинг, RAG 1000, privacy_mode/pii_mode, retry в router, i18n в main, envelope default, validators, source of truth в доке, тесты с моками).
+- **W1–W10:** по [runbooks/claude-proposal-alignment.md](../runbooks/claude-proposal-alignment.md) закрыты (budget из Settings, ресэмплинг, RAG 1000, privacy_mode/pii_mode, retry в router, i18n в main, envelope default, validators, source of truth в доке, тесты с моками).
 
 ---
 

@@ -22,7 +22,7 @@ alwaysApply: true
 ## Чеклист конца сессии
 
 1. **Тесты:** `uv run pytest tests/ -q --tb=line` (или релевантный поднабор). При падении — починить или зафиксировать в next-iteration-focus.
-2. **Коммит и пуш:** из корня репо (`cd <workspace path>`): `git add` затронутые файлы, осмысленный `git commit`, затем `git push`.
+2. **Коммит и пуш:** из корня репо (`cd <workspace path>`): `git add` затронутые файлы, осмысленный `git commit`, затем `git push`. Правила Git/GitHub: [repo-and-git-governance.md](repo-and-git-governance.md).
 3. **Обновить фокус:** в `docs/runbooks/next-iteration-focus.md` записать:
    - **Следующий шаг** — один конкретный шаг или задача для следующего чата (блок «Следующий шаг» в начале файла);
    - дату обновления;

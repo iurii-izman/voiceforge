@@ -53,7 +53,7 @@ Or from `desktop/`:
 cd desktop && cargo tauri build
 ```
 
-If the script reports all checks OK, `cargo tauri build` should succeed. For OOM or crashes in the Python/daemon part (e.g. diarization), see [pyannote-version.md](pyannote-version.md).
+If the script reports all checks OK, `cargo tauri build` should succeed. For OOM or crashes in the Python/daemon part (e.g. diarization), see [../pyannote-version.md](../pyannote-version.md).
 
 ## Full sequence in toolbox (reproducible build)
 

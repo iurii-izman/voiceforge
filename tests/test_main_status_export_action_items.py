@@ -211,7 +211,9 @@ def test_main_action_items_update_persist_and_echo(monkeypatch, tmp_path: Path) 
             closed.append(True)
 
     monkeypatch.setattr("voiceforge.core.transcript_log.TranscriptLog", _FailingTranscriptLog)
-    monkeypatch.setattr(main.structlog, "get_logger", lambda: SimpleNamespace(debug=lambda *args, **kwargs: debugged.append((args, kwargs))))
+    monkeypatch.setattr(
+        main.structlog, "get_logger", lambda: SimpleNamespace(debug=lambda *args, **kwargs: debugged.append((args, kwargs)))
+    )
 
     main._action_items_update_persist(7, [(0, "done"), (1, "todo")])
     assert debugged
@@ -243,7 +245,15 @@ def test_main_action_items_update_handles_budget_and_llm_errors(monkeypatch) -> 
         "_action_items_update_validate",
         lambda log_db, from_session, next_session: (None, None, [{"description": "Ship"}], "done"),
     )
-    monkeypatch.setattr(main, "_get_config", lambda: SimpleNamespace(default_llm="m1", pii_mode="OFF"))
+    monkeypatch.setattr(
+        main,
+        "_get_config",
+        lambda: SimpleNamespace(
+            default_llm="m1",
+            pii_mode="OFF",
+            get_effective_llm=lambda: ("m1", False),
+        ),
+    )
     monkeypatch.setattr("typer.echo", lambda message, err=False: echoed.append((str(message), err)))
 
     monkeypatch.setattr(
@@ -294,7 +304,7 @@ def test_main_export_session_invalid_format_and_otter_success(monkeypatch, tmp_p
     monkeypatch.setattr(main, "build_session_export_otter", lambda *args, **kwargs: "OTTER EXPORT")
 
     out_path = tmp_path / "session_9.txt"
-    main.export_session(session_id=9, format="otter", output=out_path)
+    main.export_session(session_id=9, format="otter", output=out_path, clipboard=False)
 
     assert out_path.read_text(encoding="utf-8") == "OTTER EXPORT"
     assert any(str(out_path) in message for message, _ in echoed)
@@ -397,7 +407,9 @@ def test_main_weekly_report_formats_and_stats_fallback(monkeypatch, tmp_path: Pa
     assert any(str(md_output) in message for message, _ in echoed)
 
     echoed.clear()
-    monkeypatch.setattr("voiceforge.core.metrics.get_stats_range", lambda from_date, to_date: (_ for _ in ()).throw(RuntimeError("stats down")))
+    monkeypatch.setattr(
+        "voiceforge.core.metrics.get_stats_range", lambda from_date, to_date: (_ for _ in ()).throw(RuntimeError("stats down"))
+    )
     main.weekly_report(output=None, days=3, format="text")
     assert "Cost (LLM): $0.00" in echoed[-1][0]
 

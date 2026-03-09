@@ -49,7 +49,8 @@ def _install_action_items_fakes(monkeypatch):
         assert pii_mode == "off"
 
         class _Response:
-            updates = [type("Update", (), {"id": 0, "status": "done"})()]
+            def __init__(self) -> None:
+                self.updates = [type("Update", (), {"id": 0, "status": "done"})()]
 
         return (_Response(), 0.42)
 

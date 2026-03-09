@@ -52,7 +52,7 @@ uv run python scripts/sonar_list_branches.py --json
 
 ## 3. SonarCloud — что можно сделать
 
-- **Удаление анализов:** в SonarCloud нет публичного API для удаления ветки/анализа. В интерфейсе: **Project → Activity** — там можно удалять старые снимки (если план и настройки это позволяют). Само наличие многих «веток» в списке на работу репо не влияет (см. [repo-and-git-governance.md](repo-and-git-governance.md): Sonar только справочно).
+- **Удаление анализов:** в SonarCloud нет публичного API для удаления ветки/анализа. В интерфейсе: **Project → Activity** — там можно удалять старые снимки (если план и настройки это позволяют). Само наличие многих «веток» в списке на работу репо не влияет (см. [../../runbooks/repo-and-git-governance.md](../../runbooks/repo-and-git-governance.md): Sonar только справочно).
 - **Ограничение по веткам:** в **Project Settings → General → Main Branch** задаётся main; анализы PR привязаны к этому проекту. Отключить анализ PR через API/конфиг в нашем workflow без потери проверки main — нельзя без изменения `sonar.yml`.
 
 Итого: основной порядок — в GitHub (закрыть старые PR, удалить ветки). В Sonar — по желанию почистить Activity вручную.
@@ -73,7 +73,7 @@ uv run python scripts/sonar_list_branches.py --json
 
 ## См. также
 
-- [repo-and-git-governance.md](repo-and-git-governance.md) — политика репо, Sonar только как справочник.
+- [../../runbooks/repo-and-git-governance.md](../../runbooks/repo-and-git-governance.md) — политика репо, Sonar только как справочник.
 - `scripts/sonar_fetch_issues.py` — список открытых issues по коду.
 - `scripts/sonar_list_branches.py` — список веток/анализов в SonarCloud.
 - `scripts/cleanup_github_pr_sonar.py` — автоочистка stale PR + отчёт Sonar.
