@@ -47,11 +47,11 @@
 ```
 Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Статус: @docs/runbooks/PROJECT-STATUS-SUMMARY.md. Quality audit: @docs/runbooks/quality-audit-2026-03.md. Scope guard: @docs/runbooks/phase-e-decision-log.md. AI/tooling source of truth: @docs/runbooks/ai-tooling-setup.md.
 
-Режим: максимальный автопилот, post-Phase-E quality remediation wave. Работать по QA-блокам `#152-#157` в порядке `QA-A → QA-B → QA-C`. Новые feature issues не создавать без отдельной задачи пользователя. Брать 1 QA-блок за сессию, доводить до конца: код, targeted tests, docs sync, GitHub Project status, commit + push, обновить PROJECT-STATUS-SUMMARY и next-iteration-focus.
+Режим: максимальный автопилот. QA wave #152–#157 завершена. Новые feature issues не создавать без отдельной задачи. Следующий приоритет — roadmap (docs/plans.md), PROJECT-STATUS-SUMMARY или docs/governance. Полный цикл: код → targeted tests → docs sync → commit + push → next-iteration-focus.
 
 Среда: Fedora Atomic, toolbox 43, uv sync --extra all. Ключи в keyring (keyring-keys-reference.md). Тесты: targeted subset, не полный pytest (OOM risk). Для infra/docs/governance cleanup сначала прогонять `./scripts/preflight_repo.sh --with-tests`. Pre-commit в toolbox; на хосте git push --no-verify если нет Python 3.12.
 
-Задача: взять QA6 #157 (Desktop/frontend Sonar cleanup). Перевести issue в In Progress, реализовать по чеклисту, targeted checks, commit с `Closes #157`, обновить docs. Соблюдать phase-e-decision-log; placeholders #148-#151 не активировать.
+Задача: QA wave #152–#157 завершена. Выбрать следующий приоритет: roadmap (docs/plans.md), следующий P0/P1 из PROJECT-STATUS-SUMMARY, или доки/governance по next-iteration-focus.
 ```
 
 ---
