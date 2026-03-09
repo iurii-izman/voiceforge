@@ -21,8 +21,7 @@ def test_watcher_debounce_and_pending_processing(monkeypatch, tmp_path: Path) ->
     monkeypatch.setattr(
         watcher,
         "_index_if_needed",
-        lambda path: processed.append(str(path))
-        or WatchIndexResult(path=str(path), status="indexed", added=1),
+        lambda path: processed.append(str(path)) or WatchIndexResult(path=str(path), status="indexed", added=1),
     )
 
     assert watcher._on_pdf_event(str(txt_path), now=10.0) is False

@@ -53,9 +53,7 @@ def collect_release_proof_report(
 
     native_status = "ready" if native_script_present else "missing-script"
     native_detail = (
-        "desktop/package.json defines `e2e:native`"
-        if native_script_present
-        else "desktop/package.json is missing `e2e:native`"
+        "desktop/package.json defines `e2e:native`" if native_script_present else "desktop/package.json is missing `e2e:native`"
     )
 
     if updater_state == "disabled":
