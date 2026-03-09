@@ -172,12 +172,12 @@ def download_models(
 ) -> None:
     """E8 (#131): Pre-download Whisper model and optionally ONNX embedder (progress bar, retry on failure)."""
     try:
-        run_download_models(
+        downloaded = run_download_models(
             model_size=model_size,
             skip_onnx=skip_onnx,
             use_rich_progress=not no_progress,
         )
-        typer.echo(t("feedback.model_ready"))
+        typer.echo(t("feedback.model_ready") if downloaded else t("feedback.model_cached"))
     except Exception as e:
         typer.echo(t("error.generic", msg=str(e)), err=True)
         raise SystemExit(1)
@@ -568,6 +568,24 @@ def run_analyze_pipeline(
             f"{len(segments)} segments, transcript ~{len(transcript or '')} chars. No LLM call."
         )
         return (msg, segments_for_log, {"transcript": transcript or ""})
+
+    if not segments or transcript == t("pipeline.silence"):
+        display_lines = list(pipeline_warnings)
+        display_lines.append(transcript or t("pipeline.silence"))
+        display_lines.append(t("feedback.no_speech_skip"))
+        return (
+            "\n".join(display_lines),
+            segments_for_log,
+            {
+                "model": "",
+                "cost_usd": 0.0,
+                "questions": [],
+                "answers": [],
+                "recommendations": [],
+                "action_items": [],
+                "template": template,
+            },
+        )
 
     effective_model, is_ollama_fallback = cfg.get_effective_llm()
     if effective_model is None:

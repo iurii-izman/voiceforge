@@ -307,3 +307,27 @@ def test_pipeline_run_returns_result_with_mocked_stt(
     assert result.diar_segments == []
     assert result.context == ""
     assert result.transcript_redacted == "mocked transcript"
+
+
+@patch("voiceforge.core.pipeline._gather_step2")
+@patch("voiceforge.core.pipeline._step1_stt")
+def test_pipeline_run_skips_step2_when_no_speech(
+    mock_stt: object,
+    mock_gather: object,
+    tmp_path: Path,
+) -> None:
+    """Silence should short-circuit before diarization/RAG/PII and return a lightweight result."""
+    ring = tmp_path / "ring.raw"
+    ring.write_bytes(np.zeros(TARGET_SAMPLE_RATE, dtype=np.int16).tobytes())
+    cfg = _make_cfg(tmp_path, ring)
+    mock_stt.return_value = ([], "(тишина)")
+
+    with AnalysisPipeline(cfg) as pipeline:
+        result, err = pipeline.run(seconds=1)
+
+    assert err is None
+    assert result is not None
+    assert result.transcript == "(тишина)"
+    assert result.diar_segments == []
+    assert result.context == ""
+    mock_gather.assert_not_called()

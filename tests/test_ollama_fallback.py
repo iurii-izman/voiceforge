@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from voiceforge.core.config import Settings
@@ -76,7 +77,7 @@ def test_run_analyze_pipeline_returns_no_llm_backend_error_when_effective_llm_no
 
     class FakeResult:
         def __init__(self):
-            self.segments = []
+            self.segments = [SimpleNamespace(start=0.0, end=1.0, text="x")]
             self.transcript = "x"
             self.diar_segments = []
             self.context = ""
@@ -103,3 +104,39 @@ def test_run_analyze_pipeline_returns_no_llm_backend_error_when_effective_llm_no
     assert "No LLM backend" in text or "no_llm_backend" in text or "keyring" in text.lower()
     assert segments == []
     assert analysis == {}
+
+
+def test_run_analyze_pipeline_skips_llm_on_silence(monkeypatch) -> None:
+    """Silence should return a no-speech message and avoid LLM invocation/cost."""
+    from voiceforge.main import run_analyze_pipeline
+
+    class FakeResult:
+        def __init__(self):
+            self.segments = []
+            self.transcript = "(тишина)"
+            self.diar_segments = []
+            self.context = ""
+            self.transcript_redacted = "(тишина)"
+            self.warnings = []
+
+    class FakePipeline:
+        def __init__(self, cfg=None):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def run(self, _sec):
+            return (FakeResult(), None)
+
+    monkeypatch.setattr("voiceforge.main._get_config", lambda: Settings())
+    with patch("voiceforge.core.pipeline.AnalysisPipeline", FakePipeline):
+        text, segments, analysis = run_analyze_pipeline(60)
+
+    assert "тишина" in text.lower()
+    assert "llm" in text.lower() or "анализ пропущен" in text.lower()
+    assert segments == []
+    assert analysis["cost_usd"] == 0.0

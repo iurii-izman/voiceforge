@@ -23,20 +23,40 @@ def test_whisper_size_mb_has_common_models() -> None:
 
 def test_download_whisper_with_retry_mocked() -> None:
     """_download_whisper_with_retry loads model (mocked); no real download."""
-    with patch("faster_whisper.WhisperModel") as mock_wm:
+    with (
+        patch("voiceforge.cli.download_models._is_whisper_model_cached", return_value=False),
+        patch("voiceforge.cli.download_models.WhisperModel") as mock_wm,
+    ):
         mock_instance = MagicMock()
         mock_wm.return_value = mock_instance
-        _download_whisper_with_retry("tiny", device="cpu", compute_type="int8")
+        downloaded = _download_whisper_with_retry("tiny", device="cpu", compute_type="int8")
         mock_wm.assert_called_once_with("tiny", device="cpu", compute_type="int8")
+        assert downloaded is True
 
 
 def test_download_whisper_retries_on_failure() -> None:
     """_download_whisper_with_retry retries up to MAX_DOWNLOAD_ATTEMPTS then raises."""
-    with patch("faster_whisper.WhisperModel") as mock_wm:
+    with (
+        patch("voiceforge.cli.download_models._is_whisper_model_cached", return_value=False),
+        patch("voiceforge.cli.download_models.WhisperModel") as mock_wm,
+    ):
         mock_wm.side_effect = RuntimeError("network error")
         with patch("voiceforge.cli.download_models.time.sleep"), pytest.raises(RuntimeError, match="network error"):
             _download_whisper_with_retry("tiny")
         assert mock_wm.call_count == 3
+
+
+def test_download_whisper_returns_false_when_cached() -> None:
+    """Cached model should be warmed locally without remote-download semantics."""
+    with (
+        patch("voiceforge.cli.download_models._is_whisper_model_cached", return_value=True),
+        patch("voiceforge.cli.download_models.WhisperModel") as mock_wm,
+    ):
+        mock_wm.return_value = MagicMock()
+        downloaded = _download_whisper_with_retry("tiny", device="cpu", compute_type="int8")
+
+    mock_wm.assert_called_once_with("tiny", device="cpu", compute_type="int8", local_files_only=True)
+    assert downloaded is False
 
 
 def test_ensure_onnx_embedder_returns_false_when_no_files(tmp_path) -> None:
@@ -54,11 +74,13 @@ def test_run_download_models_mocked_whisper(monkeypatch) -> None:
         patch("voiceforge.cli.download_models._ensure_onnx_embedder", return_value=False),
         patch("voiceforge.core.config.Settings") as mock_settings,
     ):
+        mock_dl.return_value = True
         mock_cfg = MagicMock()
         mock_cfg.model_size = "tiny"
         mock_settings.return_value = mock_cfg
-        run_download_models(model_size=None, skip_onnx=True, use_rich_progress=False)
+        downloaded = run_download_models(model_size=None, skip_onnx=True, use_rich_progress=False)
         mock_dl.assert_called_once_with("tiny")
+        assert downloaded is True
 
 
 def test_run_download_models_respects_model_size_arg(monkeypatch) -> None:
@@ -68,11 +90,13 @@ def test_run_download_models_respects_model_size_arg(monkeypatch) -> None:
         patch("voiceforge.cli.download_models._ensure_onnx_embedder", return_value=False),
         patch("voiceforge.core.config.Settings") as mock_settings,
     ):
+        mock_dl.return_value = True
         mock_cfg = MagicMock()
         mock_cfg.model_size = "small"
         mock_settings.return_value = mock_cfg
-        run_download_models(model_size="base", skip_onnx=True, use_rich_progress=False)
+        downloaded = run_download_models(model_size="base", skip_onnx=True, use_rich_progress=False)
         mock_dl.assert_called_once_with("base")
+        assert downloaded is True
 
 
 def test_run_download_models_calls_onnx_when_not_skipped(monkeypatch) -> None:

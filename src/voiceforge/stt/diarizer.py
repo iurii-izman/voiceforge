@@ -52,7 +52,7 @@ huggingface_hub.hf_hub_download = _hf_hub_download
 # file-decoding stack is not part of the VoiceForge runtime path.
 warnings.filterwarnings(
     "ignore",
-    message=r"torchcodec is not installed correctly so built-in audio decoding will fail\..*",
+    message=r"torchcodec is not installed correctly so built-in audio decoding will fail\.",
     category=UserWarning,
 )
 warnings.filterwarnings(
@@ -64,6 +64,16 @@ warnings.filterwarnings(
     "ignore",
     message=r"The sentencepiece tokenizer that you are converting to a fast tokenizer uses the byte fallback option.*",
     category=UserWarning,
+)
+warnings.filterwarnings(
+    "ignore",
+    message=r"Mean of empty slice",
+    category=RuntimeWarning,
+)
+warnings.filterwarnings(
+    "ignore",
+    message=r"invalid value encountered in divide",
+    category=RuntimeWarning,
 )
 
 import numpy as np
@@ -170,7 +180,24 @@ class Diarizer:
             # Pipeline accepts {"waveform": (C, T) Tensor, "sample_rate": int}
             waveform = torch.from_numpy(chunk.reshape(1, -1)).float()
             input_dict = {"waveform": waveform, "sample_rate": sample_rate}
-            with torch.no_grad():
+            with torch.no_grad(), warnings.catch_warnings():
+                warnings.filterwarnings(
+                    "ignore",
+                    message=r"torchcodec is not installed correctly so built-in audio decoding will fail\.",
+                    category=UserWarning,
+                )
+                warnings.filterwarnings(
+                    "ignore",
+                    message=r"`resume_download` is deprecated and will be removed in version 1\.0\.0\..*",
+                    category=FutureWarning,
+                )
+                warnings.filterwarnings(
+                    "ignore",
+                    message=r"The sentencepiece tokenizer that you are converting to a fast tokenizer uses the byte fallback option.*",
+                    category=UserWarning,
+                )
+                warnings.filterwarnings("ignore", message=r"Mean of empty slice", category=RuntimeWarning)
+                warnings.filterwarnings("ignore", message=r"invalid value encountered in divide", category=RuntimeWarning)
                 diar = pipeline(input_dict)
             annotation = getattr(diar, "speaker_diarization", diar)
             itertracks = getattr(annotation, "itertracks", None)

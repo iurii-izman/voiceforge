@@ -22,6 +22,7 @@ log = structlog.get_logger()
 _T_FEEDBACK_DIARIZATION_SKIPPED_RAM = "feedback.diarization_skipped_ram"
 _LOG_PIPELINE_STEP2_DIARIZATION = "pipeline.step2_diarization"
 _T_FEEDBACK_RAG_NO_INDEX = "feedback.rag_no_index"
+_LOG_PIPELINE_STEP2_SKIPPED_NO_SPEECH = "pipeline.step2_skipped_no_speech"
 
 # #37: skip diarization when available RAM < 2GB to avoid OOM on ≤8GB systems
 MIN_AVAILABLE_FOR_DIARIZATION_BYTES = 2 * 1024**3
@@ -388,6 +389,19 @@ class AnalysisPipeline:
             if stt_result[0] is None:
                 return (None, stt_result[1])
             segments, transcript = stt_result
+            if not segments or transcript == t("pipeline.silence"):
+                log.info(_LOG_PIPELINE_STEP2_SKIPPED_NO_SPEECH, transcript=transcript, segments=len(segments))
+                return (
+                    PipelineResult(
+                        segments=segments,
+                        transcript=transcript,
+                        diar_segments=[],
+                        context="",
+                        transcript_redacted=transcript,
+                        warnings=step1_warnings,
+                    ),
+                    None,
+                )
             step2_start = time.monotonic()
             audio_f = audio.astype(np.float32) / 32768.0
             with span("pipeline.step2_parallel"):

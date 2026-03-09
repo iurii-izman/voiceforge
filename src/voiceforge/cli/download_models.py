@@ -5,8 +5,10 @@ from __future__ import annotations
 import time
 
 import structlog
+from faster_whisper import WhisperModel
 
 from voiceforge.i18n import t
+from voiceforge.stt.transcriber import _is_whisper_model_cached
 
 log = structlog.get_logger()
 
@@ -29,18 +31,26 @@ def _download_whisper_with_retry(
     model_size: str,
     device: str = "cpu",
     compute_type: str = "int8",
-) -> None:
+) -> bool:
     """Download Whisper model via faster-whisper with retry on network failure."""
-    from faster_whisper import WhisperModel
 
     size_mb = WHISPER_SIZE_MB.get(model_size, 500)
+    cached = _is_whisper_model_cached(model_size)
+    if cached:
+        try:
+            model = WhisperModel(model_size, device=device, compute_type=compute_type, local_files_only=True)
+            del model
+            log.info("download_models.whisper_cached", model_size=model_size, size_mb=size_mb)
+            return False
+        except Exception as e:
+            log.warning("download_models.cached_model_load_failed", model_size=model_size, error=str(e))
     log.info("download_models.whisper_start", model_size=model_size, size_mb=size_mb)
     last_error: Exception | None = None
     for attempt in range(MAX_DOWNLOAD_ATTEMPTS):
         try:
             model = WhisperModel(model_size, device=device, compute_type=compute_type)
             del model  # free memory after cache is populated
-            return
+            return True
         except Exception as e:
             last_error = e
             if attempt < MAX_DOWNLOAD_ATTEMPTS - 1:
@@ -87,28 +97,32 @@ def run_download_models(
     cfg = Settings()
     size = (model_size or getattr(cfg, "model_size", "small")).strip() or "small"
 
+    downloaded = False
     if use_rich_progress:
         try:
             from rich.console import Console
             from rich.progress import Progress, SpinnerColumn, TextColumn
 
             console = Console()
+            initially_cached = _is_whisper_model_cached(size)
             with Progress(
                 SpinnerColumn(),
                 TextColumn("[bold blue]{task.description}"),
                 console=console,
             ) as progress:
                 task = progress.add_task(
-                    t("download_models.whisper_desc", model_size=size, size_mb=WHISPER_SIZE_MB.get(size, 500)),
+                    t("feedback.model_cached")
+                    if initially_cached
+                    else t("download_models.whisper_desc", model_size=size, size_mb=WHISPER_SIZE_MB.get(size, 500)),
                     total=None,
                 )
-                _download_whisper_with_retry(size)
-                progress.update(task, description=t("feedback.model_ready"))
+                downloaded = _download_whisper_with_retry(size)
+                progress.update(task, description=t("feedback.model_ready") if downloaded else t("feedback.model_cached"))
         except ImportError:
-            _download_whisper_with_retry(size)
+            downloaded = _download_whisper_with_retry(size)
     else:
-        _download_whisper_with_retry(size)
+        downloaded = _download_whisper_with_retry(size)
 
     if not skip_onnx:
         _ensure_onnx_embedder()
-    return True
+    return downloaded
