@@ -119,6 +119,8 @@ export async function installDesktopMocks(page, scenarioOverrides = {}) {
 
     writeStorage();
 
+    const envelope = (data) => JSON.stringify({ ok: true, data });
+
     const fakeWindow = {
       async innerPosition() {
         return { x: state.windowState.x, y: state.windowState.y };
@@ -198,40 +200,37 @@ export async function installDesktopMocks(page, scenarioOverrides = {}) {
             emit("listen-state-changed", { is_listening: false });
             return "ok";
           case "get_streaming_transcript":
-            return JSON.stringify({
-              ok: true,
-              data: {
-                streaming_transcript: {
-                  partial: state.listening ? "Слушаю встречу" : "",
-                  finals: state.listening ? [] : [{ text: "Финальный фрагмент" }],
-                },
+            return envelope({
+              streaming_transcript: {
+                partial: state.listening ? "Слушаю встречу" : "",
+                finals: state.listening ? [] : [{ text: "Финальный фрагмент" }],
               },
             });
           case "get_sessions":
-            return JSON.stringify({ ok: true, data: { sessions: state.sessions } });
+            return envelope({ sessions: state.sessions });
           case "get_session_detail": {
             const id = Number(args.sessionId);
             state.detailRequests.push(id);
-            return JSON.stringify({ ok: true, data: { session_detail: scenario.sessionDetails[id] || {} } });
+            return envelope({ session_detail: scenario.sessionDetails[id] || {} });
           }
           case "get_upcoming_calendar_events":
-            return JSON.stringify({ ok: true, data: { events: scenario.upcomingEvents } });
+            return envelope({ events: scenario.upcomingEvents });
           case "get_analytics":
-            return JSON.stringify({ ok: true, data: { analytics: scenario.analytics } });
+            return envelope({ analytics: scenario.analytics });
           case "get_settings":
-            return JSON.stringify({ ok: true, data: { settings: state.settings } });
+            return envelope({ settings: state.settings });
           case "get_daemon_version":
             return "0.2.0-alpha.2";
           case "get_session_ids_with_action_items":
-            return JSON.stringify({ ok: true, data: { session_ids: scenario.sessionIdsWithActionItems } });
+            return envelope({ session_ids: scenario.sessionIdsWithActionItems });
           case "search_transcripts":
-            return JSON.stringify({ ok: true, data: { hits: scenario.transcriptHits } });
+            return envelope({ hits: scenario.transcriptHits });
           case "search_rag":
-            return JSON.stringify({ ok: true, data: { rag_hits: scenario.ragHits } });
+            return envelope({ rag_hits: scenario.ragHits });
           case "export_session":
             return `exported:${args.format}:${args.sessionId}`;
           case "create_event_from_session":
-            return JSON.stringify({ ok: true, data: { event_uid: "vf-event-101" } });
+            return envelope({ event_uid: "vf-event-101" });
           case "analyze": {
             const newSessionId = 103;
             const analysisText = `Analysis done for ${args.seconds}s`;
@@ -254,10 +253,10 @@ export async function installDesktopMocks(page, scenarioOverrides = {}) {
             emit("streaming-analysis-chunk", { delta: "Шаг 2\n" });
             emit("analysis-done", { status: "ok" });
             emit("session-created", { session_id: newSessionId });
-            return JSON.stringify({ ok: true, data: { text: analysisText, session_id: newSessionId } });
+            return envelope({ text: analysisText, session_id: newSessionId });
           }
           default:
-            return JSON.stringify({ ok: true, data: {} });
+            return envelope({});
         }
       },
       listen(eventName, callback) {

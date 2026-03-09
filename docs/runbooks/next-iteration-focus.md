@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-09 (QA4 #155 закрыт; следующий — QA6 #157)
+**Обновлено:** 2026-03-09 (QA6 #157 закрыт; QA wave #152–#157 завершена)
 
 ---
 
@@ -19,9 +19,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** QA4 #155 закрыт: Test suite Sonar — test_failure_injection (assert True → реальная проверка socket timeout); float equality → pytest.approx в test_cost_estimate, test_cost_anomaly, test_daemon_helpers, test_daily_report, test_llm_router_batch115 и др. Targeted tests + commit+push.
+**Сделано в сессии:** QA6 #157 закрыт: Desktop/frontend Sonar — main.js (i18n status_ready/status_analyzing, compact_daemon_ok/off); platform.js JSDoc; desktopHarness envelope(); native-smoke константы таймаутов и assert.ok. Build + Playwright e2e зелёные.
 
-**Следующий шаг:** Взять QA6 #157 (Desktop/frontend Sonar cleanup).
+**Следующий шаг:** QA wave #152–#157 завершена. Выбрать следующий приоритет из PROJECT-STATUS-SUMMARY (roadmap, docs, или следующий P0/P1 блок).
 
 ---
 
@@ -34,7 +34,7 @@
 | **Phase E** | #124✓→#142✓ | **Done** | Feature-track закрыт |
 | **QA-A** | #152✓ → #153✓ | **Done** | Security + mypy закрыты |
 | **QA-B** | #154✓ → #156✓ | **Done** | DevOps/scripts Sonar закрыт |
-| **QA-C** | #155 ✓ → #157 | **Next** | Desktop/frontend Sonar (#157) |
+| **QA-C** | #155 ✓ → #157 ✓ | **Done** | Desktop/frontend Sonar закрыт |
 | **Decision log** | #143✓, #144✓ | Resolved | Scope guard для автопилота; новых user decisions сейчас не нужно |
 | **External wait** | #65 | Waiting upstream | CVE остаётся tracked wait state до upstream fix |
 

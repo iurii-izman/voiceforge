@@ -1,5 +1,8 @@
 import assert from "node:assert/strict";
 
+const TIMEOUT_DAEMON_BANNER_MS = 15000;
+const TIMEOUT_SETTINGS_PANEL_MS = 10000;
+
 async function clickViaDom(selector) {
   await browser.execute((cssSelector) => {
     const element = document.querySelector(cssSelector);
@@ -31,7 +34,7 @@ describe("VoiceForge desktop native smoke", () => {
 
     const banner = await $("#daemon-off-banner");
     await browser.waitUntil(async () => banner.isDisplayed(), {
-      timeout: 15000,
+      timeout: TIMEOUT_DAEMON_BANNER_MS,
       timeoutMsg: "daemon-off banner did not appear in native window",
     });
 
@@ -64,7 +67,7 @@ describe("VoiceForge desktop native smoke", () => {
 
     const panel = await $("#settings-slide-panel");
     await browser.waitUntil(async () => /open/.test((await panel.getAttribute("class")) || ""), {
-      timeout: 10000,
+      timeout: TIMEOUT_SETTINGS_PANEL_MS,
       timeoutMsg: "settings slide panel did not open in native shell",
     });
 
@@ -92,6 +95,6 @@ describe("VoiceForge desktop native smoke", () => {
 
     const banner = await $("#daemon-off-banner");
     await banner.waitForDisplayed();
-    assert.equal(await banner.isDisplayed(), true);
+    assert.ok(await banner.isDisplayed());
   });
 });

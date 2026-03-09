@@ -1,3 +1,4 @@
+/** Tauri API shim: delegates to __VOICEFORGE_TEST_HOOKS__ when present (e2e), else real Tauri. */
 import { invoke as tauriInvoke } from "@tauri-apps/api/core";
 import { listen as tauriListen } from "@tauri-apps/api/event";
 import { getCurrentWindow as tauriGetCurrentWindow, LogicalPosition, LogicalSize } from "@tauri-apps/api/window";

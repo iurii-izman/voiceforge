@@ -152,6 +152,9 @@ const I18N = {
     filter_all: "Все",
     filter_favorites: "Только избранные",
     filter_with_actions: "Только с action items",
+    status_ready: "Готово.",
+    status_analyzing: "Анализ…",
+    status_analyzing_60: "Анализ 60 сек…",
   },
   en: {
     nav: { home: "Home", sessions: "Sessions", costs: "Costs", settings: "Settings" },
@@ -263,6 +266,9 @@ const I18N = {
     filter_all: "All",
     filter_favorites: "Favorites only",
     filter_with_actions: "With action items only",
+    status_ready: "Done.",
+    status_analyzing: "Analyzing…",
+    status_analyzing_60: "Analyzing 60 sec…",
   },
 };
 
@@ -847,12 +853,12 @@ async function runQuickAnalyze60() {
   const statusEl = document.getElementById("analyze-status");
   const btn = document.getElementById("analyze-btn");
   if (btn) btn.disabled = true;
-  if (statusEl) statusEl.textContent = "Анализ 60 сек…";
+  if (statusEl) statusEl.textContent = t("status_analyzing_60");
   try {
     const raw = await invoke("analyze", { seconds: 60, template });
     const env = parseEnvelope(raw);
     if (env?.ok && env?.data?.text) {
-      if (statusEl) statusEl.textContent = "Готово.";
+      if (statusEl) statusEl.textContent = t("status_ready");
       loadSessions();
       notify("VoiceForge", "Анализ завершён.");
     } else if (statusEl) {
@@ -874,12 +880,12 @@ async function runDefaultAnalyze() {
   const btn = document.getElementById("analyze-btn");
   const statusEl = document.getElementById("analyze-status");
   if (btn) btn.disabled = true;
-  if (statusEl) statusEl.textContent = "Анализ…";
+  if (statusEl) statusEl.textContent = t("status_analyzing");
   try {
     const raw = await invoke("analyze", { seconds: 30, template: null });
     const env = parseEnvelope(raw);
     if (env?.ok && env?.data?.text) {
-      if (statusEl) statusEl.textContent = "Готово.";
+      if (statusEl) statusEl.textContent = t("status_ready");
       loadSessions();
       notify("VoiceForge", "Анализ завершён.");
     } else if (statusEl) {
@@ -952,7 +958,7 @@ listen("analysis-done", (e) => {
   const statusEl = document.getElementById("analyze-status");
   if (statusEl) {
     let msg;
-    if (status === "ok") msg = "Готово.";
+    if (status === "ok") msg = t("status_ready");
     else if (status === "error") msg = t("error_status");
     else msg = String(status ?? "");
     statusEl.textContent = msg;
@@ -1035,12 +1041,12 @@ document.getElementById("analyze-btn").addEventListener("click", async () => {
     delete outEl.dataset.streamEnd;
   }
   btn.disabled = true;
-  statusEl.textContent = "Анализ…";
+  statusEl.textContent = t("status_analyzing");
   try {
     const raw = await invoke("analyze", { seconds, template });
     const env = parseEnvelope(raw);
     if (env?.ok && env?.data?.text) {
-      statusEl.textContent = "Готово.";
+      statusEl.textContent = t("status_ready");
       loadSessions();
     } else {
       statusEl.textContent = errorMessage(env);
@@ -2442,7 +2448,7 @@ async function applyCompactModeOn(win) {
   }
   const compactStatus = document.getElementById("compact-status");
   if (compactStatus) {
-    compactStatus.textContent = daemonOk ? "Демон ок" : "Демон выкл";
+    compactStatus.textContent = daemonOk ? t("compact_daemon_ok") : t("compact_daemon_off");
     compactStatus.className = "status " + (daemonOk ? "daemon-ok" : "daemon-off");
   }
 }

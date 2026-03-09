@@ -151,7 +151,7 @@ E11 (narrow CalDAV scope) ✓ → E16 ✓ → E17 ✓
 | QA3 | [#154](https://github.com/iurii-izman/voiceforge/issues/154) ✓ | Python Core/CLI Sonar Hotspots | P1 | L | Backend | Разгрузить main/daemon/CLI hotspots |
 | QA4 | [#155](https://github.com/iurii-izman/voiceforge/issues/155) ✓ | Test Suite Sonar Cleanup | P1 | L | Testing | Снять test-only Sonar debt (stubs, float equality, constant booleans) |
 | QA5 | [#156](https://github.com/iurii-izman/voiceforge/issues/156) ✓ | DevOps & Utility Script Sonar Cleanup | P1 | M | DevOps | Почистить bootstrap/preflight/create-issues/helper scripts |
-| QA6 | [#157](https://github.com/iurii-izman/voiceforge/issues/157) | Desktop Sonar Cleanup | P2 | M | Frontend | Разобрать desktop/frontend Sonar backlog после backend/security wave |
+| QA6 | [#157](https://github.com/iurii-izman/voiceforge/issues/157) ✓ | Desktop Sonar Cleanup | P2 | M | Frontend | Разобрать desktop/frontend Sonar backlog (closed 2026-03-09) |
 
 **Рекомендуемый порядок:**
 ```
@@ -237,6 +237,7 @@ Wave QA-C: #155 → #157
 | **QA2 #153** | Done | mypy зелёный (transcriber: BaseException + assert; transcript_log: убрано переопределение _sqlcipher) |
 | **QA3 #154** | Done | fs: get_cache_home; config→voiceforge_data_dir; status_helpers→get_cache_home; daemon: _notify_analyze_done, _calendar_try_start_listen; caldav_poll: credentials helpers |
 | **QA5 #156** | Done | DevOps/scripts Sonar: bootstrap.sh, preflight_repo.sh, create_productization_issues.sh — `[[` style, explicit exit; check_docs_consistency.py path.exists; dependabot_dismiss_moderate.py explicit sys.exit(0) |
+| **QA6 #157** | Done | Desktop/frontend Sonar: main.js i18n status_ready/status_analyzing, compact_daemon_ok/off via t(); platform.js JSDoc; desktopHarness envelope(); native-smoke timeouts/assert.ok |
 | **Pre-commit на хосте** | Python 3.12 в toolbox 43 | `git commit --no-verify` на хосте без 3.12 |
 
 ---
