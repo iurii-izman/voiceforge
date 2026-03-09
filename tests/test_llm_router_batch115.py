@@ -7,6 +7,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
+from conftest import raise_when_called
 
 from voiceforge.llm import router
 from voiceforge.llm.schemas import LiveSummaryOutput, MeetingAnalysis, StandupOutput, StatusUpdateResponse
@@ -102,7 +103,7 @@ def test_analyze_meeting_falls_back_after_ollama_error(monkeypatch) -> None:
     fake_local_llm = SimpleNamespace(DEFAULT_MODEL="llama3")
     monkeypatch.setattr(
         "voiceforge.llm.router._try_ollama_faq",
-        lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("ollama boom")),
+        raise_when_called(RuntimeError("ollama boom")),
     )
     monkeypatch.setattr(
         "voiceforge.llm.router.complete_structured",

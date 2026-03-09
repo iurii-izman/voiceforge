@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from http.server import HTTPServer
 
 import pytest
+from conftest import raise_when_called
 
 
 @dataclass
@@ -201,7 +202,7 @@ def test_server_get_status_exception_returns_500(monkeypatch, tmp_path) -> None:
     monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "runtime"))
     monkeypatch.setattr(
         "voiceforge.cli.status_helpers.get_status_data",
-        lambda: (_ for _ in ()).throw(RuntimeError("status failed")),
+        raise_when_called(RuntimeError("status failed")),
     )
 
     from voiceforge.web.server import _VoiceForgeHandler

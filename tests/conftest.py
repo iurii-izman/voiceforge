@@ -9,6 +9,15 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 
+def raise_when_called(exc: BaseException):
+    """Return a callable that raises exc when called. Replaces (x for x in ()).throw(exc) for Sonar S7500."""
+
+    def _inner(*args: object, **kwargs: object) -> None:
+        raise exc
+
+    return _inner
+
+
 @pytest.fixture
 def mock_pw_record_silence():
     """Mock pw-record subprocess: stdout yields silence PCM (s16le 16kHz mono). Reusable in CI."""

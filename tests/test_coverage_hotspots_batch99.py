@@ -11,6 +11,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import pytest
+from conftest import raise_when_called
 
 from voiceforge.core.daemon import _env_flag
 from voiceforge.llm import router
@@ -221,7 +222,7 @@ def test_server_async_sync_status_200(monkeypatch) -> None:
 def test_server_async_sync_status_500_on_exception(monkeypatch) -> None:
     monkeypatch.setattr(
         "voiceforge.cli.status_helpers.get_status_data",
-        lambda: (_ for _ in ()).throw(RuntimeError("status failed")),
+        raise_when_called(RuntimeError("status failed")),
     )
     status, _, body = server_async._sync_status()
     assert status == 500
@@ -342,7 +343,7 @@ def test_router_usage_and_cost_from_response(monkeypatch) -> None:
     try:
         import litellm
 
-        monkeypatch.setattr(litellm, "completion_cost", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("mock")))
+        monkeypatch.setattr(litellm, "completion_cost", raise_when_called(RuntimeError("mock")))
     except ImportError:
         pass
     inp, out, cache_read, cache_creation, cost = router._usage_and_cost_from_response(raw, "test/model")
@@ -501,5 +502,5 @@ def test_daemon_get_version_fallback(monkeypatch) -> None:
 
     import importlib.metadata
 
-    monkeypatch.setattr(importlib.metadata, "version", lambda name: (_ for _ in ()).throw(RuntimeError("no pkg")))
+    monkeypatch.setattr(importlib.metadata, "version", raise_when_called(RuntimeError("no pkg")))
     assert daemon.get_version() == "0.2.0-alpha.1"

@@ -6,6 +6,8 @@ import types
 from pathlib import Path
 from types import SimpleNamespace
 
+from conftest import raise_when_called
+
 from voiceforge.rag.watcher import KBWatcher, WatchIndexResult, _ensure_indexed_table, _file_sha256
 
 
@@ -109,7 +111,7 @@ def test_watcher_index_if_needed_handles_sha_and_index_errors(tmp_path: Path, mo
     db_path = tmp_path / "rag.db"
     watcher = KBWatcher(tmp_path, db_path)
 
-    monkeypatch.setattr("voiceforge.rag.watcher._file_sha256", lambda path: (_ for _ in ()).throw(OSError("busy")))
+    monkeypatch.setattr("voiceforge.rag.watcher._file_sha256", raise_when_called(OSError("busy")))
     sha_result = watcher._index_if_needed(pdf_path)
     assert sha_result.status == "sha256_failed"
     assert sha_result.reason == "busy"

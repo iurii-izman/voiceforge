@@ -7,6 +7,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+from conftest import raise_when_called
 
 
 @dataclass
@@ -266,7 +267,7 @@ def test_main_action_items_update_handles_budget_and_llm_errors(monkeypatch) -> 
 
     monkeypatch.setattr(
         "voiceforge.llm.router.update_action_item_statuses",
-        lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("llm exploded")),
+        raise_when_called(RuntimeError("llm exploded")),
     )
     with pytest.raises(SystemExit) as exc_llm:
         main.action_items_update(from_session=1, next_session=2, output="json", save=False)
@@ -320,7 +321,7 @@ def test_main_export_via_pandoc_handles_missing_and_failure(monkeypatch, tmp_pat
     monkeypatch.setattr(
         main.subprocess,
         "run",
-        lambda *args, **kwargs: (_ for _ in ()).throw(FileNotFoundError("pandoc missing")),
+        raise_when_called(FileNotFoundError("pandoc missing")),
     )
     with pytest.raises(SystemExit) as exc_missing:
         main._export_via_pandoc("pdf", out_pdf, "# Report")
@@ -333,9 +334,7 @@ def test_main_export_via_pandoc_handles_missing_and_failure(monkeypatch, tmp_pat
     monkeypatch.setattr(
         main.subprocess,
         "run",
-        lambda *args, **kwargs: (_ for _ in ()).throw(
-            subprocess.CalledProcessError(returncode=2, cmd=["pandoc"], stderr=b"pdf failed")
-        ),
+        raise_when_called(subprocess.CalledProcessError(returncode=2, cmd=["pandoc"], stderr=b"pdf failed")),
     )
     with pytest.raises(SystemExit) as exc_failed:
         main._export_via_pandoc("docx", tmp_path / "session.docx", "# Report")
@@ -407,9 +406,7 @@ def test_main_weekly_report_formats_and_stats_fallback(monkeypatch, tmp_path: Pa
     assert any(str(md_output) in message for message, _ in echoed)
 
     echoed.clear()
-    monkeypatch.setattr(
-        "voiceforge.core.metrics.get_stats_range", lambda from_date, to_date: (_ for _ in ()).throw(RuntimeError("stats down"))
-    )
+    monkeypatch.setattr("voiceforge.core.metrics.get_stats_range", raise_when_called(RuntimeError("stats down")))
     main.weekly_report(output=None, days=3, format="text")
     assert "Cost (LLM): $0.00" in echoed[-1][0]
 

@@ -9,6 +9,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import pytest
+from conftest import raise_when_called
 
 from voiceforge.core.daemon import (
     VoiceForgeDaemon,
@@ -121,7 +122,7 @@ def test_daemon_analyze_returns_text_when_log_session_fails(monkeypatch) -> None
     daemon = _make_daemon()
     warnings: list[tuple[tuple[object, ...], dict[str, object]]] = []
     monkeypatch.setattr("voiceforge.main.run_analyze_pipeline", lambda *args, **kwargs: ("ok", ["s"], {"model": "m"}))
-    monkeypatch.setattr("voiceforge.core.transcript_log.TranscriptLog", lambda: (_ for _ in ()).throw(RuntimeError("db down")))
+    monkeypatch.setattr("voiceforge.core.transcript_log.TranscriptLog", raise_when_called(RuntimeError("db down")))
     monkeypatch.setattr("voiceforge.core.daemon.log.warning", lambda *args, **kwargs: warnings.append((args, kwargs)))
 
     text, session_id = daemon.analyze(10)
@@ -233,7 +234,7 @@ def test_daemon_get_session_detail_and_search_transcripts_success(monkeypatch) -
 
 
 def test_daemon_search_transcripts_failure_returns_empty(monkeypatch) -> None:
-    monkeypatch.setattr("voiceforge.core.transcript_log.TranscriptLog", lambda: (_ for _ in ()).throw(RuntimeError("fts down")))
+    monkeypatch.setattr("voiceforge.core.transcript_log.TranscriptLog", raise_when_called(RuntimeError("fts down")))
     daemon = _make_daemon()
     assert daemon.search_transcripts("hello") == "[]"
 
@@ -312,7 +313,7 @@ def test_daemon_create_event_from_session_not_found_and_exception(monkeypatch) -
     not_found = json.loads(daemon.create_event_from_session(99))
     assert not_found["error"]["code"] == "VF001"
 
-    monkeypatch.setattr("voiceforge.core.transcript_log.TranscriptLog", lambda: (_ for _ in ()).throw(RuntimeError("db broken")))
+    monkeypatch.setattr("voiceforge.core.transcript_log.TranscriptLog", raise_when_called(RuntimeError("db broken")))
     failure = json.loads(daemon.create_event_from_session(99))
     assert failure["error"]["code"] == "VF023"
 
@@ -378,7 +379,7 @@ def test_daemon_streaming_loop_processes_chunk_and_logs_failure(monkeypatch) -> 
     assert processed[0][0].size == 4
     assert processed[0][1] == pytest.approx(0.0)
 
-    daemon._streaming_capture = SimpleNamespace(get_chunk=lambda seconds: (_ for _ in ()).throw(RuntimeError("capture fail")))
+    daemon._streaming_capture = SimpleNamespace(get_chunk=raise_when_called(RuntimeError("capture fail")))
     daemon._streaming_stop = FakeStop()
     with patch.dict(
         sys.modules,
