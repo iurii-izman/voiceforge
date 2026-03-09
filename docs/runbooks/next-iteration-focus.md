@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-09 (Sonar batch: S112, S7508, S3981, S5713, S7503, shelldre S1192)
+**Обновлено:** 2026-03-09 (Sonar: S1066, S1192, S5603, S7500, S112 NOSONAR)
 
 ---
 
@@ -19,9 +19,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Sonar batch: (1) S112 — conftest raise_when_called: тип параметра BaseException → Exception. (2) S7508 — main.py: убран лишний list() вокруг sorted(overridden). (3) S3981 — test_cli_snapshots: убрано всегда истинное условие len(out.strip()) >= 0; добавлена проверка «сессий» для RU. (4) S5713 — test_failure_injection: except (DatabaseError, Exception) → except Exception; preflight: except (TimeoutError, OSError) → except OSError. (5) S7503 — test_hotspot_batch114 (_FakeJsonRequest.json), test_daemon_batch116 (_Task._inner): добавлен await asyncio.sleep(0). (6) shelldre S1192 — create_productization_issues.sh: константы LABELS_P0_FEAT, LABELS_P1_FEAT, замена дублирующих литералов. Тесты: 27 passed по затронутым модулям; test_main_status_and_calendar_commands_reuse_helpers по-прежнему падает (pre-existing).
+**Сделано в сессии:** Sonar: (1) S1066 — bootstrap.sh: объединён вложенный if с внешним. (2) S1192 — router.py: константа _OLLAMA_MODEL_PREFIX = "ollama/", замена трёх вхождений. (3) S5603 — test_daemon_helpers: удалён неиспользуемый класс FakeLog из test_retention_purge_at_startup_no_op_when_zero. (4) S7500 — test_main_status_export_action_items: lambda с generator.throw заменён на raise_when_called(BudgetExceeded(...)). (5) S112 — conftest: добавлен NOSONAR-комментарий для raise exc. Тесты: 38 passed по затронутым модулям; test_main_status_text_and_json_branches падает по-прежнему (pre-existing).
 
-**Следующий шаг:** Продолжить Sonar (S3776, S5655/S108/S7500 если остались, JS/shell) или roadmap/docs.
+**Следующий шаг:** Продолжить Sonar (S3776 cognitive complexity, JS) или roadmap/docs.
 
 ---
 

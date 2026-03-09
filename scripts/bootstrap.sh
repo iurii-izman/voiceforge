@@ -43,11 +43,10 @@ try:
 except Exception:
   print('?')
 " 2>/dev/null || echo "?")
-  if [[ "$AVAIL_GB" != "?" && -n "$AVAIL_GB" ]]; then
+  # S1066: merged inner if with outer
+  if [[ "$AVAIL_GB" != "?" && -n "$AVAIL_GB" ]] && awk "BEGIN { exit !($AVAIL_GB < 4) }" 2>/dev/null; then
     # shellcheck disable=SC2086
-    if awk "BEGIN { exit !($AVAIL_GB < 4) }" 2>/dev/null; then
-      echo "⚠ Low RAM: ${AVAIL_GB} GB available (recommended ≥4 GB for full pipeline)" >&2
-    fi
+    echo "⚠ Low RAM: ${AVAIL_GB} GB available (recommended ≥4 GB for full pipeline)" >&2
   fi
 fi
 

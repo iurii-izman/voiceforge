@@ -259,7 +259,7 @@ def test_main_action_items_update_handles_budget_and_llm_errors(monkeypatch) -> 
 
     monkeypatch.setattr(
         "voiceforge.llm.router.update_action_item_statuses",
-        lambda *args, **kwargs: (_ for _ in ()).throw(BudgetExceeded("budget cap")),
+        raise_when_called(BudgetExceeded("budget cap")),
     )
     with pytest.raises(SystemExit) as exc_budget:
         main.action_items_update(from_session=1, next_session=2, output="json", save=False)

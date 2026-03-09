@@ -277,16 +277,6 @@ def test_daemon_get_analytics_fallback_empty_on_error() -> None:
 def test_retention_purge_at_startup_no_op_when_zero() -> None:
     """_retention_purge_at_startup does nothing when retention_days is 0."""
     purge_called: list[object] = []
-
-    class FakeLog:
-        def purge_before(self, cutoff):
-            purge_called.append(cutoff)
-            return 0
-
-        def close(self) -> None:
-            # No-op for test fake (S1186).
-            pass
-
     cfg = MagicMock()
     cfg.retention_days = 0
     cfg.get_rag_db_path = lambda: "/x"
