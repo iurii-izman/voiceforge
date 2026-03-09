@@ -55,7 +55,7 @@ from voiceforge.core.contracts import (
     build_cli_success_payload,
     extract_error_message,
 )
-from voiceforge.core.fs import ensure_private_dir, ensure_private_file
+from voiceforge.core.fs import ensure_private_dir, ensure_private_file, voiceforge_data_dir
 from voiceforge.core.tracing import bind_trace_id
 from voiceforge.i18n import t
 
@@ -81,8 +81,7 @@ def _is_first_run() -> bool:
     """E7 (#130): True if no DB and no config file (first-run: show setup hint)."""
     from voiceforge.core.transcript_log import DB_NAME
 
-    data_base = os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
-    db_path = Path(data_base) / "voiceforge" / DB_NAME
+    db_path = voiceforge_data_dir() / DB_NAME
     config_path = get_default_config_yaml_path()
     return not db_path.exists() and not config_path.is_file()
 
@@ -1133,12 +1132,11 @@ def analyze(
 
 
 def _action_item_status_path() -> Path:
-    base = os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
-    base_path = Path(base).resolve()
+    base_dir = voiceforge_data_dir().resolve()
     home = Path.home()
-    if not str(base_path).startswith(str(home)):
-        base_path = home / ".local" / "share"
-    return base_path / "voiceforge" / "action_item_status.json"
+    if not str(base_dir).startswith(str(home)):
+        base_dir = home / ".local" / "share" / "voiceforge"
+    return base_dir / "action_item_status.json"
 
 
 def _load_action_item_status() -> dict[str, str]:
@@ -1887,8 +1885,7 @@ def _export_via_pandoc(format: str, out_path: Path, md_text: str) -> None:
 
 def _backup_data_dir() -> Path:
     """VoiceForge data directory (transcripts.db, metrics.db). #63"""
-    base = os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
-    return Path(base) / "voiceforge"
+    return voiceforge_data_dir()
 
 
 @app.command("backup")
