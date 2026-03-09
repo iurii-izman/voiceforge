@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-09 (Phase E закрыт; открыт quality remediation wave QA1-QA6)
+**Обновлено:** 2026-03-09 (QA1 #152, QA2 #153 закрыты; QA3 #154 — частичный прогресс)
 
 ---
 
@@ -19,9 +19,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Проведён quality audit по SonarCloud, GitHub Security, Dependabot, mypy, bandit, pip-audit и local preflight. На доску добавлены QA-блоки `#152-#157`. Обновлены quality/status/security runbooks и planning, чтобы post-Phase-E автопилот шёл уже по remediation wave, а не по закрытым E-блокам.
+**Сделано в сессии:** QA1 #152: CodeQL alert отклонён (false positive), security-decision-log и quality-audit обновлены, Cargo.lock обновлён. QA2 #153: mypy зелёный (transcriber BaseException + assert; transcript_log _sqlcipher без переопределения). QA3 #154 (частично): в fs добавлены get_data_home/voiceforge_data_dir, в main.py заменены 3 дубликата путей данных.
 
-**Следующий шаг:** Взять `QA1 #152` как верхний открытый блок новой wave: закрыть или отtriage'ить CodeQL alert и 3 Dependabot alerts, синхронизировать `security-decision-log.md`, выполнить targeted checks, перевести карточку в Done, затем обновить этот файл под `QA2 #153`.
+**Следующий шаг:** Продолжить QA3 #154 (оставшиеся hotspot-файлы: daemon, status_helpers, setup, meeting, digest, pipeline, config, router, caldav_poll — снижение когнитивной сложности и дубликатов) или взять QA5 #156 (DevOps/scripts Sonar). Порядок: #154 → #156 → #155 → #157.
 
 ---
 
@@ -32,8 +32,8 @@
 | Wave | Issues | Статус | Что делать |
 |------|--------|--------|------------|
 | **Phase E** | #124✓→#142✓ | **Done** | Feature-track закрыт |
-| **QA-A** | #152 → #153 | **Next** | Security first, затем local gate parity |
-| **QA-B** | #154 → #156 | Queued | Python core/CLI hotspots, затем scripts |
+| **QA-A** | #152✓ → #153✓ | **Done** | Security + mypy закрыты |
+| **QA-B** | #154 (partial) → #156 | **Next** | Продолжить Python hotspots или взять scripts |
 | **QA-C** | #155 → #157 | Queued | Tests, затем desktop/frontend Sonar |
 | **Decision log** | #143✓, #144✓ | Resolved | Scope guard для автопилота; новых user decisions сейчас не нужно |
 | **External wait** | #65 | Waiting upstream | CVE остаётся tracked wait state до upstream fix |

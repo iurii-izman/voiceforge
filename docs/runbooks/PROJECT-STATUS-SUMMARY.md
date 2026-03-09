@@ -233,8 +233,9 @@ Wave QA-C: #155 → #157
 | Item | Статус | Действие |
 |---|---|---|
 | **#65 CVE-2025-69872** | Waiting upstream | Снять `--ignore-vuln` после fix в diskcache/instructor |
-| **QA1 #152** | Open | CodeQL alert + 3 Dependabot alerts нужно закрыть или корректно отtriage'ить |
+| **QA1 #152** | Done | CodeQL dismissed (false positive); Dependabot tracked в security-decision-log |
 | **QA2 #153** | Done | mypy зелёный (transcriber: BaseException + assert; transcript_log: убрано переопределение _sqlcipher) |
+| **QA3 #154** | Partial | fs: get_data_home/voiceforge_data_dir; main.py: 3 дубликата путей убраны; остальные hotspot-файлы — далее |
 | **Pre-commit на хосте** | Python 3.12 в toolbox 43 | `git commit --no-verify` на хосте без 3.12 |
 
 ---
