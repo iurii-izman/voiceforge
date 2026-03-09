@@ -6,6 +6,8 @@ import importlib
 from pathlib import Path
 from typing import Any
 
+from voiceforge.core.fs import get_cache_home
+
 _DOCTOR_KEYRING_FAIL = "doctor.keyring_fail"
 _DOCTOR_OLLAMA_FAIL = "doctor.ollama_fail"
 _DOCTOR_RAM_FAIL = "doctor.ram_fail"
@@ -232,16 +234,14 @@ def _doctor_check_module(mod: str, t: Any) -> tuple[bool, str, str]:
 
 def _doctor_check_models(cfg: Any, t: Any) -> list[tuple[bool, str, str]]:
     """E8 (#131): Models cached? (Whisper, ONNX, pyannote), disk usage ~/.cache/huggingface, RAM vs recommended."""
-    import os
 
     out: list[tuple[bool, str, str]] = []
     model_size = getattr(cfg, "model_size", "small")
 
     # Disk usage: ~/.cache/huggingface (Whisper/ctranslate2 and pyannote use it)
-    cache_home = os.environ.get("XDG_CACHE_HOME") or os.path.expanduser("~/.cache")
-    hf_path = Path(cache_home) / "huggingface"
+    hf_path = Path(get_cache_home()) / "huggingface"
     if not hf_path.exists():
-        hf_path = Path(cache_home)
+        hf_path = Path(get_cache_home())
     if hf_path.exists():
         try:
             total = sum(f.stat().st_size for f in hf_path.rglob("*") if f.is_file())
@@ -252,7 +252,7 @@ def _doctor_check_models(cfg: Any, t: Any) -> list[tuple[bool, str, str]]:
 
     # Whisper: we don't load the model in doctor; report config and whether hub has content
     try:
-        hub = Path(cache_home) / "huggingface" / "hub"
+        hub = Path(get_cache_home()) / "huggingface" / "hub"
         has_whisper = False
         if hub.exists():
             has_whisper = any("whisper" in p.name.lower() or "ctranslate" in p.name.lower() for p in hub.iterdir())

@@ -25,6 +25,11 @@ def voiceforge_data_dir() -> Path:
     return Path(get_data_home()) / "voiceforge"
 
 
+def get_cache_home() -> str:
+    """Return XDG_CACHE_HOME or default ~/.cache (Sonar hotspot: single source for cache path)."""
+    return os.environ.get("XDG_CACHE_HOME") or os.path.expanduser("~/.cache")
+
+
 def _set_mode_best_effort(path: Path, mode: int) -> None:
     """Best-effort chmod for private local data paths on POSIX filesystems."""
     try:

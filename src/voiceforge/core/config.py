@@ -10,6 +10,8 @@ import structlog
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from voiceforge.core.fs import voiceforge_data_dir
+
 log = structlog.get_logger()
 
 
@@ -320,9 +322,8 @@ class Settings(BaseSettings):
         )
 
     def get_data_dir(self) -> str:
-        """XDG_DATA_HOME/voiceforge — base for cost log, RAG db, etc."""
-        base = os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
-        return os.path.join(base, "voiceforge")
+        """XDG_DATA_HOME/voiceforge — base for cost log, RAG db, etc. Uses fs.voiceforge_data_dir (QA3)."""
+        return str(voiceforge_data_dir())
 
     def get_ring_file_path(self) -> str:
         """Resolved path to ring PCM file."""

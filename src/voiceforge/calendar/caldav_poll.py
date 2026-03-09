@@ -22,6 +22,24 @@ _CALDAV_PASSWORD = "caldav_password"
 _CALENDAR_DEPS_HINT = "Install calendar deps: uv sync --extra calendar"
 
 
+def _get_caldav_credentials() -> tuple[str | None, str | None, str | None]:
+    """Return (url, username, password) from keyring. QA3: single place for credential lookup."""
+    return (
+        get_api_key(_CALDAV_URL),
+        get_api_key(_CALDAV_USERNAME),
+        get_api_key(_CALDAV_PASSWORD),
+    )
+
+
+def _require_caldav_credentials() -> tuple[tuple[str, str, str], None] | tuple[None, str]:
+    """Return ((url, username, password), None) or (None, error_message). QA3: reduces duplication."""
+    url, username, password = _get_caldav_credentials()
+    if url and username and password:
+        return (url.strip(), username.strip(), password), None
+    missing = [k for k, v in [(_CALDAV_URL, url), (_CALDAV_USERNAME, username), (_CALDAV_PASSWORD, password)] if not v]
+    return None, f"Missing keyring keys: {', '.join(missing)}. Set: keyring set voiceforge <key>"
+
+
 def _dt_to_aware(dt: Any) -> datetime | None:
     """Convert icalendar dtstart/dtend to timezone-aware datetime for comparison."""
     if dt is None:
@@ -75,12 +93,10 @@ def poll_events_started_in_last(minutes: int = 5) -> tuple[list[dict[str, Any]],
     Reads caldav_url, caldav_username, caldav_password from keyring (service voiceforge).
     Returns (list of event dicts with summary, start_iso, end_iso, calendar_name), or error message.
     """
-    url = get_api_key(_CALDAV_URL)
-    username = get_api_key(_CALDAV_USERNAME)
-    password = get_api_key(_CALDAV_PASSWORD)
-    if not url or not username or not password:
-        missing = [k for k, v in [(_CALDAV_URL, url), (_CALDAV_USERNAME, username), (_CALDAV_PASSWORD, password)] if not v]
-        return [], f"Missing keyring keys: {', '.join(missing)}. Set: keyring set voiceforge <key>"
+    creds, err = _require_caldav_credentials()
+    if creds is None:
+        return [], err
+    url, username, password = creds
 
     try:
         import caldav
@@ -110,12 +126,10 @@ def poll_events_started_in_last(minutes: int = 5) -> tuple[list[dict[str, Any]],
 
 def list_calendars() -> tuple[list[dict[str, Any]], str | None]:
     """List CalDAV calendar names (block 58). Returns (list of {name, url}, error)."""
-    url = get_api_key(_CALDAV_URL)
-    username = get_api_key(_CALDAV_USERNAME)
-    password = get_api_key(_CALDAV_PASSWORD)
-    if not url or not username or not password:
-        missing = [k for k, v in [(_CALDAV_URL, url), (_CALDAV_USERNAME, username), (_CALDAV_PASSWORD, password)] if not v]
-        return [], f"Missing keyring keys: {', '.join(missing)}. Set: keyring set voiceforge <key>"
+    creds, err = _require_caldav_credentials()
+    if creds is None:
+        return [], err
+    url, username, password = creds
 
     try:
         import caldav
@@ -190,12 +204,10 @@ def get_events_ended_at_least_minutes_ago(
     Returns (list of event dicts with summary, start_iso, end_iso, calendar_name), or error message.
     lookback_hours limits how far back we search (default 2h) to avoid re-processing old events.
     """
-    url = get_api_key(_CALDAV_URL)
-    username = get_api_key(_CALDAV_USERNAME)
-    password = get_api_key(_CALDAV_PASSWORD)
-    if not url or not username or not password:
-        missing = [k for k, v in [(_CALDAV_URL, url), (_CALDAV_USERNAME, username), (_CALDAV_PASSWORD, password)] if not v]
-        return [], f"Missing keyring keys: {', '.join(missing)}. Set: keyring set voiceforge <key>"
+    creds, err = _require_caldav_credentials()
+    if creds is None:
+        return [], err
+    url, username, password = creds
 
     try:
         import caldav
@@ -226,12 +238,10 @@ def get_upcoming_events(hours_ahead: int = 48) -> tuple[list[dict[str, Any]], st
 
     Returns (list of event dicts with summary, start_iso, end_iso, calendar_name), or error message.
     """
-    url = get_api_key(_CALDAV_URL)
-    username = get_api_key(_CALDAV_USERNAME)
-    password = get_api_key(_CALDAV_PASSWORD)
-    if not url or not username or not password:
-        missing = [k for k, v in [(_CALDAV_URL, url), (_CALDAV_USERNAME, username), (_CALDAV_PASSWORD, password)] if not v]
-        return [], f"Missing keyring keys: {', '.join(missing)}. Set: keyring set voiceforge <key>"
+    creds, err = _require_caldav_credentials()
+    if creds is None:
+        return [], err
+    url, username, password = creds
 
     try:
         import caldav
@@ -256,9 +266,7 @@ def get_next_meeting_context(hours_ahead: int = 24) -> tuple[str, str | None]:
     Reads caldav_* from keyring. Returns (context_string, error).
     context_string is e.g. "Next meeting: Standup, 2025-02-25T10:00:00+00:00–10:15" or "".
     """
-    url = get_api_key(_CALDAV_URL)
-    username = get_api_key(_CALDAV_USERNAME)
-    password = get_api_key(_CALDAV_PASSWORD)
+    url, username, password = _get_caldav_credentials()
     if not url or not username or not password:
         return "", None  # no keyring: skip calendar, no error
 
@@ -320,12 +328,10 @@ def create_event(
     Uses keyring caldav_url, caldav_username, caldav_password. If calendar_url is given,
     uses that calendar; otherwise uses the first calendar from principal.
     """
-    url = get_api_key(_CALDAV_URL)
-    username = get_api_key(_CALDAV_USERNAME)
-    password = get_api_key(_CALDAV_PASSWORD)
-    if not url or not username or not password:
-        missing = [k for k, v in [(_CALDAV_URL, url), (_CALDAV_USERNAME, username), (_CALDAV_PASSWORD, password)] if not v]
-        return None, f"Missing keyring keys: {', '.join(missing)}. Set: keyring set voiceforge <key>"
+    creds, err = _require_caldav_credentials()
+    if creds is None:
+        return None, err
+    url, username, password = creds
 
     try:
         import caldav
