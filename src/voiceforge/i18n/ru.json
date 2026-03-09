@@ -116,5 +116,15 @@
   "feedback.model_ready": "Модель загружена.",
   "feedback.budget_warning": "⚠ Дневной бюджет: {cost_today}/{limit} использовано. Этот анализ ~{estimate}.",
   "setup.keyring_fail": "Не удалось сохранить в keyring для {key}: {error}",
-  "setup.welcome_first_run": "Добро пожаловать в VoiceForge! Запустите `voiceforge setup` для пошаговой настройки."
+  "setup.welcome_first_run": "Добро пожаловать в VoiceForge! Запустите `voiceforge setup` для пошаговой настройки.",
+  "download_models.whisper_desc": "Загрузка Whisper ({model_size}) (~{size_mb} МБ)...",
+  "download_models.onnx_desc": "Проверка ONNX embedder...",
+  "doctor.models_whisper": "Whisper ({size}): в кэше",
+  "doctor.models_whisper_missing": "Whisper ({size}): не в кэше",
+  "doctor.models_onnx": "ONNX embedder: в кэше",
+  "doctor.models_onnx_missing": "ONNX embedder: не в кэше",
+  "doctor.models_pyannote": "pyannote: в кэше (HF token задан)",
+  "doctor.models_pyannote_missing": "pyannote: не в кэше или нет HF token",
+  "doctor.models_disk_usage": "Диск моделей: {path} ~{size_mb} МБ",
+  "doctor.ram_recommended": "RAM: {available_gb:.1f} ГБ доступно (рекомендуется ≥4 ГБ)"
 }

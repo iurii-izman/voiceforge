@@ -17,6 +17,7 @@ from typing import Any
 import structlog
 import typer
 
+from voiceforge.cli.download_models import run_download_models
 from voiceforge.cli.history_helpers import (
     build_session_export_notion,
     build_session_export_otter,
@@ -111,6 +112,25 @@ def config_init(
 ) -> None:
     """E7 (#130): Generate voiceforge.yaml with defaults and comments (quick alternative to full setup)."""
     run_config_init(overwrite=overwrite)
+
+
+@app.command("download-models")
+def download_models(
+    model_size: str | None = typer.Option(None, "--model-size", help="Whisper model size (default: from config)"),
+    skip_onnx: bool = typer.Option(False, "--skip-onnx", help="Do not check/load ONNX embedder"),
+    no_progress: bool = typer.Option(False, "--no-progress", help="Plain output, no rich progress bar"),
+) -> None:
+    """E8 (#131): Pre-download Whisper model and optionally ONNX embedder (progress bar, retry on failure)."""
+    try:
+        run_download_models(
+            model_size=model_size,
+            skip_onnx=skip_onnx,
+            use_rich_progress=not no_progress,
+        )
+        typer.echo(t("feedback.model_ready"))
+    except Exception as e:
+        typer.echo(t("error.generic", msg=str(e)), err=True)
+        raise SystemExit(1)
 
 
 _INDEX_EXTENSIONS = (

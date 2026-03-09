@@ -230,6 +230,74 @@ def _doctor_check_module(mod: str, t: Any) -> tuple[bool, str, str]:
         return (False, t(key), key)
 
 
+def _doctor_check_models(cfg: Any, t: Any) -> list[tuple[bool, str, str]]:
+    """E8 (#131): Models cached? (Whisper, ONNX, pyannote), disk usage ~/.cache/huggingface, RAM vs recommended."""
+    import os
+
+    out: list[tuple[bool, str, str]] = []
+    model_size = getattr(cfg, "model_size", "small")
+
+    # Disk usage: ~/.cache/huggingface (Whisper/ctranslate2 and pyannote use it)
+    cache_home = os.environ.get("XDG_CACHE_HOME") or os.path.expanduser("~/.cache")
+    hf_path = Path(cache_home) / "huggingface"
+    if not hf_path.exists():
+        hf_path = Path(cache_home)
+    if hf_path.exists():
+        try:
+            total = sum(f.stat().st_size for f in hf_path.rglob("*") if f.is_file())
+            size_mb = total // (1024 * 1024)
+            out.append((True, t("doctor.models_disk_usage", path=str(hf_path), size_mb=size_mb), "doctor.models_disk"))
+        except OSError:
+            pass
+
+    # Whisper: we don't load the model in doctor; report config and whether hub has content
+    try:
+        hub = Path(cache_home) / "huggingface" / "hub"
+        has_whisper = False
+        if hub.exists():
+            has_whisper = any("whisper" in p.name.lower() or "ctranslate" in p.name.lower() for p in hub.iterdir())
+        if has_whisper:
+            out.append((True, t("doctor.models_whisper", size=model_size), "doctor.models_whisper"))
+        else:
+            out.append((True, t("doctor.models_whisper_missing", size=model_size), "doctor.models_whisper"))
+    except Exception:
+        out.append((True, t("doctor.models_whisper_missing", size=model_size), "doctor.models_whisper"))
+
+    # ONNX embedder
+    try:
+        from voiceforge.rag.embedder import get_default_model_dir
+
+        base = Path(get_default_model_dir())
+        if (base / "model.onnx").exists() or (base / "onnx" / "model.onnx").exists():
+            out.append((True, t("doctor.models_onnx"), "doctor.models_onnx"))
+        else:
+            out.append((True, t("doctor.models_onnx_missing"), "doctor.models_onnx"))
+    except Exception:
+        out.append((True, t("doctor.models_onnx_missing"), "doctor.models_onnx"))
+
+    # pyannote: HF token set (cache is under same HF dir)
+    try:
+        import keyring
+
+        hf_token = (keyring.get_password("voiceforge", "huggingface") or "").strip()
+        if hf_token:
+            out.append((True, t("doctor.models_pyannote"), "doctor.models_pyannote"))
+        else:
+            out.append((True, t("doctor.models_pyannote_missing"), "doctor.models_pyannote"))
+    except Exception:
+        out.append((True, t("doctor.models_pyannote_missing"), "doctor.models_pyannote"))
+
+    # RAM available vs recommended (4 GB)
+    try:
+        import psutil
+
+        avail_gb = psutil.virtual_memory().available / 1024**3
+        out.append((avail_gb >= 4.0, t("doctor.ram_recommended", available_gb=avail_gb), "doctor.ram_recommended"))
+    except Exception:
+        out.append((True, "RAM: check skipped", "doctor.ram_recommended"))
+    return out
+
+
 def _doctor_checks() -> list[tuple[bool, str, str]]:
     """Run doctor checks. Returns list of (ok: bool, message: str, i18n_key: str)."""
     from voiceforge.core.config import Settings
@@ -241,6 +309,7 @@ def _doctor_checks() -> list[tuple[bool, str, str]]:
     results.extend(_doctor_check_rag_ring(cfg, t))
     results.append(_doctor_check_ollama(t))
     results.append(_doctor_check_ram(t))
+    results.extend(_doctor_check_models(cfg, t))
     for mod in ("litellm", "faster_whisper"):
         results.append(_doctor_check_module(mod, t))
     return results

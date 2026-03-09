@@ -116,5 +116,15 @@
   "feedback.model_ready": "Model ready.",
   "feedback.budget_warning": "⚠ Daily budget: {cost_today}/{limit} used. This analysis ~{estimate}.",
   "setup.keyring_fail": "Keyring save failed for {key}: {error}",
-  "setup.welcome_first_run": "Welcome to VoiceForge! Run `voiceforge setup` for guided configuration."
+  "setup.welcome_first_run": "Welcome to VoiceForge! Run `voiceforge setup` for guided configuration.",
+  "download_models.whisper_desc": "Downloading Whisper ({model_size}) (~{size_mb} MB)...",
+  "download_models.onnx_desc": "Checking ONNX embedder...",
+  "doctor.models_whisper": "Whisper ({size}): cached",
+  "doctor.models_whisper_missing": "Whisper ({size}): not cached",
+  "doctor.models_onnx": "ONNX embedder: cached",
+  "doctor.models_onnx_missing": "ONNX embedder: not cached",
+  "doctor.models_pyannote": "pyannote: cached (HF token set)",
+  "doctor.models_pyannote_missing": "pyannote: not cached or no HF token",
+  "doctor.models_disk_usage": "Models disk: {path} ~{size_mb} MB",
+  "doctor.ram_recommended": "RAM: {available_gb:.1f} GB available (recommended ≥4 GB)"
 }

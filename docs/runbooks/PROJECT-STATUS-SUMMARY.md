@@ -78,7 +78,7 @@
 | E5 | [#128](https://github.com/iurii-izman/voiceforge/issues/128) | Daemon Hardening: Auto-Start, Watchdog, Log, Shutdown | P0 | M | Backend | +12% DDR ✓ |
 | E6 | [#129](https://github.com/iurii-izman/voiceforge/issues/129) | Ollama Zero-Config Fallback | P1 | S | Backend | +7% DDR ✓ |
 | E7 | [#130](https://github.com/iurii-izman/voiceforge/issues/130) | Setup Wizard: `voiceforge setup` & First-Run | P1 | L | Backend | +15% Onboard ✓ |
-| E8 | [#131](https://github.com/iurii-izman/voiceforge/issues/131) | Model Pre-Download & Bootstrap | P1 | S | Backend | +8% Onboard |
+| E8 | [#131](https://github.com/iurii-izman/voiceforge/issues/131) | Model Pre-Download & Bootstrap | P1 | S | Backend | +8% Onboard ✓ |
 | E9 | [#132](https://github.com/iurii-izman/voiceforge/issues/132) | Post-Listen Auto-Analyze & Cost Estimate | P1 | M | Backend | +10% UF |
 | E10 | [#133](https://github.com/iurii-izman/voiceforge/issues/133) | Output Polish: History, Export, Daily Digest | P1 | M | Backend | +10% UF |
 | E11 | [#134](https://github.com/iurii-izman/voiceforge/issues/134) | Calendar Auto-Analyze & Notification Automation | P2 | L | Backend | +8% UF |
@@ -107,7 +107,7 @@ E1 ✓ → E2 ✓ → E3 ✓ → E4 ✓ → E5 ✓
 
 **Wave 2 — P1 core (3-4 недели, DDR 55→70):**
 ```
-E6 ✓ → E7 ✓ → E8 → E9 → E10 → E18
+E6 ✓ → E7 ✓ → E8 ✓ → E9 → E10 → E18
 ```
 
 **Wave 3 — P1 quality (2-3 недели):**
@@ -151,7 +151,7 @@ E11 → E16 → E17
 | # | Friction | Severity | Решается блоком |
 |---|----------|----------|-----------------|
 | F1 | Keyring setup — 3+ ручных команды + HF license | 🟢 | E7 (wizard) ✓ |
-| F2 | Первый download моделей без прогресса | 🔴 | E8, E3 |
+| F2 | Первый download моделей без прогресса | 🟢 | E8 ✓, E3 |
 | F3 | Два терминала для daemon + listen | 🟢 | E2 (meeting) ✓ |
 | F4 | Нет guided wizard / post-install guidance | 🟢 | E7 (setup) ✓ |
 | F5 | OOM при diarization — тихий skip | 🟡 | E4 (feedback) |
