@@ -18,6 +18,7 @@
 | Планы и приоритеты (roadmap 1–19, Phase A–D Steps 1–19, оставшееся до 100%) | [plans.md](plans.md)                                                                                                                         |
 | Аудит: статус, оставшееся до 100%, архив                                    | [audit/audit.md](audit/audit.md); снимки — [archive/audit/](archive/audit/)                                                                  |
 | Конфиг, env, keyring                                                        | [runbooks/config-env-contract.md](runbooks/config-env-contract.md), [runbooks/keyring-keys-reference.md](runbooks/keyring-keys-reference.md) |
+| Коды ошибок CLI/IPC (VF001–VF099)                                            | [error-codes.md](error-codes.md)                                                                                         |
 | Установка, сборка десктопа                                                  | [runbooks/installation-guide.md](runbooks/installation-guide.md), [runbooks/desktop-build-deps.md](runbooks/desktop-build-deps.md)           |
 | Управление документацией                                                    | [runbooks/doc-governance.md](runbooks/doc-governance.md)                                                                                     |
 | Инструкции Cursor Agent (автозагрузка)                                      | [AGENTS.md](../AGENTS.md) (корень репо)                                                                                                      |
@@ -61,6 +62,7 @@
 | README.md                            | Вход в документацию                                                                                           | Актуален                         |
 | DOCS-INDEX.md                        | Этот индекс                                                                                                   | Актуален                         |
 | first-meeting-5min.md                | Первая встреча за 5 минут                                                                                     | Актуален                         |
+| error-codes.md                       | Каталог кодов ошибок (VF001–VF099), причина и исправление (E14 #137)                                           | Актуален                         |
 | plans.md                             | Единый план: roadmap 1–19, Phase A–D (Steps 1–19), оставшееся до 100%                                         | Актуален                         |
 | roadmap-priority.md                  | Заглушка → [plans.md](plans.md)                                                                               | Объединён в plans.md             |
 | PROJECT_AUDIT_AND_ROADMAP.md         | Заглушка → [archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md](archive/audit/PROJECT_AUDIT_AND_ROADMAP_2026.md) | Архив                            |

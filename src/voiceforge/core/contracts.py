@@ -3,7 +3,29 @@
 from __future__ import annotations
 
 import json
+from enum import StrEnum
 from typing import Any
+
+
+class ErrorCode(StrEnum):
+    """E14 (#137): Canonical error codes for CLI/IPC. See docs/error-codes.md."""
+
+    # Session / data
+    SESSION_NOT_FOUND = "VF001"
+    ANALYZE_FAILED = "VF002"
+    ANALYZE_TIMEOUT = "VF003"
+    # Budget / limits
+    BUDGET_EXCEEDED = "VF010"
+    # Calendar / CalDAV
+    CALDAV_UPCOMING_FAILED = "VF020"
+    CALDAV_LIST_FAILED = "VF021"
+    CALDAV_POLL_FAILED = "VF022"
+    CALDAV_CREATE_EVENT_FAILED = "VF023"
+    # Config / env
+    CONFIG_INVALID = "VF030"
+    KEYRING_MISSING = "VF031"
+    # Generic
+    GENERIC = "VF099"
 
 
 class BudgetExceeded(Exception):

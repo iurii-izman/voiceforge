@@ -27,6 +27,7 @@ from voiceforge.cli.history_helpers import (
     history_list_result,
     history_search_result,
     history_session_detail_result,
+    render_sessions_table_rich,
     session_not_found_message,
 )
 from voiceforge.cli.meeting import run_meeting
@@ -40,9 +41,14 @@ from voiceforge.cli.status_helpers import (
     get_status_text,
 )
 from voiceforge.cli.watch_helpers import get_watch_banner, install_watch_stop_signal_handlers
-from voiceforge.core.config import Settings, get_default_config_yaml_path
+from voiceforge.core.config import (
+    Settings,
+    get_default_config_yaml_path,
+    get_effective_config_and_overrides,
+)
 from voiceforge.core.contracts import (
     BudgetExceeded,
+    ErrorCode,
     build_cli_error_payload,
     build_cli_success_payload,
     extract_error_message,
@@ -112,6 +118,42 @@ def config_init(
 ) -> None:
     """E7 (#130): Generate voiceforge.yaml with defaults and comments (quick alternative to full setup)."""
     run_config_init(overwrite=overwrite)
+
+
+@config_app.command("show")
+def config_show(
+    as_json: bool = typer.Option(False, "--json", help="Machine-readable JSON output"),
+) -> None:
+    """E14 (#137): Show effective config (defaults + yaml + env). Overridden values highlighted when text."""
+    config_dict, overridden = get_effective_config_and_overrides()
+    if as_json:
+        typer.echo(
+            json.dumps(
+                {"config": config_dict, "overridden": list(sorted(overridden))},
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
+    from rich.console import Console
+    from rich.table import Table
+    from rich.text import Text
+
+    table = Table(show_header=True, header_style="bold")
+    table.add_column("key")
+    table.add_column("value")
+    table.add_column("source", style="dim")
+    for key in sorted(config_dict.keys()):
+        val = config_dict[key]
+        if isinstance(val, list):
+            val_str = ",".join(str(x) for x in val) if val else ""
+        else:
+            val_str = str(val)
+        source = "overridden" if key in overridden else "default"
+        key_cell = Text(key, style="yellow") if key in overridden else key
+        val_cell = Text(val_str, style="yellow") if key in overridden else val_str
+        table.add_row(key_cell, val_cell, source)
+    Console().print(table)
 
 
 @app.command("download-models")
@@ -1034,7 +1076,7 @@ def analyze(
     error_message = _extract_error_message(display_text)
     if error_message is not None:
         if output == "json":
-            typer.echo(json.dumps(_cli_error_payload("ANALYZE_FAILED", error_message), ensure_ascii=False))
+            typer.echo(json.dumps(_cli_error_payload(ErrorCode.ANALYZE_FAILED.value, error_message), ensure_ascii=False))
         else:
             typer.echo(error_message, err=True)
         raise SystemExit(1)
@@ -1428,22 +1470,42 @@ def uninstall_service() -> None:
 
 
 def _cost_echo_text(data: dict) -> None:
-    """Emit cost report as text (S3776)."""
+    """Emit cost report as text; E14 (#137): use Rich table for by_model and by_day."""
+    from rich.console import Console
+    from rich.table import Table
+
     total = data.get("total_cost_usd") or 0
     calls = data.get("total_calls") or 0
-    typer.echo(t("cost.summary", total=total, calls=calls))
+    console = Console()
+    console.print(t("cost.summary", total=total, calls=calls))
     by_model = data.get("by_model") or []
     if by_model:
-        typer.echo(t("cost.by_models"))
+        console.print(t("cost.by_models"))
+        table = Table(show_header=True, header_style="bold")
+        table.add_column("model")
+        table.add_column("calls", justify="right")
+        table.add_column("cost_usd", justify="right")
         for row in by_model:
-            typer.echo(
-                t("cost.model_line", model=row.get("model", ""), cost=row.get("cost_usd") or 0, calls=row.get("calls") or 0)
+            table.add_row(
+                row.get("model", ""),
+                str(row.get("calls") or 0),
+                f"${(row.get('cost_usd') or 0):.4f}",
             )
+        console.print(table)
     by_day = data.get("by_day") or []
     if by_day:
-        typer.echo(t("cost.by_days"))
+        console.print(t("cost.by_days"))
+        table = Table(show_header=True, header_style="bold")
+        table.add_column("date")
+        table.add_column("calls", justify="right")
+        table.add_column("cost_usd", justify="right")
         for row in by_day[-10:]:
-            typer.echo(t("cost.day_line", date=row.get("date", ""), cost=row.get("cost_usd") or 0, calls=row.get("calls") or 0))
+            table.add_row(
+                row.get("date", ""),
+                str(row.get("calls") or 0),
+                f"${(row.get('cost_usd') or 0):.4f}",
+            )
+        console.print(table)
 
 
 @app.command()
@@ -1485,19 +1547,35 @@ def status(
         False, "--doctor", help="Диагностика окружения (конфиг, keyring, RAG, ring, Ollama, RAM, импорты)"
     ),
 ) -> None:
-    """Show RAM and cost snapshot."""
+    """Show RAM and cost snapshot. E14 (#137): Rich panel when --output text."""
     if doctor:
-        _emit_success(output, get_doctor_data(), get_doctor_text())
+        if output == "json":
+            typer.echo(json.dumps(_cli_success_payload(get_doctor_data()), ensure_ascii=False))
+        else:
+            from rich.console import Console
+            from rich.panel import Panel
+
+            Console().print(Panel(get_doctor_text(), title="Doctor", border_style="blue"))
         return
     if detailed:
         cfg = _get_config()
-        _emit_success(
-            output,
-            get_status_detailed_data(cfg.budget_limit_usd),
-            get_status_detailed_text(cfg.budget_limit_usd),
-        )
+        if output == "json":
+            typer.echo(json.dumps(_cli_success_payload(get_status_detailed_data(cfg.budget_limit_usd)), ensure_ascii=False))
+        else:
+            from rich.console import Console
+            from rich.panel import Panel
+
+            Console().print(
+                Panel(get_status_detailed_text(cfg.budget_limit_usd), title="Status (detailed)", border_style="green")
+            )
         return
-    _emit_success(output, get_status_data(), get_status_text())
+    if output == "json":
+        typer.echo(json.dumps(_cli_success_payload(get_status_data()), ensure_ascii=False))
+        return
+    from rich.console import Console
+    from rich.panel import Panel
+
+    Console().print(Panel(get_status_text(), title="VoiceForge Status", border_style="green"))
 
 
 @app.command("sessions-to-ical")
@@ -1810,7 +1888,7 @@ def _history_echo_error_data(data: Any) -> None:
 def _history_echo_session_not_found(data: Any, output: str) -> None:
     """Emit session not found error for history --id (S3776)."""
     if output == "json":
-        typer.echo(json.dumps(_cli_error_payload("SESSION_NOT_FOUND", data), ensure_ascii=False))
+        typer.echo(json.dumps(_cli_error_payload(ErrorCode.SESSION_NOT_FOUND.value, data), ensure_ascii=False))
     else:
         typer.echo(data, err=True)
 
@@ -1827,6 +1905,12 @@ def _history_echo(kind: str, data: Any, exit_on_error: bool = True) -> None:
         return
     if kind == "json":
         typer.echo(json.dumps(_cli_success_payload(data), ensure_ascii=False))
+        return
+    if kind == "rich_sessions":
+        from rich.console import Console
+
+        console = Console()
+        console.print(render_sessions_table_rich(data))
         return
     if kind == "lines":
         for line in data:
@@ -1876,7 +1960,7 @@ def _history_resolve(
             _history_echo_session_not_found(data, output)
             raise SystemExit(1)
         return (kind, data, False)
-    kind, data = history_list_result(log_db, last_n, output, offset=offset)
+    kind, data = history_list_result(log_db, last_n, output, offset=offset, use_rich=(output == "text"))
     return (kind, data, True)
 
 
@@ -1948,7 +2032,7 @@ def calendar_upcoming(
     events, err = get_upcoming_events(hours_ahead=hours)
     if err:
         if output == "json":
-            typer.echo(json.dumps(_cli_error_payload("CALDAV_UPCOMING_FAILED", err), ensure_ascii=False))
+            typer.echo(json.dumps(_cli_error_payload(ErrorCode.CALDAV_UPCOMING_FAILED.value, err), ensure_ascii=False))
         else:
             typer.echo(t(_I18N_CALENDAR_POLL_ERROR, msg=err), err=True)
             hint = _hint_for_error(err)
@@ -1975,7 +2059,7 @@ def calendar_list(
     calendars, err = list_calendars()
     if err:
         if output == "json":
-            typer.echo(json.dumps(_cli_error_payload("CALDAV_LIST_FAILED", err), ensure_ascii=False))
+            typer.echo(json.dumps(_cli_error_payload(ErrorCode.CALDAV_LIST_FAILED.value, err), ensure_ascii=False))
         else:
             typer.echo(t(_I18N_CALENDAR_POLL_ERROR, msg=err), err=True)
             hint = _hint_for_error(err)
@@ -2054,7 +2138,7 @@ def calendar_poll(
     events, err = poll_events_started_in_last(minutes=minutes)
     if err is not None:
         if output == "json":
-            typer.echo(json.dumps(_cli_error_payload("CALDAV_POLL_FAILED", err), ensure_ascii=False))
+            typer.echo(json.dumps(_cli_error_payload(ErrorCode.CALDAV_POLL_FAILED.value, err), ensure_ascii=False))
         else:
             typer.echo(t(_I18N_CALENDAR_POLL_ERROR, msg=err), err=True)
             hint = _hint_for_error(err)
@@ -2100,7 +2184,10 @@ def calendar_create_from_session(
         if not meta:
             if output == "json":
                 typer.echo(
-                    json.dumps(_cli_error_payload("SESSION_NOT_FOUND", f"Session {session_id} not found"), ensure_ascii=False)
+                    json.dumps(
+                        _cli_error_payload(ErrorCode.SESSION_NOT_FOUND.value, f"Session {session_id} not found"),
+                        ensure_ascii=False,
+                    )
                 )
             else:
                 typer.echo(session_not_found_message(session_id), err=True)
@@ -2121,7 +2208,7 @@ def calendar_create_from_session(
     )
     if err is not None:
         if output == "json":
-            typer.echo(json.dumps(_cli_error_payload("CALDAV_CREATE_EVENT_FAILED", err), ensure_ascii=False))
+            typer.echo(json.dumps(_cli_error_payload(ErrorCode.CALDAV_CREATE_EVENT_FAILED.value, err), ensure_ascii=False))
         else:
             typer.echo(t(_I18N_CALENDAR_POLL_ERROR, msg=err), err=True)
             hint = _hint_for_error(err)

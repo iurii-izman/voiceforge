@@ -436,7 +436,7 @@ class VoiceForgeDaemon:
     def create_event_from_session(self, session_id: int, calendar_url: str | None = None) -> str:
         """Create CalDAV event from session (block 79, #95). Returns JSON envelope with event_uid or error."""
         from voiceforge.calendar import create_event
-        from voiceforge.core.contracts import build_cli_error_payload, build_cli_success_payload
+        from voiceforge.core.contracts import ErrorCode, build_cli_error_payload, build_cli_success_payload
         from voiceforge.core.transcript_log import TranscriptLog
 
         try:
@@ -445,7 +445,7 @@ class VoiceForgeDaemon:
                 meta = log_db.get_session_meta(session_id)
                 if not meta:
                     return json.dumps(
-                        build_cli_error_payload("SESSION_NOT_FOUND", f"Session {session_id} not found"),
+                        build_cli_error_payload(ErrorCode.SESSION_NOT_FOUND.value, f"Session {session_id} not found"),
                         ensure_ascii=False,
                     )
                 started_at, ended_at, _ = meta
@@ -463,12 +463,12 @@ class VoiceForgeDaemon:
                 calendar_url=cal_url,
             )
             if err:
-                return json.dumps(build_cli_error_payload("CALDAV_CREATE_EVENT_FAILED", err), ensure_ascii=False)
+                return json.dumps(build_cli_error_payload(ErrorCode.CALDAV_CREATE_EVENT_FAILED.value, err), ensure_ascii=False)
             return json.dumps(build_cli_success_payload({"event_uid": event_uid}), ensure_ascii=False)
         except Exception as e:
             log.warning("daemon.create_event_from_session_failed", session_id=session_id, error=str(e))
             return json.dumps(
-                build_cli_error_payload("CALDAV_CREATE_EVENT_FAILED", str(e)),
+                build_cli_error_payload(ErrorCode.CALDAV_CREATE_EVENT_FAILED.value, str(e)),
                 ensure_ascii=False,
             )
 

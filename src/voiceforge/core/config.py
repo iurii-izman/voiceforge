@@ -339,6 +339,24 @@ class Settings(BaseSettings):
         return (f"ollama/{model}", True)
 
 
+def get_effective_config_and_overrides() -> tuple[dict[str, Any], set[str]]:
+    """E14 (#137): Effective config dict and set of keys overridden from defaults (yaml/env).
+    Returns (config_dict, overridden_keys). config_dict is flat key -> value for display."""
+    effective = Settings()
+    # Build default instance (no env/yaml) via model_construct + post-init for derived fields
+    default_instance = Settings.model_construct()
+    if default_instance.daily_budget_limit_usd is None and default_instance.budget_limit_usd:
+        object.__setattr__(default_instance, "daily_budget_limit_usd", default_instance.budget_limit_usd / 30.0)
+    raw = effective.model_dump()
+    overridden: set[str] = set()
+    for key in raw:
+        eff_val = raw.get(key)
+        def_val = getattr(default_instance, key, None)
+        if eff_val != def_val:
+            overridden.add(key)
+    return raw, overridden
+
+
 def default_config_yaml_content() -> str:
     """E7 (#130): Default voiceforge.yaml content with comments for config init / setup wizard."""
     return """# VoiceForge config (voiceforge.yaml)

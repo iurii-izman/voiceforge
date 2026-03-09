@@ -7,22 +7,21 @@ from voiceforge.core.transcript_log import TranscriptLog
 
 
 def test_history_list_default_human_friendly_has_columns(tmp_path) -> None:
-    """Default list output (text) includes date, duration, speakers, summary columns."""
+    """E14 (#137): Default list output (text) returns rich_sessions for Rich table."""
     log = TranscriptLog(db_path=tmp_path / "h.db")
     try:
         log.log_session(
             [{"start_sec": 0, "end_sec": 1, "speaker": "A", "text": "hello"}],
             model="m",
         )
-        kind, lines = hh.history_list_result(log, 5, "text")
-        assert kind == "lines"
-        assert isinstance(lines, list)
-        assert len(lines) >= 3
-        header = lines[0]
-        assert "date" in header.lower()
-        assert "duration" in header.lower()
-        assert "speakers" in header.lower()
-        assert "summary" in header.lower()
+        kind, data = hh.history_list_result(log, 5, "text")
+        assert kind == "rich_sessions"
+        assert isinstance(data, list)
+        assert len(data) == 1
+        s = data[0]
+        assert hasattr(s, "id") and hasattr(s, "started_at")
+        assert hasattr(s, "duration_sec") and hasattr(s, "speaker_count")
+        assert hasattr(s, "summary_preview")
     finally:
         log.close()
 

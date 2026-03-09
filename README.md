@@ -20,7 +20,7 @@ Core CLI commands:
 - `install-service`, `uninstall-service`
 - `web` (local Web UI)
 
-**Shell completion:** `voiceforge --install-completion` (then add the emitted line to your shell rc, or `voiceforge --install-completion bash` / `zsh`).
+**Shell completion:** `voiceforge --install-completion bash` (or `zsh`). Add the emitted line to your shell rc.
 
 ## Requirements
 

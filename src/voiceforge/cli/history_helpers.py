@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import re
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from rich.table import Table
 
 
 def session_not_found_message(session_id: int) -> str:
@@ -231,6 +234,32 @@ def render_sessions_table_lines_human(sessions: list[object]) -> list[str]:
     return lines
 
 
+def render_sessions_table_rich(sessions: list[object]) -> Table:
+    """E14 (#137): Rich table for history list (date, duration, speakers, summary preview)."""
+    from rich.table import Table
+
+    table = Table(show_header=True, header_style="bold")
+    table.add_column("id", style="dim")
+    table.add_column("date")
+    table.add_column("duration")
+    table.add_column("speakers", justify="right")
+    table.add_column("summary")
+    for s in sessions:
+        started_at = getattr(s, "started_at", "")
+        date_part = started_at[:10] if len(started_at) >= 10 else started_at
+        duration_sec = getattr(s, "duration_sec", 0.0)
+        speaker_count = getattr(s, "speaker_count", 0)
+        preview = (getattr(s, "summary_preview", "") or "")[:200].strip() or "—"
+        table.add_row(
+            str(getattr(s, "id", 0)),
+            date_part,
+            f"{duration_sec:.1f}s",
+            str(speaker_count),
+            preview,
+        )
+    return table
+
+
 def highlight_search_term(snippet: str, term: str) -> str:
     """E10 (#133): wrap term in ANSI bold for terminal highlight (case-insensitive)."""
     if not term or not snippet:
@@ -345,12 +374,14 @@ def history_session_detail_result(log_db: Any, session_id: int, output: str) -> 
     return ("lines", render_session_detail_lines(session_id, segments, analysis))
 
 
-def history_list_result(log_db: Any, last_n: int, output: str, offset: int = 0) -> tuple[str, Any]:
-    """Return ("json", payload) | ("lines", list) | ("message", i18n_key). E10: human-friendly default."""
+def history_list_result(log_db: Any, last_n: int, output: str, offset: int = 0, use_rich: bool = True) -> tuple[str, Any]:
+    """Return ("json", payload) | ("lines", list) | ("rich_sessions", list) | ("message", i18n_key). E14: rich table when text."""
     if output == "json":
         sessions = log_db.get_sessions(last_n=last_n, offset=offset)
         return ("json", build_sessions_payload(sessions) if sessions else empty_sessions_payload())
     display_sessions = log_db.get_sessions_for_display(last_n=last_n, offset=offset)
     if not display_sessions:
         return ("message", "history.no_sessions")
+    if use_rich and output == "text":
+        return ("rich_sessions", display_sessions)
     return ("lines", render_sessions_table_lines_human(display_sessions))
