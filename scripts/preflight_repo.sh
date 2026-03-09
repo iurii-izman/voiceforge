@@ -17,6 +17,7 @@ Checks:
   - repository governance/security baseline (unless --skip-governance)
   - lightweight smoke checks (only with --with-tests)
 EOF
+  return 0
 }
 
 while [[ $# -gt 0 ]]; do

@@ -12,7 +12,7 @@ import pytest
 
 from voiceforge.core.daemon import (
     VoiceForgeDaemon,
-    _calendar_autostart_try_start,
+    _calendar_try_start_listen,
     _cancel_purge_then_service_reraise,
     _run_one_retention_purge,
     _sd_notify,
@@ -295,7 +295,7 @@ def test_daemon_upcoming_events_skip_and_create_event_paths(monkeypatch) -> None
 
     monkeypatch.setattr("voiceforge.calendar.create_event", lambda **kwargs: (None, "caldav failed"))
     error = json.loads(daemon.create_event_from_session(5))
-    assert error["error"]["code"] == "CALDAV_CREATE_EVENT_FAILED"
+    assert error["error"]["code"] == "VF023"
 
 
 def test_daemon_create_event_from_session_not_found_and_exception(monkeypatch) -> None:
@@ -310,11 +310,11 @@ def test_daemon_create_event_from_session_not_found_and_exception(monkeypatch) -
     daemon = _make_daemon()
     monkeypatch.setattr("voiceforge.core.transcript_log.TranscriptLog", MissingLogDb)
     not_found = json.loads(daemon.create_event_from_session(99))
-    assert not_found["error"]["code"] == "SESSION_NOT_FOUND"
+    assert not_found["error"]["code"] == "VF001"
 
     monkeypatch.setattr("voiceforge.core.transcript_log.TranscriptLog", lambda: (_ for _ in ()).throw(RuntimeError("db broken")))
     failure = json.loads(daemon.create_event_from_session(99))
-    assert failure["error"]["code"] == "CALDAV_CREATE_EVENT_FAILED"
+    assert failure["error"]["code"] == "VF023"
 
 
 def test_daemon_streaming_partial_and_final_update_state(monkeypatch) -> None:
@@ -514,11 +514,11 @@ def test_calendar_autostart_try_start_starts_only_for_window(monkeypatch) -> Non
     )
     monkeypatch.setattr("voiceforge.core.daemon.datetime", fake_now)
 
-    _calendar_autostart_try_start(daemon, 15)
+    _calendar_try_start_listen(daemon, 15)
     assert started == [1]
 
     monkeypatch.setattr("voiceforge.calendar.get_upcoming_events", lambda hours_ahead=1: ([], None))
-    _calendar_autostart_try_start(daemon, 15)
+    _calendar_try_start_listen(daemon, 15)
     assert started == [1]
 
 

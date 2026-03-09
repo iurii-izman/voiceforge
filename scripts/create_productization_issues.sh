@@ -88,6 +88,7 @@ create_issue() {
 
     echo "  Fields set ✓"
     echo "$number"
+    return 0
 }
 
 echo "=== Creating Productization Issues ==="

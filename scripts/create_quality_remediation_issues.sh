@@ -35,11 +35,13 @@ ensure_label() {
 find_issue_number() {
   local title="$1"
   gh issue list --repo "$REPO" --state all --limit 200 --json number,title --jq ".[] | select(.title == \"${title}\") | .number" | head -n1
+  return 0
 }
 
 find_item_id() {
   local number="$1"
   gh project item-list 1 --owner iurii-izman --limit 200 --format json --jq ".items[] | select(.content.number==${number}) | .id" | head -n1
+  return 0
 }
 
 ensure_issue() {
@@ -77,6 +79,7 @@ ensure_issue() {
   gh project item-edit --project-id "$PROJECT_ID" --id "$item_id" --field-id "$AREA_FIELD" --single-select-option-id "$area" >/dev/null
 
   printf '%s\t%s\n' "$number" "$title"
+  return 0
 }
 
 ensure_label "quality-remediation" "0052CC" "Static analysis, quality gate and security debt remediation track"
