@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-09 (E17 #140 Security закрыт; Wave 4 завершён)
+**Обновлено:** 2026-03-09 (Phase E Waves 1–4 завершены; следующего E-блока нет)
 
 ---
 
@@ -19,9 +19,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** E17 (#140) Security: optional SQLite encryption (encrypt_db, sqlcipher3, key db_encryption_key), API key audit log (structlog + metrics.db api_key_access), AppArmor profile security/voiceforge.apparmor, docs (security.md, security-and-dependencies, config-env-contract, keyring), tests test_audit_log.py и test_encryption.py.
+**Сделано в сессии:** Подтверждено, что все Phase E Waves 1–4 закрыты; открытых E-issues для автопилота нет. Исправлена проверка release metadata (check_release_metadata.py: all extra с `security` и `web-async`). Preflight (--with-tests) пройден. Обновлены PROJECT-STATUS-SUMMARY (Post–Wave 4) и next-iteration-focus.
 
-**Следующий шаг:** Wave 4 завершён. Взять следующий блок по доске или приоритету из PROJECT-STATUS-SUMMARY (например следующая волна или maintenance).
+**Следующий шаг:** Новых E-блоков по доске нет. Варианты: (1) maintenance — preflight, доки, мелкие фиксы; (2) явная задача от пользователя (новый scope/issue); (3) ожидание #65 (CVE upstream). При появлении новой задачи — перевести issue в In Progress и выполнить по чеклисту.
 
 ---
 
@@ -38,6 +38,7 @@
 | **Wave 4 (P2 polish)** | #134✓→#139✓→#140✓ | **Done** | E17 Security ✓ |
 | **Decision log** | #143✓, #144✓ | Resolved | Scope guard для автопилота; новых user decisions сейчас не нужно |
 | **External wait** | #65 | Waiting upstream | CVE — ждём fix |
+| **Post–Wave 4** | — | No open E-block | Следующая работа: maintenance / user-defined task / #65 когда будет fix |
 
 ---
 

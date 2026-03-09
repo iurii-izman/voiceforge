@@ -138,6 +138,8 @@ E11 (narrow CalDAV scope) ✓ → E16 ✓ → E17 ✓
 
 **Scope guard:** E20/E21 больше не требуют решения пользователя; их policy уже зафиксирован в [phase-e-decision-log.md](phase-e-decision-log.md).
 
+**Post–Wave 4 (2026-03-09):** Все autopilot E-блоки (E1–E19, #124–#142) закрыты. Открытых E-issues для автопилота нет. Placeholders #148–#151 не активировать. Единственный открытый issue — #65 (CVE, ожидание upstream). Следующие сессии: maintenance, docs sync, preflight-driven fixes или явная задача от пользователя.
+
 ---
 
 ## 3. Confidence Checklist

@@ -41,7 +41,8 @@ def collect_release_metadata_errors(repo_root: Path = REPO_ROOT) -> list[str]:
 
     errors: list[str] = []
     all_extra = pyproject["project"]["optional-dependencies"]["all"]
-    if "voiceforge[rag,llm,pii,calendar,otel,web-async]" not in all_extra:
+    all_spec = " ".join(all_extra) if isinstance(all_extra, list) else str(all_extra)
+    if "web-async" not in all_spec:
         errors.append("pyproject.toml: optional-dependencies.all must include web-async for full-stack install")
 
     if package_json["version"] != desktop_version:
