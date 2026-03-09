@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-09 (S7500: raise_when_called в conftest, замена generator-throw в тестах)
+**Обновлено:** 2026-03-09 (S108, S5655: пустые блоки и cast в тестах)
 
 ---
 
@@ -19,9 +19,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Sonar S7500: в conftest добавлен raise_when_called(exc); во всех тестах заменён паттерн lambda: (_ for _ in ()).throw(E) на raise_when_called(E) (test_daemon_batch116, test_main_status_export_action_items, test_llm_router_batch115, test_rag_watcher, test_coverage_hotspots_batch99, test_web_status_export_action_items). 15 мест. Тесты test_daemon_batch116 + test_rag_watcher (затронутые) — 21 passed. test_llm_router/test_coverage в некоторых средах дают segfault (sentencepiece/litellm) — не из-за правок.
+**Сделано в сессии:** (1) S108: в test_web_status_export_action_items заполнены 4 пустых блока with urllib.request.urlopen(...) as _: pass → as resp: resp.read() + комментарий. (2) S5655: в test_daemon_batch116 добавлены cast(DaemonVoiceForgeInterface, ...) для iface (3 вызова) и cast(asyncio.Task[None], ...) для _cancel_purge_then_service_reraise. Тесты: 28 passed (test_daemon_batch116 + test_web_status_export_action_items).
 
-**Следующий шаг:** Продолжить Sonar (S3776, S5655) или roadmap/docs. sonar_fetch_issues.py для счёта после пуша.
+**Следующий шаг:** Продолжить Sonar (S3776, S5713, S7503, shell/JS) или roadmap/docs.
 
 ---
 

@@ -6,6 +6,7 @@ import asyncio
 import json
 import sys
 from types import SimpleNamespace
+from typing import cast
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -20,6 +21,8 @@ from voiceforge.core.daemon import (
     _watchdog_task,
 )
 from voiceforge.core.dbus_service import DaemonVoiceForgeInterface
+
+# Casts for S5655: tests use SimpleNamespace/mock where interface is expected
 
 
 def _make_daemon(
@@ -74,7 +77,10 @@ class _FakeThread:
 
 def test_daemon_analyze_success_logs_session_and_emits_chunks(monkeypatch) -> None:
     chunks: list[str] = []
-    iface = SimpleNamespace(StreamingAnalysisChunk=lambda chunk: chunks.append(chunk))
+    iface = cast(
+        DaemonVoiceForgeInterface,
+        SimpleNamespace(StreamingAnalysisChunk=lambda chunk: chunks.append(chunk)),
+    )
     daemon = _make_daemon(iface=iface)
 
     def fake_run_analyze_pipeline(seconds, template=None, stream_callback=None):
@@ -162,11 +168,10 @@ def test_daemon_listen_start_and_stop_manage_threads(monkeypatch) -> None:
 
 def test_daemon_dbus_streaming_emitter_loop_handles_queue_item(monkeypatch) -> None:
     emitted: list[tuple[str, str, int, bool]] = []
-    daemon = _make_daemon(
-        iface=SimpleNamespace(
-            TranscriptChunk=lambda *args: emitted.append(args) or daemon._dbus_emitter_stop.set()  # type: ignore[name-defined]
-        )
+    iface = SimpleNamespace(
+        TranscriptChunk=lambda *args: emitted.append(args) or daemon._dbus_emitter_stop.set()  # type: ignore[name-defined]
     )
+    daemon = _make_daemon(iface=cast(DaemonVoiceForgeInterface, iface))
     daemon._streaming_chunk_queue.put(("hello", "SPEAKER_01", 1.25, True))
 
     daemon._dbus_streaming_emitter_loop()
@@ -175,7 +180,7 @@ def test_daemon_dbus_streaming_emitter_loop_handles_queue_item(monkeypatch) -> N
 
 
 def test_daemon_dbus_streaming_emitter_loop_logs_errors(monkeypatch) -> None:
-    daemon = _make_daemon(iface=SimpleNamespace(TranscriptChunk=lambda *args: None))
+    daemon = _make_daemon(iface=cast(DaemonVoiceForgeInterface, SimpleNamespace(TranscriptChunk=lambda *args: None)))
 
     def fake_get(timeout):
         daemon._dbus_emitter_stop.set()
@@ -494,7 +499,7 @@ async def test_run_one_retention_purge_and_cancel_helper(monkeypatch) -> None:
     purge_task = _Task(raises_cancel=True)
     service_task = _Task(raises_cancel=True)
     with pytest.raises(asyncio.CancelledError):
-        await _cancel_purge_then_service_reraise(purge_task, service_task)
+        await _cancel_purge_then_service_reraise(cast(asyncio.Task[None], purge_task), cast(asyncio.Task[None], service_task))
     assert purge_task.cancelled is True
     assert service_task.cancelled is True
 

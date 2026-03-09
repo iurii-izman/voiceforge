@@ -98,8 +98,8 @@ def test_server_get_export_validation_id_required(monkeypatch, tmp_path) -> None
         with urllib.request.urlopen(
             f"http://127.0.0.1:{port}/api/export?format=md",
             timeout=2,
-        ) as _:
-            pass
+        ) as resp:
+            resp.read()  # S108: consume response; assertions in except/else
     except urllib.error.HTTPError as exc:
         assert exc.code == 400
         payload = json.loads(exc.read().decode("utf-8"))
@@ -125,8 +125,8 @@ def test_server_get_export_validation_format(monkeypatch, tmp_path) -> None:
         with urllib.request.urlopen(
             f"http://127.0.0.1:{port}/api/export?id=1&format=docx",
             timeout=2,
-        ) as _:
-            pass
+        ) as resp:
+            resp.read()  # S108: consume response; assertions in except/else
     except urllib.error.HTTPError as exc:
         assert exc.code == 400
         payload = json.loads(exc.read().decode("utf-8"))
@@ -156,8 +156,8 @@ def test_server_get_export_session_not_found(monkeypatch, tmp_path) -> None:
         with urllib.request.urlopen(
             f"http://127.0.0.1:{port}/api/export?id=999&format=md",
             timeout=2,
-        ) as _:
-            pass
+        ) as resp:
+            resp.read()  # S108: consume response; assertions in except/else
     except urllib.error.HTTPError as exc:
         assert exc.code == 404
         payload = json.loads(exc.read().decode("utf-8"))
@@ -215,8 +215,8 @@ def test_server_get_status_exception_returns_500(monkeypatch, tmp_path) -> None:
         with urllib.request.urlopen(
             f"http://127.0.0.1:{port}/api/status",
             timeout=2,
-        ) as _:
-            pass
+        ) as resp:
+            resp.read()  # S108: consume response; assertions in except/else
     except urllib.error.HTTPError as exc:
         assert exc.code == 500
         payload = json.loads(exc.read().decode("utf-8"))
