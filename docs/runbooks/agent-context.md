@@ -2,7 +2,7 @@
 
 Единый контекст для Cursor-агента. Новый чат: приложи этот файл (@docs/runbooks/agent-context.md) — не ищи по проекту, работай по этому документу. Для продолжения — @docs/runbooks/next-iteration-focus.md (обновляет агент в конце сессии).
 
-**Индекс документации (актуальность):** `docs/DOCS-INDEX.md`. **Порядок в доках (архив, источники правды):** [doc-governance.md](doc-governance.md). **AI tooling и source of truth:** [ai-tooling-setup.md](ai-tooling-setup.md). **Автопилот конца сессии:** `.cursor/rules/agent-session-handoff.mdc` (копия в репо: [agent-session-handoff-rule.md](agent-session-handoff-rule.md)). **Max-autopilot и batching:** [cursor.md](cursor.md), [planning.md](planning.md), [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md).
+**Индекс документации (актуальность):** `docs/DOCS-INDEX.md`. **Порядок в доках (архив, источники правды):** [doc-governance.md](doc-governance.md). **AI tooling и source of truth:** [ai-tooling-setup.md](ai-tooling-setup.md). **Quality remediation snapshot:** [quality-audit-2026-03.md](quality-audit-2026-03.md). **Автопилот конца сессии:** `.cursor/rules/agent-session-handoff.mdc` (копия в репо: [agent-session-handoff-rule.md](agent-session-handoff-rule.md)). **Max-autopilot и batching:** [cursor.md](cursor.md), [planning.md](planning.md), [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md).
 
 ---
 
@@ -88,9 +88,9 @@
 В начале **каждого** нового чата вставлять этот блок (и при необходимости дописать задачу). Агент по нему знает: контекст, keyring, что в конце сессии делать коммит/пуш и обновлять next-iteration-focus.
 
 ```
-Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Режим Cursor и batching: @docs/runbooks/cursor.md. При работе по доске и issues: @docs/runbooks/planning.md. Сводный статус и приоритеты: @docs/runbooks/PROJECT-STATUS-SUMMARY.md. Scope guard: @docs/runbooks/phase-e-decision-log.md. AI/tooling source of truth: @docs/runbooks/ai-tooling-setup.md.
+Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Режим Cursor и batching: @docs/runbooks/cursor.md. При работе по доске и issues: @docs/runbooks/planning.md. Сводный статус и приоритеты: @docs/runbooks/PROJECT-STATUS-SUMMARY.md. Quality remediation snapshot: @docs/runbooks/quality-audit-2026-03.md. Scope guard: @docs/runbooks/phase-e-decision-log.md. AI/tooling source of truth: @docs/runbooks/ai-tooling-setup.md.
 
-Режим: максимальный автопилот и максимум согласованных блоков за итерацию. Выбирай 1 главный P0/P1 блок и до 2 соседних подблоков только если это тот же subsystem, те же файлы или те же проверки. Не смешивай unrelated surfaces. Работай по существующим issue и policy-артефактам проекта; не создавай новые E-issues без отдельной причины. Делай полный цикл: код, targeted tests, docs/контракты, GitHub Project status, commit/push, обновление next-iteration-focus.
+Режим: максимальный автопилот и максимум согласованных блоков за итерацию. Выбирай 1 главный P0/P1 блок и до 2 соседних подблоков только если это тот же subsystem, те же файлы или те же проверки. Не смешивай unrelated surfaces. Работай по существующим issue и policy-артефактам проекта; не создавай новые feature issues без отдельной причины. Делай полный цикл: код, targeted tests, docs/контракты, GitHub Project status, commit/push, обновление next-iteration-focus.
 
 Ключи и доступы только в keyring (voiceforge). Fedora Atomic/toolbox/uv; базово `uv sync --extra all`, при нужде подключай профильные extras. Для infra/docs/governance cleanup сначала запускай `./scripts/preflight_repo.sh --with-tests`. В конце сессии: тесты, коммит, пуш, обновить next-iteration-focus, выдать prompt для следующего чата.
 

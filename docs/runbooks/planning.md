@@ -11,6 +11,7 @@
 - **Задачи Phase A–D (issues #55–73):** [audit/audit.md](../audit/audit.md) — статус W1–W20, маппинг на issues.
 - **Следующий шаг и фокус итерации:** [next-iteration-focus.md](next-iteration-focus.md) — обновляет агент в конце сессии.
 - **Границы scope для Phase E:** [phase-e-decision-log.md](phase-e-decision-log.md) — зафиксированные решения по E19-E21.
+- **Следующая remediation wave:** [quality-audit-2026-03.md](quality-audit-2026-03.md) — QA1-QA6, GitHub Security, Sonar, mypy.
 - **История (что сделано):** [history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
 - **Приоритет фич (roadmap 1–19):** [plans.md](../plans.md) — порядок внедрения, что сделано; детали по задачам — [audit/audit.md](../audit/audit.md).
 
@@ -75,6 +76,8 @@ gh auth refresh -s project
 ### Рекомендуемые ручные views
 
 - `Autopilot Next`: `label:autopilot -label:freeze -label:defer -label:accept-later`
+- `Quality Remediation`: `label:quality-remediation`
+- `Security First`: `label:quality-remediation label:area:security OR label:quality-remediation label:p0`
 - `Frozen / Maintenance Only`: `label:freeze, label:maintenance-only`
 - `Deferred / Accept Later`: `label:defer, label:accept-later`
 - `Decision Log`: `label:decision-locked`

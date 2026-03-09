@@ -2,7 +2,7 @@
 
 **Назначение:** один источник правды по тому, какой документ за что отвечает и актуален ли он. При изменении кода/фич обновлять соответствующий док и при необходимости этот индекс.
 
-**Обновлено:** 2026-03-09 (docs/config drift cleaned; stubs restored; Phase E scope synchronized; AI tooling + security decision log + docs consistency added)
+**Обновлено:** 2026-03-09 (Phase E closed; QA remediation wave added; security/logging and Sonar audit synced)
 
 ---
 
@@ -14,6 +14,7 @@
 | Контекст агента, правила, конец сессии                                      | [runbooks/agent-context.md](runbooks/agent-context.md)                                                                                       |
 | Следующий шаг / фокус итерации                                              | [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md)                                                                         |
 | Scope guard для Phase E                                                     | [runbooks/phase-e-decision-log.md](runbooks/phase-e-decision-log.md)                                                                         |
+| Quality/security remediation snapshot                                       | [runbooks/quality-audit-2026-03.md](runbooks/quality-audit-2026-03.md)                                                                       |
 | Текущие задачи и аудит (Phase A–D, W1–W20)                                  | [audit/audit.md](audit/audit.md)                                                                                                             |
 | Планы и приоритеты (roadmap 1–19, Phase A–D Steps 1–19, оставшееся до 100%) | [plans.md](plans.md)                                                                                                                         |
 | Аудит: статус, оставшееся до 100%, архив                                    | [audit/audit.md](audit/audit.md); снимки — [archive/audit/](archive/audit/)                                                                  |
@@ -122,6 +123,7 @@
 | telegram-bot-setup.md, pyannote-version.md                    | Фичи                                                                                    | Актуален                         |
 | repo-and-git-governance.md                                    | Репо, main, Git, PR, теги, issues, Sonar                                                | Актуален                         |
 | release-and-quality.md                                        | Релиз, откат, alpha2 checklist; Alpha0.1 DoD сохранён как исторический baseline         | Актуален                         |
+| quality-audit-2026-03.md                                      | Post-Phase-E quality remediation wave: GitHub Security, Sonar, mypy, QA1-QA6             | Актуален                         |
 | lifecycle-smoke.md                                            | Smoke-шаги для audio/STT и RAG lifecycle (#105, #106)                                  | Актуален                         |
 | pre-beta-sonar-github.md                                      | Чеклист Sonar и GitHub перед бета-релизом (PR, issues, порядок)                         | Актуален                         |
 | PROJECT-STATUS-SUMMARY.md                                     | Итог по проекту (12 разделов): планы↔код, audit delta, critical path, риски, приоритеты | Актуален                         |

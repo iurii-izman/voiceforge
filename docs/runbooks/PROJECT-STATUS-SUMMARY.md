@@ -1,6 +1,6 @@
 # VoiceForge: Project Status & Productization Roadmap
 
-**Обновлено:** 2026-03-09 (E17 #140 Security закрыт). **Версия:** 0.2.0-alpha.2. **Стадия:** Phase E — Daily Driver.
+**Обновлено:** 2026-03-09 (Phase E закрыт; post-Phase-E quality remediation wave открыта). **Версия:** 0.2.0-alpha.2. **Стадия:** Post-Phase-E maintenance + quality remediation.
 **Предыдущий цикл (#97-#123):** закрыт полностью; архив: [history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
 
 ---
@@ -136,9 +136,31 @@ E19 (#142) ✓ → Tauri E2E flow, tray, hotkeys, packaging verification
 E11 (narrow CalDAV scope) ✓ → E16 ✓ → E17 ✓
 ```
 
-**Scope guard:** E20/E21 больше не требуют решения пользователя; их policy уже зафиксирован в [phase-e-decision-log.md](phase-e-decision-log.md).
+**Scope guard:** E20/E21 больше не требуют решения пользователя; их policy уже зафиксирован в [phase-e-decision-log.md](phase-e-decision-log.md). QA-wave не должна открывать новые feature tracks.
 
-**Post–Wave 4 (2026-03-09):** Все autopilot E-блоки (E1–E19, #124–#142) закрыты. Открытых E-issues для автопилота нет. Placeholders #148–#151 не активировать. Единственный открытый issue — #65 (CVE, ожидание upstream). Следующие сессии: maintenance, docs sync, preflight-driven fixes или явная задача от пользователя.
+**Post–Wave 4 (2026-03-09):** Все autopilot E-блоки (E1–E19, #124–#142) закрыты. Feature-track автопилот на этом завершён. Дальше идёт отдельная remediation wave QA1-QA6 по security, Sonar и local gates. Placeholders #148–#151 не активировать.
+
+### Post-Phase-E: Quality Remediation Wave
+
+Подробный аудит: [quality-audit-2026-03.md](quality-audit-2026-03.md).
+
+| QA | Issue | Блок | Priority | Effort | Area | Зачем |
+|---|---|---|---|---|---|---|
+| QA1 | [#152](https://github.com/iurii-izman/voiceforge/issues/152) | Security & Supply Chain Remediation | P0 | M | Security | Закрыть CodeQL + Dependabot, убрать GitHub-visible security debt |
+| QA2 | [#153](https://github.com/iurii-izman/voiceforge/issues/153) | Local Gate Recovery | P0 | S | Backend | Вернуть `mypy` и verify-pr parity в честно зелёное состояние |
+| QA3 | [#154](https://github.com/iurii-izman/voiceforge/issues/154) | Python Core/CLI Sonar Hotspots | P1 | L | Backend | Разгрузить main/daemon/CLI hotspots |
+| QA4 | [#155](https://github.com/iurii-izman/voiceforge/issues/155) | Test Suite Sonar Cleanup | P1 | L | Testing | Снять test-only Sonar debt без шума в production code |
+| QA5 | [#156](https://github.com/iurii-izman/voiceforge/issues/156) | DevOps & Utility Script Sonar Cleanup | P1 | M | DevOps | Почистить bootstrap/preflight/create-issues/helper scripts |
+| QA6 | [#157](https://github.com/iurii-izman/voiceforge/issues/157) | Desktop Sonar Cleanup | P2 | M | Frontend | Разобрать desktop/frontend Sonar backlog после backend/security wave |
+
+**Рекомендуемый порядок:**
+```
+Wave QA-A: #152 → #153
+Wave QA-B: #154 → #156
+Wave QA-C: #155 → #157
+```
+
+**Почему так:** сначала GitHub-visible security debt и красные локальные quality gates, потом backend/scripts, затем tests/frontend.
 
 ---
 
@@ -211,21 +233,21 @@ E11 (narrow CalDAV scope) ✓ → E16 ✓ → E17 ✓
 | Item | Статус | Действие |
 |---|---|---|
 | **#65 CVE-2025-69872** | Waiting upstream | Снять `--ignore-vuln` после fix в diskcache/instructor |
-| **Sonar S3776 hotspots** | 8 мест | Будет решаться в рамках E-блоков при рефакторинге |
+| **QA1 #152** | Open | CodeQL alert + 3 Dependabot alerts нужно закрыть или корректно отtriage'ить |
+| **QA2 #153** | Open | `mypy` сейчас красный: 2 ошибки в `transcriber.py` и `transcript_log.py` |
 | **Pre-commit на хосте** | Python 3.12 в toolbox 43 | `git commit --no-verify` на хосте без 3.12 |
 
 ---
 
-## 8. Cursor Autopilot: как работать с E-блоками
+## 8. Cursor Autopilot: как работать после Phase E
 
-**Формат:** каждый E-блок уже существует как GitHub issue с чеклистом и labels `autopilot` + `phase:E`. Для текущего Phase E создавать новые E-issues не нужно, если пользователь отдельно не меняет структуру roadmap.
+**Формат:** feature-track Phase E уже закрыт. Новый источник очереди для автопилота — QA-блоки `#152-#157` с label `quality-remediation`.
 
 **Batching discipline:**
-- Брать 1 E-блок за сессию (max 2 если в одном subsystem)
-- E1-E5 — строго по порядку (Wave 1)
-- E6-E18 — по priority, можно параллелить несвязанные
-- E19 выполнять как desktop-first track после E15
-- E20/E21 не исполнять как feature blocks; использовать их как scope guard через [phase-e-decision-log.md](phase-e-decision-log.md)
+- Брать 1 QA-блок за сессию (max 2 только если это один subsystem и один verification loop)
+- QA1-QA2 — строго по порядку
+- QA3-QA6 — по очереди из [quality-audit-2026-03.md](quality-audit-2026-03.md), без смешивания unrelated surfaces
+- E20/E21 остаются policy-слоем; QA-wave не повод активировать placeholders или новые feature tracks
 
 **В конце каждой сессии:**
 1. Targeted tests по изменённой поверхности
@@ -236,16 +258,16 @@ E11 (narrow CalDAV scope) ✓ → E16 ✓ → E17 ✓
 
 ---
 
-## 9. Промпт для старта Phase E
+## 9. Промпт для старта quality remediation wave
 
 ```
-Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Статус: @docs/runbooks/PROJECT-STATUS-SUMMARY.md. Scope guard: @docs/runbooks/phase-e-decision-log.md. AI/tooling source of truth: @docs/runbooks/ai-tooling-setup.md.
+Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Статус: @docs/runbooks/PROJECT-STATUS-SUMMARY.md. Quality audit: @docs/runbooks/quality-audit-2026-03.md. Scope guard: @docs/runbooks/phase-e-decision-log.md. AI/tooling source of truth: @docs/runbooks/ai-tooling-setup.md.
 
-Режим: максимальный автопилот, Phase E productization. Реализовать открытые autopilot-блоки по текущему Wave: сначала E1-E18 по порядку Wave 1→2→3→4, но после E15 брать E19 как desktop-first track. Работать по уже существующим E-issues; новые E-issues не создавать без отдельной причины. Брать 1 блок за сессию, доводить до конца: код, targeted tests, docs sync, GitHub Project status, commit + push, обновить PROJECT-STATUS-SUMMARY и next-iteration-focus.
+Режим: максимальный автопилот, post-Phase-E quality remediation wave. Работать по QA-блокам `#152-#157` в порядке `QA-A → QA-B → QA-C`. Новые feature issues не создавать без отдельной задачи пользователя. Брать 1 QA-блок за сессию, доводить до конца: код, targeted tests, docs sync, GitHub Project status, commit + push, обновить PROJECT-STATUS-SUMMARY и next-iteration-focus.
 
 Среда: Fedora Atomic, toolbox 43, uv sync --extra all. Ключи в keyring. Тесты: targeted subset, не полный pytest (OOM risk). Для infra/docs/governance cleanup сначала прогонять `./scripts/preflight_repo.sh --with-tests`. Pre-commit в toolbox.
 
-Задача: взять верхний незакрытый E-блок из текущего Wave, перевести существующий issue в In Progress, реализовать по чеклисту, targeted tests, commit с `Closes #N`, Done на доске. Строго соблюдать phase-e-decision-log и не активировать policy placeholders #148-#151. Обновить docs. Выдать prompt для следующего чата.
+Задача: взять верхний открытый QA-блок из next-iteration-focus, перевести issue в In Progress, реализовать по чеклисту, targeted checks, commit с `Closes #N`, Done на доске. Строго соблюдать phase-e-decision-log и не активировать policy placeholders #148-#151. Обновить docs. Выдать prompt для следующего чата.
 ```
 
 ---
