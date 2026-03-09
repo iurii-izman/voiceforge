@@ -70,7 +70,7 @@ gh auth refresh -s project
 - `defer` — идея отложена до триггера пересмотра
 - `accept-later` — направление принято как будущее, но не активируется в текущей фазе
 
-Эти labels должны совпадать с [phase-e-decision-log.md](phase-e-decision-log.md). Если GitHub API не позволяет создать project views программно, canonical filters хранятся в Project README и в этом runbook.
+Эти labels должны совпадать с [phase-e-decision-log.md](phase-e-decision-log.md). Если GitHub API не позволяет создать project views программно, canonical filters хранятся в Project README и в этом runbook. Для E-блоков пользоваться уже созданными issues; новые E-issues не заводить без явного нового scope.
 
 ### Рекомендуемые ручные views
 

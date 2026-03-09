@@ -216,7 +216,7 @@ E11 (narrow CalDAV scope) → E16 → E17
 
 ## 8. Cursor Autopilot: как работать с E-блоками
 
-**Формат:** каждый E-блок = 1 GitHub issue с чеклистом, labels `autopilot` + `phase:E`.
+**Формат:** каждый E-блок уже существует как GitHub issue с чеклистом и labels `autopilot` + `phase:E`. Для текущего Phase E создавать новые E-issues не нужно, если пользователь отдельно не меняет структуру roadmap.
 
 **Batching discipline:**
 - Брать 1 E-блок за сессию (max 2 если в одном subsystem)
@@ -237,13 +237,13 @@ E11 (narrow CalDAV scope) → E16 → E17
 ## 9. Промпт для старта Phase E
 
 ```
-Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Статус: @docs/runbooks/PROJECT-STATUS-SUMMARY.md. Scope guard: @docs/runbooks/phase-e-decision-log.md.
+Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Статус: @docs/runbooks/PROJECT-STATUS-SUMMARY.md. Scope guard: @docs/runbooks/phase-e-decision-log.md. AI/tooling source of truth: @docs/runbooks/ai-tooling-setup.md.
 
-Режим: максимальный автопилот, Phase E productization. Реализовать открытые autopilot-блоки по текущему Wave: сначала E1-E18 по порядку Wave 1→2→3→4, но после E15 брать E19 как desktop-first track. Каждый блок — отдельный GitHub issue с label `autopilot` и `phase:E`. Брать 1 блок за сессию, доводить до конца: код, тесты, docs sync, commit + push, обновить PROJECT-STATUS-SUMMARY и next-iteration-focus.
+Режим: максимальный автопилот, Phase E productization. Реализовать открытые autopilot-блоки по текущему Wave: сначала E1-E18 по порядку Wave 1→2→3→4, но после E15 брать E19 как desktop-first track. Работать по уже существующим E-issues; новые E-issues не создавать без отдельной причины. Брать 1 блок за сессию, доводить до конца: код, targeted tests, docs sync, GitHub Project status, commit + push, обновить PROJECT-STATUS-SUMMARY и next-iteration-focus.
 
-Среда: Fedora Atomic, toolbox 43, uv sync --extra all. Ключи в keyring. Тесты: targeted subset, не полный pytest (OOM risk). Pre-commit в toolbox.
+Среда: Fedora Atomic, toolbox 43, uv sync --extra all. Ключи в keyring. Тесты: targeted subset, не полный pytest (OOM risk). Для infra/docs/governance cleanup сначала прогонять `./scripts/preflight_repo.sh --with-tests`. Pre-commit в toolbox.
 
-Задача: взять верхний незакрытый E-блок из Wave 1 (E1→E5). Открыть issue на GitHub, перевести в In Progress, реализовать по чеклисту, targeted tests, commit с `Closes #N`, Done на доске. Обновить docs. Выдать prompt для следующего чата.
+Задача: взять верхний незакрытый E-блок из текущего Wave, перевести существующий issue в In Progress, реализовать по чеклисту, targeted tests, commit с `Closes #N`, Done на доске. Строго соблюдать phase-e-decision-log и не активировать policy placeholders #148-#151. Обновить docs. Выдать prompt для следующего чата.
 ```
 
 ---

@@ -88,11 +88,11 @@
 В начале **каждого** нового чата вставлять этот блок (и при необходимости дописать задачу). Агент по нему знает: контекст, keyring, что в конце сессии делать коммит/пуш и обновлять next-iteration-focus.
 
 ```
-Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Режим Cursor и batching: @docs/runbooks/cursor.md. При работе по доске и issues: @docs/runbooks/planning.md. Сводный статус и приоритеты: @docs/runbooks/PROJECT-STATUS-SUMMARY.md.
+Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Режим Cursor и batching: @docs/runbooks/cursor.md. При работе по доске и issues: @docs/runbooks/planning.md. Сводный статус и приоритеты: @docs/runbooks/PROJECT-STATUS-SUMMARY.md. Scope guard: @docs/runbooks/phase-e-decision-log.md. AI/tooling source of truth: @docs/runbooks/ai-tooling-setup.md.
 
-Режим: максимальный автопилот и максимум согласованных блоков за итерацию. Выбирай 1 главный P0/P1 блок и до 2 соседних подблоков только если это тот же subsystem, те же файлы или те же проверки. Не смешивай unrelated surfaces. Делай полный цикл: код, targeted tests, docs/контракты, GitHub Project status, commit/push, обновление next-iteration-focus.
+Режим: максимальный автопилот и максимум согласованных блоков за итерацию. Выбирай 1 главный P0/P1 блок и до 2 соседних подблоков только если это тот же subsystem, те же файлы или те же проверки. Не смешивай unrelated surfaces. Работай по существующим issue и policy-артефактам проекта; не создавай новые E-issues без отдельной причины. Делай полный цикл: код, targeted tests, docs/контракты, GitHub Project status, commit/push, обновление next-iteration-focus.
 
-Ключи и доступы только в keyring (voiceforge). Fedora Atomic/toolbox/uv; базово `uv sync --extra all`, при нужде подключай профильные extras. В конце сессии: тесты, коммит, пуш, обновить next-iteration-focus, выдать prompt для следующего чата.
+Ключи и доступы только в keyring (voiceforge). Fedora Atomic/toolbox/uv; базово `uv sync --extra all`, при нужде подключай профильные extras. Для infra/docs/governance cleanup сначала запускай `./scripts/preflight_repo.sh --with-tests`. В конце сессии: тесты, коммит, пуш, обновить next-iteration-focus, выдать prompt для следующего чата.
 
 [Задача или: продолжить с @docs/runbooks/next-iteration-focus.md]
 ```

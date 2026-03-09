@@ -46,13 +46,13 @@
 **Скопируй блок ниже в начало нового чата.** Агент работает на максимальном автопилоте, берёт E-блоки строго по порядку Wave.
 
 ```
-Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Статус: @docs/runbooks/PROJECT-STATUS-SUMMARY.md. Scope guard: @docs/runbooks/phase-e-decision-log.md.
+Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Статус: @docs/runbooks/PROJECT-STATUS-SUMMARY.md. Scope guard: @docs/runbooks/phase-e-decision-log.md. AI/tooling source of truth: @docs/runbooks/ai-tooling-setup.md.
 
-Режим: максимальный автопилот, Phase E productization. Реализовать открытые autopilot-блоки по текущему Wave: сначала E1-E18 по порядку Wave 1→2→3→4, но после E15 брать E19 как desktop-first track. Каждый блок — GitHub issue с label `autopilot` + `phase:E`. Брать 1 блок за сессию, доводить до конца: код, тесты, docs sync, commit + push, обновить PROJECT-STATUS-SUMMARY и next-iteration-focus.
+Режим: максимальный автопилот, Phase E productization. Работать по уже существующим E-issues и текущему Wave order из PROJECT-STATUS-SUMMARY: E1→E18, а после E15 переходить к E19 как desktop-first track. Новые E-issues не создавать, если для этого нет отдельной новой задачи. Брать 1 блок за сессию, доводить до конца: код, targeted tests, docs sync, GitHub Project status, commit + push, обновить PROJECT-STATUS-SUMMARY и next-iteration-focus.
 
-Среда: Fedora Atomic, toolbox 43, uv sync --extra all. Ключи в keyring (keyring-keys-reference.md). Тесты: targeted subset, не полный pytest (OOM risk). Pre-commit в toolbox; на хосте git push --no-verify если нет Python 3.12.
+Среда: Fedora Atomic, toolbox 43, uv sync --extra all. Ключи в keyring (keyring-keys-reference.md). Тесты: targeted subset, не полный pytest (OOM risk). Для infra/docs/governance cleanup сначала прогонять `./scripts/preflight_repo.sh --with-tests`. Pre-commit в toolbox; на хосте git push --no-verify если нет Python 3.12.
 
-Задача: взять верхний незакрытый E-блок из текущего Wave. Перевести issue в In Progress на доске. Реализовать по чеклисту в issue body. Строго соблюдать phase-e-decision-log: Tauri = primary GUI, Web UI/Telegram/RAG watcher = maintenance-only, Calendar = narrow CalDAV scope. Targeted tests. Commit с `Closes #N` (Conventional Commits). Done на доске. Обновить docs. Выдать prompt для следующего чата.
+Задача: взять верхний незакрытый E-блок из текущего Wave. Перевести существующий issue в In Progress на доске. Реализовать по чеклисту в issue body. Строго соблюдать phase-e-decision-log: Tauri = primary GUI, Web UI/Telegram/RAG watcher = maintenance-only, Calendar = narrow CalDAV scope; placeholders #148-#151 не активировать. Targeted tests. Commit с `Closes #N` (Conventional Commits). Done на доске. Обновить docs. Выдать prompt для следующего чата.
 
 Текущий блок: E13 (#136) — Core Logic: Prompt Cache, Streaming CLI, Whisper Turbo (Wave 3).
 ```
@@ -64,11 +64,11 @@
 **Скопируй блок ниже если хочешь агрессивный темп (2-3 блока за сессию).**
 
 ```
-Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Статус: @docs/runbooks/PROJECT-STATUS-SUMMARY.md.
+Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Статус: @docs/runbooks/PROJECT-STATUS-SUMMARY.md. Scope guard: @docs/runbooks/phase-e-decision-log.md.
 
 Режим: AGGRESSIVE автопилот, Phase E. Максимум E-блоков за сессию. Брать блоки строго по Wave order. Если блок завершён раньше ожидания — сразу брать следующий. Не тратить время на вопросы, если ответ есть в коде/docs/keyring.
 
-Среда: Fedora Atomic, toolbox 43, uv sync --extra all. Ключи в keyring. Тесты: targeted, не полный pytest.
+Среда: Fedora Atomic, toolbox 43, uv sync --extra all. Ключи в keyring. Тесты: targeted, не полный pytest. Не создавать новые E-issues без явной необходимости; работать по существующим #124-#151 и policy placeholders не активировать.
 
 Задача: начать с верхнего незакрытого E-блока, максимум блоков за итерацию. При каждом закрытии: commit + push, update docs, сразу следующий блок. В конце сессии: финальный docs sync + prompt для следующего чата.
 
