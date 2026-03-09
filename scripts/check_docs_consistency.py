@@ -11,6 +11,14 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 MARKDOWN_SUFFIXES = {".md", ".mdc"}
 LINK_RE = re.compile(r"(?<!\!)\[[^\]]+\]\(([^)]+)\)")
 
+# Doc references (S1192: avoid duplicated literals)
+_REF_PHASE_E = "phase-e-decision-log.md"
+_REF_STATUS = "PROJECT-STATUS-SUMMARY.md"
+_REF_NEXT = "next-iteration-focus.md"
+_REF_PLANNING = "planning.md"
+_REF_AI_TOOLING = "ai-tooling-setup.md"
+_REF_SECURITY = "security-decision-log.md"
+
 REQUIRED_FILES = [
     Path("docs/roadmap-priority.md"),
     Path("docs/PROJECT_AUDIT_AND_ROADMAP.md"),
@@ -36,32 +44,32 @@ REQUIRED_REFERENCES = {
         "docs/DOCS-INDEX.md",
     ],
     Path("docs/runbooks/agent-context.md"): [
-        "next-iteration-focus.md",
-        "PROJECT-STATUS-SUMMARY.md",
-        "planning.md",
-        "ai-tooling-setup.md",
+        _REF_NEXT,
+        _REF_STATUS,
+        _REF_PLANNING,
+        _REF_AI_TOOLING,
     ],
     Path("docs/runbooks/next-iteration-focus.md"): [
-        "phase-e-decision-log.md",
-        "PROJECT-STATUS-SUMMARY.md",
+        _REF_PHASE_E,
+        _REF_STATUS,
     ],
     Path("docs/runbooks/PROJECT-STATUS-SUMMARY.md"): [
-        "phase-e-decision-log.md",
-        "next-iteration-focus.md",
+        _REF_PHASE_E,
+        _REF_NEXT,
     ],
     Path("docs/runbooks/planning.md"): [
-        "phase-e-decision-log.md",
-        "PROJECT-STATUS-SUMMARY.md",
+        _REF_PHASE_E,
+        _REF_STATUS,
     ],
     Path("docs/runbooks/cursor.md"): [
-        "phase-e-decision-log.md",
-        "planning.md",
-        "ai-tooling-setup.md",
+        _REF_PHASE_E,
+        _REF_PLANNING,
+        _REF_AI_TOOLING,
     ],
     Path("docs/DOCS-INDEX.md"): [
-        "phase-e-decision-log.md",
-        "ai-tooling-setup.md",
-        "security-decision-log.md",
+        _REF_PHASE_E,
+        _REF_AI_TOOLING,
+        _REF_SECURITY,
     ],
 }
 

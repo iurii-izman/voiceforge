@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-09 (Sonar batch: BLOCKER S5549, S5754, S1186×27, shell S7682; остаётся ~78 issues — S1192, S3776, S5655, JS)
+**Обновлено:** 2026-03-09 (Sonar S1192 batch: константы в status_helpers, config, caldav_poll, main, router, pipeline, check_docs_consistency)
 
 ---
 
@@ -19,9 +19,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Sonar batch: исправлены BLOCKER S5549 (setup.py t() — дубликат параметра key → key_name в i18n), CRITICAL S5754 (transcriber.py: BaseException → Exception), 27× S1186 (пустые методы в тестах — комментарий «No-op for test fake»), shell S7682 (ensure_label: return 0 + локальные переменные). Остаётся ~78 issues: S1192 (дубли строк), S3776 (сложность), S5655 (аргументы тестов), JS/desktop. Тесты: test_setup_wizard, test_post_listen, test_daemon_helpers и др. — 110 passed; test_daemon_batch116 — import error (pre-existing); test_hotspot_batch114::test_main_status_and_calendar_commands_reuse_helpers — fail (pre-existing).
+**Сделано в сессии:** Sonar S1192 (дублирующиеся литералы): вынесены константы в status_helpers (doctor.* ключи), config (voiceforge, voiceforge.yaml, ring.raw, phi3:mini), caldav_poll (caldav.date_search_failed), main (history.date_invalid, error.no_llm_backend, export.saved, llm.ollama_fallback), router (llm.ollama_fallback), pipeline (feedback.diarization_skipped_ram, pipeline.step2_diarization, feedback.rag_no_index), check_docs_consistency (phase-e, PROJECT-STATUS, next-iteration, planning, ai-tooling, security). Тесты: 112 passed (без test_daemon_batch116 — сломанный импорт _calendar_autostart_try_start).
 
-**Следующий шаг:** Продолжить закрытие Sonar: S1192 (константы вместо дублей строк), S3776 (рефакторинг сложных функций), S5655 (порядок/имена аргументов в тестах); либо следующий пункт roadmap/docs. После пуша перезапустить Sonar и `sonar_fetch_issues.py` для актуального счёта.
+**Следующий шаг:** Продолжить Sonar: S3776 (сложность), S7500, S5655 (test_daemon_batch116 после починки импорта); либо roadmap/docs. После пуша — `sonar_fetch_issues.py` для актуального счёта.
 
 ---
 

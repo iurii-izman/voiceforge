@@ -18,6 +18,11 @@ from voiceforge.i18n import t
 
 log = structlog.get_logger()
 
+# Log/i18n keys (S1192)
+_T_FEEDBACK_DIARIZATION_SKIPPED_RAM = "feedback.diarization_skipped_ram"
+_LOG_PIPELINE_STEP2_DIARIZATION = "pipeline.step2_diarization"
+_T_FEEDBACK_RAG_NO_INDEX = "feedback.rag_no_index"
+
 # #37: skip diarization when available RAM < 2GB to avoid OOM on ≤8GB systems
 MIN_AVAILABLE_FOR_DIARIZATION_BYTES = 2 * 1024**3
 
@@ -137,9 +142,9 @@ def _step2_diarization(
                 available_mb=round(vm.available / 1024**2, 1),
                 threshold_mb=MIN_AVAILABLE_FOR_DIARIZATION_BYTES // (1024**2),
             )
-            warnings.append(t("feedback.diarization_skipped_ram", available_gb=round(vm.available / 1024**3, 1), required_gb=2))
+            warnings.append(t(_T_FEEDBACK_DIARIZATION_SKIPPED_RAM, available_gb=round(vm.available / 1024**3, 1), required_gb=2))
             duration_sec = time.monotonic() - t0
-            log.info("pipeline.step2_diarization", count=0, duration_sec=round(duration_sec, 2))
+            log.info(_LOG_PIPELINE_STEP2_DIARIZATION, count=0, duration_sec=round(duration_sec, 2))
             return (out, warnings)
         try:
             import keyring as _keyring
@@ -150,18 +155,18 @@ def _step2_diarization(
         if not auth_token:
             warnings.append(t("feedback.diarization_skipped_hf"))
             duration_sec = time.monotonic() - t0
-            log.info("pipeline.step2_diarization", count=0, duration_sec=round(duration_sec, 2))
+            log.info(_LOG_PIPELINE_STEP2_DIARIZATION, count=0, duration_sec=round(duration_sec, 2))
             return (out, warnings)
         diarizer = _get_cached_diarizer(auth_token, pyannote_restart_hours)
         try:
             out = diarizer.diarize(audio_f, sample_rate=sample_rate)
         except MemoryError as e:
             log.warning("pipeline.diarization.oom", error=str(e))
-            warnings.append(t("feedback.diarization_skipped_ram", available_gb=0, required_gb=2))
+            warnings.append(t(_T_FEEDBACK_DIARIZATION_SKIPPED_RAM, available_gb=0, required_gb=2))
         except RuntimeError as e:
             if "out of memory" in str(e).lower():
                 log.warning("pipeline.diarization.oom", error=str(e))
-                warnings.append(t("feedback.diarization_skipped_ram", available_gb=0, required_gb=2))
+                warnings.append(t(_T_FEEDBACK_DIARIZATION_SKIPPED_RAM, available_gb=0, required_gb=2))
             else:
                 raise
     except ImportError:
@@ -169,7 +174,7 @@ def _step2_diarization(
     except Exception as e:
         log.warning("pipeline.diarization.failed", error=str(e))
     duration_sec = time.monotonic() - t0
-    log.info("pipeline.step2_diarization", count=len(out), duration_sec=round(duration_sec, 2))
+    log.info(_LOG_PIPELINE_STEP2_DIARIZATION, count=len(out), duration_sec=round(duration_sec, 2))
     try:
         from voiceforge.core.observability import record_diarization_duration
 
@@ -199,7 +204,7 @@ def _step2_rag(transcript: str, rag_db_path: str) -> tuple[str, list[str]]:
     warnings: list[str] = []
     try:
         if not Path(rag_db_path).is_file():
-            warnings.append(t("feedback.rag_no_index"))
+            warnings.append(t(_T_FEEDBACK_RAG_NO_INDEX))
             duration_sec = time.monotonic() - t0
             log.info("pipeline.step2_rag", context_len=0, duration_sec=round(duration_sec, 2))
             return (context, warnings)
@@ -211,9 +216,9 @@ def _step2_rag(transcript: str, rag_db_path: str) -> tuple[str, list[str]]:
         searcher = _get_cached_searcher(rag_db_path)
         context = _rag_merge_results(queries, searcher)
         if not context.strip():
-            warnings.append(t("feedback.rag_no_index"))
+            warnings.append(t(_T_FEEDBACK_RAG_NO_INDEX))
     except ImportError:
-        warnings.append(t("feedback.rag_no_index"))
+        warnings.append(t(_T_FEEDBACK_RAG_NO_INDEX))
     except Exception as e:
         log.warning("pipeline.rag.failed", error=str(e))
     duration_sec = time.monotonic() - t0

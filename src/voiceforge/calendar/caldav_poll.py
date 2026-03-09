@@ -20,6 +20,7 @@ _CALDAV_URL = "caldav_url"
 _CALDAV_USERNAME = "caldav_username"
 _CALDAV_PASSWORD = "caldav_password"
 _CALENDAR_DEPS_HINT = "Install calendar deps: uv sync --extra calendar"
+_LOG_CALDAV_DATE_SEARCH_FAILED = "caldav.date_search_failed"
 
 
 def _get_caldav_credentials() -> tuple[str | None, str | None, str | None]:
@@ -72,7 +73,7 @@ def _events_from_calendar(cal: Any, start_range: datetime, end_range: datetime, 
     try:
         events = cal.date_search(start=start_range, end=end_range, compfilter="VEVENT")
     except Exception as e:
-        log.warning("caldav.date_search_failed", calendar=cal.name, error=str(e))
+        log.warning(_LOG_CALDAV_DATE_SEARCH_FAILED, calendar=cal.name, error=str(e))
         return out
     cal_name = getattr(cal, "name", None) or ""
     for ev in events:
@@ -158,7 +159,7 @@ def _candidates_from_calendars(client: Any, now: datetime, end_range: datetime) 
         try:
             events = cal.date_search(start=now, end=end_range, compfilter="VEVENT")
         except Exception as e:
-            log.warning("caldav.date_search_failed", calendar=getattr(cal, "name", ""), error=str(e))
+            log.warning(_LOG_CALDAV_DATE_SEARCH_FAILED, calendar=getattr(cal, "name", ""), error=str(e))
             continue
         cal_name = getattr(cal, "name", None) or ""
         for ev in events:
@@ -179,7 +180,7 @@ def _events_ended_in_range(cal: Any, range_start: datetime, range_end: datetime,
     try:
         events = cal.date_search(start=range_start, end=range_end, compfilter="VEVENT")
     except Exception as e:
-        log.warning("caldav.date_search_failed", calendar=getattr(cal, "name", ""), error=str(e))
+        log.warning(_LOG_CALDAV_DATE_SEARCH_FAILED, calendar=getattr(cal, "name", ""), error=str(e))
         return out
     cal_name = getattr(cal, "name", None) or ""
     for ev in events:

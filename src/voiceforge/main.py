@@ -60,6 +60,13 @@ from voiceforge.core.tracing import bind_trace_id
 from voiceforge.i18n import t
 
 log = structlog.get_logger()
+
+# i18n / log keys (S1192: avoid duplicated literals)
+_T_HISTORY_DATE_INVALID = "history.date_invalid"
+_T_ERROR_NO_LLM_BACKEND = "error.no_llm_backend"
+_T_EXPORT_SAVED = "export.saved"
+_LOG_LLM_OLLAMA_FALLBACK = "llm.ollama_fallback"
+
 app = typer.Typer(help="VoiceForge — local-first AI assistant (alpha 0.2)")
 action_items_app = typer.Typer(help=t("cli.action_items_help"))
 app.add_typer(action_items_app, name="action-items")
@@ -242,7 +249,7 @@ def _sessions_to_ical_fetch_sessions(log_db: Any, from_date: str | None, to_date
             fd = date_type.fromisoformat(from_date)
             td = date_type.fromisoformat(to_date)
         except ValueError:
-            typer.echo(t("history.date_invalid", err=from_date + " / " + to_date), err=True)
+            typer.echo(t(_T_HISTORY_DATE_INVALID, err=from_date + " / " + to_date), err=True)
             raise SystemExit(1)
         return log_db.get_sessions_in_range(fd, td)
     return log_db.get_sessions(last_n=limit, offset=0)
@@ -564,10 +571,10 @@ def run_analyze_pipeline(
 
     effective_model, is_ollama_fallback = cfg.get_effective_llm()
     if effective_model is None:
-        return (t("error.no_llm_backend"), [], {})
+        return (t(_T_ERROR_NO_LLM_BACKEND), [], {})
 
     if is_ollama_fallback:
-        log.info("llm.ollama_fallback", model=effective_model, message="No API keys found. Using Ollama as LLM backend.")
+        log.info(_LOG_LLM_OLLAMA_FALLBACK, model=effective_model, message="No API keys found. Using Ollama as LLM backend.")
 
     try:
         from voiceforge.llm.router import analyze_meeting, analyze_meeting_stream, get_budget_warning_if_near_limit
@@ -643,7 +650,7 @@ def run_live_summary_pipeline(seconds: int) -> tuple[list[str], float]:
 
     effective_model, _ = cfg.get_effective_llm()
     if effective_model is None:
-        return ([t("error.no_llm_backend")], 0.0)
+        return ([t(_T_ERROR_NO_LLM_BACKEND)], 0.0)
 
     try:
         from voiceforge.llm.router import analyze_live_summary
@@ -1019,7 +1026,7 @@ def analyze(
         transcript = (dry_result or {}).get("transcript", "") or ""
         effective_model, _ = cfg.get_effective_llm()
         if effective_model is None:
-            typer.echo(t("error.no_llm_backend"), err=True)
+            typer.echo(t(_T_ERROR_NO_LLM_BACKEND), err=True)
             raise SystemExit(1)
         from voiceforge.llm.router import estimate_analyze_cost
 
@@ -1247,7 +1254,7 @@ def action_items_update(
     cfg = _get_config()
     effective_model, _ = cfg.get_effective_llm()
     if effective_model is None:
-        typer.echo(t("error.no_llm_backend"), err=True)
+        typer.echo(t(_T_ERROR_NO_LLM_BACKEND), err=True)
         raise SystemExit(1) from None
     try:
         response, cost_usd = update_action_item_statuses(
@@ -1673,7 +1680,7 @@ def daily_report(
         try:
             day = date_type.fromisoformat(date_str)
         except ValueError:
-            typer.echo(t("history.date_invalid", err=date_str), err=True)
+            typer.echo(t(_T_HISTORY_DATE_INVALID, err=date_str), err=True)
             raise SystemExit(1)
     from voiceforge.core.transcript_log import TranscriptLog
 
@@ -1691,7 +1698,7 @@ def daily_report(
         log_db.close()
     if output:
         output.write_text(text, encoding="utf-8")
-        typer.echo(t("export.saved", path=str(output)))
+        typer.echo(t(_T_EXPORT_SAVED, path=str(output)))
     else:
         typer.echo(text)
 
@@ -1854,7 +1861,7 @@ def export_session(
     out_path = output or Path(f"session_{session_id}.{suffix}")
     if format in ("md", "notion", "otter"):
         out_path.write_text(md_text, encoding="utf-8")
-        typer.echo(t("export.saved", path=str(out_path)))
+        typer.echo(t(_T_EXPORT_SAVED, path=str(out_path)))
         return
     _export_via_pandoc(format, out_path, md_text)
 
@@ -1873,7 +1880,7 @@ def _export_via_pandoc(format: str, out_path: Path, md_text: str) -> None:
             capture_output=True,
         )
         tmp_md.unlink(missing_ok=True)
-        typer.echo(t("export.saved", path=str(out_path)))
+        typer.echo(t(_T_EXPORT_SAVED, path=str(out_path)))
     except FileNotFoundError:
         typer.echo(t("export.pdf_install") if format == "pdf" else "pandoc not found. Install: pandoc", err=True)
         typer.echo(t("export.md_fallback", path=str(tmp_md)))
@@ -1993,7 +2000,7 @@ def _history_resolve(
         try:
             cutoff = date_type.fromisoformat(purge_before)
         except ValueError:
-            typer.echo(t("history.date_invalid", err=purge_before), err=True)
+            typer.echo(t(_T_HISTORY_DATE_INVALID, err=purge_before), err=True)
             raise SystemExit(1)
         n = log_db.purge_before(cutoff)
         typer.echo(t("history.purge_done", count=n))

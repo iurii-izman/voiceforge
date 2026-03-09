@@ -14,6 +14,11 @@ from voiceforge.core.fs import voiceforge_data_dir
 
 log = structlog.get_logger()
 
+_CONFIG_DIR_NAME = "voiceforge"
+_CONFIG_FILENAME = "voiceforge.yaml"
+_RING_FILENAME = "ring.raw"
+_DEFAULT_OLLAMA_MODEL = "phi3:mini"
+
 
 def _config_base_dir() -> str:
     return os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config")
@@ -27,8 +32,8 @@ def get_default_config_yaml_path() -> Path:
 
 def _config_yaml_paths(base: str) -> list[Path]:
     return [
-        Path(base) / "voiceforge" / "voiceforge.yaml",
-        Path.cwd() / "voiceforge.yaml",
+        Path(base) / _CONFIG_DIR_NAME / _CONFIG_FILENAME,
+        Path.cwd() / _CONFIG_FILENAME,
     ]
 
 
@@ -330,7 +335,7 @@ class Settings(BaseSettings):
         if self.ring_file_path:
             return self.ring_file_path
         base = os.environ.get("XDG_RUNTIME_DIR") or os.path.expanduser("~/.cache")
-        return os.path.join(base, "voiceforge", "ring.raw")
+        return os.path.join(base, _CONFIG_DIR_NAME, _RING_FILENAME)
 
     def get_rag_db_path(self) -> str:
         """Resolved path to RAG SQLite database."""
@@ -355,7 +360,7 @@ class Settings(BaseSettings):
             return (None, False)
         if not is_available():
             return (None, False)
-        model = (self.ollama_model or "phi3:mini").strip() or "phi3:mini"
+        model = (self.ollama_model or _DEFAULT_OLLAMA_MODEL).strip() or _DEFAULT_OLLAMA_MODEL
         return (f"ollama/{model}", True)
 
 

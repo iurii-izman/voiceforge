@@ -11,6 +11,14 @@ from voiceforge.core.fs import get_cache_home
 _DOCTOR_KEYRING_FAIL = "doctor.keyring_fail"
 _DOCTOR_OLLAMA_FAIL = "doctor.ollama_fail"
 _DOCTOR_RAM_FAIL = "doctor.ram_fail"
+_KEY_DOCTOR_WHISPER = "doctor.models_whisper"
+_KEY_DOCTOR_WHISPER_MISSING = "doctor.models_whisper_missing"
+_KEY_DOCTOR_ONNX = "doctor.models_onnx"
+_KEY_DOCTOR_ONNX_MISSING = "doctor.models_onnx_missing"
+_KEY_DOCTOR_PYANNOTE = "doctor.models_pyannote"
+_KEY_DOCTOR_PYANNOTE_MISSING = "doctor.models_pyannote_missing"
+_KEY_DOCTOR_RAM_RECOMMENDED = "doctor.ram_recommended"
+_KEY_DOCTOR_MODEL_RECOMMENDATION = "doctor.model_recommendation"
 
 
 def get_status_text() -> str:
@@ -257,11 +265,11 @@ def _doctor_check_models(cfg: Any, t: Any) -> list[tuple[bool, str, str]]:
         if hub.exists():
             has_whisper = any("whisper" in p.name.lower() or "ctranslate" in p.name.lower() for p in hub.iterdir())
         if has_whisper:
-            out.append((True, t("doctor.models_whisper", size=model_size), "doctor.models_whisper"))
+            out.append((True, t(_KEY_DOCTOR_WHISPER, size=model_size), _KEY_DOCTOR_WHISPER))
         else:
-            out.append((True, t("doctor.models_whisper_missing", size=model_size), "doctor.models_whisper"))
+            out.append((True, t(_KEY_DOCTOR_WHISPER_MISSING, size=model_size), _KEY_DOCTOR_WHISPER_MISSING))
     except Exception:
-        out.append((True, t("doctor.models_whisper_missing", size=model_size), "doctor.models_whisper"))
+        out.append((True, t(_KEY_DOCTOR_WHISPER_MISSING, size=model_size), _KEY_DOCTOR_WHISPER_MISSING))
 
     # ONNX embedder
     try:
@@ -269,11 +277,11 @@ def _doctor_check_models(cfg: Any, t: Any) -> list[tuple[bool, str, str]]:
 
         base = Path(get_default_model_dir())
         if (base / "model.onnx").exists() or (base / "onnx" / "model.onnx").exists():
-            out.append((True, t("doctor.models_onnx"), "doctor.models_onnx"))
+            out.append((True, t(_KEY_DOCTOR_ONNX), _KEY_DOCTOR_ONNX))
         else:
-            out.append((True, t("doctor.models_onnx_missing"), "doctor.models_onnx"))
+            out.append((True, t(_KEY_DOCTOR_ONNX_MISSING), _KEY_DOCTOR_ONNX_MISSING))
     except Exception:
-        out.append((True, t("doctor.models_onnx_missing"), "doctor.models_onnx"))
+        out.append((True, t(_KEY_DOCTOR_ONNX_MISSING), _KEY_DOCTOR_ONNX_MISSING))
 
     # pyannote: HF token set (cache is under same HF dir)
     try:
@@ -281,20 +289,20 @@ def _doctor_check_models(cfg: Any, t: Any) -> list[tuple[bool, str, str]]:
 
         hf_token = (keyring.get_password("voiceforge", "huggingface") or "").strip()
         if hf_token:
-            out.append((True, t("doctor.models_pyannote"), "doctor.models_pyannote"))
+            out.append((True, t(_KEY_DOCTOR_PYANNOTE), _KEY_DOCTOR_PYANNOTE))
         else:
-            out.append((True, t("doctor.models_pyannote_missing"), "doctor.models_pyannote"))
+            out.append((True, t(_KEY_DOCTOR_PYANNOTE_MISSING), _KEY_DOCTOR_PYANNOTE_MISSING))
     except Exception:
-        out.append((True, t("doctor.models_pyannote_missing"), "doctor.models_pyannote"))
+        out.append((True, t(_KEY_DOCTOR_PYANNOTE_MISSING), _KEY_DOCTOR_PYANNOTE_MISSING))
 
     # RAM available vs recommended (4 GB)
     try:
         import psutil
 
         avail_gb = psutil.virtual_memory().available / 1024**3
-        out.append((avail_gb >= 4.0, t("doctor.ram_recommended", available_gb=avail_gb), "doctor.ram_recommended"))
+        out.append((avail_gb >= 4.0, t(_KEY_DOCTOR_RAM_RECOMMENDED, available_gb=avail_gb), _KEY_DOCTOR_RAM_RECOMMENDED))
     except Exception:
-        out.append((True, "RAM: check skipped", "doctor.ram_recommended"))
+        out.append((True, "RAM: check skipped", _KEY_DOCTOR_RAM_RECOMMENDED))
 
     # E18 (#141): model size recommendation by available RAM; warn if current may cause OOM
     try:
@@ -332,7 +340,7 @@ def _doctor_check_models(cfg: Any, t: Any) -> list[tuple[bool, str, str]]:
                         available_gb=round(avail_gb, 1),
                         current=current,
                     ),
-                    "doctor.model_recommendation",
+                    _KEY_DOCTOR_MODEL_RECOMMENDATION,
                 )
             )
         else:
@@ -345,11 +353,11 @@ def _doctor_check_models(cfg: Any, t: Any) -> list[tuple[bool, str, str]]:
                         available_gb=round(avail_gb, 1),
                         current=current,
                     ),
-                    "doctor.model_recommendation",
+                    _KEY_DOCTOR_MODEL_RECOMMENDATION,
                 )
             )
     except Exception:
-        out.append((True, "Model recommendation: check skipped", "doctor.model_recommendation"))
+        out.append((True, "Model recommendation: check skipped", _KEY_DOCTOR_MODEL_RECOMMENDATION))
     return out
 
 

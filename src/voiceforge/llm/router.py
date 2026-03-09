@@ -17,6 +17,7 @@ from voiceforge.llm.prompt_loader import load_prompt, load_template_prompts
 log = structlog.get_logger()
 TModel = TypeVar("TModel", bound=BaseModel)
 _REASON_FILE_MISSING = "file missing"
+_LOG_LLM_OLLAMA_FALLBACK = "llm.ollama_fallback"
 
 # Anthropic: Opus 4.6 $5/$25, Sonnet 4.6 $3/$15, Haiku 4.5 $1/$5 (per MTok in/out)
 MODEL_CLAUDE_OPUS = "anthropic/claude-opus-4-6"
@@ -175,7 +176,7 @@ def analyze_meeting(
 
     model_id = model or DEFAULT_MODEL
     if model_id.startswith("ollama/"):
-        log.info("llm.ollama_fallback", model=model_id, message="No API keys found. Using Ollama as LLM backend.")
+        log.info(_LOG_LLM_OLLAMA_FALLBACK, model=model_id, message="No API keys found. Using Ollama as LLM backend.")
     response_model: type[MeetingAnalysis] | None = MeetingAnalysis
     system_prompt_override: str | None = None
     if template:
@@ -250,7 +251,7 @@ def analyze_meeting_stream(
 
     model_id = model or DEFAULT_MODEL
     if model_id.startswith("ollama/"):
-        log.info("llm.ollama_fallback", model=model_id, message="No API keys found. Using Ollama as LLM backend.")
+        log.info(_LOG_LLM_OLLAMA_FALLBACK, model=model_id, message="No API keys found. Using Ollama as LLM backend.")
     response_model: type[MeetingAnalysis] | None = MeetingAnalysis
     system_prompt_override: str | None = None
     if template:
