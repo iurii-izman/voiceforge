@@ -213,6 +213,7 @@ def test_daemon_get_sessions_empty() -> None:
             return []
 
         def close(self) -> None:
+            # No-op for test fake (S1186).
             pass
 
     daemon = _make_daemon()
@@ -229,6 +230,7 @@ def test_daemon_get_session_detail_not_found() -> None:
             return None
 
         def close(self) -> None:
+            # No-op for test fake (S1186).
             pass
 
     daemon = _make_daemon()
@@ -282,6 +284,7 @@ def test_retention_purge_at_startup_no_op_when_zero() -> None:
             return 0
 
         def close(self) -> None:
+            # No-op for test fake (S1186).
             pass
 
     cfg = MagicMock()
@@ -307,6 +310,7 @@ def test_retention_purge_at_startup_calls_purge() -> None:
             return 2
 
         def close(self) -> None:
+            # No-op for test fake (S1186).
             pass
 
     with patch("voiceforge.core.transcript_log.TranscriptLog", FakeLog):

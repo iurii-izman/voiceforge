@@ -84,6 +84,7 @@ def test_run_analyze_pipeline_returns_no_llm_backend_error_when_effective_llm_no
 
     class FakePipeline:
         def __init__(self, cfg=None):
+            # Empty: test fake (S1186).
             pass
 
         def __enter__(self):

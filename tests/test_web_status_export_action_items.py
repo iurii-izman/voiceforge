@@ -38,6 +38,7 @@ class _FakeTranscriptLogExport:
         return None
 
     def close(self) -> None:
+        # No-op for test fake (S1186).
         pass
 
 
@@ -55,6 +56,7 @@ class _FakeTranscriptLogActionItemsEmpty:
         return None
 
     def close(self) -> None:
+        # No-op for test fake (S1186).
         pass
 
 
@@ -70,6 +72,7 @@ class _FakeTranscriptLogActionItemsSessionNotFound:
         return None
 
     def close(self) -> None:
+        # No-op for test fake (S1186).
         pass
 
 

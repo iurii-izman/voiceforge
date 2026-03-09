@@ -102,6 +102,7 @@ def test_daemon_analyze_success_logs_session_and_emits_chunks(monkeypatch) -> No
             return 42
 
         def close(self) -> None:
+            # No-op for test fake (S1186).
             pass
 
     monkeypatch.setattr("voiceforge.main.run_analyze_pipeline", fake_run_analyze_pipeline)
@@ -217,6 +218,7 @@ def test_daemon_get_session_detail_and_search_transcripts_success(monkeypatch) -
             return [(3, "text", 1.0, 2.0, "snippet")]
 
         def close(self) -> None:
+            # No-op for test fake (S1186).
             pass
 
     monkeypatch.setattr("voiceforge.core.transcript_log.TranscriptLog", FakeLogDb)
@@ -250,6 +252,7 @@ def test_daemon_search_rag_get_ids_and_upcoming_events_success(monkeypatch, tmp_
             return [1, 3, 5]
 
         def close(self) -> None:
+            # No-op for test fake (S1186).
             pass
 
     monkeypatch.setattr(
@@ -277,6 +280,7 @@ def test_daemon_upcoming_events_skip_and_create_event_paths(monkeypatch) -> None
             return ([], SimpleNamespace(action_items=[{"description": "Ship release"}]))
 
         def close(self) -> None:
+            # No-op for test fake (S1186).
             pass
 
     monkeypatch.setattr("voiceforge.calendar.get_upcoming_events", lambda hours_ahead=48: ([], "calendar disabled"))
@@ -300,6 +304,7 @@ def test_daemon_create_event_from_session_not_found_and_exception(monkeypatch) -
             return None
 
         def close(self) -> None:
+            # No-op for test fake (S1186).
             pass
 
     daemon = _make_daemon()
@@ -458,6 +463,7 @@ async def test_run_one_retention_purge_and_cancel_helper(monkeypatch) -> None:
             return 3
 
         def close(self) -> None:
+            # No-op for test fake (S1186).
             pass
 
     daemon = _make_daemon(settings_overrides={"retention_days": 7})

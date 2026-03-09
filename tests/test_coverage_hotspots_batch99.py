@@ -169,6 +169,7 @@ def test_server_async_sync_ready_503_when_db_raises(monkeypatch) -> None:
             raise RuntimeError("db unavailable")
 
         def close(self) -> None:
+            # No-op for test fake (S1186).
             pass
 
     monkeypatch.setattr("voiceforge.core.transcript_log.TranscriptLog", lambda: FakeLog())
@@ -197,6 +198,7 @@ def test_server_async_sync_export_404_session_not_found(monkeypatch) -> None:
             return None
 
         def close(self) -> None:
+            # No-op for test fake (S1186).
             pass
 
     monkeypatch.setattr("voiceforge.core.transcript_log.TranscriptLog", lambda: FakeLog())
@@ -238,6 +240,7 @@ def test_server_async_sync_session_by_id_404_not_found(monkeypatch) -> None:
             return None
 
         def close(self) -> None:
+            # No-op for test fake (S1186).
             pass
 
     monkeypatch.setattr("voiceforge.core.transcript_log.TranscriptLog", lambda: FakeLog())

@@ -43,6 +43,7 @@ def test_cli_history_snapshot_keywords(monkeypatch: pytest.MonkeyPatch, tmp_path
             return []
 
         def close(self):
+            # No-op for test fake (S1186).
             pass
 
     monkeypatch.setattr("voiceforge.core.transcript_log.TranscriptLog", lambda *a, **kw: FakeLog())

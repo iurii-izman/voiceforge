@@ -53,6 +53,7 @@ class _FakeTranscriptLogSessionDetail:
         return None
 
     def close(self) -> None:
+        # No-op for test fake (S1186).
         pass
 
 

@@ -120,7 +120,7 @@
   "feedback.model_downloading": "Модель {model_size} не в кэше, загрузка (~{size_mb} МБ)...",
   "feedback.model_ready": "Модель загружена.",
   "feedback.budget_warning": "⚠ Дневной бюджет: {cost_today}/{limit} использовано. Этот анализ ~{estimate}.",
-  "setup.keyring_fail": "Не удалось сохранить в keyring для {key}: {error}",
+  "setup.keyring_fail": "Не удалось сохранить в keyring для {key_name}: {error}",
   "setup.welcome_first_run": "Добро пожаловать в VoiceForge! Запустите `voiceforge setup` для пошаговой настройки.",
   "download_models.whisper_desc": "Загрузка Whisper ({model_size}) (~{size_mb} МБ)...",
   "download_models.onnx_desc": "Проверка ONNX embedder...",

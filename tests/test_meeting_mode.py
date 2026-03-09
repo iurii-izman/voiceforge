@@ -17,12 +17,15 @@ class _FakeCapture:
     """Minimal AudioCapture that returns empty chunks and obeys stop."""
 
     def __init__(self, *args: object, **kwargs: object) -> None:
+        # Empty: test fake (S1186).
         pass
 
     def start(self) -> None:
+        # Empty: test fake (S1186).
         pass
 
     def stop(self) -> None:
+        # Empty: test fake (S1186).
         pass
 
     def get_chunk(self, seconds: float) -> tuple[np.ndarray, np.ndarray]:
@@ -118,6 +121,7 @@ def test_meeting_analyze_on_exit_calls_pipeline(monkeypatch, tmp_path) -> None:
             return 99
 
         def close(self) -> None:
+            # No-op for test fake (S1186).
             pass
 
     monkeypatch.setattr("voiceforge.core.transcript_log.TranscriptLog", FakeLogDb)

@@ -58,7 +58,7 @@ def _set_keyring_password(service: str, key_name: str, value: str) -> None:
 
         keyring.set_password(service, key_name, value)
     except Exception as e:
-        typer.echo(t("setup.keyring_fail", key=key_name, error=str(e)), err=True)
+        typer.echo(t("setup.keyring_fail", key_name=key_name, error=str(e)), err=True)
 
 
 def run_setup_wizard(

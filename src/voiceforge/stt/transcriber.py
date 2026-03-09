@@ -87,7 +87,7 @@ def _load_whisper_model(
             if warnings is not None:
                 warnings.append(t("feedback.model_ready"))
             return model
-        except BaseException as e:
+        except Exception as e:
             last_error = e
             if attempt < MAX_DOWNLOAD_ATTEMPTS - 1:
                 delay = DOWNLOAD_BACKOFF_BASE_SEC * (2**attempt)

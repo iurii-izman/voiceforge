@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-09 (docs governance sync: PROJECT-STATUS-SUMMARY, DOCS-INDEX; следующий приоритет — roadmap или docs)
+**Обновлено:** 2026-03-09 (Sonar batch: BLOCKER S5549, S5754, S1186×27, shell S7682; остаётся ~78 issues — S1192, S3776, S5655, JS)
 
 ---
 
@@ -19,9 +19,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Docs governance sync: обновлён PROJECT-STATUS-SUMMARY (QA wave #152–#157 завершена, стадия «quality remediation complete»), DOCS-INDEX (дата и пометка docs governance sync). Targeted tests: test_release_metadata, test_init_version, test_preflight, test_history_output — 21 passed.
+**Сделано в сессии:** Sonar batch: исправлены BLOCKER S5549 (setup.py t() — дубликат параметра key → key_name в i18n), CRITICAL S5754 (transcriber.py: BaseException → Exception), 27× S1186 (пустые методы в тестах — комментарий «No-op for test fake»), shell S7682 (ensure_label: return 0 + локальные переменные). Остаётся ~78 issues: S1192 (дубли строк), S3776 (сложность), S5655 (аргументы тестов), JS/desktop. Тесты: test_setup_wizard, test_post_listen, test_daemon_helpers и др. — 110 passed; test_daemon_batch116 — import error (pre-existing); test_hotspot_batch114::test_main_status_and_calendar_commands_reuse_helpers — fail (pre-existing).
 
-**Следующий шаг:** Приоритет — следующий пункт roadmap (docs/plans.md) или docs/governance: roadmap #19 (prompt caching — research) или очередная актуализация доков (DOCS-INDEX, runbooks, archive). Новые feature issues не создавать без отдельной задачи. При инфра/cleanup-сессии снова запускать preflight и при необходимости CVE re-check (#65).
+**Следующий шаг:** Продолжить закрытие Sonar: S1192 (константы вместо дублей строк), S3776 (рефакторинг сложных функций), S5655 (порядок/имена аргументов в тестах); либо следующий пункт roadmap/docs. После пуша перезапустить Sonar и `sonar_fetch_issues.py` для актуального счёта.
 
 ---
 

@@ -131,6 +131,7 @@ def test_main_status_and_calendar_commands_reuse_helpers(monkeypatch) -> None:
             return ([], None)
 
         def close(self) -> None:
+            # No-op for test fake (S1186).
             pass
 
     monkeypatch.setattr("voiceforge.core.transcript_log.TranscriptLog", _FakeLogDb)

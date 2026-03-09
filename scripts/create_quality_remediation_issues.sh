@@ -25,7 +25,11 @@ TESTING="cb342949"
 SECURITY="6a0f371d"
 
 ensure_label() {
-  gh label create "$1" --repo "$REPO" --color "$2" --description "$3" --force >/dev/null
+  local name="$1"
+  local color="$2"
+  local desc="$3"
+  gh label create "$name" --repo "$REPO" --color "$color" --description "$desc" --force >/dev/null
+  return 0
 }
 
 find_issue_number() {

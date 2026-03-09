@@ -17,12 +17,15 @@ class _FakeCapture:
     """Minimal AudioCapture that returns empty chunks and obeys stop."""
 
     def __init__(self, *args: object, **kwargs: object) -> None:
+        # Empty: test fake (S1186).
         pass
 
     def start(self) -> None:
+        # Empty: test fake (S1186).
         pass
 
     def stop(self) -> None:
+        # Empty: test fake (S1186).
         pass
 
     def get_chunk(self, seconds: float) -> tuple[np.ndarray, np.ndarray]:
