@@ -17,6 +17,8 @@ def main() -> None:
     token = get_api_key("github_token_pat")
     if token:
         print("username=git", flush=True)
+        # Git credential helper protocol: git expects password on stdout. This is not logging;
+        # only the invoking git process reads it. See docs/runbooks/security-decision-log.md.
         print("password=" + token, flush=True)
 
 

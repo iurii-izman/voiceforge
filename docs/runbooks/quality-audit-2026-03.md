@@ -11,9 +11,9 @@
 ### GitHub
 
 - Открытые repo issues по API: фактически остался внешний wait-state [#65](https://github.com/iurii-izman/voiceforge/issues/65).
-- Открытые GitHub Security alerts: `4`
-  - `1` CodeQL alert (`scripts/git_credential_keyring_pat.py`)
-  - `3` Dependabot alerts (`serialize-javascript`, `time`, `glib`)
+- Открытые GitHub Security alerts: `3` (Dependabot; CodeQL alert dismissed in QA1 [#152](https://github.com/iurii-izman/voiceforge/issues/152))
+  - CodeQL `py/clear-text-logging-sensitive-data`: **dismissed** (false positive — Git credential helper protocol)
+  - `3` Dependabot alerts (`serialize-javascript`, `time`, `glib`) — tracked, see security-decision-log.md
 
 ### Локальные quality gates
 
