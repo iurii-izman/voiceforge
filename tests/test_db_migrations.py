@@ -123,6 +123,31 @@ def test_metrics_migrations_on_clean_db(tmp_path, monkeypatch) -> None:
         conn.close()
 
 
+def test_transcript_migrate_down_then_up_recovery(tmp_path: Path) -> None:
+    """E12 #135: Set schema_version to 3, drop 004/005 artifacts, re-open → 004 and 005 run again, verify at TARGET."""
+    db_path = tmp_path / "transcripts.db"
+    log_db = TranscriptLog(db_path=db_path)
+    log_db.log_session([{"start_sec": 0, "end_sec": 1, "speaker": "A", "text": "pre"}])
+    log_db.close()
+
+    conn = sqlite3.connect(db_path)
+    conn.execute("UPDATE schema_version SET version = 3")
+    with contextlib.suppress(sqlite3.OperationalError):
+        conn.execute("ALTER TABLE analyses DROP COLUMN template")
+    conn.execute("DROP TABLE IF EXISTS action_items")
+    conn.commit()
+    conn.close()
+
+    log_db2 = TranscriptLog(db_path=db_path)
+    sessions = log_db2.get_sessions()
+    log_db2.close()
+    assert len(sessions) >= 1
+    conn = sqlite3.connect(db_path)
+    row = conn.execute("SELECT version FROM schema_version LIMIT 1").fetchone()
+    conn.close()
+    assert row is not None and int(row[0]) == SCHEMA_VERSION_TARGET
+
+
 def test_metrics_migrations_on_existing_db(tmp_path, monkeypatch) -> None:
     monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
     db_path = Path(tmp_path / "data" / "voiceforge" / "metrics.db")

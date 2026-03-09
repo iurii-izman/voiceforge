@@ -120,7 +120,7 @@ markers = [
 [tool.coverage.run]
 source = ["src/voiceforge"]
 branch = true
-# Reduce omit gradually + add tests; target fail_under 80% (issue #56, FULL_AUDIT W2).
+# Reduce omit gradually + add tests; target fail_under 75% (E12 #135).
 omit = [
     "*/tests/*",
     "src/voiceforge/__main__.py",
@@ -130,12 +130,10 @@ omit = [
     # pipeline removed from omit (#56): test_pipeline_integration.py + test_pipeline_memory_guard.py
     # dbus_service removed from omit (#56): test_dbus_service.py + test_dbus_contract_snapshot.py
     # server.py removed from omit (#99): test_web_*.py + test_coverage_hotspots_batch99.py (server helpers)
-    "src/voiceforge/stt/diarizer.py",
+    # diarizer, indexer, embedder removed from omit (E12 #135): test_diarizer_mock.py, test_rag_indexer_embedder_mock.py
     "src/voiceforge/rag/_onnx_runner.py",
     "src/voiceforge/rag/dedup.py",
-    "src/voiceforge/rag/embedder.py",
     "src/voiceforge/rag/incremental.py",
-    "src/voiceforge/rag/indexer.py",
     "src/voiceforge/rag/searcher.py",
     # rag/watcher removed from omit (#99): test_rag_watcher.py + watch CLI/helper smoke cover debounce/hash/index/stop paths
     "src/voiceforge/llm/local_llm.py",
@@ -144,9 +142,8 @@ omit = [
 ]
 
 [tool.coverage.report]
-# Target 60% with server.py in report (#99); raise toward 75% as more hotspots are covered.
-# Run `make coverage` or pytest with --cov in toolbox; optional [otel] extra adds OTel path coverage.
-fail_under = 60
+# E12 #135: Coverage target 75%; run `make coverage` or pytest with --cov in toolbox.
+fail_under = 75
 exclude_lines = ["pragma: no cover", "def __repr__", "raise NotImplementedError"]
 
 [build-system]

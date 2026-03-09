@@ -20,7 +20,7 @@
 | RAG / data / storage | 81 | 88 | 7 | Index/search/restore lifecycle проверен; ONNX-heavy paths — manual |
 | LLM / prompts / PII | 78 | 87 | 9 | Router coverage 91%; non-Claude caching — research |
 | Interfaces & integrations | 76 | 85 | 9 | Sync/async glue тоньше; drift risk при изменениях |
-| Testing & QA | 82 | 86 | 4 | Coverage 60% (target 75%); targeted suites для ключевых модулей |
+| Testing & QA | 82 | 86 | 4 | Coverage target 75% (fail_under=75); E12 real-audio, concurrent, failure injection, CLI snapshots |
 | Security & dependency hygiene | 82 | 89 | 7 | fs.py 0700/0600 baseline; #65 CVE — external wait |
 | Observability & runtime ops | 79 | 88 | 9 | OTel + Prometheus + Jaeger proof path; live execution manual |
 | CI/CD & release / packaging | 81 | 87 | 6 | Release proof scripts; updater disabled |
@@ -82,7 +82,7 @@
 | E9 | [#132](https://github.com/iurii-izman/voiceforge/issues/132) | Post-Listen Auto-Analyze & Cost Estimate | P1 | M | Backend | +10% UF ✓ |
 | E10 | [#133](https://github.com/iurii-izman/voiceforge/issues/133) | Output Polish: History, Export, Daily Digest | P1 | M | Backend | +10% UF ✓ |
 | E11 | [#134](https://github.com/iurii-izman/voiceforge/issues/134) | Calendar Auto-Analyze & Notification Automation | P2 | L | Backend | +8% UF |
-| E12 | [#135](https://github.com/iurii-izman/voiceforge/issues/135) | Testing Hardening: Coverage 75%, Real Audio, Concurrent | P1 | L | Testing | +20% Test |
+| E12 | [#135](https://github.com/iurii-izman/voiceforge/issues/135) | Testing Hardening: Coverage 75%, Real Audio, Concurrent | P1 | L | Testing | +20% Test ✓ |
 | E13 | [#136](https://github.com/iurii-izman/voiceforge/issues/136) | Core Logic: Prompt Cache, Streaming CLI, Whisper Turbo | P1 | L | AI/ML | +10% Core |
 | E14 | [#137](https://github.com/iurii-izman/voiceforge/issues/137) | CLI & API Polish: Rich Output, Config Show, Error Catalog | P1 | M | Backend | +10% CLI |
 | E15 | [#138](https://github.com/iurii-izman/voiceforge/issues/138) | Observability: Grafana Dashboard, Alert Rules | P1 | M | DevOps | +15% Obs |
@@ -112,7 +112,7 @@ E6 ✓ → E7 ✓ → E8 ✓ → E9 ✓ → E10 ✓ → E18 ✓
 
 **Wave 3 — P1 quality (2-3 недели):**
 ```
-E12 → E13 → E14 → E15
+E12 ✓ → E13 → E14 → E15
 ```
 
 **Wave 4 — P2 polish (2-3 недели, DDR 70→78):**
