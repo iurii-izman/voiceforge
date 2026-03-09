@@ -118,6 +118,19 @@ class SessionSummary:
 
 
 @dataclass
+class SessionListDisplay:
+    """E10 (#133): session row for human-friendly history list (summary_preview, speaker_count)."""
+
+    id: int
+    started_at: str
+    ended_at: str
+    duration_sec: float
+    segments_count: int
+    speaker_count: int
+    summary_preview: str
+
+
+@dataclass
 class SegmentRow:
     start_sec: float
     end_sec: float
@@ -324,6 +337,37 @@ class TranscriptLog:
                 ended_at=row["ended_at"],
                 duration_sec=row["duration_sec"],
                 segments_count=row["segments_count"],
+            )
+            for row in cursor.fetchall()
+        ]
+
+    def get_sessions_for_display(self, last_n: int = 10, offset: int = 0) -> list[SessionListDisplay]:
+        """E10 (#133): sessions with summary_preview (first 200 chars) and speaker_count for human-friendly list."""
+        conn = self._get_conn()
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT s.id, s.started_at, s.ended_at, s.duration_sec,
+                   (SELECT COUNT(*) FROM segments WHERE session_id = s.id) AS segments_count,
+                   (SELECT COUNT(DISTINCT speaker) FROM segments WHERE session_id = s.id
+                    AND COALESCE(trim(speaker), '') != '') AS speaker_count,
+                   (SELECT substr(trim(replace(replace(COALESCE(json_extract(a.answers, '$[0]'), ''), '"', ''), char(10), ' ')), 1, 200)
+                    FROM analyses a WHERE a.session_id = s.id ORDER BY a.id DESC LIMIT 1) AS summary_preview
+            FROM sessions s
+            ORDER BY s.id DESC
+            LIMIT ? OFFSET ?
+            """,
+            (last_n, max(0, offset)),
+        )
+        return [
+            SessionListDisplay(
+                id=row["id"],
+                started_at=row["started_at"],
+                ended_at=row["ended_at"],
+                duration_sec=row["duration_sec"],
+                segments_count=row["segments_count"],
+                speaker_count=row["speaker_count"] or 0,
+                summary_preview=(row["summary_preview"] or "").strip(),
             )
             for row in cursor.fetchall()
         ]

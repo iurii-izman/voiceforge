@@ -80,7 +80,7 @@
 | E7 | [#130](https://github.com/iurii-izman/voiceforge/issues/130) | Setup Wizard: `voiceforge setup` & First-Run | P1 | L | Backend | +15% Onboard ✓ |
 | E8 | [#131](https://github.com/iurii-izman/voiceforge/issues/131) | Model Pre-Download & Bootstrap | P1 | S | Backend | +8% Onboard ✓ |
 | E9 | [#132](https://github.com/iurii-izman/voiceforge/issues/132) | Post-Listen Auto-Analyze & Cost Estimate | P1 | M | Backend | +10% UF ✓ |
-| E10 | [#133](https://github.com/iurii-izman/voiceforge/issues/133) | Output Polish: History, Export, Daily Digest | P1 | M | Backend | +10% UF |
+| E10 | [#133](https://github.com/iurii-izman/voiceforge/issues/133) | Output Polish: History, Export, Daily Digest | P1 | M | Backend | +10% UF ✓ |
 | E11 | [#134](https://github.com/iurii-izman/voiceforge/issues/134) | Calendar Auto-Analyze & Notification Automation | P2 | L | Backend | +8% UF |
 | E12 | [#135](https://github.com/iurii-izman/voiceforge/issues/135) | Testing Hardening: Coverage 75%, Real Audio, Concurrent | P1 | L | Testing | +20% Test |
 | E13 | [#136](https://github.com/iurii-izman/voiceforge/issues/136) | Core Logic: Prompt Cache, Streaming CLI, Whisper Turbo | P1 | L | AI/ML | +10% Core |
@@ -107,7 +107,7 @@ E1 ✓ → E2 ✓ → E3 ✓ → E4 ✓ → E5 ✓
 
 **Wave 2 — P1 core (3-4 недели, DDR 55→70):**
 ```
-E6 ✓ → E7 ✓ → E8 ✓ → E9 ✓ → E10 → E18
+E6 ✓ → E7 ✓ → E8 ✓ → E9 ✓ → E10 ✓ → E18
 ```
 
 **Wave 3 — P1 quality (2-3 недели):**

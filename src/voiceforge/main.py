@@ -1466,6 +1466,45 @@ def sessions_to_ical(
     typer.echo(f"Exported {len([x for x in lines if x == 'BEGIN:VEVENT'])} sessions to {output}")
 
 
+@app.command("daily-report")
+def daily_report(
+    date_str: str | None = typer.Option(None, "--date", help="Date YYYY-MM-DD (default: today)"),
+    use_llm: bool = typer.Option(False, "--llm", help="Summarize with LLM (optional)"),
+    output: Path | None = typer.Option(None, "--output", "-o", path_type=Path, help="Write to file (default: stdout)"),
+) -> None:
+    """E10 (#133): Daily digest — sessions, action items, cost for one day. Default: structured text."""
+    from datetime import date as date_type
+
+    from voiceforge.cli.digest import build_daily_digest, format_daily_digest_text
+
+    day = date_type.today()
+    if date_str is not None:
+        try:
+            day = date_type.fromisoformat(date_str)
+        except ValueError:
+            typer.echo(t("history.date_invalid", err=date_str), err=True)
+            raise SystemExit(1)
+    from voiceforge.core.transcript_log import TranscriptLog
+
+    log_db = TranscriptLog()
+    try:
+        digest = build_daily_digest(log_db, day)
+        text = format_daily_digest_text(digest)
+        if use_llm:
+            from voiceforge.cli.digest import summarize_daily_with_llm
+
+            llm_summary = summarize_daily_with_llm(day, log_db)
+            if llm_summary:
+                text += "\n\n--- LLM summary ---\n\n" + llm_summary
+    finally:
+        log_db.close()
+    if output:
+        output.write_text(text, encoding="utf-8")
+        typer.echo(t("export.saved", path=str(output)))
+    else:
+        typer.echo(text)
+
+
 @app.command("weekly-report")
 def weekly_report(
     output: Path | None = typer.Option(None, "--output", "-o", path_type=Path, help="Write report to file (default: stdout)"),
@@ -1537,6 +1576,33 @@ def weekly_report(
         typer.echo(out)
 
 
+def _copy_to_clipboard(text: str) -> bool:
+    """E10 (#133): copy text to clipboard via wl-copy (Wayland) or xclip (X11). Returns True if ok."""
+    if os.environ.get("WAYLAND_DISPLAY"):
+        try:
+            proc = subprocess.run(
+                ["wl-copy"],
+                input=text.encode("utf-8"),
+                check=True,
+                capture_output=True,
+                timeout=5,
+            )  # nosec B603 B607 -- wl-copy from PATH
+            return proc.returncode == 0
+        except (FileNotFoundError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
+            return False
+    try:
+        proc = subprocess.run(
+            ["xclip", "-selection", "clipboard", "-in"],
+            input=text.encode("utf-8"),
+            check=True,
+            capture_output=True,
+            timeout=5,
+        )  # nosec B603 B607 -- xclip from PATH
+        return proc.returncode == 0
+    except (FileNotFoundError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
+        return False
+
+
 @app.command("export")
 def export_session(
     session_id: int = typer.Option(..., "--id", help="ID сессии для экспорта"),
@@ -1548,8 +1614,9 @@ def export_session(
         path_type=Path,
         help="Файл вывода (по умолчанию: session_<id>.<format>)",
     ),
+    clipboard: bool = typer.Option(False, "--clipboard", help="Скопировать в буфер (wl-copy / xclip)"),
 ) -> None:
-    """Экспорт сессии в Markdown, PDF, DOCX, Notion или Otter (blocks 39, 81)."""
+    """Экспорт сессии в Markdown, PDF, DOCX, Notion или Otter (blocks 39, 81). E10: --clipboard."""
     from voiceforge.core.transcript_log import TranscriptLog
 
     if sys.stderr.isatty():
@@ -1574,6 +1641,14 @@ def export_session(
             md_text = build_session_markdown(session_id, segments, analysis, started_at=started_at)
     finally:
         log_db.close()
+
+    if clipboard:
+        if _copy_to_clipboard(md_text):
+            typer.echo(t("export.clipboard_done"))
+        else:
+            typer.echo(t("export.clipboard_unavailable"), err=True)
+            typer.echo(md_text)
+        return
 
     def _export_suffix(fmt: str) -> str:
         if fmt == "pdf":

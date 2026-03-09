@@ -69,6 +69,8 @@
   "cost.day_line": "  {date}: ${cost:.4f} ({calls})",
   "export.format_md_or_pdf": "Формат должен быть md или pdf.",
   "export.saved": "Экспорт: {path}",
+  "export.clipboard_done": "Скопировано в буфер обмена.",
+  "export.clipboard_unavailable": "Нет wl-copy/xclip. Вывод в stdout.",
   "export.pdf_install": "Для PDF установите pandoc и pdflatex (или: pandoc -o out.pdf session.md).",
   "export.md_fallback": "Markdown сохранён: {path}",
   "history.session_not_found": "Сессия не найдена: {session_id}",

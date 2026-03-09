@@ -12,12 +12,15 @@ Core CLI commands:
 - `status`
 - `history` (list or `--id N` for detail)
 - `cost` (cost report by days or `--from`/`--to`)
-- `export` (session to md/pdf)
+- `export` (session to md/pdf, optional `--clipboard`)
+- `daily-report` (daily digest: sessions, action items, cost; optional `--llm`)
 - `action-items update` (from-session / next-session)
 - `index`, `watch`
 - `daemon`
 - `install-service`, `uninstall-service`
 - `web` (local Web UI)
+
+**Shell completion:** `voiceforge --install-completion` (then add the emitted line to your shell rc, or `voiceforge --install-completion bash` / `zsh`).
 
 ## Requirements
 

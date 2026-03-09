@@ -69,6 +69,8 @@
   "cost.day_line": "  {date}: ${cost:.4f} ({calls})",
   "export.format_md_or_pdf": "Format must be md or pdf.",
   "export.saved": "Export: {path}",
+  "export.clipboard_done": "Copied to clipboard.",
+  "export.clipboard_unavailable": "No clipboard tool (wl-copy or xclip). Printing to stdout.",
   "export.pdf_install": "For PDF install pandoc and pdflatex (or: pandoc -o out.pdf session.md).",
   "export.md_fallback": "Markdown saved: {path}",
   "history.session_not_found": "Session not found: {session_id}",

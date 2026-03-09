@@ -139,12 +139,17 @@ def _migrate_cost_daily_if_exists(conn: sqlite3.Connection) -> None:
 def get_cost_today() -> float:
     """Return total LLM cost for today from SQLite (source of truth).
     Uses UTC date to match stored UTC timestamps — avoids the midnight gap bug."""
+    return get_cost_for_date(datetime.now(UTC).date())
+
+
+def get_cost_for_date(day: date) -> float:
+    """E10 (#133): total LLM cost for given date (UTC). Used by daily-report."""
     conn = _get_conn()
     try:
-        today = datetime.now(UTC).date().isoformat()
+        day_str = day.isoformat()
         row = conn.execute(
             "SELECT COALESCE(SUM(cost_usd), 0) FROM llm_calls WHERE date(timestamp) = ? AND success = 1",
-            (today,),
+            (day_str,),
         ).fetchone()
         return float(row[0] or 0.0)
     except sqlite3.OperationalError:

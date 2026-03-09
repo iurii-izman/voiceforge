@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 
@@ -200,7 +201,7 @@ def build_session_export_otter(
 
 
 def render_sessions_table_lines(sessions: list[object]) -> list[str]:
-    """Build text table lines for session summaries."""
+    """Build text table lines for session summaries (raw table, --json compat)."""
     lines = [
         "  id  started_at              duration  segments",
         "  --  ----------------------  --------  -------",
@@ -212,6 +213,30 @@ def render_sessions_table_lines(sessions: list[object]) -> list[str]:
             f"  {getattr(s, 'id', 0):<3} {started}  {getattr(s, 'duration_sec', 0.0):>6.1f}s  {getattr(s, 'segments_count', 0)}"
         )
     return lines
+
+
+def render_sessions_table_lines_human(sessions: list[object]) -> list[str]:
+    """E10 (#133): human-friendly list — date, duration, speaker count, first 200 chars of summary."""
+    lines = [
+        "  id  date        duration  speakers  summary",
+        "  --  ----------  --------  --------  -------",
+    ]
+    for s in sessions:
+        started_at = getattr(s, "started_at", "")
+        date_part = started_at[:10] if len(started_at) >= 10 else started_at
+        duration_sec = getattr(s, "duration_sec", 0.0)
+        speaker_count = getattr(s, "speaker_count", 0)
+        preview = (getattr(s, "summary_preview", "") or "")[:200].strip() or "—"
+        lines.append(f"  {getattr(s, 'id', 0):<3} {date_part}  {duration_sec:>6.1f}s  {speaker_count:>8}  {preview}")
+    return lines
+
+
+def highlight_search_term(snippet: str, term: str) -> str:
+    """E10 (#133): wrap term in ANSI bold for terminal highlight (case-insensitive)."""
+    if not term or not snippet:
+        return snippet
+    pattern = re.compile(re.escape(term), re.IGNORECASE)
+    return pattern.sub(r"\033[1m\g<0>\033[0m", snippet)
 
 
 # --- History command result builders (return (kind, data) for main.history to echo) ---
@@ -253,7 +278,7 @@ def history_action_items_result(log_db: Any, output: str) -> tuple[str, Any]:
 
 
 def history_search_result(log_db: Any, search: str, output: str) -> tuple[str, Any]:
-    """Return ("json", payload) | ("lines", list[str]) | ("message", i18n_key)."""
+    """Return ("json", payload) | ("lines", list[str]) | ("message", i18n_key). E10: highlight term in snippets."""
     hits = log_db.search_transcripts(search.strip(), limit=30)
     if output == "json":
         payload = {
@@ -263,7 +288,11 @@ def history_search_result(log_db: Any, search: str, output: str) -> tuple[str, A
         return ("json", payload)
     if not hits:
         return ("message", "history.no_results")
-    lines = [f"session_id={sid} | {start_sec:.1f}s | {snippet}" for sid, _text, start_sec, _end_sec, snippet in hits]
+    term = search.strip()
+    lines = [
+        f"session_id={sid} | {start_sec:.1f}s | {highlight_search_term(snippet, term)}"
+        for sid, _text, start_sec, _end_sec, snippet in hits
+    ]
     return ("lines", lines)
 
 
@@ -317,10 +346,11 @@ def history_session_detail_result(log_db: Any, session_id: int, output: str) -> 
 
 
 def history_list_result(log_db: Any, last_n: int, output: str, offset: int = 0) -> tuple[str, Any]:
-    """Return ("json", payload) | ("lines", list) | ("message", i18n_key). Block 51: offset for pagination."""
-    sessions = log_db.get_sessions(last_n=last_n, offset=offset)
+    """Return ("json", payload) | ("lines", list) | ("message", i18n_key). E10: human-friendly default."""
     if output == "json":
+        sessions = log_db.get_sessions(last_n=last_n, offset=offset)
         return ("json", build_sessions_payload(sessions) if sessions else empty_sessions_payload())
-    if not sessions:
+    display_sessions = log_db.get_sessions_for_display(last_n=last_n, offset=offset)
+    if not display_sessions:
         return ("message", "history.no_sessions")
-    return ("lines", render_sessions_table_lines(sessions))
+    return ("lines", render_sessions_table_lines_human(display_sessions))
