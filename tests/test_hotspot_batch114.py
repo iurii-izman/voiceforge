@@ -51,9 +51,7 @@ async def test_server_async_json_request_to_response_handles_invalid_json() -> N
     )
 
     assert response.status_code == 400
-    assert json.loads(response.body.decode("utf-8")) == {
-        "error": {"code": "BAD_REQUEST", "message": "invalid JSON"}
-    }
+    assert json.loads(response.body.decode("utf-8")) == {"error": {"code": "BAD_REQUEST", "message": "invalid JSON"}}
 
 
 @pytest.mark.asyncio
@@ -116,8 +114,12 @@ def test_main_status_and_calendar_commands_reuse_helpers(monkeypatch) -> None:
     ]
 
     calendar_calls: list[tuple[str, tuple[object, ...]]] = []
-    monkeypatch.setattr(main, "_calendar_poll_emit", lambda output, minutes, events: calendar_calls.append(("poll", (output, minutes, events))))
-    monkeypatch.setattr(main, "_calendar_create_emit", lambda output, event_uid: calendar_calls.append(("create", (output, event_uid))))
+    monkeypatch.setattr(
+        main, "_calendar_poll_emit", lambda output, minutes, events: calendar_calls.append(("poll", (output, minutes, events)))
+    )
+    monkeypatch.setattr(
+        main, "_calendar_create_emit", lambda output, event_uid: calendar_calls.append(("create", (output, event_uid)))
+    )
     monkeypatch.setattr("voiceforge.calendar.poll_events_started_in_last", lambda minutes: ([{"summary": "Demo"}], None))
     monkeypatch.setattr("voiceforge.calendar.create_event", lambda **kwargs: ("uid-42", None))
 
