@@ -1011,152 +1011,120 @@ echo ""
 # USER DECISION BLOCKS
 # ─────────────────────────────────────────────
 
-# BLOCK 19: Desktop UI Strategy
+# BLOCK 19: Desktop UI Strategy (decision locked)
 create_issue \
-"E19 · 🔶 DECISION: Desktop UI Strategy — Invest or Freeze" \
+"E19 · Desktop UI: Invest in Tauri (decision locked)" \
 "$(cat <<'BODY'
 ## Context
 
-Desktop UI (Tauri 2) существует, но не проверен E2E. Это proof of concept.
+Решение принято: **Invest in Tauri**. Desktop становится primary GUI surface для VoiceForge.
 
-## Decision Required
-
-**Вариант A: Invest (6-8 недель)**
-- Довести E2E flow: Record → Analyze → View → Export
-- Tray icon с quick actions (Start/Stop listen, last analysis)
-- Global keyboard hotkey (start/stop listen)
-- E2E тесты с Playwright
-- AppImage/Flatpak packaging
-
-**Вариант B: Freeze (0 недель)**
-- Пометить desktop как «experimental» в README
-- Не тратить время до beta
-- Фокус на CLI + Web UI
-
-**Вариант C: Replace with Web-only (3-4 недели)**
-- Заменить Tauri на SPA (React/Svelte) + существующий web server
-- Lighter, easier to develop, cross-platform
-- Теряем: native feel, tray icon, global hotkeys
-
-## Impact
-- Вариант A: Desktop UI 40% → 75%, но 6-8 недель effort
-- Вариант B: Desktop UI stays 40%, freed time for other blocks
-- Вариант C: Desktop UI 40% → 65%, 3-4 недели
-
-## If Invest (Variant A) — Scope
+## Locked Scope
 - [ ] E2E meeting flow in Tauri
 - [ ] Tray icon: Start/Stop listen, Open, Quit
 - [ ] Global hotkey: Ctrl+Shift+V → toggle listen
 - [ ] Playwright E2E tests
 - [ ] AppImage packaging verification
 
+## Scope Guard
+- Не делать Web-only pivot
+- Не развивать Web UI как второй основной продуктовый frontend
+- Desktop-track брать после Wave 3 backend/quality
+
+## Decision Source
+- `docs/runbooks/phase-e-decision-log.md`
+
 ## Labels
-user-decision, productization, phase:E
+productization, phase:E
 BODY
 )" \
-"productization,user-decision,phase:E,area:frontend" "$P1" "$L" "$FRONTEND"
+"productization,phase:E,area:frontend" "$P1" "$L" "$FRONTEND"
 
 echo ""
 
-# BLOCK 20: Surface Freeze Decisions
+# BLOCK 20: Surface Freeze Decisions (decision locked)
 create_issue \
-"E20 · 🔶 DECISION: Surface Area — What to Freeze vs Invest" \
+"E20 · Scope Policy: Freeze Web UI / Telegram / RAG Watcher; Narrow Calendar" \
 "$(cat <<'BODY'
 ## Context
 
-Из анализа: несколько surfaces в полуготовом состоянии. Нужно решить по каждому.
+Решение принято. Для автопилота это **policy issue**, а не feature roadmap item.
 
-## Decisions Required
+## Locked Decisions
 
-### Web UI (stdlib HTTP server)
-- **Current:** 🟡 Demo/functional
-- **Option A:** Freeze (достаточно для alpha)
-- **Option B:** Invest: add SPA frontend, WebSocket для real-time updates
+### Web UI
+- **Status:** Freeze / maintenance-only
+- Разрешено: bugfix, contract parity, admin/debug usability
+- Не делать: SPA rewrite, второй основной frontend
 
 ### Telegram Bot
-- **Current:** 🟡 Functional (webhook)
-- **Option A:** Freeze (работает)
-- **Option B:** Invest: rich messages, inline buttons, /start flow
+- **Status:** Freeze / maintenance-only
+- Разрешено: webhook reliability, delivery fixes, summary push
+- Не делать: bot-first UX, inline flows, rich bot surface
 
 ### Calendar (CalDAV)
-- **Current:** 🟡 Functional
-- **Option A:** Freeze
-- **Option B:** Invest: auto-listen (E11), Google Calendar support
+- **Status:** Invest narrow
+- Разрешено: auto-listen / auto-analyze / notify на существующем CalDAV stack
+- Не делать: Google Calendar support, multi-provider expansion
 
 ### RAG Watcher
-- **Current:** 🟡 Functional
-- **Option A:** Freeze
-- **Option B:** Invest: auto-discovery, smarter chunking, web UI for management
+- **Status:** Freeze / maintenance-only
+- Разрешено: stability, debounce/dedup, tests
+- Не делать: management UI, auto-discovery, large UX expansion
 
-## Recommendation
-Freeze Web UI, Telegram, RAG watcher. Invest in Calendar only if E11 approved.
+## Implementation Hook
+- Calendar narrow scope реализуется через `E11`
+- Остальные surfaces не расширять без нового user decision
+
+## Decision Source
+- `docs/runbooks/phase-e-decision-log.md`
 
 ## Labels
-user-decision, productization, phase:E
+productization, phase:E
 BODY
 )" \
-"productization,user-decision,phase:E" "$P2" "$S" "$BACKEND"
+"productization,phase:E" "$P2" "$S" "$BACKEND"
 
 echo ""
 
-# BLOCK 21: Beyond Boundaries
+# BLOCK 21: Beyond Boundaries (decision locked)
 create_issue \
-"E21 · 🔶 DECISION: Beyond Boundaries — Platform & Architecture Strategy" \
+"E21 · Strategic Boundaries: Accept Later / Defer / Reject (decision locked)" \
 "$(cat <<'BODY'
 ## Context
 
-10 стратегических возможностей, выходящих за текущие рамки проекта. Каждая требует решения.
+Решение принято. Это **boundary issue**: фиксирует, что допустимо открывать после Phase E, а что не трогаем.
 
-## Decisions Required (ranked by impact)
+## Accept Later
+- **Managed packaging (APT / Snap / Homebrew)** — принять в будущий трек после Linux beta / stable desktop release proof
 
-### 1. 🌐 Cloud-hosted mode (SaaS lite)
-- **Impact:** +30 Daily Driver | **Нарушает:** local-first
-- **Trade-off:** privacy → convenience; можно self-hosted
+## Defer
+- macOS / Windows
+- Browser extension
+- GPU acceleration
+- Whisper.cpp / MLX backend
 
-### 2. 🍎 macOS / Windows support
-- **Impact:** ×20 audience | **Нарушает:** Linux-only (ADR)
-- **Trade-off:** PipeWire → CoreAudio/WASAPI, D-Bus → другой IPC
+## Reject For Current Phase
+- Cloud-hosted / SaaS lite
+- Web-only main UI
+- Real-time collaborative notes
+- PostgreSQL + pgvector
+- LLM fine-tuning on meeting data
 
-### 3. 🌐 Browser extension (Chrome/Firefox)
-- **Impact:** +20 Onboarding | **Нарушает:** scope
-- **Trade-off:** captures Meet/Zoom audio without PipeWire
+## Revisit Triggers
+- Managed packaging: Linux beta + stable release proof
+- macOS / Windows: Linux beta + stable audio/IPC abstraction
+- Browser extension: PipeWire остаётся главным onboarding blocker
+- GPU / Whisper.cpp / MLX: CPU perf становится системным bottleneck
 
-### 4. 📦 Managed packaging (APT, Snap, Homebrew)
-- **Impact:** +25 Onboarding | **Нарушает:** uv-only distribution
-- **Trade-off:** package maintenance, model distribution
-
-### 5. 🖥️ Web-only UI (Electron / SPA)
-- **Impact:** +15 Desktop UI | **Нарушает:** Tauri philosophy
-- **Trade-off:** RAM overhead vs dev speed
-
-### 6. 🎮 GPU acceleration (CUDA/ROCm)
-- **Impact:** +10 Performance | **Нарушает:** CPU-only
-- **Trade-off:** install complexity, vendor dependency
-
-### 7. 🤖 Real-time collaborative notes
-- **Impact:** +20 User Flow (team) | **Нарушает:** single-user
-- **Trade-off:** needs server, auth, network
-
-### 8. ⚡ Whisper.cpp / MLX backend
-- **Impact:** +8 Performance | **Нарушает:** Python-only
-- **Trade-off:** FFI complexity, build deps
-
-### 9. 🐘 PostgreSQL + pgvector
-- **Impact:** +10 Reliability+Perf | **Нарушает:** minimal deps
-- **Trade-off:** needs PG server
-
-### 10. 🧠 LLM fine-tuning on meeting data
-- **Impact:** +10 Core Logic | **Нарушает:** generic models
-- **Trade-off:** privacy risk, cost
-
-## For Each: Decide Accept / Reject / Defer
-Tag accepted items for future implementation.
+## Decision Source
+- `docs/runbooks/phase-e-decision-log.md`
 
 ## Labels
-user-decision, productization, phase:E
+productization, phase:E
 BODY
 )" \
-"productization,user-decision,phase:E" "$P3" "$L" "$BACKEND"
+"productization,phase:E" "$P3" "$L" "$BACKEND"
 
 echo ""
 

@@ -10,6 +10,7 @@
 - **Единый бэклог (ваши решения и ручные шаги):** [backlog-and-actions.md](../plans/backlog-and-actions.md) — блоки A–E; issues #82–86 на доске.
 - **Задачи Phase A–D (issues #55–73):** [audit/audit.md](../audit/audit.md) — статус W1–W20, маппинг на issues.
 - **Следующий шаг и фокус итерации:** [next-iteration-focus.md](next-iteration-focus.md) — обновляет агент в конце сессии.
+- **Границы scope для Phase E:** [phase-e-decision-log.md](phase-e-decision-log.md) — зафиксированные решения по E19-E21.
 - **История (что сделано):** [history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
 - **Приоритет фич (roadmap 1–19):** [plans.md](../plans.md) — порядок внедрения, что сделано; детали по задачам — [audit/audit.md](../audit/audit.md).
 
@@ -24,7 +25,7 @@
 - **Хорошие batches:** bugfix + regression tests + contract docs; hotspot refactor + coverage; version sync + packaging docs + release smoke.
 - **Плохие batches:** desktop packaging + RAG parser + calendar; security-only + unrelated UI polish; большие cross-cutting переделки без общей verification loop.
 - **После старта по issue:** перевести карточку в `In Progress`. После `Closes #N` и зелёных проверок — в `Done`.
-- **Подробный режим Cursor и готовые prompts:** [cursor.md](cursor.md), [next-iteration-focus.md](next-iteration-focus.md), [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md).
+- **Подробный режим Cursor и готовые prompts:** [cursor.md](cursor.md), [next-iteration-focus.md](next-iteration-focus.md), [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md), [phase-e-decision-log.md](phase-e-decision-log.md).
 
 ---
 
@@ -49,7 +50,7 @@ gh auth refresh -s project
 
 После этого агент может: создавать issue, добавлять в проект (`gh project item-add`), переводить карточку в другую колонку (`gh project item-edit` с полем Status). Примеры: «создай issue на CalDAV и добавь в проект», «перенеси #17 в Done».
 
-**Текущий проект:** [GitHub Project #1](https://github.com/users/iurii-izman/projects/1) — колонки Status: Todo, In Progress, Done. Рабочий вид: [View 1](https://github.com/users/iurii-izman/projects/1/views/1). На доске остаётся история (`#55-#73`, `#82-#86`, `#96-#123`), но практический execution order для новых сессий задают `next-iteration-focus.md` и `PROJECT-STATUS-SUMMARY.md`: batches `#114-#122` уже закрыты, текущий live item — `#123`. Поля: Phase, Priority, Effort, Area — для визуализации и фильтрации.
+**Текущий проект:** [GitHub Project #1](https://github.com/users/iurii-izman/projects/1) — колонки Status: Todo, In Progress, Done. Рабочий вид: [View 1](https://github.com/users/iurii-izman/projects/1/views/1). На доске остаётся история (`#55-#73`, `#82-#86`, `#96-#123`), но практический execution order для новых сессий задают `next-iteration-focus.md`, `PROJECT-STATUS-SUMMARY.md` и `phase-e-decision-log.md`. Поля: Phase, Priority, Effort, Area — для визуализации и фильтрации.
 
 **Обновление доски (обязательно для агента):**
 - При старте работы по issue — перевести карточку в **In Progress**.

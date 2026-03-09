@@ -90,13 +90,18 @@
 | E17 | [#140](https://github.com/iurii-izman/voiceforge/issues/140) | Security: SQLite Encryption, Audit Log, AppArmor | P2 | M | Security | +8% Sec |
 | E18 | [#141](https://github.com/iurii-izman/voiceforge/issues/141) | Performance: SQLite WAL, Ring Buffer, Adaptive Models | P1 | M | Backend | +15% Perf ✓ |
 
-### User Decision Blocks (требуют решения пользователя)
+### Decision Outcomes (зафиксировано 2026-03-09)
 
-| # | Issue | Блок | Что решить |
+Подробный policy-документ: [phase-e-decision-log.md](phase-e-decision-log.md).
+
+| # | Issue | Решение | Что это значит для автопилота |
 |---|---|---|---|
-| E19 | [#142](https://github.com/iurii-izman/voiceforge/issues/142) | Desktop UI Strategy | Invest (E2E + tray + hotkeys) vs Freeze vs Replace with SPA |
-| E20 | [#143](https://github.com/iurii-izman/voiceforge/issues/143) | Surface Area Freeze | Web UI / Telegram / Calendar / RAG Watcher: freeze vs invest |
-| E21 | [#144](https://github.com/iurii-izman/voiceforge/issues/144) | Beyond Boundaries | macOS, SaaS, GPU, browser extension, PostgreSQL и др. |
+| E19 | [#142](https://github.com/iurii-izman/voiceforge/issues/142) | **Invest in Tauri** | Tauri становится primary GUI surface. После Wave 3 брать desktop-first track: E2E flow, tray, hotkeys, packaging verification. |
+| E20 | [#143](https://github.com/iurii-izman/voiceforge/issues/143) | **Web UI / Telegram / RAG Watcher = Freeze** | Эти surfaces переводятся в maintenance-only: bugfix, contract parity, reliability. Без SPA/bot-first/management-UI expansion. |
+| E20 | [#143](https://github.com/iurii-izman/voiceforge/issues/143) | **Calendar = Invest narrow** | Разрешён только узкий scope: CalDAV auto-listen / auto-analyze / notify. Без новых providers и platform expansion. |
+| E21 | [#144](https://github.com/iurii-izman/voiceforge/issues/144) | **Managed packaging = Accept later** | Отдельный будущий трек после Linux beta / stable desktop release proof. |
+| E21 | [#144](https://github.com/iurii-izman/voiceforge/issues/144) | **Defer:** macOS/Windows, browser extension, GPU, Whisper.cpp/MLX | Вернуться только при достижении конкретных триггеров из decision log. |
+| E21 | [#144](https://github.com/iurii-izman/voiceforge/issues/144) | **Reject for current phase:** SaaS, Web-only main UI, collaborative notes, PostgreSQL, fine-tuning | Не открывать эти направления в Phase E без нового решения пользователя. |
 
 ### Порядок выполнения (рекомендуемый)
 
@@ -115,12 +120,17 @@ E6 ✓ → E7 ✓ → E8 ✓ → E9 ✓ → E10 ✓ → E18 ✓
 E12 ✓ → E13 → E14 → E15
 ```
 
-**Wave 4 — P2 polish (2-3 недели, DDR 70→78):**
+**Wave 3.5 — Desktop-first frontend (после E15):**
 ```
-E11 → E16 → E17
+E19 (#142) → Tauri E2E flow, tray polish, hotkeys, packaging proof
 ```
 
-**Параллельно:** E19, E20, E21 — user decisions, влияют на scope Wave 3-4.
+**Wave 4 — P2 polish (2-3 недели, DDR 70→78):**
+```
+E11 (narrow CalDAV scope) → E16 → E17
+```
+
+**Scope guard:** E20/E21 больше не требуют решения пользователя; их policy уже зафиксирован в [phase-e-decision-log.md](phase-e-decision-log.md).
 
 ---
 
@@ -206,7 +216,8 @@ E11 → E16 → E17
 - Брать 1 E-блок за сессию (max 2 если в одном subsystem)
 - E1-E5 — строго по порядку (Wave 1)
 - E6-E18 — по priority, можно параллелить несвязанные
-- E19-E21 — только после решения пользователя
+- E19 выполнять как desktop-first track после E15
+- E20/E21 не исполнять как feature blocks; использовать их как scope guard через [phase-e-decision-log.md](phase-e-decision-log.md)
 
 **В конце каждой сессии:**
 1. Targeted tests по изменённой поверхности
@@ -220,9 +231,9 @@ E11 → E16 → E17
 ## 9. Промпт для старта Phase E
 
 ```
-Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Статус: @docs/runbooks/PROJECT-STATUS-SUMMARY.md.
+Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Статус: @docs/runbooks/PROJECT-STATUS-SUMMARY.md. Scope guard: @docs/runbooks/phase-e-decision-log.md.
 
-Режим: максимальный автопилот, Phase E productization. Реализовать блоки E1-E18 по порядку Wave 1→2→3→4. Каждый блок — отдельный GitHub issue с label `autopilot` и `phase:E`. Брать 1 блок за сессию, доводить до конца: код, тесты, docs sync, commit + push, обновить PROJECT-STATUS-SUMMARY и next-iteration-focus.
+Режим: максимальный автопилот, Phase E productization. Реализовать открытые autopilot-блоки по текущему Wave: сначала E1-E18 по порядку Wave 1→2→3→4, но после E15 брать E19 как desktop-first track. Каждый блок — отдельный GitHub issue с label `autopilot` и `phase:E`. Брать 1 блок за сессию, доводить до конца: код, тесты, docs sync, commit + push, обновить PROJECT-STATUS-SUMMARY и next-iteration-focus.
 
 Среда: Fedora Atomic, toolbox 43, uv sync --extra all. Ключи в keyring. Тесты: targeted subset, не полный pytest (OOM risk). Pre-commit в toolbox.
 

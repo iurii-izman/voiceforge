@@ -2,25 +2,26 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-09 (E12 #135 закрыт; следующий — E13 #136 Wave 3)
+**Обновлено:** 2026-03-09 (решения E19-E21 зафиксированы; следующий — E13 #136 Wave 3)
 
 ---
 
 ## Что требуется от вас (подтверждения и решения)
 
 - **#65 CVE:** Фикса в upstream (diskcache/instructor) **пока нет — делать ничего не нужно**. Чеклист снятия: [security-and-dependencies.md](security-and-dependencies.md) разд. 4.
-- **E19 Desktop UI Strategy (#142):** Решите: Invest (E2E + tray) / Freeze / Replace with SPA. Пока решения нет — блок пропускается.
-- **E20 Surface Freeze (#143):** Решите по каждому surface: Web UI, Telegram, Calendar, RAG Watcher.
-- **E21 Beyond Boundaries (#144):** macOS, SaaS, GPU, browser extension и др. — по каждому Accept/Reject/Defer.
+- **E19-E21:** дополнительных решений сейчас **не требуется**. Политика зафиксирована в [phase-e-decision-log.md](phase-e-decision-log.md):
+  - `#142`: **Invest in Tauri**
+  - `#143`: **Freeze Web UI / Telegram / RAG watcher; Invest narrow in Calendar**
+  - `#144`: **Accept later = managed packaging; Defer = macOS/Windows, browser extension, GPU, Whisper.cpp/MLX; Reject current phase = SaaS, Web-only main UI, collaborative notes, PostgreSQL, fine-tuning**
 - **Keyring (HuggingFace):** Проверка: `uv run python -c "from voiceforge.core.secrets import get_api_key; print('huggingface:', 'present' if get_api_key('huggingface') else 'absent')"`. **Проверено:** ключ присутствует.
 
 ---
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** E12 (#135) Testing Hardening: coverage target 75% (fail_under, omit снят с diarizer/indexer/embedder), test_diarizer_mock.py, test_rag_indexer_embedder_mock.py, test_real_audio_e2e.py, test_concurrent_access.py, test_failure_injection.py, расширен test_db_migrations (migrate down/up, recovery), test_cli_snapshots.py (status/history/cost).
+**Сделано в сессии:** зафиксированы решения E19-E21 (desktop-first на Tauri; Web UI/Telegram/RAG watcher в maintenance-only; narrow CalDAV automation; managed packaging — future accept; SaaS/web-only/collab/PG/fine-tune — reject for Phase E). Источник истины: [phase-e-decision-log.md](phase-e-decision-log.md). E12 (#135) закрыт.
 
-**Следующий шаг:** взять **E13 (#136) Core Logic** (Wave 3): Prompt Cache, Streaming CLI, Whisper Turbo.
+**Следующий шаг:** взять **E13 (#136) Core Logic** (Wave 3): Prompt Cache, Streaming CLI, Whisper Turbo. После E15 идти в **E19 (#142)** как desktop-first track; E11 держать в narrowed CalDAV scope.
 
 ---
 
@@ -33,8 +34,9 @@
 | **Wave 1 (P0)** | #124✓→#125✓→#126✓→#127✓→#128✓ | **Done** | DDR 35→55 |
 | **Wave 2 (P1 core)** | #129✓→#130✓→#131✓→#132✓→#133✓→#141✓ | **Done** | DDR 55→70 |
 | **Wave 3 (P1 quality)** | #135✓→#136→#137→#138 | In progress | Core + CLI + Obs |
-| **Wave 4 (P2 polish)** | #134→#139→#140 | Todo | Calendar + CI/CD + Security |
-| **User decisions** | #142, #143, #144 | Awaiting user | Требуют решения пользователя |
+| **Wave 3.5 (Frontend)** | #142 | Todo | Desktop-first Tauri track после E15 |
+| **Wave 4 (P2 polish)** | #134→#139→#140 | Todo | Calendar (narrow CalDAV) + CI/CD + Security |
+| **Decision log** | #143✓, #144✓ | Resolved | Scope guard для автопилота; новых user decisions сейчас не нужно |
 | **External wait** | #65 | Waiting upstream | CVE — ждём fix |
 
 ---
@@ -44,13 +46,13 @@
 **Скопируй блок ниже в начало нового чата.** Агент работает на максимальном автопилоте, берёт E-блоки строго по порядку Wave.
 
 ```
-Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Статус: @docs/runbooks/PROJECT-STATUS-SUMMARY.md.
+Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Статус: @docs/runbooks/PROJECT-STATUS-SUMMARY.md. Scope guard: @docs/runbooks/phase-e-decision-log.md.
 
-Режим: максимальный автопилот, Phase E productization. Реализовать блоки E1-E18 по порядку Wave 1→2→3→4. Каждый блок — GitHub issue с label `autopilot` + `phase:E`. Брать 1 блок за сессию, доводить до конца: код, тесты, docs sync, commit + push, обновить PROJECT-STATUS-SUMMARY и next-iteration-focus.
+Режим: максимальный автопилот, Phase E productization. Реализовать открытые autopilot-блоки по текущему Wave: сначала E1-E18 по порядку Wave 1→2→3→4, но после E15 брать E19 как desktop-first track. Каждый блок — GitHub issue с label `autopilot` + `phase:E`. Брать 1 блок за сессию, доводить до конца: код, тесты, docs sync, commit + push, обновить PROJECT-STATUS-SUMMARY и next-iteration-focus.
 
 Среда: Fedora Atomic, toolbox 43, uv sync --extra all. Ключи в keyring (keyring-keys-reference.md). Тесты: targeted subset, не полный pytest (OOM risk). Pre-commit в toolbox; на хосте git push --no-verify если нет Python 3.12.
 
-Задача: взять верхний незакрытый E-блок из текущего Wave. Перевести issue в In Progress на доске. Реализовать по чеклисту в issue body. Targeted tests. Commit с `Closes #N` (Conventional Commits). Done на доске. Обновить docs. Выдать prompt для следующего чата.
+Задача: взять верхний незакрытый E-блок из текущего Wave. Перевести issue в In Progress на доске. Реализовать по чеклисту в issue body. Строго соблюдать phase-e-decision-log: Tauri = primary GUI, Web UI/Telegram/RAG watcher = maintenance-only, Calendar = narrow CalDAV scope. Targeted tests. Commit с `Closes #N` (Conventional Commits). Done на доске. Обновить docs. Выдать prompt для следующего чата.
 
 Текущий блок: E13 (#136) — Core Logic: Prompt Cache, Streaming CLI, Whisper Turbo (Wave 3).
 ```
@@ -70,7 +72,7 @@
 
 Задача: начать с верхнего незакрытого E-блока, максимум блоков за итерацию. При каждом закрытии: commit + push, update docs, сразу следующий блок. В конце сессии: финальный docs sync + prompt для следующего чата.
 
-Текущий Wave: 1 (E1 #124 → E5 #128). Цель сессии: закрыть E1 + E2 (или больше).
+Текущий Wave: 3 (E13 #136 → E15 #138), затем Wave 3.5: E19 #142. Цель сессии: закрыть верхний открытый блок текущего Wave и двигаться дальше без нарушения phase-e-decision-log.
 ```
 
 ---
@@ -81,6 +83,7 @@
 - **Pre-commit (Fedora Atomic):** Python 3.12 в toolbox 43. Pre-commit: `toolbox run -c fedora-toolbox-43 bash -c 'cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files'`. Вне toolbox: `git commit --no-verify`.
 - **Ключи:** только keyring ([keyring-keys-reference.md](keyring-keys-reference.md)).
 - **Новые CLI-команды:** через ADR (ADR-0001). `voiceforge meeting` и `voiceforge setup` — новые команды, потребуют ADR update.
+- **Scope guard:** UI-расширения делать в Tauri; Web UI, Telegram и RAG watcher не расширять beyond maintenance без нового решения. Calendar — только current CalDAV narrow path.
 - **Доска:** при работе по issue In Progress → Done. Команды: [planning.md](planning.md).
 
 ---

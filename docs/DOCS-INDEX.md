@@ -2,7 +2,7 @@
 
 **Назначение:** один источник правды по тому, какой документ за что отвечает и актуален ли он. При изменении кода/фич обновлять соответствующий док и при необходимости этот индекс.
 
-**Обновлено:** 2026-03-08 (#123 docs/governance sweep: live queue sync, active/archive boundary, CLI drift cleanup)
+**Обновлено:** 2026-03-09 (Phase E decision log added: E19-E21 locked for autopilot)
 
 ---
 
@@ -13,6 +13,7 @@
 | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
 | Контекст агента, правила, конец сессии                                      | [runbooks/agent-context.md](runbooks/agent-context.md)                                                                                       |
 | Следующий шаг / фокус итерации                                              | [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md)                                                                         |
+| Scope guard для Phase E                                                     | [runbooks/phase-e-decision-log.md](runbooks/phase-e-decision-log.md)                                                                         |
 | Текущие задачи и аудит (Phase A–D, W1–W20)                                  | [audit/audit.md](audit/audit.md)                                                                                                             |
 | Планы и приоритеты (roadmap 1–19, Phase A–D Steps 1–19, оставшееся до 100%) | [plans.md](plans.md)                                                                                                                         |
 | Аудит: статус, оставшееся до 100%, архив                                    | [audit/audit.md](audit/audit.md); снимки — [archive/audit/](archive/audit/)                                                                  |
@@ -33,7 +34,7 @@
 | **Начало работы**                   | [first-meeting-5min.md](first-meeting-5min.md), [runbooks/quickstart.md](runbooks/quickstart.md), [runbooks/installation-guide.md](runbooks/installation-guide.md)                                                                                                                                                                                           |
 | **Сборка и установка**              | [runbooks/desktop-build-deps.md](runbooks/desktop-build-deps.md), [runbooks/offline-package.md](runbooks/offline-package.md), [runbooks/desktop-updater.md](runbooks/desktop-updater.md), [runbooks/desktop-gui-testing.md](runbooks/desktop-gui-testing.md) (тесты GUI), [runbooks/desktop-release-gate-matrix.md](runbooks/desktop-release-gate-matrix.md) |
 | **Конфигурация и ключи**            | [runbooks/config-env-contract.md](runbooks/config-env-contract.md), [runbooks/keyring-keys-reference.md](runbooks/keyring-keys-reference.md)                                                                                                                                                                                                                 |
-| **Разработка и агент**              | [AGENTS.md](../AGENTS.md), [runbooks/agent-context.md](runbooks/agent-context.md), [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md), [runbooks/cursor.md](runbooks/cursor.md), [runbooks/PROJECT-STATUS-SUMMARY.md](runbooks/PROJECT-STATUS-SUMMARY.md), [architecture/README.md](architecture/README.md)                                |
+| **Разработка и агент**              | [AGENTS.md](../AGENTS.md), [runbooks/agent-context.md](runbooks/agent-context.md), [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md), [runbooks/phase-e-decision-log.md](runbooks/phase-e-decision-log.md), [runbooks/cursor.md](runbooks/cursor.md), [runbooks/PROJECT-STATUS-SUMMARY.md](runbooks/PROJECT-STATUS-SUMMARY.md), [architecture/README.md](architecture/README.md)                                |
 | **Релиз и качество**                | [runbooks/release-and-quality.md](runbooks/release-and-quality.md), [runbooks/pre-beta-sonar-github.md](runbooks/pre-beta-sonar-github.md), [runbooks/repo-and-git-governance.md](runbooks/repo-and-git-governance.md), [audit/audit.md](audit/audit.md)                                                                                                     |
 | **Безопасность и зависимости**      | [runbooks/security-and-dependencies.md](runbooks/security-and-dependencies.md)                                                                                                                                                                                                                                                                               |
 | **Фичи (календарь, RAG, Telegram)** | [runbooks/calendar-integration.md](runbooks/calendar-integration.md), [runbooks/rag-formats.md](runbooks/rag-formats.md), [runbooks/telegram-bot-setup.md](runbooks/telegram-bot-setup.md)                                                                                                                                                                   |
@@ -119,6 +120,7 @@
 | lifecycle-smoke.md                                            | Smoke-шаги для audio/STT и RAG lifecycle (#105, #106)                                  | Актуален                         |
 | pre-beta-sonar-github.md                                      | Чеклист Sonar и GitHub перед бета-релизом (PR, issues, порядок)                         | Актуален                         |
 | PROJECT-STATUS-SUMMARY.md                                     | Итог по проекту (12 разделов): планы↔код, audit delta, critical path, риски, приоритеты | Актуален                         |
+| phase-e-decision-log.md                                       | Зафиксированные решения по E19-E21; scope guard для автопилота                          | Актуален                         |
 | web-api.md, observability-alerts.md                           | API, мониторинг, трассировка Jaeger (#71)                                               | Актуален                         |
 | test-operations.md, sonar-pr-cleanup.md                       | Тесты и CI                                                                              | Актуален                         |
 | prompt-management.md, calendar-integration.md, rag-formats.md | Фичи и форматы                                                                          | Актуален                         |

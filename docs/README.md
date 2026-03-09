@@ -12,7 +12,7 @@
 |------|----------|
 | **Пользователь: первая встреча** | [first-meeting-5min.md](first-meeting-5min.md) — полный сценарий за 5 минут |
 | **Краткий сценарий** | [runbooks/quickstart.md](runbooks/quickstart.md) — линейные шаги + ссылка на полную версию |
-| **Агент (Cursor)** | [runbooks/agent-context.md](runbooks/agent-context.md) — контекст, правила, keyring, чеклист конца сессии (тесты, коммит, пуш); [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md) — следующий шаг. Правило автопилота: `.cursor/rules/agent-session-handoff.mdc` |
+| **Агент (Cursor)** | [runbooks/agent-context.md](runbooks/agent-context.md) — контекст, правила, keyring, чеклист конца сессии (тесты, коммит, пуш); [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md) — следующий шаг; [runbooks/phase-e-decision-log.md](runbooks/phase-e-decision-log.md) — зафиксированные границы scope для Phase E. Правило автопилота: `.cursor/rules/agent-session-handoff.mdc` |
 
 ---
 
@@ -29,6 +29,7 @@
 - [plans.md](plans.md) — планы, приоритет фич (roadmap 1–19), что сделано, текущие задачи
 - [audit/audit.md](audit/audit.md) — аудит: статус W1–W20, Phase A–D (#55–73), оставшееся до 100%
 - [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md) — фокус следующей итерации (обновляет агент)
+- [runbooks/phase-e-decision-log.md](runbooks/phase-e-decision-log.md) — решения по E19-E21; primary surface = Tauri, maintenance-only surfaces = Web UI / Telegram / RAG watcher
 - Выполненные планы и архив: [archive/README.md](archive/README.md), [DOCS-INDEX.md](DOCS-INDEX.md)
 
 ---

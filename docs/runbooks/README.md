@@ -12,6 +12,7 @@
 |------|------------|
 | [agent-context.md](agent-context.md) | Единый контекст для Cursor: правила, keyring, чеклист конца сессии, универсальный промпт. Прикладывать в новый чат. |
 | [next-iteration-focus.md](next-iteration-focus.md) | Следующий шаг (один для следующего чата); обновляет агент в конце сессии. |
+| [phase-e-decision-log.md](phase-e-decision-log.md) | Зафиксированные решения по E19-E21; что можно и нельзя расширять в автопилоте. |
 | [doc-governance.md](doc-governance.md) | Порядок в доках: источники правды, архив, актуализация после итераций. |
 | [cursor.md](cursor.md) | Cursor: настройка (Cloud/локально), тюнинг, промпты, OOM, справка. |
 | [voiceforge-cursor-tz.md](voiceforge-cursor-tz.md) | Заглушка → [archive/runbooks/voiceforge-cursor-tz-2026.md](../archive/runbooks/voiceforge-cursor-tz-2026.md). |
