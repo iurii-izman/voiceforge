@@ -44,16 +44,16 @@
 
 ## Промпт для следующего чата (Phase E autopilot)
 
-**Скопируй блок ниже в начало нового чата.** Агент работает на максимальном автопилоте, берёт E-блоки строго по порядку Wave.
+**Скопируй блок ниже в начало нового чата.** Агент работает по доске и next-iteration-focus; при появлении новой E-задачи — переводит в In Progress и выполняет по чеклисту.
 
 ```
 Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Статус: @docs/runbooks/PROJECT-STATUS-SUMMARY.md. Scope guard: @docs/runbooks/phase-e-decision-log.md. AI/tooling source of truth: @docs/runbooks/ai-tooling-setup.md.
 
-Режим: максимальный автопилот, Phase E productization. Wave 4 (E11, E16, E17) завершён. Работать по существующим E-issues и доске; новые E-issues не создавать без отдельной задачи. Брать 1 блок за сессию: код, targeted tests, docs sync, GitHub Project status, commit + push, обновить PROJECT-STATUS-SUMMARY и next-iteration-focus.
+Режим: максимальный автопилот, Phase E productization. Все Wave 1–4 закрыты; открытых E-блоков для автопилота нет. Работать по существующим E-issues и доске; новые E-issues не создавать без отдельной задачи. Если пользователь даёт задачу по issue — перевести в In Progress, реализовать по чеклисту, targeted tests, commit с Closes #N, Done на доске. Иначе: maintenance (preflight, доки), или явная задача от пользователя.
 
 Среда: Fedora Atomic, toolbox 43, uv sync --extra all. Ключи в keyring (keyring-keys-reference.md). Тесты: targeted subset, не полный pytest (OOM risk). Для infra/docs сначала прогонять `./scripts/preflight_repo.sh --with-tests`. Pre-commit в toolbox; на хосте git push --no-verify если нет Python 3.12.
 
-Задача: взять следующий блок по доске или приоритету из PROJECT-STATUS-SUMMARY (все Wave 1–4 закрыты). Перевести issue в In Progress. Реализовать по чеклисту. Соблюдать phase-e-decision-log: Tauri = primary GUI, Web UI/Telegram/RAG watcher = maintenance-only, Calendar = narrow CalDAV; placeholders #148–#151 не активировать. Targeted tests. Commit с Closes #N (Conventional Commits). Done на доске. Обновить docs. Выдать промпт для следующего чата.
+Задача: следовать блоку «Следующий шаг» в next-iteration-focus (maintenance / user-defined / или взять issue с доски при появлении). Соблюдать phase-e-decision-log; placeholders #148–#151 не активировать. В конце: обновить docs, выдать промпт для следующего чата.
 ```
 
 ---
