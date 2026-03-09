@@ -74,16 +74,15 @@ def test_disk_full_mock_backup_raises_propagates(tmp_path: Path) -> None:
 
 
 def test_network_timeout_mock_graceful(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Network timeout in a dependent call (e.g. LLM) — mock returns error message, no crash."""
-    # Placeholder: actual network timeout is in LLM/API layer; we verify no uncaught timeout
+    """Network timeout in a dependent call (e.g. LLM) — mock returns TimeoutError when connect is used."""
     import socket
 
     def slow_connect(*args, **kwargs):
         raise TimeoutError("Connection timed out")
 
     monkeypatch.setattr(socket, "create_connection", slow_connect)
-    # Any code that would call create_connection would get TimeoutError; we don't call it here
-    assert True
+    with pytest.raises(TimeoutError, match="timed out"):
+        socket.create_connection(("example.com", 80), timeout=1)
 
 
 def test_oom_mock_graceful() -> None:

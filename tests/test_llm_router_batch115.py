@@ -43,7 +43,7 @@ def test_router_try_ollama_faq_returns_meeting_analysis_for_faq() -> None:
     assert result is not None
     analysis, cost = result
     assert analysis.answers == ["Use the documented process."]
-    assert cost == 0.0
+    assert cost == pytest.approx(0.0)
 
 
 @pytest.mark.parametrize(
@@ -89,7 +89,7 @@ def test_analyze_meeting_uses_template_prompt_and_complete_structured(monkeypatc
 
     assert isinstance(result, StandupOutput)
     assert result.done == ["closed"]
-    assert cost == 0.25
+    assert cost == pytest.approx(0.25)
     assert captured["response_model"] is StandupOutput
     assert captured["model"] == router.MODEL_GPT4O_MINI
     prompt = captured["prompt"]
@@ -113,7 +113,7 @@ def test_analyze_meeting_falls_back_after_ollama_error(monkeypatch) -> None:
         result, cost = router.analyze_meeting("transcript", "ctx")
 
     assert result.answers == ["fallback"]
-    assert cost == 0.1
+    assert cost == pytest.approx(0.1)
 
 
 def test_router_stream_accumulate_and_parse_emits_callback_and_returns_empty_when_needed(monkeypatch) -> None:
@@ -130,7 +130,7 @@ def test_router_stream_accumulate_and_parse_emits_callback_and_returns_empty_whe
 
     parsed, cost = router._stream_accumulate_and_parse([], router.MODEL_GPT4O_MINI, callback.append, MeetingAnalysis)
     assert parsed.answers == ["done"]
-    assert cost == 0.0
+    assert cost == pytest.approx(0.0)
     assert callback == [
         '{"questions":[],"answers":["done"]',
         ',"recommendations":[],"next_directions":[],"action_items":[]}',
@@ -140,7 +140,7 @@ def test_router_stream_accumulate_and_parse_emits_callback_and_returns_empty_whe
     monkeypatch.setattr("voiceforge.llm.router.stream_completion", lambda prompt, model=None: iter([]))
     empty, empty_cost = router._stream_accumulate_and_parse([], router.MODEL_GPT4O_MINI, None, MeetingAnalysis)
     assert empty == MeetingAnalysis()
-    assert empty_cost == 0.0
+    assert empty_cost == pytest.approx(0.0)
 
 
 def test_router_stream_accumulate_and_parse_raises_for_invalid_json(monkeypatch) -> None:
@@ -175,7 +175,7 @@ def test_analyze_meeting_stream_uses_template_parser(monkeypatch) -> None:
         )
 
     assert result.done == ["streamed"]
-    assert cost == 0.0
+    assert cost == pytest.approx(0.0)
     assert captured["model_id"] == router.MODEL_GPT4O_MINI
     assert captured["response_model"] is StandupOutput
     assert captured["stream_callback"] == "cb"
@@ -229,7 +229,7 @@ def test_update_action_item_statuses_builds_prompts_for_non_claude_and_claude(mo
 
     response, cost = router.update_action_item_statuses(action_items, "raw follow-up", model=router.MODEL_GPT4O_MINI)
     assert response.updates == []
-    assert cost == 0.02
+    assert cost == pytest.approx(0.02)
     non_claude_prompt = captured[0]["prompt"]
     assert non_claude_prompt[0]["content"] == "status system"
     assert "[0] Ship release (assignee: Iurii)" in non_claude_prompt[1]["content"]
@@ -315,7 +315,7 @@ def test_complete_structured_finish_logs_cache_and_observability(monkeypatch) ->
     )
 
     assert parsed == MeetingAnalysis()
-    assert cost == 0.5
+    assert cost == pytest.approx(0.5)
     assert warnings and warnings[0][0][0] == "llm.empty_structured_response"
     assert infos and infos[0][0][0] == "llm.cache"
     assert llm_calls and llm_calls[0][0][0] == router.MODEL_GPT4O_MINI
@@ -334,7 +334,7 @@ def test_complete_structured_returns_cache_hit_before_imports(monkeypatch) -> No
     result, cost = router.complete_structured([{"role": "user", "content": "hi"}], MeetingAnalysis, model="test/model")
 
     assert result.answers == ["cached-hit"]
-    assert cost == 0.9
+    assert cost == pytest.approx(0.9)
 
 
 def test_complete_structured_success_and_failure_paths(monkeypatch) -> None:
@@ -384,7 +384,7 @@ def test_complete_structured_success_and_failure_paths(monkeypatch) -> None:
         )
 
     assert result == parsed
-    assert cost == 0.42
+    assert cost == pytest.approx(0.42)
     assert log_cache_events == [False]
     assert finished and finished[0][2] == router.MODEL_GPT4O_MINI
 

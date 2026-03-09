@@ -13,6 +13,8 @@ import urllib.request
 from dataclasses import dataclass
 from http.server import HTTPServer
 
+import pytest
+
 
 @dataclass
 class _FakeSegment:
@@ -311,6 +313,6 @@ def test_server_action_items_update_empty_action_items_returns_200(monkeypatch, 
             assert r.status == 200
             payload = json.loads(r.read().decode("utf-8"))
             assert payload.get("updates") == []
-            assert payload.get("cost_usd") == 0.0
+            assert payload.get("cost_usd") == pytest.approx(0.0)
     finally:
         server.shutdown()

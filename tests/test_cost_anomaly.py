@@ -19,7 +19,7 @@ def test_update_cost_anomaly_no_anomaly(monkeypatch: pytest.MonkeyPatch) -> None
 
     obs.update_cost_anomaly()
     # avg_7 = 1.0, threshold = 2.0, today = 1.0 -> no anomaly
-    assert obs.llm_cost_anomaly._value.get() == 0.0
+    assert obs.llm_cost_anomaly._value.get() == pytest.approx(0.0)
 
 
 def test_update_cost_anomaly_detects_anomaly(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -32,7 +32,7 @@ def test_update_cost_anomaly_detects_anomaly(monkeypatch: pytest.MonkeyPatch) ->
 
     obs.update_cost_anomaly()
     # avg_7 = 1.0, threshold = 2.0, today = 10.0 -> anomaly
-    assert obs.llm_cost_anomaly._value.get() == 1.0
+    assert obs.llm_cost_anomaly._value.get() == pytest.approx(1.0)
 
 
 def test_update_cost_anomaly_zero_avg_no_anomaly(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -44,7 +44,7 @@ def test_update_cost_anomaly_zero_avg_no_anomaly(monkeypatch: pytest.MonkeyPatch
     monkeypatch.setattr("voiceforge.core.config.Settings", lambda: settings)
 
     obs.update_cost_anomaly()
-    assert obs.llm_cost_anomaly._value.get() == 0.0
+    assert obs.llm_cost_anomaly._value.get() == pytest.approx(0.0)
 
 
 def test_update_data_dir_free_bytes(tmp_path, monkeypatch: pytest.MonkeyPatch) -> None:

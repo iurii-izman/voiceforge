@@ -112,7 +112,7 @@ def test_daemon_analyze_success_logs_session_and_emits_chunks(monkeypatch) -> No
     assert text == "analysis text"
     assert session_id == 42
     assert chunks == ["part-1", ""]
-    assert logged["duration_sec"] == 30.0
+    assert logged["duration_sec"] == pytest.approx(30.0)
     assert logged["template"] == "standup"
 
 
@@ -263,7 +263,7 @@ def test_daemon_search_rag_get_ids_and_upcoming_events_success(monkeypatch, tmp_
     ids = json.loads(daemon.get_session_ids_with_action_items())
     events = json.loads(daemon.get_upcoming_events(24))
 
-    assert rag_hits[0]["score"] == 0.987654
+    assert rag_hits[0]["score"] == pytest.approx(0.987654)
     assert ids == [1, 3, 5]
     assert events == [{"summary": "Demo"}]
 
@@ -371,7 +371,7 @@ def test_daemon_streaming_loop_processes_chunk_and_logs_failure(monkeypatch) -> 
 
     assert len(processed) == 1
     assert processed[0][0].size == 4
-    assert processed[0][1] == 0.0
+    assert processed[0][1] == pytest.approx(0.0)
 
     daemon._streaming_capture = SimpleNamespace(get_chunk=lambda seconds: (_ for _ in ()).throw(RuntimeError("capture fail")))
     daemon._streaming_stop = FakeStop()

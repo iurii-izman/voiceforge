@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-09 (QA5 #156 закрыт; следующий — QA4 #155)
+**Обновлено:** 2026-03-09 (QA4 #155 закрыт; следующий — QA6 #157)
 
 ---
 
@@ -19,9 +19,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** QA5 #156 закрыт: DevOps/scripts Sonar — bootstrap.sh, preflight_repo.sh, create_productization_issues.sh (shell `[[`, explicit exit); check_docs_consistency.py (path.exists перед read); dependabot_dismiss_moderate.py (явный sys.exit(0)). Targeted checks + commit+push.
+**Сделано в сессии:** QA4 #155 закрыт: Test suite Sonar — test_failure_injection (assert True → реальная проверка socket timeout); float equality → pytest.approx в test_cost_estimate, test_cost_anomaly, test_daemon_helpers, test_daily_report, test_llm_router_batch115 и др. Targeted tests + commit+push.
 
-**Следующий шаг:** Взять QA4 #155 (Test suite Sonar: test-only debt, stubs, float equality, type smells). Затем #157 (Desktop/frontend Sonar).
+**Следующий шаг:** Взять QA6 #157 (Desktop/frontend Sonar cleanup).
 
 ---
 
@@ -34,7 +34,7 @@
 | **Phase E** | #124✓→#142✓ | **Done** | Feature-track закрыт |
 | **QA-A** | #152✓ → #153✓ | **Done** | Security + mypy закрыты |
 | **QA-B** | #154✓ → #156✓ | **Done** | DevOps/scripts Sonar закрыт |
-| **QA-C** | #155 → #157 | **Next** | Test suite Sonar (QA4 #155), затем desktop/frontend (#157) |
+| **QA-C** | #155 ✓ → #157 | **Next** | Desktop/frontend Sonar (#157) |
 | **Decision log** | #143✓, #144✓ | Resolved | Scope guard для автопилота; новых user decisions сейчас не нужно |
 | **External wait** | #65 | Waiting upstream | CVE остаётся tracked wait state до upstream fix |
 
@@ -51,7 +51,7 @@
 
 Среда: Fedora Atomic, toolbox 43, uv sync --extra all. Ключи в keyring (keyring-keys-reference.md). Тесты: targeted subset, не полный pytest (OOM risk). Для infra/docs/governance cleanup сначала прогонять `./scripts/preflight_repo.sh --with-tests`. Pre-commit в toolbox; на хосте git push --no-verify если нет Python 3.12.
 
-Задача: взять QA4 #155 (Test suite Sonar: test-only debt). Перевести issue в In Progress, реализовать по чеклисту, targeted checks, commit с `Closes #155`, обновить docs. Затем при возможности #157 (Desktop Sonar). Соблюдать phase-e-decision-log; placeholders #148-#151 не активировать.
+Задача: взять QA6 #157 (Desktop/frontend Sonar cleanup). Перевести issue в In Progress, реализовать по чеклисту, targeted checks, commit с `Closes #157`, обновить docs. Соблюдать phase-e-decision-log; placeholders #148-#151 не активировать.
 ```
 
 ---

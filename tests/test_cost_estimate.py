@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
+import pytest
 from typer.testing import CliRunner
 
 import voiceforge.main as main_mod
@@ -14,8 +15,8 @@ runner = CliRunner()
 
 def test_estimate_analyze_cost_empty_returns_zero() -> None:
     """estimate_analyze_cost with empty transcript returns 0."""
-    assert estimate_analyze_cost("", "anthropic/claude-3-5-haiku-20241022") == 0.0
-    assert estimate_analyze_cost("   ", "openai/gpt-4o-mini") == 0.0
+    assert estimate_analyze_cost("", "anthropic/claude-3-5-haiku-20241022") == pytest.approx(0.0)
+    assert estimate_analyze_cost("   ", "openai/gpt-4o-mini") == pytest.approx(0.0)
 
 
 def test_estimate_analyze_cost_returns_float() -> None:
@@ -31,7 +32,7 @@ def test_estimate_analyze_cost_returns_float() -> None:
         )
     assert isinstance(cost, float)
     assert cost >= 0.0
-    assert cost == 0.003
+    assert cost == pytest.approx(0.003)
 
 
 def test_analyze_help_shows_estimate() -> None:

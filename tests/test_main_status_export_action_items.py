@@ -58,7 +58,7 @@ def test_main_status_text_and_json_branches(monkeypatch) -> None:
     detailed_payload = next(payload for payload in json_payloads if "budget_limit_usd" in payload["data"])
     doctor_payload = next(payload for payload in json_payloads if "checks" in payload["data"])
     assert detailed_payload["ok"] is True
-    assert detailed_payload["data"]["budget_limit_usd"] == 12.5
+    assert detailed_payload["data"]["budget_limit_usd"] == pytest.approx(12.5)
     assert doctor_payload["data"] == {"checks": [], "errors": 0}
 
 

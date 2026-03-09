@@ -89,7 +89,7 @@ def test_server_async_sync_cost_supports_range(monkeypatch) -> None:
     assert status == 200
     assert content_type == server_async._CONTENT_TYPE_JSON
     assert observed == {"start": "2026-03-01", "end": "2026-03-02"}
-    assert payload["total_cost_usd"] == 2.5
+    assert payload["total_cost_usd"] == pytest.approx(2.5)
     assert payload["total_calls"] == 3
 
 
@@ -347,7 +347,7 @@ def test_router_usage_and_cost_from_response(monkeypatch) -> None:
     assert out == 5
     assert cache_read == 2
     assert cache_creation == 1
-    assert cost == 0.01
+    assert cost == pytest.approx(0.01)
 
 
 def test_router_system_prompt_fallback(monkeypatch) -> None:
@@ -424,7 +424,7 @@ def test_router_update_action_item_statuses_short_circuits_empty_items() -> None
 
     assert isinstance(response, StatusUpdateResponse)
     assert response.updates == []
-    assert cost == 0.0
+    assert cost == pytest.approx(0.0)
 
 
 def test_daemon_env_flag_parses_expected_values(monkeypatch) -> None:

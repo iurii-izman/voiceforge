@@ -257,7 +257,7 @@ def test_daemon_get_analytics_returns_json() -> None:
     with patch("voiceforge.core.metrics.get_stats", return_value={"total_cost_usd": 0.5, "total_calls": 3}):
         out = daemon.get_analytics("7d")
     data = json.loads(out)
-    assert data.get("total_cost_usd") == 0.5
+    assert data.get("total_cost_usd") == pytest.approx(0.5)
     assert data.get("total_calls") == 3
 
 

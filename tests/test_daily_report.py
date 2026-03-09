@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from datetime import date
 
+import pytest
+
 from voiceforge.cli.digest import (
     DailyDigest,
     build_daily_digest,
@@ -22,7 +24,7 @@ def test_build_daily_digest_empty(tmp_path) -> None:
         assert digest.session_ids == []
         assert digest.session_summaries == []
         assert digest.action_items == []
-        assert digest.total_cost_usd == 0.0
+        assert digest.total_cost_usd == pytest.approx(0.0)
     finally:
         log.close()
 
