@@ -1,6 +1,6 @@
 # VoiceForge: Project Status & Productization Roadmap
 
-**Обновлено:** 2026-03-09 (Phase E закрыт; post-Phase-E quality remediation wave открыта). **Версия:** 0.2.0-alpha.2. **Стадия:** Post-Phase-E maintenance + quality remediation.
+**Обновлено:** 2026-03-09 (Phase E закрыт; QA wave #152–#157 завершена). **Версия:** 0.2.0-alpha.2. **Стадия:** Post-Phase-E maintenance + quality remediation complete.
 **Предыдущий цикл (#97-#123):** закрыт полностью; архив: [history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
 
 ---
@@ -146,8 +146,8 @@ E11 (narrow CalDAV scope) ✓ → E16 ✓ → E17 ✓
 
 | QA | Issue | Блок | Priority | Effort | Area | Зачем |
 |---|---|---|---|---|---|---|
-| QA1 | [#152](https://github.com/iurii-izman/voiceforge/issues/152) | Security & Supply Chain Remediation | P0 | M | Security | Закрыть CodeQL + Dependabot, убрать GitHub-visible security debt |
-| QA2 | [#153](https://github.com/iurii-izman/voiceforge/issues/153) | Local Gate Recovery | P0 | S | Backend | Вернуть `mypy` и verify-pr parity в честно зелёное состояние |
+| QA1 | [#152](https://github.com/iurii-izman/voiceforge/issues/152) ✓ | Security & Supply Chain Remediation | P0 | M | Security | Закрыть CodeQL + Dependabot, убрать GitHub-visible security debt |
+| QA2 | [#153](https://github.com/iurii-izman/voiceforge/issues/153) ✓ | Local Gate Recovery | P0 | S | Backend | Вернуть `mypy` и verify-pr parity в честно зелёное состояние |
 | QA3 | [#154](https://github.com/iurii-izman/voiceforge/issues/154) ✓ | Python Core/CLI Sonar Hotspots | P1 | L | Backend | Разгрузить main/daemon/CLI hotspots |
 | QA4 | [#155](https://github.com/iurii-izman/voiceforge/issues/155) ✓ | Test Suite Sonar Cleanup | P1 | L | Testing | Снять test-only Sonar debt (stubs, float equality, constant booleans) |
 | QA5 | [#156](https://github.com/iurii-izman/voiceforge/issues/156) ✓ | DevOps & Utility Script Sonar Cleanup | P1 | M | DevOps | Почистить bootstrap/preflight/create-issues/helper scripts |

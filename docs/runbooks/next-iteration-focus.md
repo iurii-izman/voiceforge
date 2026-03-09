@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-09 (preflight sweep + CVE re-check #65 выполнены; следующий приоритет — roadmap/docs governance)
+**Обновлено:** 2026-03-09 (docs governance sync: PROJECT-STATUS-SUMMARY, DOCS-INDEX; следующий приоритет — roadmap или docs)
 
 ---
 
@@ -19,9 +19,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Preflight sweep: `./scripts/preflight_repo.sh --with-tests` — READY (toolchain, release metadata, docs consistency, repo governance, lightweight smoke). CVE re-check #65: `uv run pip-audit --desc --ignore-vuln CVE-2025-69872` — без новых уязвимостей; статус #65 без изменений (ожидание upstream).
+**Сделано в сессии:** Docs governance sync: обновлён PROJECT-STATUS-SUMMARY (QA wave #152–#157 завершена, стадия «quality remediation complete»), DOCS-INDEX (дата и пометка docs governance sync). Targeted tests: test_release_metadata, test_init_version, test_preflight, test_history_output — 21 passed.
 
-**Следующий шаг:** Приоритет — следующий пункт roadmap (docs/plans.md) или docs/governance: реализация следующего пункта из plans.md (roadmap 1–19 / Phase A–D), либо актуализация доков по doc-governance (DOCS-INDEX, runbooks, archive). Новые feature issues не создавать без отдельной задачи. При следующей инфра/cleanup-сессии снова запускать preflight и при необходимости периодический CVE re-check.
+**Следующий шаг:** Приоритет — следующий пункт roadmap (docs/plans.md) или docs/governance: roadmap #19 (prompt caching — research) или очередная актуализация доков (DOCS-INDEX, runbooks, archive). Новые feature issues не создавать без отдельной задачи. При инфра/cleanup-сессии снова запускать preflight и при необходимости CVE re-check (#65).
 
 ---
 
