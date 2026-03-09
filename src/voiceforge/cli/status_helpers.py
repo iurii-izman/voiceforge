@@ -35,6 +35,13 @@ def get_status_text() -> str:
         lines.append(t("status.ollama_available") if is_available() else t("status.ollama_unavailable"))
     except ImportError:
         lines.append(t("status.ollama_unavailable"))
+    # E6 (#129): show effective LLM backend (API or Ollama fallback)
+    effective_model, is_ollama_fallback = cfg.get_effective_llm()
+    if effective_model is not None:
+        if is_ollama_fallback:
+            lines.append(t("status.llm_ollama_fallback", model=effective_model))
+        else:
+            lines.append(t("status.llm_backend", model=effective_model))
     return "\n".join(lines)
 
 
@@ -85,6 +92,7 @@ def get_status_data() -> dict[str, Any]:
         prompt_version = get_prompt_version()
     except Exception:
         pass
+    effective_model, is_ollama_fallback = cfg.get_effective_llm()
     out: dict[str, Any] = {
         "ram": {
             "used_gb": round(mem.used / 1024**3, 2),
@@ -94,6 +102,8 @@ def get_status_data() -> dict[str, Any]:
         "cost_today_usd": round(float(get_cost_today()), 6),
         "pii_mode": getattr(cfg, "pii_mode", "ON"),
         "ollama_available": ollama_available,
+        "llm_backend": effective_model,
+        "llm_ollama_fallback": is_ollama_fallback,
     }
     if prompt_version is not None:
         out["prompt_version"] = prompt_version

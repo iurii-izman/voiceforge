@@ -76,7 +76,7 @@
 | E3 | [#126](https://github.com/iurii-izman/voiceforge/issues/126) | Error Pre-Flight Checks: PipeWire, Disk, Network | P0 | M | Backend | +15% ER ✓ |
 | E4 | [#127](https://github.com/iurii-izman/voiceforge/issues/127) | Explicit Failure Feedback: Diarization, RAG, Models | P0 | S | Backend | +12% ER ✓ |
 | E5 | [#128](https://github.com/iurii-izman/voiceforge/issues/128) | Daemon Hardening: Auto-Start, Watchdog, Log, Shutdown | P0 | M | Backend | +12% DDR ✓ |
-| E6 | [#129](https://github.com/iurii-izman/voiceforge/issues/129) | Ollama Zero-Config Fallback | P1 | S | Backend | +7% DDR |
+| E6 | [#129](https://github.com/iurii-izman/voiceforge/issues/129) | Ollama Zero-Config Fallback | P1 | S | Backend | +7% DDR ✓ |
 | E7 | [#130](https://github.com/iurii-izman/voiceforge/issues/130) | Setup Wizard: `voiceforge setup` & First-Run | P1 | L | Backend | +15% Onboard |
 | E8 | [#131](https://github.com/iurii-izman/voiceforge/issues/131) | Model Pre-Download & Bootstrap | P1 | S | Backend | +8% Onboard |
 | E9 | [#132](https://github.com/iurii-izman/voiceforge/issues/132) | Post-Listen Auto-Analyze & Cost Estimate | P1 | M | Backend | +10% UF |
@@ -107,7 +107,7 @@ E1 ✓ → E2 ✓ → E3 ✓ → E4 ✓ → E5 ✓
 
 **Wave 2 — P1 core (3-4 недели, DDR 55→70):**
 ```
-E6 → E7 → E8 → E9 → E10 → E18
+E6 ✓ → E7 → E8 → E9 → E10 → E18
 ```
 
 **Wave 3 — P1 quality (2-3 недели):**
@@ -160,7 +160,7 @@ E11 → E16 → E17
 | F8 | PipeWire check отсутствует в bootstrap | 🟡 | E1, E3 |
 | F9 | Обновление только ручное (git pull) | 🟡 | E16 (CI/CD) |
 | F10 | Log rotation отсутствует для daemon | 🟢 | E5 (journald) ✓ |
-| F11 | Нет fallback на Ollama | 🟡 | E6 |
+| F11 | Нет fallback на Ollama | 🟢 | E6 ✓ |
 | F12 | ring.raw не чистится при остановке | 🟢 | E5 ✓ |
 
 ---

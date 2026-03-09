@@ -16,7 +16,7 @@ Priority order:
 |---|---|---|---|
 | `model_size` | `VOICEFORGE_MODEL_SIZE` | `small` | `faster-whisper` model size |
 | `sample_rate` | `VOICEFORGE_SAMPLE_RATE` | `16000` | Audio sample rate (Hz) |
-| `default_llm` | `VOICEFORGE_DEFAULT_LLM` | `anthropic/claude-haiku-4-5` | LLM id for `analyze` |
+| `default_llm` | `VOICEFORGE_DEFAULT_LLM` | `anthropic/claude-haiku-4-5` | User preference LLM id; actual backend from `get_effective_llm()` (E6: Ollama fallback when no API keys) |
 | `budget_limit_usd` | `VOICEFORGE_BUDGET_LIMIT_USD` | `75.0` | Monthly API budget |
 | `daily_budget_limit_usd` | `VOICEFORGE_DAILY_BUDGET_LIMIT_USD` | `budget_limit_usd/30` | Daily LLM budget; pre-call enforcement (#38) |
 | `ring_seconds` | `VOICEFORGE_RING_SECONDS` | `300.0` | Ring buffer duration |
@@ -78,7 +78,7 @@ Method `GetSettings` returns a JSON object with settings for UI. It includes:
 - `model_size`, `default_llm`, `budget_limit_usd`, `smart_trigger`, `sample_rate`, `streaming_stt`, `pii_mode`.
 - **`privacy_mode`** — alias for `pii_mode` (same value); kept for UI compatibility. There is no separate Settings field; both keys reflect `pii_mode` / `VOICEFORGE_PII_MODE`.
 
-**CLI** `status` and `status --output json` also include `pii_mode` (and in text output: `status.pii_mode` line) for PII UX (#11).
+**CLI** `status` and `status --output json` also include `pii_mode` (and in text output: `status.pii_mode` line) for PII UX (#11). E6 (#129): status shows effective LLM backend (`llm_backend`, `llm_ollama_fallback`) — API model or Ollama (fallback when no anthropic/openai/google keys).
 
 ## Cost (cost_usd) source of truth (W9)
 

@@ -102,7 +102,10 @@ def test_status_helpers_format_stats_and_detailed(monkeypatch) -> None:
     fake_local_llm.is_available = lambda: False
     monkeypatch.setitem(sys.modules, "voiceforge.llm.local_llm", fake_local_llm)
     fake_config = types.ModuleType("voiceforge.core.config")
-    fake_config.Settings = lambda: SimpleNamespace(pii_mode="ON")
+    fake_config.Settings = lambda: SimpleNamespace(
+        pii_mode="ON",
+        get_effective_llm=lambda: ("anthropic/claude-haiku-4-5", False),
+    )
     monkeypatch.setitem(sys.modules, "voiceforge.core.config", fake_config)
 
     detailed_text = sh.get_status_detailed_text(budget_limit_usd=10.0)

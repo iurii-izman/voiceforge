@@ -366,10 +366,10 @@ def _format_meeting_analysis_lines(llm_result: Any) -> list[str]:
     return lines
 
 
-def _build_analysis_for_log_default(llm_result: Any, cfg: Any, cost_usd: float) -> dict[str, Any]:
-    """Build analysis_for_log dict for default MeetingAnalysis."""
+def _build_analysis_for_log_default(llm_result: Any, cfg: Any, cost_usd: float, model: str | None = None) -> dict[str, Any]:
+    """Build analysis_for_log dict for default MeetingAnalysis. E6: model is effective_llm when provided."""
     return {
-        "model": cfg.default_llm,
+        "model": model if model is not None else cfg.default_llm,
         "questions": llm_result.questions,
         "answers": llm_result.answers,
         "recommendations": llm_result.recommendations,
@@ -425,6 +425,13 @@ def run_analyze_pipeline(
         )
         return (msg, segments_for_log, {})
 
+    effective_model, is_ollama_fallback = cfg.get_effective_llm()
+    if effective_model is None:
+        return (t("error.no_llm_backend"), [], {})
+
+    if is_ollama_fallback:
+        log.info("llm.ollama_fallback", model=effective_model, message="No API keys found. Using Ollama as LLM backend.")
+
     try:
         from voiceforge.llm.router import analyze_meeting, analyze_meeting_stream, get_budget_warning_if_near_limit
 
@@ -433,7 +440,7 @@ def run_analyze_pipeline(
             llm_result, cost_usd = analyze_meeting_stream(
                 transcript,
                 context=context,
-                model=cfg.default_llm,
+                model=effective_model,
                 template=template,
                 transcript_pre_redacted=transcript_redacted,
                 ollama_model=cfg.ollama_model,
@@ -444,7 +451,7 @@ def run_analyze_pipeline(
             llm_result, cost_usd = analyze_meeting(
                 transcript,
                 context=context,
-                model=cfg.default_llm,
+                model=effective_model,
                 template=template,
                 transcript_pre_redacted=transcript_redacted,
                 ollama_model=cfg.ollama_model,
@@ -459,7 +466,8 @@ def run_analyze_pipeline(
         from voiceforge.core.preflight import NetworkUnavailableError
 
         if isinstance(e, NetworkUnavailableError):
-            return (t(e.i18n_key) + ". " + t("error.ollama_suggestion"), [], {})
+            suffix = "" if e.i18n_key == "error.ollama_not_running" else (". " + t("error.ollama_suggestion"))
+            return (t(e.i18n_key) + suffix, [], {})
         log.warning("analyze.llm_failed", error=str(e))
         return (t(_I18N_ERROR_LLM_FAILED, e=str(e)), [], {})
 
@@ -469,12 +477,12 @@ def run_analyze_pipeline(
 
     if template and hasattr(llm_result, "model_dump"):
         lines, analysis_for_log = _format_template_result(template, llm_result)
-        analysis_for_log["model"] = cfg.default_llm
+        analysis_for_log["model"] = effective_model
         analysis_for_log["cost_usd"] = cost_usd
         return ("\n".join(header_lines + lines), segments_for_log, analysis_for_log)
 
     lines = _format_meeting_analysis_lines(llm_result)
-    analysis_for_log = _build_analysis_for_log_default(llm_result, cfg, cost_usd)
+    analysis_for_log = _build_analysis_for_log_default(llm_result, cfg, cost_usd, effective_model)
     return ("\n".join(header_lines + lines), segments_for_log, analysis_for_log)
 
 
@@ -496,13 +504,17 @@ def run_live_summary_pipeline(seconds: int) -> tuple[list[str], float]:
     context = result.context
     transcript_redacted = result.transcript_redacted
 
+    effective_model, _ = cfg.get_effective_llm()
+    if effective_model is None:
+        return ([t("error.no_llm_backend")], 0.0)
+
     try:
         from voiceforge.llm.router import analyze_live_summary
 
         live_result, cost_usd = analyze_live_summary(
             transcript,
             context=context,
-            model=cfg.default_llm,
+            model=effective_model,
             transcript_pre_redacted=transcript_redacted,
             pii_mode=cfg.pii_mode,
         )
@@ -984,11 +996,15 @@ def action_items_update(
         log_db.close()
 
     cfg = _get_config()
+    effective_model, _ = cfg.get_effective_llm()
+    if effective_model is None:
+        typer.echo(t("error.no_llm_backend"), err=True)
+        raise SystemExit(1) from None
     try:
         response, cost_usd = update_action_item_statuses(
             action_items,
             transcript_next,
-            model=cfg.default_llm,
+            model=effective_model,
             pii_mode=cfg.pii_mode,
         )
     except BudgetExceeded as e:

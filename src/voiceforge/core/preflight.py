@@ -23,11 +23,12 @@ DISK_WARNING_BYTES = 1 * 1024**3  # 1 GB
 DISK_ERROR_BYTES = 200 * 1024**2  # 200 MB
 NETWORK_TIMEOUT_SEC = 3
 
-# Model ID prefix -> (host, port) for connectivity check
+# Model ID prefix -> (host, port) for connectivity check (E6: ollama for zero-config fallback)
 _LLM_HOSTS: list[tuple[str, str, int]] = [
     ("anthropic", "api.anthropic.com", 443),
     ("openai", "api.openai.com", 443),
     ("gemini", "generativelanguage.googleapis.com", 443),
+    ("ollama", "127.0.0.1", 11434),
 ]
 
 
@@ -56,11 +57,13 @@ def check_disk_space(data_dir: str) -> tuple[str | None, str | None]:
 
 def check_network_for_llm(model_id: str) -> str | None:
     """Quick socket connect to API host for model_id (timeout 3s).
-    Return None if reachable; else i18n key for error (suggest Ollama)."""
+    Return None if reachable; else i18n key for error (E6: ollama_not_running when using Ollama)."""
     model_lower = (model_id or "").lower()
+    matched_prefix: str | None = None
     host_port: tuple[str, int] | None = None
     for prefix, host, port in _LLM_HOSTS:
         if prefix in model_lower:
+            matched_prefix = prefix
             host_port = (host, port)
             break
     if not host_port:
@@ -72,4 +75,4 @@ def check_network_for_llm(model_id: str) -> str | None:
         return None
     except (TimeoutError, OSError) as e:
         log.warning("preflight.network_unreachable", host=host, error=str(e))
-        return "error.no_network"
+        return "error.ollama_not_running" if matched_prefix == "ollama" else "error.no_network"

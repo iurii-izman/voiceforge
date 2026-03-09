@@ -174,6 +174,8 @@ def analyze_meeting(
     from voiceforge.llm.schemas import MeetingAnalysis
 
     model_id = model or DEFAULT_MODEL
+    if model_id.startswith("ollama/"):
+        log.info("llm.ollama_fallback", model=model_id, message="No API keys found. Using Ollama as LLM backend.")
     response_model: type[MeetingAnalysis] | None = MeetingAnalysis
     system_prompt_override: str | None = None
     if template:
@@ -247,6 +249,8 @@ def analyze_meeting_stream(
     from voiceforge.llm.schemas import MeetingAnalysis
 
     model_id = model or DEFAULT_MODEL
+    if model_id.startswith("ollama/"):
+        log.info("llm.ollama_fallback", model=model_id, message="No API keys found. Using Ollama as LLM backend.")
     response_model: type[MeetingAnalysis] | None = MeetingAnalysis
     system_prompt_override: str | None = None
     if template:
@@ -560,7 +564,8 @@ def complete_structured(
     except ImportError as e:
         raise ImportError("Install [llm] extras: uv sync --extra llm") from e
 
-    fallbacks = [m for m in FALLBACK_MODELS if m != model_id][:3]
+    # E6 (#129): when using Ollama fallback, do not fall back to API models (no keys).
+    fallbacks = None if model_id.startswith("ollama/") else [m for m in FALLBACK_MODELS if m != model_id][:3]
     client = instructor.from_litellm(wrap_completion(completion))
     try:
         parsed, raw_used = client.create_with_completion(

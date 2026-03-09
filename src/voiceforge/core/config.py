@@ -307,3 +307,23 @@ class Settings(BaseSettings):
         if self.rag_db_path:
             return self.rag_db_path
         return os.path.join(self.get_data_dir(), "rag.db")
+
+    def get_effective_llm(self) -> tuple[str | None, bool]:
+        """E6 (#129): Effective LLM model id and whether using Ollama fallback (no API keys).
+
+        Returns (model_id, is_ollama_fallback). model_id is for LiteLLM (e.g. anthropic/...
+        or ollama/phi3:mini). When no API keys and Ollama not running, model_id is None.
+        """
+        from voiceforge.core.secrets import get_api_key
+
+        has_api_key = any(get_api_key(name) for name in ("anthropic", "openai", "google"))
+        if has_api_key:
+            return (self.default_llm, False)
+        try:
+            from voiceforge.llm.local_llm import is_available
+        except ImportError:
+            return (None, False)
+        if not is_available():
+            return (None, False)
+        model = (self.ollama_model or "phi3:mini").strip() or "phi3:mini"
+        return (f"ollama/{model}", True)
