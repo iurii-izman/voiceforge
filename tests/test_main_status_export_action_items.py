@@ -211,7 +211,9 @@ def test_main_action_items_update_persist_and_echo(monkeypatch, tmp_path: Path) 
             closed.append(True)
 
     monkeypatch.setattr("voiceforge.core.transcript_log.TranscriptLog", _FailingTranscriptLog)
-    monkeypatch.setattr(main.structlog, "get_logger", lambda: SimpleNamespace(debug=lambda *args, **kwargs: debugged.append((args, kwargs))))
+    monkeypatch.setattr(
+        main.structlog, "get_logger", lambda: SimpleNamespace(debug=lambda *args, **kwargs: debugged.append((args, kwargs)))
+    )
 
     main._action_items_update_persist(7, [(0, "done"), (1, "todo")])
     assert debugged
@@ -397,7 +399,9 @@ def test_main_weekly_report_formats_and_stats_fallback(monkeypatch, tmp_path: Pa
     assert any(str(md_output) in message for message, _ in echoed)
 
     echoed.clear()
-    monkeypatch.setattr("voiceforge.core.metrics.get_stats_range", lambda from_date, to_date: (_ for _ in ()).throw(RuntimeError("stats down")))
+    monkeypatch.setattr(
+        "voiceforge.core.metrics.get_stats_range", lambda from_date, to_date: (_ for _ in ()).throw(RuntimeError("stats down"))
+    )
     main.weekly_report(output=None, days=3, format="text")
     assert "Cost (LLM): $0.00" in echoed[-1][0]
 
