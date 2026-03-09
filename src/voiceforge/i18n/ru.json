@@ -131,5 +131,7 @@
   "doctor.models_pyannote": "pyannote: в кэше (HF token задан)",
   "doctor.models_pyannote_missing": "pyannote: не в кэше или нет HF token",
   "doctor.models_disk_usage": "Диск моделей: {path} ~{size_mb} МБ",
-  "doctor.ram_recommended": "RAM: {available_gb:.1f} ГБ доступно (рекомендуется ≥4 ГБ)"
+  "doctor.ram_recommended": "RAM: {available_gb:.1f} ГБ доступно (рекомендуется ≥4 ГБ)",
+  "doctor.model_recommendation_ok": "Рекомендуемая модель: {recommended} ({available_gb} ГБ RAM). Текущая: {current}",
+  "doctor.model_recommendation_oom": "Рекомендуемая модель: {recommended} ({available_gb} ГБ RAM). Текущая: {current} (возможен OOM)"
 }

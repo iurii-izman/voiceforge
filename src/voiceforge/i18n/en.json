@@ -131,5 +131,7 @@
   "doctor.models_pyannote": "pyannote: cached (HF token set)",
   "doctor.models_pyannote_missing": "pyannote: not cached or no HF token",
   "doctor.models_disk_usage": "Models disk: {path} ~{size_mb} MB",
-  "doctor.ram_recommended": "RAM: {available_gb:.1f} GB available (recommended ≥4 GB)"
+  "doctor.ram_recommended": "RAM: {available_gb:.1f} GB available (recommended ≥4 GB)",
+  "doctor.model_recommendation_ok": "Recommended model: {recommended} ({available_gb} GB RAM). Current: {current}",
+  "doctor.model_recommendation_oom": "Recommended model: {recommended} ({available_gb} GB RAM). Current: {current} (may cause OOM)"
 }

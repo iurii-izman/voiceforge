@@ -88,7 +88,7 @@
 | E15 | [#138](https://github.com/iurii-izman/voiceforge/issues/138) | Observability: Grafana Dashboard, Alert Rules | P1 | M | DevOps | +15% Obs |
 | E16 | [#139](https://github.com/iurii-izman/voiceforge/issues/139) | CI/CD Polish: Auto-Release, Nightly Smoke | P2 | M | DevOps | +10% CICD |
 | E17 | [#140](https://github.com/iurii-izman/voiceforge/issues/140) | Security: SQLite Encryption, Audit Log, AppArmor | P2 | M | Security | +8% Sec |
-| E18 | [#141](https://github.com/iurii-izman/voiceforge/issues/141) | Performance: SQLite WAL, Ring Buffer, Adaptive Models | P1 | M | Backend | +15% Perf |
+| E18 | [#141](https://github.com/iurii-izman/voiceforge/issues/141) | Performance: SQLite WAL, Ring Buffer, Adaptive Models | P1 | M | Backend | +15% Perf ✓ |
 
 ### User Decision Blocks (требуют решения пользователя)
 
@@ -107,7 +107,7 @@ E1 ✓ → E2 ✓ → E3 ✓ → E4 ✓ → E5 ✓
 
 **Wave 2 — P1 core (3-4 недели, DDR 55→70):**
 ```
-E6 ✓ → E7 ✓ → E8 ✓ → E9 ✓ → E10 ✓ → E18
+E6 ✓ → E7 ✓ → E8 ✓ → E9 ✓ → E10 ✓ → E18 ✓
 ```
 
 **Wave 3 — P1 quality (2-3 недели):**

@@ -276,6 +276,8 @@ class TranscriptLog:
     def _get_conn(self) -> sqlite3.Connection:
         if self._conn is None:
             self._conn = sqlite3.connect(str(self.db_path))
+            self._conn.execute("PRAGMA journal_mode=WAL")
+            self._conn.execute("PRAGMA synchronous=NORMAL")
             ensure_private_file(self.db_path)
             self._conn.row_factory = sqlite3.Row
             _init_db(self._conn)

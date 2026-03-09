@@ -295,6 +295,57 @@ def _doctor_check_models(cfg: Any, t: Any) -> list[tuple[bool, str, str]]:
         out.append((avail_gb >= 4.0, t("doctor.ram_recommended", available_gb=avail_gb), "doctor.ram_recommended"))
     except Exception:
         out.append((True, "RAM: check skipped", "doctor.ram_recommended"))
+
+    # E18 (#141): model size recommendation by available RAM; warn if current may cause OOM
+    try:
+        import psutil
+
+        avail_gb = psutil.virtual_memory().available / 1024**3
+        if avail_gb < 4.0:
+            recommended = "tiny"
+        elif avail_gb < 6.0:
+            recommended = "small"
+        elif avail_gb < 10.0:
+            recommended = "medium"
+        else:
+            recommended = "large"
+        current = model_size.lower()
+        # Order: tiny < base < small < medium < large-v2 < large-v3 < large
+        _order = ("tiny", "base", "small", "medium", "large-v2", "large-v3", "large")
+        try:
+            cur_idx = _order.index(current) if current in _order else _order.index("small")
+        except ValueError:
+            cur_idx = 2
+        rec_idx = _order.index(recommended) if recommended in _order else 2
+        may_oom = cur_idx > rec_idx
+        if may_oom:
+            out.append(
+                (
+                    False,
+                    t(
+                        "doctor.model_recommendation_oom",
+                        recommended=recommended,
+                        available_gb=round(avail_gb, 1),
+                        current=current,
+                    ),
+                    "doctor.model_recommendation",
+                )
+            )
+        else:
+            out.append(
+                (
+                    True,
+                    t(
+                        "doctor.model_recommendation_ok",
+                        recommended=recommended,
+                        available_gb=round(avail_gb, 1),
+                        current=current,
+                    ),
+                    "doctor.model_recommendation",
+                )
+            )
+    except Exception:
+        out.append((True, "Model recommendation: check skipped", "doctor.model_recommendation"))
     return out
 
 

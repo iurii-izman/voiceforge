@@ -249,18 +249,15 @@ def _step2_pii(transcript: str, pii_mode: str = "ON") -> str:
 
 
 def _prepare_audio(cfg: Any, seconds: int) -> tuple[np.ndarray, int] | tuple[None, str]:
-    """Load and resample audio. Returns (audio, effective_rate) or (None, error_str)."""
+    """Load and resample audio. Returns (audio, effective_rate) or (None, error_str). E18: uses mmap for ring file when beneficial."""
+    from voiceforge.audio.buffer import read_ring_file_last
+
     ring_path = cfg.get_ring_file_path()
     if not Path(ring_path).is_file():
         return (None, t("pipeline.run_listen_first"))
-    raw = Path(ring_path).read_bytes()
-    want = int(seconds * cfg.sample_rate * 2)
-    if len(raw) > want:
-        raw = raw[-want:]
-    raw = raw[: len(raw) - (len(raw) % 2)]
-    if len(raw) < cfg.sample_rate * 2:
+    audio = read_ring_file_last(ring_path, float(seconds), cfg.sample_rate, use_mmap=True)
+    if len(audio) < cfg.sample_rate:
         return (None, t("pipeline.insufficient_audio"))
-    audio = np.frombuffer(raw, dtype=np.int16)
     effective_rate = cfg.sample_rate
     if effective_rate != TARGET_SAMPLE_RATE:
         audio = _resample_to_16k(audio, effective_rate)

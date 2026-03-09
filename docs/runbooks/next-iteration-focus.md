@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-09 (E10 #133 закрыт; следующий — E18 #141 или E12 #135)
+**Обновлено:** 2026-03-09 (E18 #141 закрыт; следующий — E12 #135 Wave 3)
 
 ---
 
@@ -18,9 +18,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** E10 (#133) Output Polish: History, Export, Daily Digest: history — human-friendly default (date, duration, speakers, summary 200 chars), --json для raw; search — highlight термина в snippet (ANSI); export --clipboard (wl-copy/xclip); daily-report [--date] [--llm], digest.py; shell completion в README; тесты test_history_output.py, test_export_clipboard.py, test_daily_report.py.
+**Сделано в сессии:** E18 (#141) Performance: SQLite WAL в transcript_log; read_ring_file_last (mmap) в buffer.py + pipeline; model size recommendations в doctor (status_helpers); тесты test_sqlite_wal.py, test_buffer_mmap.py.
 
-**Следующий шаг:** взять **E18 (#141) Performance: SQLite WAL, Ring Buffer, Adaptive Models** (Wave 2) или **E12 (#135) Testing Hardening** (Wave 3).
+**Следующий шаг:** взять **E12 (#135) Testing Hardening** (Wave 3): Coverage 75%, real audio, concurrent.
 
 ---
 
@@ -31,7 +31,7 @@
 | Wave | Issues | Статус | Что делать |
 |------|--------|--------|------------|
 | **Wave 1 (P0)** | #124✓→#125✓→#126✓→#127✓→#128✓ | **Done** | DDR 35→55 |
-| **Wave 2 (P1 core)** | #129✓→#130✓→#131✓→#132✓→#133✓→#141 | In progress | E18 следующий. DDR 55→70 |
+| **Wave 2 (P1 core)** | #129✓→#130✓→#131✓→#132✓→#133✓→#141✓ | **Done** | DDR 55→70 |
 | **Wave 3 (P1 quality)** | #135→#136→#137→#138 | Todo | Testing + Core + CLI + Obs |
 | **Wave 4 (P2 polish)** | #134→#139→#140 | Todo | Calendar + CI/CD + Security |
 | **User decisions** | #142, #143, #144 | Awaiting user | Требуют решения пользователя |
@@ -52,7 +52,7 @@
 
 Задача: взять верхний незакрытый E-блок из текущего Wave. Перевести issue в In Progress на доске. Реализовать по чеклисту в issue body. Targeted tests. Commit с `Closes #N` (Conventional Commits). Done на доске. Обновить docs. Выдать prompt для следующего чата.
 
-Текущий блок: E18 (#141) — Performance (Wave 2) или E12 (#135) — Testing Hardening (Wave 3).
+Текущий блок: E12 (#135) — Testing Hardening (Wave 3).
 ```
 
 ---
