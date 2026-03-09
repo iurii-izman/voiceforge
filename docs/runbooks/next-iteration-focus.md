@@ -51,7 +51,7 @@
 
 Среда: Fedora Atomic, toolbox 43, uv sync --extra all. Ключи в keyring (keyring-keys-reference.md). Тесты: targeted subset, не полный pytest (OOM risk). Для infra/docs/governance cleanup сначала прогонять `./scripts/preflight_repo.sh --with-tests`. Pre-commit в toolbox; на хосте git push --no-verify если нет Python 3.12.
 
-Задача: взять верхний открытый QA-блок из next-iteration-focus, перевести issue в In Progress на доске, реализовать по чеклисту, прогнать targeted checks, commit с `Closes #N`, перевести в Done, обновить docs и выдать prompt для следующего чата. Соблюдать phase-e-decision-log; placeholders #148-#151 не активировать.
+Задача: взять QA4 #155 (Test suite Sonar: test-only debt). Перевести issue в In Progress, реализовать по чеклисту, targeted checks, commit с `Closes #155`, обновить docs. Затем при возможности #157 (Desktop Sonar). Соблюдать phase-e-decision-log; placeholders #148-#151 не активировать.
 ```
 
 ---
