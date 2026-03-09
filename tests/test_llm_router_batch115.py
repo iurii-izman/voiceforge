@@ -349,8 +349,9 @@ def test_complete_structured_success_and_failure_paths(monkeypatch) -> None:
     monkeypatch.setattr("voiceforge.llm.router.wrap_completion", lambda fn: fn)
     monkeypatch.setattr(
         "voiceforge.llm.router._complete_structured_finish",
-        lambda parsed, raw_used, model_id, response_model, key, ttl: finished.append((parsed, raw_used, model_id, key, ttl))
-        or (parsed, 0.42),
+        lambda parsed, raw_used, model_id, response_model, key, ttl: (
+            finished.append((parsed, raw_used, model_id, key, ttl)) or (parsed, 0.42)
+        ),
     )
     monkeypatch.setattr(
         "voiceforge.core.observability.record_llm_call",
@@ -378,21 +379,26 @@ def test_complete_structured_success_and_failure_paths(monkeypatch) -> None:
             "litellm": fake_litellm,
         },
     ):
-        result, cost = router.complete_structured([{"role": "user", "content": "hi"}], MeetingAnalysis, model=router.MODEL_GPT4O_MINI)
+        result, cost = router.complete_structured(
+            [{"role": "user", "content": "hi"}], MeetingAnalysis, model=router.MODEL_GPT4O_MINI
+        )
 
     assert result == parsed
     assert cost == 0.42
     assert log_cache_events == [False]
     assert finished and finished[0][2] == router.MODEL_GPT4O_MINI
 
-    with patch.dict(
-        sys.modules,
-        {
-            "instructor": SimpleNamespace(from_litellm=lambda wrapped: FakeClient(should_fail=True)),
-            "litellm": fake_litellm,
-        },
-    ), pytest.raises(RuntimeError, match="boom"):
-            router.complete_structured([{"role": "user", "content": "hi"}], MeetingAnalysis, model=router.MODEL_GPT4O_MINI)
+    with (
+        patch.dict(
+            sys.modules,
+            {
+                "instructor": SimpleNamespace(from_litellm=lambda wrapped: FakeClient(should_fail=True)),
+                "litellm": fake_litellm,
+            },
+        ),
+        pytest.raises(RuntimeError, match="boom"),
+    ):
+        router.complete_structured([{"role": "user", "content": "hi"}], MeetingAnalysis, model=router.MODEL_GPT4O_MINI)
 
     assert observed[-1] == (router.MODEL_GPT4O_MINI, 0.0, False)
 

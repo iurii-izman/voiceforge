@@ -183,11 +183,11 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - run: cd desktop && npm ci
       - run: cd desktop && npm run tauri build
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: desktop-bundle-linux
           path: desktop/src-tauri/target/release/bundle/
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: desktop-appimage
           path: desktop/src-tauri/target/release/bundle/appimage/
@@ -226,12 +226,12 @@ jobs:
       - run: cd desktop && npm ci && npm run build
       - run: cd desktop && npx playwright install chromium --with-deps
       - run: cd desktop && npm run e2e
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: desktop-playwright-report
           path: desktop/playwright-report/
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: desktop-playwright-results
