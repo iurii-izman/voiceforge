@@ -90,4 +90,26 @@ test.describe("Desktop QA autopilot", () => {
     expect(state.autostartEnabled).toBeTruthy();
     expect(state.updateChecks).toBeGreaterThan(0);
   });
+
+  // E19 #142: desktop-first meeting flow — Record -> Analyze -> View -> Export
+  test("desktop-first meeting flow: Record -> Analyze -> View -> Export", async ({ page }) => {
+    // Record: start then stop listen
+    await page.locator("#listen-toggle").click();
+    await expect(page.locator("#listen-toggle")).toHaveText(/Стоп записи/);
+    await expect(page.locator("#streaming-card")).toBeVisible();
+    await page.locator("#listen-toggle").click();
+    await expect(page.locator("#listen-toggle")).toHaveText(/Старт записи/);
+
+    // Analyze: quick 60s (app auto-opens session 103 detail via session-created)
+    await page.locator("#quick-analyze-60").click();
+    await expect(page.locator("#analyze-status")).toHaveText(/Готово/);
+    await expect(page.locator("#session-detail")).toBeVisible({ timeout: 5000 });
+    await expect(page.locator("#session-detail-body")).toContainText("Analysis done for 60s");
+
+    // Export: MD
+    await page.locator("#export-md").click();
+    const state = await page.evaluate(() => globalThis.__VOICEFORGE_TEST_STATE__);
+    const exportInvoke = state.invokes.find((i) => i.cmd === "export_session" && i.args.format === "md" && i.args.sessionId === 103);
+    expect(exportInvoke).toBeDefined();
+  });
 });

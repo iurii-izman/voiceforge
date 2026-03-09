@@ -126,7 +126,7 @@ E12 ✓ → E13 ✓ → E14 ✓ → E15 ✓
 
 **Wave 3.5 — Desktop-first frontend (после E15):**
 ```
-E19 (#142) → Tauri E2E flow, tray polish, hotkeys, packaging proof
+E19 (#142) ✓ → Tauri E2E flow, tray, hotkeys, packaging verification
 ```
 
 **Entry gate для E19:** перед стартом desktop-first track должны быть закрыты E13, E14 и E15, а scope policy из [phase-e-decision-log.md](phase-e-decision-log.md) обязан оставаться без расширения Web UI / Telegram / RAG watcher beyond maintenance-only.
@@ -153,7 +153,7 @@ E11 (narrow CalDAV scope) → E16 → E17
 | Export (MD/PDF) | ✅ | ⚠️ | ✅ | ✅ | Almost |
 | Daemon mode | ✅ | ❌ | ⚠️ | ✅ | WIP |
 | Web UI | ✅ | ✅ | ✅ | ⚠️ | Almost |
-| Desktop (Tauri) | ⚠️ | ❌ | ❓ | ⚠️ | WIP |
+| Desktop (Tauri) | ✅ | ⚠️ | ✅ | ⚠️ | E2E flow + tray + hotkeys + packaging verify |
 | Calendar (CalDAV) | ✅ | ❌ | ✅ | ⚠️ | WIP |
 | Telegram bot | ✅ | ⚠️ | ✅ | ✅ | Almost |
 | Cost tracking | ✅ | ✅ | ✅ | ✅ | **Ready** |
@@ -183,7 +183,7 @@ E11 (narrow CalDAV scope) → E16 → E17
 
 ## 5. Риски «кажется готовее, чем есть»
 
-1. **🔴 Desktop UI:** Tauri app существует, но E2E flow не проверен
+1. **🟢 Desktop UI:** E2E meeting flow (Record→Analyze→View→Export), tray, hotkeys, packaging verification (E19 #142)
 2. **🔴 Diarization:** Тихо пропускается у 70% пользователей (нет HF token)
 3. **🟡 RAG:** Требует ручного index; analyze не сообщает о пустом контексте
 4. **🟡 Offline packaging:** Flatpak/AppImage скрипты есть, GA не проверен в CI

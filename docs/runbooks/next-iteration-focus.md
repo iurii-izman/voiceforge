@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-09 (E15 #138 закрыт; следующий — E19 #142 desktop-first)
+**Обновлено:** 2026-03-09 (E19 #142 закрыт; следующий — Wave 4: E11 #134 или E16 #139)
 
 ---
 
@@ -19,9 +19,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** E15 (#138) Observability: Grafana dashboard (monitoring/grafana/voiceforge-dashboard.json), 7 alert rules (pipeline, LLM, circuit breaker, cost, disk, daemon down), cost anomaly metric + warning, data_dir_free_bytes, targeted tests test_cost_anomaly.py.
+**Сделано в сессии:** E19 (#142) Desktop-first: E2E meeting flow (Record→Analyze→View→Export) в autopilot.spec.js, tray/hotkeys задокументированы (tray.rs + main.js), скрипт verify-desktop-packaging.sh, обновлены desktop-gui-testing, offline-package, desktop-release-gate-matrix.
 
-**Следующий шаг:** взять **E19 (#142) desktop-first track** (Wave 3.5): Tauri E2E flow, tray, hotkeys, packaging verification.
+**Следующий шаг:** взять **Wave 4** — первый открытый блок: **E11 (#134)** Calendar Auto-Analyze (narrow CalDAV) или **E16 (#139)** CI/CD Polish.
 
 ---
 
@@ -34,7 +34,7 @@
 | **Wave 1 (P0)** | #124✓→#125✓→#126✓→#127✓→#128✓ | **Done** | DDR 35→55 |
 | **Wave 2 (P1 core)** | #129✓→#130✓→#131✓→#132✓→#133✓→#141✓ | **Done** | DDR 55→70 |
 | **Wave 3 (P1 quality)** | #135✓→#136✓→#137✓→#138✓ | **Done** | — |
-| **Wave 3.5 (Frontend)** | #142 | Todo | Desktop-first Tauri track (E19) |
+| **Wave 3.5 (Frontend)** | #142✓ | Done | Desktop-first Tauri (E19) |
 | **Wave 4 (P2 polish)** | #134→#139→#140 | Todo | Calendar (narrow CalDAV) + CI/CD + Security |
 | **Decision log** | #143✓, #144✓ | Resolved | Scope guard для автопилота; новых user decisions сейчас не нужно |
 | **External wait** | #65 | Waiting upstream | CVE — ждём fix |
@@ -54,7 +54,7 @@
 
 Задача: взять верхний незакрытый E-блок из текущего Wave. Перевести существующий issue в In Progress на доске. Реализовать по чеклисту в issue body. Строго соблюдать phase-e-decision-log: Tauri = primary GUI, Web UI/Telegram/RAG watcher = maintenance-only, Calendar = narrow CalDAV scope; placeholders #148-#151 не активировать. Targeted tests. Commit с `Closes #N` (Conventional Commits). Done на доске. Обновить docs. Выдать prompt для следующего чата.
 
-Текущий блок: E19 (#142) — Desktop-first track: Tauri E2E flow, tray, hotkeys, packaging verification (Wave 3.5).
+Текущий блок: Wave 4 — E11 (#134) Calendar или E16 (#139) CI/CD (по приоритету на доске).
 ```
 
 ---

@@ -5,6 +5,7 @@
 ## Воспроизводимая сборка (repeatable path)
 
 - **Версии:** синхронизация версий и контракт updater проверяются скриптом `scripts/check_release_metadata.py` (обязателен перед релизом, см. [release-and-quality.md](release-and-quality.md) § 1.1).
+- **Проверка упаковки (E19 #142):** из корня репо `./scripts/verify-desktop-packaging.sh` — собирает десктоп при необходимости и проверяет наличие артефактов .deb и .AppImage в `desktop/src-tauri/target/release/bundle/`.
 - **Flatpak из корня репо:** `make flatpak-build` или `./scripts/build-flatpak.sh`. Требует: flatpak, flatpak-builder, org.gnome.Platform//46; при отсутствии .deb скрипт сначала собирает десктоп (см. [desktop-build-deps.md](desktop-build-deps.md)).
 - **Deb/RPM/AppImage:** из каталога `desktop/`: `npm run build && npm run tauri build` (зависимости и шаги — в [desktop-build-deps.md](desktop-build-deps.md)).
 - **Updater:** до настройки ключей и сервера обновлений — явно отключён (`pubkey` и `endpoints` пустые в tauri.conf.json). См. [desktop-updater.md](desktop-updater.md) § 0.

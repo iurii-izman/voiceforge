@@ -41,6 +41,7 @@ Playwright/autopilot и visual/a11y suite дают сильный regression sig
 5. `cd desktop && npx playwright test e2e/visual.spec.js --project=chromium`
 6. `cd desktop && npm run e2e:native`
 7. `cd desktop && npm run tauri build`
+8. `./scripts/verify-desktop-packaging.sh` (E19: проверка .deb/.AppImage в bundle)
 
 Дополнительно для релиза с updater:
 

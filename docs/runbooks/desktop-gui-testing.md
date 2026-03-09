@@ -38,8 +38,10 @@ Playwright сам поднимет `npm run preview`. HTML report сохраня
 ### 2.2. Что уже проверяется
 
 - `desktop/e2e/nav.spec.js`: layout/navigation smoke, роли, вкладки, базовые controls
-- `desktop/e2e/autopilot.spec.js`: mocked desktop flows вокруг listen/analyze, sessions/detail, transcript/RAG search, calendar action, settings/autostart/updater
+- `desktop/e2e/autopilot.spec.js`: mocked desktop flows вокруг listen/analyze, sessions/detail, transcript/RAG search, calendar action, settings/autostart/updater; **E19 desktop-first flow** — один сценарий Record → Analyze → View → Export (полный цикл встречи)
 - `desktop/e2e/helpers/desktopHarness.js`: детерминированный mock runtime для invoke/listen/store/window/notification/global shortcuts/updater
+
+**Tray и hotkeys (E19 #142):** пункты меню трея (Open, Start/Stop listen, Quit) реализованы в `desktop/src-tauri/src/tray.rs`. Глобальный hotkey для toggle listen настраивается в Settings и регистрируется через `@tauri-apps/plugin-global-shortcut` в `desktop/src/main.js`; проверка — вручную по [desktop-release-gate-matrix.md](desktop-release-gate-matrix.md) § 4.
 
 ### 2.3. Ограничения слоя
 
