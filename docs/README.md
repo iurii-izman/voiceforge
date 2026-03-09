@@ -12,7 +12,7 @@
 |------|----------|
 | **Пользователь: первая встреча** | [first-meeting-5min.md](first-meeting-5min.md) — полный сценарий за 5 минут |
 | **Краткий сценарий** | [runbooks/quickstart.md](runbooks/quickstart.md) — линейные шаги + ссылка на полную версию |
-| **Агент (Cursor)** | [runbooks/agent-context.md](runbooks/agent-context.md) — контекст, правила, keyring, чеклист конца сессии (тесты, коммит, пуш); [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md) — следующий шаг; [runbooks/phase-e-decision-log.md](runbooks/phase-e-decision-log.md) — зафиксированные границы scope для Phase E. Правило автопилота: `.cursor/rules/agent-session-handoff.mdc` |
+| **Агент (Cursor/Codex/Claude)** | [runbooks/agent-context.md](runbooks/agent-context.md) — контекст, правила, keyring, чеклист конца сессии (тесты, коммит, пуш); [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md) — следующий шаг; [runbooks/phase-e-decision-log.md](runbooks/phase-e-decision-log.md) — зафиксированные границы scope для Phase E; [runbooks/ai-tooling-setup.md](runbooks/ai-tooling-setup.md) — где источник истины для AI tooling и локальных assistant configs. Правило автопилота: `.cursor/rules/agent-session-handoff.mdc` |
 
 ---
 
@@ -39,10 +39,11 @@
 Операционные инструкции и справочники — [runbooks/README.md](runbooks/README.md). Полный список и статусы — [DOCS-INDEX.md](DOCS-INDEX.md). Кратко:
 
 - **Контекст и агент:** agent-context, next-iteration-focus, cursor, voiceforge-cursor-tz (заглушка)
+- **AI tooling и автопилот:** ai-tooling-setup, phase-e-decision-log
 - **Конфиг и среда:** config-env-contract, keyring-keys-reference, bootstrap, installation-guide, desktop-build-deps
-- **Безопасность и зависимости:** security, dependencies, dependabot-review
+- **Безопасность и зависимости:** security-and-dependencies, security-decision-log
 - **Фичи:** telegram-bot-setup (ADR-0005), pyannote-version
-- **Релизы и качество:** release-and-quality (релиз, откат, чеклисты альфа, DoD)
+- **Релизы и качество:** release-and-quality (релиз, откат, чеклисты альфа, DoD), `./scripts/preflight_repo.sh`
 - **Остальное:** quickstart, repo-governance, test-operations, web-api
 
 ---

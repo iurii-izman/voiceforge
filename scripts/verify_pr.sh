@@ -20,29 +20,35 @@ run_gitleaks() {
   return 1
 }
 
-echo "[1/8] Toolchain"
+echo "[1/10] Toolchain"
 ./scripts/check_toolchain.sh
 
-echo "[2/8] Ruff"
+echo "[2/10] Release metadata"
+uv run python scripts/check_release_metadata.py
+
+echo "[3/10] Docs consistency"
+uv run python scripts/check_docs_consistency.py
+
+echo "[4/10] Ruff"
 uv run ruff check src tests scripts
 
-echo "[3/8] Mypy"
+echo "[5/10] Mypy"
 uv run mypy src/voiceforge/core src/voiceforge/llm src/voiceforge/rag src/voiceforge/stt --ignore-missing-imports
 
-echo "[4/8] Tests + Coverage"
+echo "[6/10] Tests + Coverage"
 uv run pytest tests -q --cov=src/voiceforge --cov-report=xml --cov-report=json --cov-fail-under=0
 
-echo "[5/8] New-code coverage"
+echo "[7/10] New-code coverage"
 ./scripts/check_new_code_coverage.sh
 
-echo "[6/8] CLI contract"
+echo "[8/10] CLI contract"
 ./scripts/check_cli_contract.sh
 
-echo "[7/8] Security"
+echo "[9/10] Security"
 uv run pip-audit --desc --ignore-vuln CVE-2025-69872
 uv run bandit -r src -ll -q --configfile .bandit.yaml
 
-echo "[8/8] Gitleaks"
+echo "[10/10] Gitleaks"
 run_gitleaks
 
 echo "verify_pr.sh: ALL CHECKS PASSED"

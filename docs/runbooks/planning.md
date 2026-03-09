@@ -59,6 +59,26 @@ gh auth refresh -s project
   - В In Progress: `gh project item-edit --project-id PVT_kwHODvfgWM4BQC-Z --id <ITEM_ID> --field-id PVTSSF_lAHODvfgWM4BQC-Zzg-R4aU --single-select-option-id 47fc9ee4`
   - В Done: то же, но `--single-select-option-id 98236657`
 
+### Taxonomy для автопилота
+
+Дополнительные labels, которые задают policy-слой поверх issue backlog:
+
+- `decision-locked` — решение пользователя/проекта уже принято, повторно не обсуждать без нового explicit decision
+- `primary-track` — основной route для активной разработки
+- `maintenance-only` — surface поддерживается, но не расширяется
+- `freeze` — развитие остановлено до отдельного решения
+- `defer` — идея отложена до триггера пересмотра
+- `accept-later` — направление принято как будущее, но не активируется в текущей фазе
+
+Эти labels должны совпадать с [phase-e-decision-log.md](phase-e-decision-log.md). Если GitHub API не позволяет создать project views программно, canonical filters хранятся в Project README и в этом runbook.
+
+### Рекомендуемые ручные views
+
+- `Autopilot Next`: `label:autopilot -label:freeze -label:defer -label:accept-later`
+- `Frozen / Maintenance Only`: `label:freeze, label:maintenance-only`
+- `Deferred / Accept Later`: `label:defer, label:accept-later`
+- `Decision Log`: `label:decision-locked`
+
 ---
 
 ## Связь с документами

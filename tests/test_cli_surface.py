@@ -11,7 +11,7 @@ runner = CliRunner()
 
 def _normalized_command_names() -> set[str]:
     names: set[str] = set()
-    commands: Iterable[object] = app.registered_commands
+    commands: Iterable[object] = [*app.registered_commands, *getattr(app, "registered_groups", [])]
     for command in commands:
         raw_name = getattr(command, "name", None)
         if raw_name:
@@ -27,23 +27,29 @@ def _normalized_command_names() -> set[str]:
 def test_help_exposes_only_core_commands() -> None:
     expected = {
         "backup",
+        "analyze",
+        "action-items",
+        "calendar",
+        "config",
+        "cost",
+        "daemon",
+        "daily-report",
+        "download-models",
+        "export",
+        "history",
+        "index",
+        "install-service",
         "listen",
         "meeting",
-        "analyze",
-        "status",
-        "cost",
-        "history",
-        "export",
-        "web",
-        "index",
-        "watch",
         "rag-export",
         "sessions-to-ical",
-        "weekly-report",
-        "daemon",
-        "install-service",
+        "setup",
+        "status",
         "uninstall-service",
         "version",
+        "watch",
+        "web",
+        "weekly-report",
     }
     removed = {"dashboard", "analytics", "privacy", "update", "prefetch", "tasks", "summary", "plugin", "speaker"}
     assert _normalized_command_names() == expected

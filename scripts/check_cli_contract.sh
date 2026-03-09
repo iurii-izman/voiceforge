@@ -5,15 +5,22 @@ uv run pytest tests/test_cli_surface.py -q
 
 help_output="$(uv run voiceforge --help)"
 required=(
-  "listen"
   "analyze"
-  "status"
-  "history"
+  "action-items"
+  "calendar"
+  "config"
+  "daily-report"
+  "download-models"
   "index"
-  "watch"
   "daemon"
+  "history"
   "install-service"
+  "listen"
+  "meeting"
+  "setup"
+  "status"
   "uninstall-service"
+  "watch"
 )
 for cmd in "${required[@]}"; do
   if ! grep -q "${cmd}" <<<"${help_output}"; then

@@ -13,6 +13,7 @@
 | [agent-context.md](agent-context.md) | Единый контекст для Cursor: правила, keyring, чеклист конца сессии, универсальный промпт. Прикладывать в новый чат. |
 | [next-iteration-focus.md](next-iteration-focus.md) | Следующий шаг (один для следующего чата); обновляет агент в конце сессии. |
 | [phase-e-decision-log.md](phase-e-decision-log.md) | Зафиксированные решения по E19-E21; что можно и нельзя расширять в автопилоте. |
+| [ai-tooling-setup.md](ai-tooling-setup.md) | Source of truth для Cursor / Codex / Claude / Sonar / GitHub CLI; что хранится в git, а что локально. |
 | [doc-governance.md](doc-governance.md) | Порядок в доках: источники правды, архив, актуализация после итераций. |
 | [cursor.md](cursor.md) | Cursor: настройка (Cloud/локально), тюнинг, промпты, OOM, справка. |
 | [voiceforge-cursor-tz.md](voiceforge-cursor-tz.md) | Заглушка → [archive/runbooks/voiceforge-cursor-tz-2026.md](../archive/runbooks/voiceforge-cursor-tz-2026.md). |
@@ -45,6 +46,7 @@
 | Файл | Назначение |
 |------|------------|
 | [security-and-dependencies.md](security-and-dependencies.md) | **Единый документ:** секреты, keyring, pip-audit, CVE; политика зависимостей (pyproject, uv.lock); Dependabot. Раньше: security.md, dependencies.md, dependabot-review.md (теперь заглушки). |
+| [security-decision-log.md](security-decision-log.md) | Открытые security wait states и revisit triggers для remote alerts / CVE. |
 
 ## Фичи (runbooks)
 
@@ -64,7 +66,7 @@
 | Файл | Назначение |
 |------|------------|
 | [quickstart.md](quickstart.md) | Краткий сценарий первой встречи; полная версия — docs/first-meeting-5min.md. |
-| [repo-and-git-governance.md](repo-and-git-governance.md) | **Единый документ:** правила main, security baseline, SonarCloud; коммиты, ветки, теги, issues, GitHub Project. Раньше: repo-governance.md, git-github-practices.md (теперь заглушки). |
+| [repo-and-git-governance.md](repo-and-git-governance.md) | **Единый документ:** правила main, security baseline, SonarCloud; коммиты, ветки, теги, issues, GitHub Project. Раньше: repo-governance.md, git-github-practices.md (теперь заглушки). Для полного preflight: `./scripts/preflight_repo.sh --with-tests`. |
 | [test-operations.md](test-operations.md) | Flaky-тесты, CI, карантин. |
 | [web-api.md](web-api.md) | Web UI API (опционально). |
 

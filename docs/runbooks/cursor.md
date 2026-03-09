@@ -10,6 +10,7 @@
 
 - **Cloud Agents:** Create PRs — только при необходимости; Slack Notifications — по желанию. My Secrets: имена переменных (без значений в репо) — `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY`, Huggingface token при использовании pyannote. См. [security-and-dependencies.md](security-and-dependencies.md).
 - **Локально (Fedora Atomic Cosmic):** ключи в keyring (хост или toolbox): `keyring set voiceforge anthropic`, `openai`, `huggingface`. Bootstrap: `./scripts/bootstrap.sh`, `uv sync --extra all`; проверка: `uv run voiceforge status`, `./scripts/doctor.sh`. Полный список ключей и конфига: [config-env-contract.md](config-env-contract.md), [keyring-keys-reference.md](keyring-keys-reference.md).
+- **Source of truth для Cursor/Codex/Claude:** [ai-tooling-setup.md](ai-tooling-setup.md). Если локальные assistant settings расходятся с runbook’ами, сначала править tracked документы.
 
 ---
 
@@ -24,6 +25,8 @@
 Правила с `alwaysApply: true` съедают токены на каждый запрос. Рекомендация: минимум таких правил; только критичные (session handoff, cost). Остальные — по файлам или вручную через @.
 
 **Копии для .cursor/rules/:** в docs/runbooks лежат [agent-session-handoff-rule.md](agent-session-handoff-rule.md) → `.cursor/rules/agent-session-handoff.mdc`, [git-github-practices-rule.md](git-github-practices-rule.md) → `git-github-practices.mdc`. cost-and-environment, plan-verify-before-implement — по agent-context.
+
+Repo-local `.codex/` и `.claude/` не требуются. Codex и Claude работают по [../../AGENTS.md](../../AGENTS.md) и runbook’ам.
 
 ---
 
@@ -108,7 +111,7 @@
 
 **RAM (пиковый, sequential):** ОС + COSMIC + PipeWire ~2–2.5 ГБ; faster-whisper small INT8 ~0.8–1 ГБ; pyannote ~1–1.4 ГБ; all-MiniLM ONNX ~0.1–0.2 ГБ; Python runtime ~0.2–0.3 ГБ. Итого пиковый ~4.2–5.5 ГБ. Swap — safety net.
 
-**Чеклист перед PR:** ruff check/format, pytest -q, bandit, gitleaks; нет print() (только structlog), нет ключей в коде, type hints, ADR-0001 не нарушен; CHANGELOG и config-env-contract при изменении контракта.
+**Чеклист перед PR:** `./scripts/preflight_repo.sh --with-tests`, затем ruff check/format, targeted pytest, bandit, gitleaks; нет print() (только structlog), нет ключей в коде, type hints, ADR-0001 не нарушен; CHANGELOG и config-env-contract при изменении контракта.
 
 ---
 

@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-09 (решения E19-E21 зафиксированы; следующий — E13 #136 Wave 3)
+**Обновлено:** 2026-03-09 (autopilot prep завершён: docs-consistency, preflight, AI tooling and policy taxonomy; следующий — E13 #136 Wave 3)
 
 ---
 
@@ -19,7 +19,7 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** зафиксированы решения E19-E21 (desktop-first на Tauri; Web UI/Telegram/RAG watcher в maintenance-only; narrow CalDAV automation; managed packaging — future accept; SaaS/web-only/collab/PG/fine-tune — reject for Phase E). Источник истины: [phase-e-decision-log.md](phase-e-decision-log.md). E12 (#135) закрыт.
+**Сделано в сессии:** зафиксированы решения E19-E21 (desktop-first на Tauri; Web UI/Telegram/RAG watcher в maintenance-only; narrow CalDAV automation; managed packaging — future accept; SaaS/web-only/collab/PG/fine-tune — reject for Phase E). Дополнительно выровнена автопилотная инфраструктура: `scripts/check_docs_consistency.py`, `scripts/preflight_repo.sh`, новый workflow `docs-consistency`, runbooks [ai-tooling-setup.md](ai-tooling-setup.md) и [security-decision-log.md](security-decision-log.md), policy labels для Project. Источник истины: [phase-e-decision-log.md](phase-e-decision-log.md). E12 (#135) закрыт.
 
 **Следующий шаг:** взять **E13 (#136) Core Logic** (Wave 3): Prompt Cache, Streaming CLI, Whisper Turbo. После E15 идти в **E19 (#142)** как desktop-first track; E11 держать в narrowed CalDAV scope.
 
@@ -85,6 +85,7 @@
 - **Новые CLI-команды:** через ADR (ADR-0001). `voiceforge meeting` и `voiceforge setup` — новые команды, потребуют ADR update.
 - **Scope guard:** UI-расширения делать в Tauri; Web UI, Telegram и RAG watcher не расширять beyond maintenance без нового решения. Calendar — только current CalDAV narrow path.
 - **Доска:** при работе по issue In Progress → Done. Команды: [planning.md](planning.md).
+- **Repo preflight:** перед cleanup / infra / governance-сессией запускать `./scripts/preflight_repo.sh --with-tests`.
 
 ---
 

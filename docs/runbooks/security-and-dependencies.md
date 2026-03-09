@@ -1,6 +1,6 @@
 # Безопасность и зависимости (объединённый runbook)
 
-Единый документ: политика секретов, проверки, зависимости (pyproject/uv), Dependabot. Объединяет бывшие security.md, dependencies.md, dependabot-review.md.
+Единый документ: политика секретов, проверки, зависимости (pyproject/uv), Dependabot. Объединяет бывшие security.md, dependencies.md, dependabot-review.md. Открытые remote alerts и wait states фиксируются отдельно в [security-decision-log.md](security-decision-log.md).
 
 ---
 
@@ -34,6 +34,7 @@
 
 - **Где смотреть:** GitHub → Repository → Security → Dependabot alerts.
 - **Действия:** для каждого алерта — принять (мержить PR после проверки тестов) или отложить (Dismiss с комментарием).
+- **Source of truth для открытых alerts:** [security-decision-log.md](security-decision-log.md). Любой открытый remote alert должен быть отражён там с revisit trigger.
 - **CVE-2025-69872 (diskcache):** фиксирующей версии нет (проверено 2026-03: upstream не выпустил патч). В CI уже `pip-audit --ignore-vuln CVE-2025-69872`. Рекомендуется отложить алерт: Dependabot → Dismiss → «Accept risk», комментарий: «No fix version yet. See docs/runbooks/security-and-dependencies.md. Revisit when upstream fixes.» Либо скрипт (нужен `github_token` в keyring с правом security_events): `uv run python scripts/dependabot_dismiss_moderate.py`. После появления фикса — выполнить чеклист ниже.
 
 ---

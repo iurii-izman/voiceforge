@@ -103,6 +103,10 @@
 | E21 | [#144](https://github.com/iurii-izman/voiceforge/issues/144) | **Defer:** macOS/Windows, browser extension, GPU, Whisper.cpp/MLX | Вернуться только при достижении конкретных триггеров из decision log. |
 | E21 | [#144](https://github.com/iurii-izman/voiceforge/issues/144) | **Reject for current phase:** SaaS, Web-only main UI, collaborative notes, PostgreSQL, fine-tuning | Не открывать эти направления в Phase E без нового решения пользователя. |
 
+**Project markers:** `#142 = decision-locked + primary-track`, `#143 = decision-locked + freeze + maintenance-only`, `#144 = decision-locked` + future `defer/accept-later` placeholders. Рабочие фильтры и taxonomy описаны в [planning.md](planning.md).
+
+**Future placeholders on board:** `#148` managed packaging, `#149` macOS/Windows, `#150` browser extension, `#151` GPU / Whisper.cpp / MLX.
+
 ### Порядок выполнения (рекомендуемый)
 
 **Wave 1 — P0 блокеры (2-3 недели, DDR 35→55):**
@@ -124,6 +128,8 @@ E12 ✓ → E13 → E14 → E15
 ```
 E19 (#142) → Tauri E2E flow, tray polish, hotkeys, packaging proof
 ```
+
+**Entry gate для E19:** перед стартом desktop-first track должны быть закрыты E13, E14 и E15, а scope policy из [phase-e-decision-log.md](phase-e-decision-log.md) обязан оставаться без расширения Web UI / Telegram / RAG watcher beyond maintenance-only.
 
 **Wave 4 — P2 polish (2-3 недели, DDR 70→78):**
 ```

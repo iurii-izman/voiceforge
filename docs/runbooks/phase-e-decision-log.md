@@ -113,7 +113,32 @@
 
 ---
 
-## 4. Когда пересматривать deferred items
+### 3.6 Project markers
+
+Чтобы board и policy не расходились:
+
+- [#142](https://github.com/iurii-izman/voiceforge/issues/142) должен оставаться `decision-locked` + `primary-track`
+- [#143](https://github.com/iurii-izman/voiceforge/issues/143) должен оставаться `decision-locked` + `freeze` + `maintenance-only`
+- [#144](https://github.com/iurii-izman/voiceforge/issues/144) должен оставаться `decision-locked`; future items под ним маркируются `defer` или `accept-later`
+- будущие placeholders на board: [#148](https://github.com/iurii-izman/voiceforge/issues/148) = managed packaging, [#149](https://github.com/iurii-izman/voiceforge/issues/149) = macOS/Windows, [#150](https://github.com/iurii-izman/voiceforge/issues/150) = browser extension, [#151](https://github.com/iurii-izman/voiceforge/issues/151) = GPU / Whisper.cpp / MLX
+
+---
+
+## 4. Entry gate для E19 (desktop-first track)
+
+Автопилот переходит в активный desktop-first режим только если выполнены все условия:
+
+- E13, E14 и E15 завершены или явно переупорядочены новым решением пользователя
+- [next-iteration-focus.md](next-iteration-focus.md) и [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md) указывают на [#142](https://github.com/iurii-izman/voiceforge/issues/142) как на следующий track
+- Web UI, Telegram и RAG watcher по-прежнему остаются maintenance-only
+- Calendar по-прежнему остаётся в narrow CalDAV scope
+- desktop work остаётся Linux-first / Tauri-first и не превращается в web-only pivot
+
+Если хотя бы одно условие не выполнено, автопилот не должен открывать новый frontend scope и должен вернуться к текущему wave order.
+
+---
+
+## 5. Когда пересматривать deferred items
 
 | Item | Триггер пересмотра |
 |---|---|
@@ -127,7 +152,7 @@
 
 ---
 
-## 5. Практическое правило для новых задач
+## 6. Практическое правило для новых задач
 
 Перед созданием нового issue или расширением scope задавать вопрос:
 

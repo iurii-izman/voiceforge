@@ -19,6 +19,8 @@
 
 **Security baseline:** Dependabot alerts и security updates включены; secret scanning и push protection включены. Проверка: `./scripts/check_repo_governance.sh`.
 
+**Repo preflight:** перед крупной итерацией или cleanup-сессией запускать `./scripts/preflight_repo.sh --with-tests` (git clean, toolchain, release metadata, docs consistency, governance, lightweight smoke).
+
 **Alpha0.1 milestone:** см. [release-and-quality.md](release-and-quality.md) (раздел 4). Helper: `scripts/create_alpha_milestone_issues.sh` (нужен gh auth).
 
 **SonarCloud:** Quality Gate — только Sonar way (Default). Скан в CI (sonar.yml); отчёт в SonarCloud. Локально: `uv run python scripts/sonar_fetch_issues.py` (токен keyring `voiceforge/sonar_token`). Используем как справочную информацию: не блокируем merge. Порядок при множестве анализов: [sonar-pr-cleanup.md](sonar-pr-cleanup.md).
@@ -53,7 +55,7 @@
 ## 5. GitHub Issues и Project
 
 - Одна задача — один issue. В описании: ссылки на runbook/ADR, критерии готовности.
-- **Labels:** roadmap, docs, feat, fix, chore, p0/p1/p2. При создании проставлять.
+- **Labels:** roadmap, docs, feat, fix, chore, p0/p1/p2, а также policy/taxonomy labels из [planning.md](planning.md): `decision-locked`, `primary-track`, `maintenance-only`, `freeze`, `defer`, `accept-later`.
 - Закрытие: коммит с `Closes #N` на default branch закрывает issue.
 - **Доска:** [VoiceForge Board](https://github.com/users/iurii-izman/projects/1). Status: Todo → In Progress → Done. По завершении (`Closes #N`): перенести в Done через `gh project item-edit`. При старте задачи — в In Progress.
 

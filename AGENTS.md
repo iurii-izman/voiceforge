@@ -17,11 +17,12 @@
 - **Полный контекст и чеклист конца сессии:** `docs/runbooks/agent-context.md` — приложить в новый чат (`@docs/runbooks/agent-context.md`).
 - **Следующий шаг и промпт для нового чата:** `docs/runbooks/next-iteration-focus.md` — при продолжении работы (`@docs/runbooks/next-iteration-focus.md`).
 - **Scope guard для автопилота:** `docs/runbooks/phase-e-decision-log.md`.
+- **AI tooling / Cursor / Codex / Claude / Sonar:** `docs/runbooks/ai-tooling-setup.md`.
 - **Индекс документации:** `docs/DOCS-INDEX.md`.
 
 ## Конец сессии
 
-По возможности в конце каждой сессии: (1) тесты: `uv run pytest tests/ -q --tb=line`; при OOM — подмножество из next-iteration-focus; (2) коммит и пуш из **корня репо** (Conventional Commits, Closes #N); (3) обновить блок «Следующий шаг» в `docs/runbooks/next-iteration-focus.md`; (4) выдать промпт для следующего чата. Подробно: `docs/runbooks/agent-context.md` и правило agent-session-handoff.
+По возможности в конце каждой сессии: (1) тесты: `uv run pytest tests/ -q --tb=line`; при OOM — подмножество из next-iteration-focus; (2) коммит и пуш из **корня репо** (Conventional Commits, Closes #N); (3) обновить блок «Следующий шаг» в `docs/runbooks/next-iteration-focus.md`; (4) выдать промпт для следующего чата. Для repo/governance preflight перед крупной итерацией: `./scripts/preflight_repo.sh --with-tests`. Подробно: `docs/runbooks/agent-context.md` и правило agent-session-handoff.
 
 ## Эффективность
 

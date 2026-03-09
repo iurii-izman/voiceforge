@@ -2,7 +2,7 @@
 
 **Назначение:** один источник правды по тому, какой документ за что отвечает и актуален ли он. При изменении кода/фич обновлять соответствующий док и при необходимости этот индекс.
 
-**Обновлено:** 2026-03-09 (docs/config drift cleaned; stubs restored; Phase E scope synchronized)
+**Обновлено:** 2026-03-09 (docs/config drift cleaned; stubs restored; Phase E scope synchronized; AI tooling + security decision log + docs consistency added)
 
 ---
 
@@ -22,6 +22,7 @@
 | Управление документацией                                                    | [runbooks/doc-governance.md](runbooks/doc-governance.md)                                                                                     |
 | Инструкции Cursor Agent (автозагрузка)                                      | [AGENTS.md](../AGENTS.md) (корень репо)                                                                                                      |
 | Тюнинг Cursor (промпты, правила, OOM, max-autopilot batching)               | [runbooks/cursor.md](runbooks/cursor.md)                                                                                                     |
+| AI tooling и source of truth (Cursor/Codex/Claude/Sonar/GitHub CLI)         | [runbooks/ai-tooling-setup.md](runbooks/ai-tooling-setup.md)                                                                                |
 
 
 ---
@@ -34,9 +35,9 @@
 | **Начало работы**                   | [first-meeting-5min.md](first-meeting-5min.md), [runbooks/quickstart.md](runbooks/quickstart.md), [runbooks/installation-guide.md](runbooks/installation-guide.md)                                                                                                                                                                                           |
 | **Сборка и установка**              | [runbooks/desktop-build-deps.md](runbooks/desktop-build-deps.md), [runbooks/offline-package.md](runbooks/offline-package.md), [runbooks/desktop-updater.md](runbooks/desktop-updater.md), [runbooks/desktop-gui-testing.md](runbooks/desktop-gui-testing.md) (тесты GUI), [runbooks/desktop-release-gate-matrix.md](runbooks/desktop-release-gate-matrix.md) |
 | **Конфигурация и ключи**            | [runbooks/config-env-contract.md](runbooks/config-env-contract.md), [runbooks/keyring-keys-reference.md](runbooks/keyring-keys-reference.md)                                                                                                                                                                                                                 |
-| **Разработка и агент**              | [AGENTS.md](../AGENTS.md), [runbooks/agent-context.md](runbooks/agent-context.md), [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md), [runbooks/phase-e-decision-log.md](runbooks/phase-e-decision-log.md), [runbooks/cursor.md](runbooks/cursor.md), [runbooks/PROJECT-STATUS-SUMMARY.md](runbooks/PROJECT-STATUS-SUMMARY.md), [architecture/README.md](architecture/README.md)                                |
+| **Разработка и агент**              | [AGENTS.md](../AGENTS.md), [runbooks/agent-context.md](runbooks/agent-context.md), [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md), [runbooks/phase-e-decision-log.md](runbooks/phase-e-decision-log.md), [runbooks/ai-tooling-setup.md](runbooks/ai-tooling-setup.md), [runbooks/cursor.md](runbooks/cursor.md), [runbooks/PROJECT-STATUS-SUMMARY.md](runbooks/PROJECT-STATUS-SUMMARY.md), [architecture/README.md](architecture/README.md)                                |
 | **Релиз и качество**                | [runbooks/release-and-quality.md](runbooks/release-and-quality.md), [runbooks/pre-beta-sonar-github.md](runbooks/pre-beta-sonar-github.md), [runbooks/repo-and-git-governance.md](runbooks/repo-and-git-governance.md), [audit/audit.md](audit/audit.md)                                                                                                     |
-| **Безопасность и зависимости**      | [runbooks/security-and-dependencies.md](runbooks/security-and-dependencies.md)                                                                                                                                                                                                                                                                               |
+| **Безопасность и зависимости**      | [runbooks/security-and-dependencies.md](runbooks/security-and-dependencies.md), [runbooks/security-decision-log.md](runbooks/security-decision-log.md)                                                                                                                                                                                                    |
 | **Фичи (календарь, RAG, Telegram)** | [runbooks/calendar-integration.md](runbooks/calendar-integration.md), [runbooks/rag-formats.md](runbooks/rag-formats.md), [runbooks/telegram-bot-setup.md](runbooks/telegram-bot-setup.md)                                                                                                                                                                   |
 
 
@@ -106,6 +107,7 @@
 | agent-context.md                                              | Контекст агента, чеклист конца сессии, max-autopilot mode                               | Актуален                         |
 | next-iteration-focus.md                                       | Следующий шаг; обновляет агент; готовые prompts                                         | Актуален                         |
 | doc-governance.md                                             | Порядок в доках: архив, источники правды, после итерации                                | Актуален                         |
+| ai-tooling-setup.md                                           | Source of truth для Cursor / Codex / Claude / Sonar / GitHub CLI; tracked vs local setup | Актуален                         |
 | config-env-contract.md, keyring-keys-reference.md             | Конфиг и ключи                                                                          | Актуален                         |
 | installation-guide.md, desktop-build-deps.md, bootstrap.md    | Установка и сборка                                                                      | Актуален                         |
 | desktop-gui-testing.md                                        | Тестирование GUI десктопа: mocked autopilot, native smoke, a11y, visual regression      | Актуален                         |
@@ -114,6 +116,7 @@
 | cli-commands-and-run.md                                       | Все CLI-команды, когда пересобирать, как запускать демон и полный стек (toolbox)        | Актуален                         |
 | planning.md                                                   | Канбан, GitHub Project, batching policy; live execution order брать из next-iteration-focus и PROJECT-STATUS-SUMMARY | Актуален                         |
 | security-and-dependencies.md                                  | Безопасность, зависимости, Dependabot (объединённый runbook)                            | Актуален                         |
+| security-decision-log.md                                      | Открытые security wait states и revisit triggers                                        | Актуален                         |
 | telegram-bot-setup.md, pyannote-version.md                    | Фичи                                                                                    | Актуален                         |
 | repo-and-git-governance.md                                    | Репо, main, Git, PR, теги, issues, Sonar                                                | Актуален                         |
 | release-and-quality.md                                        | Релиз, откат, alpha2 checklist; Alpha0.1 DoD сохранён как исторический baseline         | Актуален                         |

@@ -2,7 +2,7 @@
 
 Единый контекст для Cursor-агента. Новый чат: приложи этот файл (@docs/runbooks/agent-context.md) — не ищи по проекту, работай по этому документу. Для продолжения — @docs/runbooks/next-iteration-focus.md (обновляет агент в конце сессии).
 
-**Индекс документации (актуальность):** `docs/DOCS-INDEX.md`. **Порядок в доках (архив, источники правды):** [doc-governance.md](doc-governance.md). **Автопилот конца сессии:** `.cursor/rules/agent-session-handoff.mdc` (копия в репо: [agent-session-handoff-rule.md](agent-session-handoff-rule.md)). **Max-autopilot и batching:** [cursor.md](cursor.md), [planning.md](planning.md), [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md).
+**Индекс документации (актуальность):** `docs/DOCS-INDEX.md`. **Порядок в доках (архив, источники правды):** [doc-governance.md](doc-governance.md). **AI tooling и source of truth:** [ai-tooling-setup.md](ai-tooling-setup.md). **Автопилот конца сессии:** `.cursor/rules/agent-session-handoff.mdc` (копия в репо: [agent-session-handoff-rule.md](agent-session-handoff-rule.md)). **Max-autopilot и batching:** [cursor.md](cursor.md), [planning.md](planning.md), [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md).
 
 ---
 
@@ -18,6 +18,7 @@
 - **Ключи и доступы — только keyring:** сервис `voiceforge`, имена: `anthropic`, `openai`, `huggingface`, `webhook_telegram`, `sonar_token`, `github_token` и др. Полный список: `docs/runbooks/keyring-keys-reference.md`. Не хардкодить, не коммитить; в облаке без keyring — Cursor My Secrets.
 - **Конфиг:** `docs/runbooks/config-env-contract.md` — VOICEFORGE_*, Settings, D-Bus.
 - **Среда:** Fedora Atomic Cosmic (toolbox/uv); `./scripts/bootstrap.sh`, `uv sync --extra all`, `./scripts/doctor.sh`. См. `.cursor/rules/agent-session-handoff.mdc` — коммит и пуш агент выполняет сам из корня репо.
+- **Preflight перед крупной итерацией:** `./scripts/preflight_repo.sh --with-tests`.
 - **Режим Cursor:** для максимальной производительности использовать coherent batching, а не хаотичный мультизадачный режим: [cursor.md](cursor.md), [planning.md](planning.md), [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md).
 
 ---
