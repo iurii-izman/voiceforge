@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-09 (E16 #139 CI/CD Polish закрыт; следующий — E17 #140 Security)
+**Обновлено:** 2026-03-09 (E17 #140 Security закрыт; Wave 4 завершён)
 
 ---
 
@@ -19,9 +19,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** E16 (#139) CI/CD Polish: auto-release on tag push (v*), wheel + GitHub Release + PyPI job (environment pypi/OIDC), nightly smoke workflow (cron 03:00 UTC, status + test subset + wheel, create issue on failure), mock PipeWire fixture in tests/conftest.py, release docs updated.
+**Сделано в сессии:** E17 (#140) Security: optional SQLite encryption (encrypt_db, sqlcipher3, key db_encryption_key), API key audit log (structlog + metrics.db api_key_access), AppArmor profile security/voiceforge.apparmor, docs (security.md, security-and-dependencies, config-env-contract, keyring), tests test_audit_log.py и test_encryption.py.
 
-**Следующий шаг:** взять **E17 (#140)** Security (SQLite encryption, audit log, AppArmor).
+**Следующий шаг:** Wave 4 завершён. Взять следующий блок по доске или приоритету из PROJECT-STATUS-SUMMARY (например следующая волна или maintenance).
 
 ---
 
@@ -35,7 +35,7 @@
 | **Wave 2 (P1 core)** | #129✓→#130✓→#131✓→#132✓→#133✓→#141✓ | **Done** | DDR 55→70 |
 | **Wave 3 (P1 quality)** | #135✓→#136✓→#137✓→#138✓ | **Done** | — |
 | **Wave 3.5 (Frontend)** | #142✓ | Done | Desktop-first Tauri (E19) |
-| **Wave 4 (P2 polish)** | #134✓→#139✓→#140 | In progress | CI/CD Polish ✓; next E17 Security |
+| **Wave 4 (P2 polish)** | #134✓→#139✓→#140✓ | **Done** | E17 Security ✓ |
 | **Decision log** | #143✓, #144✓ | Resolved | Scope guard для автопилота; новых user decisions сейчас не нужно |
 | **External wait** | #65 | Waiting upstream | CVE — ждём fix |
 
@@ -54,7 +54,7 @@
 
 Задача: взять верхний незакрытый E-блок из Wave 4. Перевести issue в In Progress. Реализовать по чеклисту. Соблюдать phase-e-decision-log: Tauri = primary GUI, Web UI/Telegram/RAG watcher = maintenance-only, Calendar = narrow CalDAV; placeholders #148–#151 не активировать. Targeted tests. Commit с Closes #N (Conventional Commits). Done на доске. Обновить docs. Выдать промпт для следующего чата.
 
-Текущий блок: Wave 4 — **E17 (#140)** Security (SQLite encryption, audit log, AppArmor).
+Текущий блок: Wave 4 завершён. Следующий — по доске / PROJECT-STATUS-SUMMARY (следующая волна или приоритет).
 ```
 
 ---

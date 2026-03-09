@@ -62,11 +62,14 @@ otel = [
     "opentelemetry-sdk>=1.28",
     "opentelemetry-exporter-otlp-proto-http>=1.28",
 ]
+security = [
+    "sqlcipher3>=0.5.0",
+]
 web-async = [
     "starlette>=0.38",
     "uvicorn[standard]>=0.32",
 ]
-all = ["voiceforge[rag,llm,pii,calendar,otel,web-async]"]
+all = ["voiceforge[rag,llm,pii,calendar,otel,security,web-async]"]
 
 [project.scripts]
 voiceforge = "voiceforge.main:main"

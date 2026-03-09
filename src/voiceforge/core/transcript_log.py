@@ -1,4 +1,4 @@
-"""Block 4.2: Persistent transcript and analysis log — SQLite, FTS5 search. Block 11.7: migrations."""
+"""Block 4.2: Persistent transcript and analysis log — SQLite, FTS5 search. Block 11.7: migrations. E17 #140: optional SQLCipher."""
 
 from __future__ import annotations
 
@@ -17,6 +17,13 @@ import structlog
 from voiceforge.core.fs import ensure_private_dir, ensure_private_file
 
 log = structlog.get_logger()
+
+# E17 #140: Optional SQLCipher for encryption at rest (encrypt_db=True + key in keyring)
+_sqlcipher = None
+try:
+    import sqlcipher3 as _sqlcipher  # type: ignore[import-untyped]
+except ImportError:
+    _sqlcipher = None
 
 DB_NAME = "transcripts.db"
 _SCHEMA_ERROR_NO_SUCH_TABLE = "no such table"
@@ -265,6 +272,33 @@ def _insert_action_items(
             raise
 
 
+def _connect_transcript_db(db_path: Path) -> sqlite3.Connection:
+    """Open transcripts DB: SQLCipher if encrypt_db and key present, else standard sqlite3."""
+    from voiceforge.core.config import Settings
+    from voiceforge.core.secrets import get_api_key
+
+    cfg = Settings()
+    use_encryption = getattr(cfg, "encrypt_db", False)
+    key = get_api_key("db_encryption_key") if use_encryption else None
+
+    if use_encryption and key and _sqlcipher is not None:
+        conn = _sqlcipher.connect(str(db_path))
+        conn.execute("PRAGMA key = ?", (key,))
+        log.info("transcript_log.encrypted", path=str(db_path))
+    else:
+        conn = sqlite3.connect(str(db_path))
+        if use_encryption and (not key or _sqlcipher is None):
+            log.warning(
+                "transcript_log.encryption_skipped",
+                reason="no_key" if not key else "sqlcipher_unavailable",
+            )
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA synchronous=NORMAL")
+    ensure_private_file(db_path)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
 class TranscriptLog:
     """Persistent log: sessions, segments, analyses. FTS5 search on segment text."""
 
@@ -275,11 +309,7 @@ class TranscriptLog:
 
     def _get_conn(self) -> sqlite3.Connection:
         if self._conn is None:
-            self._conn = sqlite3.connect(str(self.db_path))
-            self._conn.execute("PRAGMA journal_mode=WAL")
-            self._conn.execute("PRAGMA synchronous=NORMAL")
-            ensure_private_file(self.db_path)
-            self._conn.row_factory = sqlite3.Row
+            self._conn = _connect_transcript_db(self.db_path)
             _init_db(self._conn)
             _ensure_migrated(self._conn, self.db_path)
         return self._conn

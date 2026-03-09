@@ -30,6 +30,15 @@ CREATE TABLE IF NOT EXISTS llm_calls (
 );
 """
 
+# E17 #140: API key access audit log (keyring reads)
+API_KEY_ACCESS_DDL = """
+CREATE TABLE IF NOT EXISTS api_key_access (
+    timestamp TEXT NOT NULL,
+    key_name TEXT NOT NULL,
+    operation TEXT NOT NULL
+);
+"""
+
 _init_done_paths: set[str] = set()
 _init_lock = threading.Lock()
 
@@ -47,6 +56,7 @@ def _cost_file_path() -> Path:
 def _run_migrations(conn: sqlite3.Connection) -> None:
     """One-time schema bootstrap and migrations. Idempotent DDL."""
     conn.execute(TABLE_DDL)
+    conn.execute(API_KEY_ACCESS_DDL)
     conn.execute("""
         CREATE TABLE IF NOT EXISTS schema_migrations (
             version TEXT PRIMARY KEY,
@@ -84,6 +94,23 @@ def _run_migrations(conn: sqlite3.Connection) -> None:
             _migrate_cost_daily_if_exists(conn)
     except sqlite3.OperationalError:
         conn.rollback()
+
+
+def log_api_key_access(key_name: str, operation: str, caller: str | None = None) -> None:
+    """E17 #140: Log API key access to structlog and metrics.db audit table."""
+    ts = datetime.now(UTC).isoformat()
+    log.info("api_key.access", timestamp=ts, key_name=key_name, operation=operation, caller=caller or "")
+    conn = _get_conn()
+    try:
+        conn.execute(
+            "INSERT INTO api_key_access (timestamp, key_name, operation) VALUES (?, ?, ?)",
+            (ts, key_name, operation),
+        )
+        conn.commit()
+    except sqlite3.OperationalError as e:
+        log.debug("api_key.access_log_db_failed", error=str(e))
+    finally:
+        conn.close()
 
 
 def _get_conn() -> sqlite3.Connection:

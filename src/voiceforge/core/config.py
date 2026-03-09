@@ -185,6 +185,10 @@ class Settings(BaseSettings):
         default=False,
         description="E11 #134: poll CalDAV every 5 min; auto-start listen when meeting in ≤2 min; auto-analyze when meeting ended ≥1 min ago.",
     )
+    encrypt_db: bool = Field(
+        default=False,
+        description="E17 #140: Use SQLCipher for transcripts.db at rest; key from keyring 'db_encryption_key'. Requires optional dependency sqlcipher3.",
+    )
 
     @field_validator("model_size")
     @classmethod

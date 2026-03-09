@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 import os
 
 import structlog
@@ -11,15 +12,35 @@ log = structlog.get_logger()
 _SERVICE = "voiceforge"
 
 
+def _caller_name() -> str:
+    """E17 #140: Module/caller name for audit log (skip this module and metrics)."""
+    for frame_info in inspect.stack()[2:6]:
+        try:
+            name = frame_info.frame.f_globals.get("__name__", "")
+            if name and "voiceforge.core.secrets" not in name:
+                return name or "unknown"
+        except Exception:
+            pass
+    return "unknown"
+
+
 def get_api_key(name: str) -> str | None:
-    """Get API key from gnome-keyring. Returns None if not found or keyring unavailable."""
+    """Get API key from gnome-keyring. Returns None if not found or keyring unavailable.
+    E17 #140: Every read is logged to structlog and metrics.db api_key_access table."""
     try:
         import keyring
 
-        return keyring.get_password(_SERVICE, name) or None
+        value = keyring.get_password(_SERVICE, name) or None
     except Exception as exc:
         log.debug("keyring.get_failed", name=name, error=str(exc))
-        return None
+        value = None
+    try:
+        from voiceforge.core.metrics import log_api_key_access
+
+        log_api_key_access(key_name=name, operation="read", caller=_caller_name())
+    except Exception as e:
+        log.debug("api_key.audit_log_failed", name=name, error=str(e))
+    return value
 
 
 def require_api_key(name: str) -> str:

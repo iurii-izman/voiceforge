@@ -20,6 +20,7 @@
 | `caldav_url` | CalDAV calendar URL (e.g. https://nextcloud.example.com/remote.php/dav) |
 | `caldav_username` | CalDAV login |
 | `caldav_password` | CalDAV password or token |
+| `db_encryption_key` | E17 #140: SQLCipher passphrase for transcripts.db when `encrypt_db` is true |
 
 Проверка доступа (без вывода значений):
 ```bash

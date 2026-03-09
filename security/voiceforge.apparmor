@@ -1,0 +1,27 @@
+# E17 #140: AppArmor profile template for VoiceForge.
+# Install: sudo cp security/voiceforge.apparmor /etc/apparmor.d/voiceforge
+#         sudo apparmor_parser -r /etc/apparmor.d/voiceforge
+# If running from venv, replace /usr/bin/voiceforge below with full path to .venv/bin/voiceforge.
+#include <tunables/global>
+
+profile voiceforge /usr/bin/voiceforge flags=(attach_disconnected) {
+  #include <abstractions/base>
+  #include <abstractions/nameservice>
+
+  # Data and config (owner = current user)
+  owner @{HOME}/.local/share/voiceforge/ rw,
+  owner @{HOME}/.local/share/voiceforge/** rwk,
+  owner @{HOME}/.config/voiceforge/ r,
+  owner @{HOME}/.config/voiceforge/** rwk,
+  /tmp/ rw,
+  /tmp/** rwk,
+
+  # PipeWire capture (pw-record)
+  /usr/bin/pw-record ix,
+  /usr/bin/pw-cat ix,
+
+  # Network: required for LLM/STT APIs (Anthropic, OpenAI, etc.).
+  # To deny all network: add "deny network,"
+  network inet stream,
+  network inet dgram,
+}

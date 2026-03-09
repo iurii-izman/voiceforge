@@ -61,7 +61,13 @@
 - создаваемые local DB/cache/status/backup files приводятся к private permissions `0600`;
 - regression suite `tests/test_security_batch120.py` фиксирует этот baseline, чтобы проект не выглядел защищённее, чем он есть.
 
-**Возможные направления на будущее:** SQLCipher, шифрование на уровне файловой системы (LUKS, ecryptfs), или опция «хранить в зашифрованном каталоге». Реализация не входит в текущий roadmap; при появлении требований — см. [roadmap-100-blocks.md](../plans/roadmap-100-blocks.md) блок 96.
+**E17 #140 (реализовано):**
+
+- **SQLite encryption at rest (optional):** В конфиге опция `encrypt_db: true`; ключ в keyring `db_encryption_key`. Требуется опциональная зависимость `sqlcipher3` (`uv sync --extra security`). Без ключа или без sqlcipher3 при включённом encrypt_db используется обычный sqlite3 с предупреждением в лог. Миграция существующей незашифрованной БД: backup → удалить или переименовать transcripts.db → запуск создаст новую зашифрованную БД (данные нужно восстанавливать из backup вручную или отдельным скриптом).
+- **API key audit log:** Каждое обращение к keyring (get_api_key) пишется в structlog и в таблицу `api_key_access` в metrics.db (timestamp, key_name, operation). Caller передаётся только в structlog.
+- **AppArmor:** Шаблон профиля в `security/voiceforge.apparmor`. Установка: см. [security.md](security.md).
+
+**Возможные направления на будущее:** LUKS/ecryptfs для каталога данных; автоматическая миграция существующей БД в SQLCipher (export/import).
 
 ---
 

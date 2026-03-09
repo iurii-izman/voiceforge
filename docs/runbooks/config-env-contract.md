@@ -45,6 +45,7 @@ Priority order:
 | `calendar_autostart_enabled` | `VOICEFORGE_CALENDAR_AUTOSTART_ENABLED` | `false` | Block 78: auto-start listen N minutes before next calendar event |
 | `calendar_autostart_minutes` | `VOICEFORGE_CALENDAR_AUTOSTART_MINUTES` | `5` | Minutes before event start to start listen when calendar_autostart_enabled |
 | `calendar_auto_listen` | `VOICEFORGE_CALENDAR_AUTO_LISTEN` | `false` | E11 #134: poll CalDAV every 5 min; auto-start listen when meeting in ≤2 min; auto-analyze when meeting ended ≥1 min ago |
+| `encrypt_db` | `VOICEFORGE_ENCRYPT_DB` | `false` | E17 #140: Use SQLCipher for transcripts.db; key in keyring `db_encryption_key`. Requires optional dependency `sqlcipher3`. |
 
 ## OpenTelemetry (Phase D #71)
 
