@@ -137,7 +137,11 @@ def validate_required_files() -> list[str]:
 def validate_required_references() -> list[str]:
     errors: list[str] = []
     for rel_path, required_snippets in REQUIRED_REFERENCES.items():
-        text = (REPO_ROOT / rel_path).read_text(encoding="utf-8")
+        path = REPO_ROOT / rel_path
+        if not path.exists():
+            errors.append(f"{rel_path}: missing file for required references check")
+            continue
+        text = path.read_text(encoding="utf-8")
         for snippet in required_snippets:
             if snippet not in text:
                 errors.append(f"{rel_path}: missing required source-of-truth reference '{snippet}'")

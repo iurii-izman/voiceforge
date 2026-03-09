@@ -24,7 +24,7 @@ for f in d['fields']:
 " 2>/dev/null || echo "")"
 
 # If Phase E doesn't exist yet, we'll skip phase field
-if [ -z "$PHASE_E" ]; then
+if [[ -z "${PHASE_E:-}" ]]; then
     echo "Phase E option not found, will skip phase field"
 fi
 
@@ -72,17 +72,17 @@ create_issue() {
     gh project item-edit --project-id "$PROJECT_ID" --id "$item_id" --field-id "$STATUS_FIELD" --single-select-option-id "$TODO" > /dev/null 2>&1
 
     # Set priority
-    if [ -n "$priority" ]; then
+    if [[ -n "${priority:-}" ]]; then
         gh project item-edit --project-id "$PROJECT_ID" --id "$item_id" --field-id "$PRIORITY_FIELD" --single-select-option-id "$priority" > /dev/null 2>&1
     fi
 
     # Set effort
-    if [ -n "$effort" ]; then
+    if [[ -n "${effort:-}" ]]; then
         gh project item-edit --project-id "$PROJECT_ID" --id "$item_id" --field-id "$EFFORT_FIELD" --single-select-option-id "$effort" > /dev/null 2>&1
     fi
 
     # Set area
-    if [ -n "$area" ]; then
+    if [[ -n "${area:-}" ]]; then
         gh project item-edit --project-id "$PROJECT_ID" --id "$item_id" --field-id "$AREA_FIELD" --single-select-option-id "$area" > /dev/null 2>&1
     fi
 

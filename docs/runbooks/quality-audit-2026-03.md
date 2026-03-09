@@ -45,7 +45,7 @@
 | `QA2` | [#153](https://github.com/iurii-izman/voiceforge/issues/153) | P0 | Backend | Вернуть local type gate в зелёное состояние (`mypy`) |
 | `QA3` | [#154](https://github.com/iurii-izman/voiceforge/issues/154) ✓ | P1 | Backend | Разгрузить backend/core/CLI Sonar hotspots и duplicated literals (closed 2026-03-09) |
 | `QA4` | [#155](https://github.com/iurii-izman/voiceforge/issues/155) | P1 | Testing | Снять test-only Sonar debt без потери coverage и читаемости |
-| `QA5` | [#156](https://github.com/iurii-izman/voiceforge/issues/156) | P1 | DevOps | Почистить shell/python utility scripts под Sonar |
+| `QA5` | [#156](https://github.com/iurii-izman/voiceforge/issues/156) ✓ | P1 | DevOps | Почистить shell/python utility scripts под Sonar (closed 2026-03-09) |
 | `QA6` | [#157](https://github.com/iurii-izman/voiceforge/issues/157) | P2 | Frontend | Почистить desktop/frontend Sonar backlog |
 
 ---

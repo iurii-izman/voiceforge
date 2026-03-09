@@ -22,12 +22,12 @@ uv sync --extra all
 # E8: optional model pre-download (skip with --skip-models)
 SKIP_MODELS=false
 for arg in "$@"; do
-  if [ "$arg" = "--skip-models" ]; then
+  if [[ "$arg" == "--skip-models" ]]; then
     SKIP_MODELS=true
     break
   fi
 done
-if [ "$SKIP_MODELS" = false ]; then
+if [[ "$SKIP_MODELS" == false ]]; then
   echo "Pre-downloading models (Whisper + ONNX check)..."
   uv run voiceforge download-models --no-progress || true
 fi
@@ -43,7 +43,7 @@ try:
 except Exception:
   print('?')
 " 2>/dev/null || echo "?")
-  if [ "$AVAIL_GB" != "?" ] && [ -n "$AVAIL_GB" ]; then
+  if [[ "$AVAIL_GB" != "?" && -n "$AVAIL_GB" ]]; then
     # shellcheck disable=SC2086
     if awk "BEGIN { exit !($AVAIL_GB < 4) }" 2>/dev/null; then
       echo "⚠ Low RAM: ${AVAIL_GB} GB available (recommended ≥4 GB for full pipeline)" >&2
@@ -66,3 +66,4 @@ echo "Smoke check:"
 uv run voiceforge status || true
 
 echo "Setup complete! Run: voiceforge meeting"
+exit 0

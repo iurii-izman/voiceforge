@@ -80,3 +80,4 @@ else
 fi
 
 echo "preflight_repo.sh: READY"
+exit 0

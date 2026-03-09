@@ -79,7 +79,7 @@ def main() -> None:
     target = _find_target_alert(alerts)
     if not target:
         print("No open Dependabot alert for diskcache / CVE-2025-69872. Already dismissed or fixed.")
-        return
+        sys.exit(0)
 
     alert_number = target.get("number")
     pkg = (target.get("security_vulnerability") or {}).get("package", {}).get("name", "?")
@@ -88,7 +88,7 @@ def main() -> None:
 
     if dry_run:
         print("Dry-run: would dismiss with reason=risk_accepted")
-        return
+        sys.exit(0)
 
     try:
         _dismiss_alert(alert_number, headers)
@@ -98,6 +98,8 @@ def main() -> None:
         if e.code == 401:
             print("401: token rejected. Ensure token has repo (or security_events) scope and is not expired.", file=sys.stderr)
         sys.exit(2)
+
+    sys.exit(0)
 
 
 if __name__ == "__main__":

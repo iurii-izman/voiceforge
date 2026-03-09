@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-09 (QA3 #154 закрыт; следующий — QA5 #156 или QA4 #155)
+**Обновлено:** 2026-03-09 (QA5 #156 закрыт; следующий — QA4 #155)
 
 ---
 
@@ -19,9 +19,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** QA3 #154 закрыт: fs.get_cache_home(); config.get_data_dir()→voiceforge_data_dir(); status_helpers→get_cache_home; daemon: _notify_analyze_done(), _calendar_try_start_listen(); caldav_poll: _get_caldav_credentials(), _require_caldav_credentials(). Targeted tests + commit+push.
+**Сделано в сессии:** QA5 #156 закрыт: DevOps/scripts Sonar — bootstrap.sh, preflight_repo.sh, create_productization_issues.sh (shell `[[`, explicit exit); check_docs_consistency.py (path.exists перед read); dependabot_dismiss_moderate.py (явный sys.exit(0)). Targeted checks + commit+push.
 
-**Следующий шаг:** Взять QA5 #156 (DevOps/scripts Sonar: bootstrap, preflight, create-issues, helper scripts) или QA4 #155 (Test suite Sonar). Порядок: #156 → #155 → #157.
+**Следующий шаг:** Взять QA4 #155 (Test suite Sonar: test-only debt, stubs, float equality, type smells). Затем #157 (Desktop/frontend Sonar).
 
 ---
 
@@ -33,8 +33,8 @@
 |------|--------|--------|------------|
 | **Phase E** | #124✓→#142✓ | **Done** | Feature-track закрыт |
 | **QA-A** | #152✓ → #153✓ | **Done** | Security + mypy закрыты |
-| **QA-B** | #154✓ → #156 | **Next** | DevOps/scripts Sonar (QA5 #156) или Test Sonar (QA4 #155) |
-| **QA-C** | #155 → #157 | Queued | Tests, затем desktop/frontend Sonar |
+| **QA-B** | #154✓ → #156✓ | **Done** | DevOps/scripts Sonar закрыт |
+| **QA-C** | #155 → #157 | **Next** | Test suite Sonar (QA4 #155), затем desktop/frontend (#157) |
 | **Decision log** | #143✓, #144✓ | Resolved | Scope guard для автопилота; новых user decisions сейчас не нужно |
 | **External wait** | #65 | Waiting upstream | CVE остаётся tracked wait state до upstream fix |
 

@@ -148,9 +148,9 @@ E11 (narrow CalDAV scope) ✓ → E16 ✓ → E17 ✓
 |---|---|---|---|---|---|---|
 | QA1 | [#152](https://github.com/iurii-izman/voiceforge/issues/152) | Security & Supply Chain Remediation | P0 | M | Security | Закрыть CodeQL + Dependabot, убрать GitHub-visible security debt |
 | QA2 | [#153](https://github.com/iurii-izman/voiceforge/issues/153) | Local Gate Recovery | P0 | S | Backend | Вернуть `mypy` и verify-pr parity в честно зелёное состояние |
-| QA3 | [#154](https://github.com/iurii-izman/voiceforge/issues/154) | Python Core/CLI Sonar Hotspots | P1 | L | Backend | Разгрузить main/daemon/CLI hotspots |
+| QA3 | [#154](https://github.com/iurii-izman/voiceforge/issues/154) ✓ | Python Core/CLI Sonar Hotspots | P1 | L | Backend | Разгрузить main/daemon/CLI hotspots |
 | QA4 | [#155](https://github.com/iurii-izman/voiceforge/issues/155) | Test Suite Sonar Cleanup | P1 | L | Testing | Снять test-only Sonar debt без шума в production code |
-| QA5 | [#156](https://github.com/iurii-izman/voiceforge/issues/156) | DevOps & Utility Script Sonar Cleanup | P1 | M | DevOps | Почистить bootstrap/preflight/create-issues/helper scripts |
+| QA5 | [#156](https://github.com/iurii-izman/voiceforge/issues/156) ✓ | DevOps & Utility Script Sonar Cleanup | P1 | M | DevOps | Почистить bootstrap/preflight/create-issues/helper scripts |
 | QA6 | [#157](https://github.com/iurii-izman/voiceforge/issues/157) | Desktop Sonar Cleanup | P2 | M | Frontend | Разобрать desktop/frontend Sonar backlog после backend/security wave |
 
 **Рекомендуемый порядок:**
@@ -236,6 +236,7 @@ Wave QA-C: #155 → #157
 | **QA1 #152** | Done | CodeQL dismissed (false positive); Dependabot tracked в security-decision-log |
 | **QA2 #153** | Done | mypy зелёный (transcriber: BaseException + assert; transcript_log: убрано переопределение _sqlcipher) |
 | **QA3 #154** | Done | fs: get_cache_home; config→voiceforge_data_dir; status_helpers→get_cache_home; daemon: _notify_analyze_done, _calendar_try_start_listen; caldav_poll: credentials helpers |
+| **QA5 #156** | Done | DevOps/scripts Sonar: bootstrap.sh, preflight_repo.sh, create_productization_issues.sh — `[[` style, explicit exit; check_docs_consistency.py path.exists; dependabot_dismiss_moderate.py explicit sys.exit(0) |
 | **Pre-commit на хосте** | Python 3.12 в toolbox 43 | `git commit --no-verify` на хосте без 3.12 |
 
 ---
