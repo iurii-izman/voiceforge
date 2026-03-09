@@ -124,6 +124,31 @@ def test_run_setup_wizard_mocked_no_download(tmp_path, monkeypatch) -> None:
     assert "model_size:" in path.read_text()
 
 
+def test_run_setup_wizard_hides_secret_prompts(tmp_path, monkeypatch) -> None:
+    """Secret prompts should request hidden input so setup does not echo keys in terminal."""
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "cfg"))
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
+    prompt_calls: list[tuple[str, dict[str, object]]] = []
+
+    def fake_prompt(msg: str, default: str = "", **kwargs: object) -> str:
+        prompt_calls.append((msg, kwargs))
+        if "Language" in msg or "language" in msg.lower():
+            return "auto"
+        if "Whisper" in msg or "model" in msg.lower():
+            return "tiny"
+        return ""
+
+    def fake_confirm(msg: str, default: bool = True) -> bool:
+        return "Continue anyway" in msg
+
+    with patch("voiceforge.cli.setup.check_pipewire", return_value=None):
+        run_setup_wizard(prompt_fn=fake_prompt, confirm_fn=fake_confirm, echo_fn=lambda _msg: None)
+
+    secret_calls = [kwargs for msg, kwargs in prompt_calls if "API key" in msg or "HuggingFace" in msg]
+    assert secret_calls
+    assert all(call.get("hide_input") is True for call in secret_calls)
+
+
 def test_setup_cli_help_exposes_setup_and_config_init() -> None:
     """CLI exposes 'setup' and 'config init' commands."""
     from typer.testing import CliRunner

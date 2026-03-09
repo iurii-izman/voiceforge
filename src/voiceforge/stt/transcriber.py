@@ -7,6 +7,7 @@ import numpy as np
 import psutil
 import structlog
 from faster_whisper import WhisperModel
+from faster_whisper.utils import download_model
 
 from voiceforge.i18n import t
 
@@ -77,18 +78,34 @@ def _load_whisper_model(
 ):
     """Load Whisper model with download log and retry (E3 #126). E4 (#127): append user-facing messages to warnings."""
     size_mb = _WHISPER_SIZE_MB.get(model_size, 500)
-    if warnings is not None:
+    cached = _is_whisper_model_cached(model_size)
+    should_emit_download_warning = not cached
+    if should_emit_download_warning and warnings is not None:
         warnings.append(t("feedback.model_downloading", model_size=model_size, size_mb=size_mb))
-    log.info("stt.downloading_model", size=model_size, message=f"Downloading Whisper model ({model_size})...")
+        log.info("stt.downloading_model", size=model_size, message=f"Downloading Whisper model ({model_size})...")
+    else:
+        log.info("stt.model_cached", size=model_size)
     last_error: BaseException | None = None
     for attempt in range(MAX_DOWNLOAD_ATTEMPTS):
         try:
-            model = WhisperModel(model_size, device=device, compute_type=compute_type)
-            if warnings is not None:
+            model = WhisperModel(
+                model_size,
+                device=device,
+                compute_type=compute_type,
+                local_files_only=cached,
+            )
+            if should_emit_download_warning and warnings is not None:
                 warnings.append(t("feedback.model_ready"))
             return model
         except Exception as e:
             last_error = e
+            if cached:
+                cached = False
+                should_emit_download_warning = True
+                if warnings is not None:
+                    warnings.append(t("feedback.model_downloading", model_size=model_size, size_mb=size_mb))
+                log.warning("stt.cached_model_load_failed", size=model_size, error=str(e))
+                continue
             if attempt < MAX_DOWNLOAD_ATTEMPTS - 1:
                 delay = DOWNLOAD_BACKOFF_BASE_SEC * (2**attempt)
                 log.warning(
@@ -100,6 +117,15 @@ def _load_whisper_model(
                 time.sleep(delay)
     assert last_error is not None
     raise last_error
+
+
+def _is_whisper_model_cached(model_size: str) -> bool:
+    """Return True when the faster-whisper snapshot is already available locally."""
+    try:
+        download_model(model_size, local_files_only=True)
+        return True
+    except Exception:
+        return False
 
 
 class Transcriber:

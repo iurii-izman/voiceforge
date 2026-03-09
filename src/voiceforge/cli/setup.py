@@ -123,7 +123,12 @@ def run_setup_wizard(
 
     # 5. Anthropic API key
     echo("\n5. API keys (optional; press Enter to skip)")
-    anthropic_key = prompt("Anthropic API key (or Enter to skip):", default="", show_default=False)
+    anthropic_key = prompt(
+        "Anthropic API key (or Enter to skip):",
+        default="",
+        show_default=False,
+        hide_input=True,
+    )
     if anthropic_key and anthropic_key.strip():
         _set_keyring_password("voiceforge", "anthropic", anthropic_key.strip())
         echo("   Saved to keyring (voiceforge/anthropic)")
@@ -131,7 +136,12 @@ def run_setup_wizard(
         echo("   Skipped (you can use Ollama or set later: keyring set voiceforge anthropic)")
 
     # 6. HuggingFace token (diarization)
-    hf_token = prompt("HuggingFace token for diarization (or Enter to skip):", default="", show_default=False)
+    hf_token = prompt(
+        "HuggingFace token for diarization (or Enter to skip):",
+        default="",
+        show_default=False,
+        hide_input=True,
+    )
     if hf_token and hf_token.strip():
         _set_keyring_password("voiceforge", "huggingface", hf_token.strip())
         echo("   Saved to keyring (voiceforge/huggingface)")

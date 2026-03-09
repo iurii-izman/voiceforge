@@ -86,6 +86,7 @@ def test_transcriber_transcribe_reuses_float32_input_for_model_call(monkeypatch)
 def test_cli_repeat_listen_and_analyze_lifecycle_smoke(monkeypatch, tmp_path) -> None:
     monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
     monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "runtime"))
+    (tmp_path / "data" / "voiceforge").mkdir(parents=True, exist_ok=True)
 
     fake_capture_module = types.ModuleType("voiceforge.audio.capture")
     fake_capture_module.AudioCapture = _FakeAudioCapture
@@ -98,7 +99,10 @@ def test_cli_repeat_listen_and_analyze_lifecycle_smoke(monkeypatch, tmp_path) ->
     pipeline_calls: list[int] = []
 
     def fake_pipeline(
-        seconds: int, template: str | None = None, dry_run: bool = False
+        seconds: int,
+        template: str | None = None,
+        dry_run: bool = False,
+        stream_callback=None,  # type: ignore[no-untyped-def]
     ) -> tuple[str, list[dict[str, object]], dict[str, object]]:
         pipeline_calls.append(seconds)
         idx = len(pipeline_calls)

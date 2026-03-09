@@ -4,6 +4,7 @@ import gc
 import os
 import threading
 import time
+import warnings
 from dataclasses import dataclass
 from typing import Any
 
@@ -46,6 +47,24 @@ def _hf_hub_download(*args, **kwargs):
 
 
 huggingface_hub.hf_hub_download = _hf_hub_download
+
+# We always pass in-memory waveform tensors to pyannote, so its optional
+# file-decoding stack is not part of the VoiceForge runtime path.
+warnings.filterwarnings(
+    "ignore",
+    message=r"torchcodec is not installed correctly so built-in audio decoding will fail\..*",
+    category=UserWarning,
+)
+warnings.filterwarnings(
+    "ignore",
+    message=r"`resume_download` is deprecated and will be removed in version 1\.0\.0\..*",
+    category=FutureWarning,
+)
+warnings.filterwarnings(
+    "ignore",
+    message=r"The sentencepiece tokenizer that you are converting to a fast tokenizer uses the byte fallback option.*",
+    category=UserWarning,
+)
 
 import numpy as np
 import psutil
@@ -153,7 +172,11 @@ class Diarizer:
             input_dict = {"waveform": waveform, "sample_rate": sample_rate}
             with torch.no_grad():
                 diar = pipeline(input_dict)
-            for segment, _, speaker in diar.itertracks(yield_label=True):
+            annotation = getattr(diar, "speaker_diarization", diar)
+            itertracks = getattr(annotation, "itertracks", None)
+            if not callable(itertracks):
+                raise TypeError(f"Unsupported diarization output: {type(diar).__name__}")
+            for segment, _, speaker in itertracks(yield_label=True):
                 out.append(
                     DiarSegment(
                         start=segment.start + t,

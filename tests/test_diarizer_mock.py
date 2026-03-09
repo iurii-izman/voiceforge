@@ -47,3 +47,25 @@ def test_diarizer_diarize_accepts_int16(mock_pipeline) -> None:
             audio = np.zeros(16000, dtype=np.int16)
             out = d.diarize(audio, sample_rate=16000)
     assert isinstance(out, list)
+
+
+def test_diarizer_diarize_supports_pyannote4_diarize_output() -> None:
+    """pyannote 4 may return DiarizeOutput with .speaker_diarization instead of itertracks on the root object."""
+    pipe = MagicMock()
+    seg = MagicMock()
+    seg.start = 0.0
+    seg.end = 0.75
+    annotation = MagicMock()
+    annotation.itertracks = lambda yield_label: [(seg, None, "SPEAKER_00")]
+    pipe.return_value.speaker_diarization = annotation
+
+    with patch("voiceforge.stt.diarizer.Pipeline") as p:
+        p.from_pretrained.return_value = pipe
+        with patch("voiceforge.stt.diarizer.psutil") as psutil_mod:
+            psutil_mod.Process.return_value.memory_info.return_value.rss = 1024 * 1024
+            d = Diarizer(auth_token="token")
+            audio = np.zeros(16000, dtype=np.float32)
+            out = d.diarize(audio, sample_rate=16000)
+
+    assert len(out) == 1
+    assert out[0].speaker == "SPEAKER_00"
