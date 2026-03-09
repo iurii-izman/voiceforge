@@ -429,6 +429,48 @@ def _build_analysis_for_log_default(llm_result: Any, cfg: Any, cost_usd: float, 
     }
 
 
+def _ensure_rag_auto_index(cfg: Any) -> list[str]:
+    """E13 #136: If rag_auto_index_path is set, run one-time index; return list of warnings."""
+    warnings: list[str] = []
+    path_str = getattr(cfg, "rag_auto_index_path", None)
+    if not path_str or not path_str.strip():
+        return warnings
+    path = Path(path_str).expanduser().resolve()
+    if not path.exists():
+        log.warning("rag.auto_index_path_missing", path=str(path))
+        warnings.append(f"rag_auto_index_path does not exist: {path}")
+        return warnings
+    if not path.is_dir():
+        log.warning("rag.auto_index_path_not_dir", path=str(path))
+        return warnings
+    data_dir = Path(cfg.get_data_dir())
+    sentinel = data_dir / "voiceforge" / ".rag_auto_index_done"
+    sentinel_content = str(path)
+    if sentinel.is_file() and sentinel.read_text().strip() == sentinel_content:
+        return warnings
+    try:
+        from voiceforge.core.fs import ensure_private_dir, ensure_private_file
+        from voiceforge.rag.indexer import KnowledgeIndexer
+
+        ensure_private_dir(sentinel.parent)
+        db_path = cfg.get_rag_db_path()
+        indexer = KnowledgeIndexer(db_path)
+        try:
+            total, _ = _index_directory(indexer, path, getattr(cfg, "rag_exclude_patterns", None) or [])
+            log.info("rag.auto_index_done", path=str(path), chunks=total)
+        finally:
+            indexer.close()
+        ensure_private_file(sentinel)
+        sentinel.write_text(sentinel_content)
+    except ImportError as e:
+        log.warning("rag.auto_index_import_failed", error=str(e))
+        warnings.append("RAG auto-index skipped (install [rag] extra).")
+    except Exception as e:
+        log.warning("rag.auto_index_failed", path=str(path), error=str(e))
+        warnings.append(f"RAG auto-index failed: {e}")
+    return warnings
+
+
 def run_analyze_pipeline(
     seconds: int,
     template: str | None = None,
@@ -439,6 +481,7 @@ def run_analyze_pipeline(
     If stream_callback is set, LLM output is streamed via stream_callback(delta) (#91)."""
     bind_trace_id()  # one trace_id per pipeline run (CLI or daemon worker)
     cfg = _get_config()
+    auto_index_warnings = _ensure_rag_auto_index(cfg)
     try:
         from voiceforge.core.pipeline import AnalysisPipeline
 
@@ -457,7 +500,7 @@ def run_analyze_pipeline(
     diar_segments = result.diar_segments
     context = result.context
     transcript_redacted = result.transcript_redacted
-    pipeline_warnings: list[str] = getattr(result, "warnings", None) or []
+    pipeline_warnings: list[str] = (getattr(result, "warnings", None) or []) + auto_index_warnings
 
     segments_for_log = [
         {
@@ -905,6 +948,11 @@ def analyze(
         "--estimate",
         help="Show estimated LLM cost without running analyze (E9 #132).",
     ),
+    stream: bool = typer.Option(
+        False,
+        "--stream",
+        help="E13 #136: stream partial LLM output to stdout in real time (text output only).",
+    ),
 ) -> None:
     """Analyze ring-buffer fragment: transcribe -> diarize -> rag -> llm."""
     cfg = _get_config()
@@ -971,7 +1019,18 @@ def analyze(
         est_lo = max(10, seconds // 5 + 5)
         est_hi = min(120, max(20, seconds // 2 + 30))
         typer.echo(f"Analyzing… (≈ {est_lo}–{est_hi} s)", err=True)
-    display_text, segments_for_log, analysis_for_log = run_analyze_pipeline(seconds, template=template, dry_run=dry_run)
+    stream_cb: Any = None
+    if stream and not dry_run and output == "text":
+
+        def _stream_cb(delta: str | None) -> None:
+            if delta:
+                sys.stdout.write(delta)
+                sys.stdout.flush()
+
+        stream_cb = _stream_cb
+    display_text, segments_for_log, analysis_for_log = run_analyze_pipeline(
+        seconds, template=template, dry_run=dry_run, stream_callback=stream_cb
+    )
     error_message = _extract_error_message(display_text)
     if error_message is not None:
         if output == "json":

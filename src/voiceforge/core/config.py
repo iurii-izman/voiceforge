@@ -99,6 +99,10 @@ class Settings(BaseSettings):
         description="Ring file path; default XDG_RUNTIME_DIR/voiceforge/ring.raw",
     )
     rag_db_path: str | None = Field(default=None, description="RAG SQLite path")
+    rag_auto_index_path: str | None = Field(
+        default=None,
+        description="E13 #136: path to auto-index on first analyze (e.g. ~/Documents). Default null = disabled.",
+    )
     rag_exclude_patterns: list[str] = Field(
         default_factory=list,
         description="Block 74: glob patterns to exclude paths from RAG indexing (e.g. *.tmp, */.git/*).",
@@ -177,7 +181,7 @@ class Settings(BaseSettings):
     @field_validator("model_size")
     @classmethod
     def _model_size_allowed(cls, v: str) -> str:
-        allowed = ("tiny", "base", "small", "medium", "large-v2", "large-v3", "large")
+        allowed = ("tiny", "base", "small", "medium", "large-v2", "large-v3", "large-v3-turbo", "large", "auto")
         if v.lower() not in allowed:
             raise ValueError(f"model_size must be one of: {', '.join(allowed)}")
         return v.lower()
@@ -340,7 +344,7 @@ def default_config_yaml_content() -> str:
     return """# VoiceForge config (voiceforge.yaml)
 # See docs/runbooks/config-env-contract.md for full options.
 
-# STT: faster-whisper model (tiny=~75MB, small=~466MB, medium=~1.5GB RAM)
+# STT: faster-whisper (tiny, base, small, medium, large-v2, large-v3, large-v3-turbo, large; auto=by RAM)
 model_size: small
 # Language for STT: auto | ru | en
 language: auto

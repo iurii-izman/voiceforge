@@ -12,12 +12,40 @@ from voiceforge.i18n import t
 
 log = structlog.get_logger()
 
+# E13 #136: RAM thresholds (GB) for model_size=auto
+_AUTO_RAM_TINY = 2.0
+_AUTO_RAM_BASE = 4.0
+_AUTO_RAM_SMALL = 8.0
+
+
+def resolve_stt_model_size(model_size: str) -> str:
+    """E13 #136: If model_size is 'auto', select by available RAM: tiny(<2GB), base(<4GB), small(<8GB), medium(>=8GB)."""
+    if model_size != "auto":
+        return model_size
+    available_gb = psutil.virtual_memory().available / (1024**3)
+    if available_gb < _AUTO_RAM_TINY:
+        resolved = "tiny"
+    elif available_gb < _AUTO_RAM_BASE:
+        resolved = "base"
+    elif available_gb < _AUTO_RAM_SMALL:
+        resolved = "small"
+    else:
+        resolved = "medium"
+    log.info(
+        "stt.auto_model",
+        selected=resolved,
+        available_gb=round(available_gb, 1),
+        message=f"Auto-selected model: {resolved} ({available_gb:.1f}GB RAM available)",
+    )
+    return resolved
+
+
 # RSS threshold above which we log a warning (bytes)
 RSS_WARNING_BYTES = 4 * 1024**3
 MAX_DOWNLOAD_ATTEMPTS = 3
 DOWNLOAD_BACKOFF_BASE_SEC = 1.0
 
-# E4 (#127): approximate model sizes MB for user-facing download message
+# E4 (#127): approximate model sizes MB for user-facing download message. E13 #136: large-v3-turbo.
 _WHISPER_SIZE_MB: dict[str, int] = {
     "tiny": 75,
     "base": 142,
@@ -26,6 +54,7 @@ _WHISPER_SIZE_MB: dict[str, int] = {
     "large": 3000,
     "large-v2": 3000,
     "large-v3": 3000,
+    "large-v3-turbo": 3000,
 }
 
 
@@ -119,11 +148,14 @@ class Transcriber:
         lang = getattr(info, "language", None) or language
         for s in segments_iter:
             confidence = 1.0 - getattr(s, "no_speech_prob", 0.0)
+            text = (s.text or "").strip()
+            if confidence < 0.3 and text:
+                text = "[unclear]"  # E13 #136: low-confidence segments marked; reduce LLM noise
             out.append(
                 Segment(
                     start=s.start,
                     end=s.end,
-                    text=s.text.strip(),
+                    text=text,
                     language=lang,
                     confidence=confidence,
                 )

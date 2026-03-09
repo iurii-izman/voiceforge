@@ -19,6 +19,7 @@ WHISPER_SIZE_MB: dict[str, int] = {
     "large": 3000,
     "large-v2": 3000,
     "large-v3": 3000,
+    "large-v3-turbo": 3000,
 }
 MAX_DOWNLOAD_ATTEMPTS = 3
 DOWNLOAD_BACKOFF_BASE_SEC = 1.0

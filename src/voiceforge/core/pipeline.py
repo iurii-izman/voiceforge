@@ -68,11 +68,12 @@ def _step1_stt(
     cfg: Any = None,
     out_warnings: list[str] | None = None,
 ) -> tuple[list[Any], str]:
-    """Step 1: STT only. Returns (segments, transcript). E4 (#127): optional out_warnings for model download messages."""
+    """Step 1: STT only. Returns (segments, transcript). E4 (#127): optional out_warnings for model download messages. E13 #136: model_size=auto resolved by RAM."""
     from voiceforge.core.model_manager import get_model_manager
-    from voiceforge.stt.transcriber import Transcriber
+    from voiceforge.stt.transcriber import Transcriber, resolve_stt_model_size
 
     t0 = time.monotonic()
+    effective_model_size = resolve_stt_model_size(model_size)
     stt_backend = getattr(cfg, "stt_backend", "local") if cfg else "local"
     transcriber: Any
     if stt_backend == "openai":
@@ -84,7 +85,7 @@ def _step1_stt(
         if manager is not None:
             transcriber = manager.get_transcriber(warnings=out_warnings)
         else:
-            transcriber = Transcriber(model_size=model_size, warnings=out_warnings)
+            transcriber = Transcriber(model_size=effective_model_size, warnings=out_warnings)
     segments = transcriber.transcribe(audio, sample_rate=sample_rate, language=language_hint)
     transcript = " ".join(s.text for s in segments if s.text).strip() or t("pipeline.silence")
     duration_sec = time.monotonic() - t0

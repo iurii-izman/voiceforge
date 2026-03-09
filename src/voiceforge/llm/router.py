@@ -538,6 +538,13 @@ def _complete_structured_finish(
     inp, out, cache_read, cache_creation, cost = _usage_and_cost_from_response(raw_used, model_id)
     if cache_read > 0 or cache_creation > 0:
         log.info("llm.cache", model=model_id, cache_read_input_tokens=cache_read, cache_creation_input_tokens=cache_creation)
+    if cache_read > 0 and _is_claude_model(model_id):
+        log.info(
+            "llm.prompt_cache_savings",
+            model=model_id,
+            cached_tokens=cache_read,
+            message="Claude prompt cache hit; input cost reduced for cached tokens (E13 #136)",
+        )
     log_llm_call(model_id, inp, out, cost, cache_read_input_tokens=cache_read, cache_creation_input_tokens=cache_creation)
     if ttl > 0:
         cache_set(key, model_id, response_model.__name__, parsed, cost, ttl)

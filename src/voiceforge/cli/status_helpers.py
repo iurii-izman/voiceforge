@@ -310,8 +310,12 @@ def _doctor_check_models(cfg: Any, t: Any) -> list[tuple[bool, str, str]]:
         else:
             recommended = "large"
         current = model_size.lower()
-        # Order: tiny < base < small < medium < large-v2 < large-v3 < large
-        _order = ("tiny", "base", "small", "medium", "large-v2", "large-v3", "large")
+        if current == "auto":
+            from voiceforge.stt.transcriber import resolve_stt_model_size
+
+            current = resolve_stt_model_size("auto")
+        # Order: tiny < base < small < medium < large-v2 < large-v3 < large-v3-turbo < large
+        _order = ("tiny", "base", "small", "medium", "large-v2", "large-v3", "large-v3-turbo", "large")
         try:
             cur_idx = _order.index(current) if current in _order else _order.index("small")
         except ValueError:

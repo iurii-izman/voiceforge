@@ -16,7 +16,7 @@ Priority order:
 
 | Field | Env var | Default | Description |
 |---|---|---|---|
-| `model_size` | `VOICEFORGE_MODEL_SIZE` | `small` | `faster-whisper` model size |
+| `model_size` | `VOICEFORGE_MODEL_SIZE` | `small` | faster-whisper: tiny, base, small, medium, large-v2, large-v3, large-v3-turbo, large; `auto` = by RAM (E13 #136) |
 | `sample_rate` | `VOICEFORGE_SAMPLE_RATE` | `16000` | Audio sample rate (Hz) |
 | `default_llm` | `VOICEFORGE_DEFAULT_LLM` | `anthropic/claude-haiku-4-5` | User preference LLM id; actual backend from `get_effective_llm()` (E6: Ollama fallback when no API keys) |
 | `budget_limit_usd` | `VOICEFORGE_BUDGET_LIMIT_USD` | `75.0` | Monthly API budget |
@@ -25,6 +25,7 @@ Priority order:
 | `ring_persist_interval_sec` | `VOICEFORGE_RING_PERSIST_INTERVAL_SEC` | `10.0` | Interval (s) between full ring file writes in listen loop; reduces I/O (#100) |
 | `ring_file_path` | `VOICEFORGE_RING_FILE_PATH` | auto (`XDG_RUNTIME_DIR`/`~/.cache`) | Ring PCM path |
 | `rag_db_path` | `VOICEFORGE_RAG_DB_PATH` | auto (`XDG_DATA_HOME`/`~/.local/share`) | RAG SQLite path |
+| `rag_auto_index_path` | `VOICEFORGE_RAG_AUTO_INDEX_PATH` | `null` | E13 #136: path to auto-index on first analyze (e.g. ~/Documents); warning if path missing |
 | `smart_trigger` | `VOICEFORGE_SMART_TRIGGER` | `true` | Auto-analyze on semantic pause (E1: sensible default). Set to `false` to disable. |
 | `smart_trigger_template` | `VOICEFORGE_SMART_TRIGGER_TEMPLATE` | `null` | Optional template for smart-trigger analyze (e.g. `standup`, `one_on_one`). Only when `smart_trigger` is true. |
 | `monitor_source` | `VOICEFORGE_MONITOR_SOURCE` | `null` | PipeWire monitor source |
@@ -48,7 +49,7 @@ Priority order:
 | `VOICEFORGE_OTEL_ENABLED` | unset | Set to `1` to enable OTel tracing (requires `voiceforge[otel]`). Spans: pipeline.run, prepare_audio, step1_stt, step2_parallel. |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | `http://localhost:4318` | OTLP HTTP endpoint (e.g. Jaeger collector). When set, OTel is enabled even without VOICEFORGE_OTEL_ENABLED. |
 
-**Validation:** Settings validates `model_size` (allowed: tiny, base, small, medium, large-v2, large-v3, large), `sample_rate` (1..192000), `default_llm` (non-empty), `budget_limit_usd` (≥ 0), `daily_budget_limit_usd` (≥ 0 when set), `pipeline_step2_timeout_sec` (positive), `analyze_timeout_sec` (positive), `ollama_model` (non-empty), `ring_seconds` (positive), `ring_persist_interval_sec` (≥ 1), `pyannote_restart_hours` (≥ 1), `live_summary_interval_sec` (≥ 1), `retention_days` (≥ 0), `response_cache_ttl_seconds` (≥ 0). Invalid values raise at load.
+**Validation:** Settings validates `model_size` (allowed: tiny, base, small, medium, large-v2, large-v3, large-v3-turbo, large, auto), `sample_rate` (1..192000), `default_llm` (non-empty), `budget_limit_usd` (≥ 0), `daily_budget_limit_usd` (≥ 0 when set), `pipeline_step2_timeout_sec` (positive), `analyze_timeout_sec` (positive), `ollama_model` (non-empty), `ring_seconds` (positive), `ring_persist_interval_sec` (≥ 1), `pyannote_restart_hours` (≥ 1), `live_summary_interval_sec` (≥ 1), `retention_days` (≥ 0), `response_cache_ttl_seconds` (≥ 0). Invalid values raise at load.
 
 ## Runtime / Non-Settings Environment
 
