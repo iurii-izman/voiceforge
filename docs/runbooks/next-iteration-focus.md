@@ -48,13 +48,13 @@
 ```
 Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Статус: @docs/runbooks/PROJECT-STATUS-SUMMARY.md. Scope guard: @docs/runbooks/phase-e-decision-log.md. AI/tooling source of truth: @docs/runbooks/ai-tooling-setup.md.
 
-Режим: максимальный автопилот, Phase E productization. Работать по уже существующим E-issues и текущему Wave order из PROJECT-STATUS-SUMMARY: E1→E18, а после E15 переходить к E19 как desktop-first track. Новые E-issues не создавать, если для этого нет отдельной новой задачи. Брать 1 блок за сессию, доводить до конца: код, targeted tests, docs sync, GitHub Project status, commit + push, обновить PROJECT-STATUS-SUMMARY и next-iteration-focus.
+Режим: максимальный автопилот, Phase E productization. Работать по уже существующим E-issues и текущему Wave order из PROJECT-STATUS-SUMMARY: E1→E18, E19 (desktop-first) закрыт; далее Wave 4. Новые E-issues не создавать без отдельной задачи. Брать 1 блок за сессию: код, targeted tests, docs sync, GitHub Project status, commit + push, обновить PROJECT-STATUS-SUMMARY и next-iteration-focus.
 
-Среда: Fedora Atomic, toolbox 43, uv sync --extra all. Ключи в keyring (keyring-keys-reference.md). Тесты: targeted subset, не полный pytest (OOM risk). Для infra/docs/governance cleanup сначала прогонять `./scripts/preflight_repo.sh --with-tests`. Pre-commit в toolbox; на хосте git push --no-verify если нет Python 3.12.
+Среда: Fedora Atomic, toolbox 43, uv sync --extra all. Ключи в keyring (keyring-keys-reference.md). Тесты: targeted subset, не полный pytest (OOM risk). Для infra/docs сначала прогонять `./scripts/preflight_repo.sh --with-tests`. Pre-commit в toolbox; на хосте git push --no-verify если нет Python 3.12.
 
-Задача: взять верхний незакрытый E-блок из текущего Wave. Перевести существующий issue в In Progress на доске. Реализовать по чеклисту в issue body. Строго соблюдать phase-e-decision-log: Tauri = primary GUI, Web UI/Telegram/RAG watcher = maintenance-only, Calendar = narrow CalDAV scope; placeholders #148-#151 не активировать. Targeted tests. Commit с `Closes #N` (Conventional Commits). Done на доске. Обновить docs. Выдать prompt для следующего чата.
+Задача: взять верхний незакрытый E-блок из Wave 4. Перевести issue в In Progress. Реализовать по чеклисту. Соблюдать phase-e-decision-log: Tauri = primary GUI, Web UI/Telegram/RAG watcher = maintenance-only, Calendar = narrow CalDAV; placeholders #148–#151 не активировать. Targeted tests. Commit с Closes #N (Conventional Commits). Done на доске. Обновить docs. Выдать промпт для следующего чата.
 
-Текущий блок: Wave 4 — E11 (#134) Calendar или E16 (#139) CI/CD (по приоритету на доске).
+Текущий блок: Wave 4 — E11 (#134) Calendar Auto-Analyze (narrow CalDAV) или E16 (#139) CI/CD Polish (по приоритету на доске).
 ```
 
 ---
