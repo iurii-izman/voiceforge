@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-09 (E6 #129 закрыт; следующий — E7 #130)
+**Обновлено:** 2026-03-09 (E7 #130 закрыт; следующий — E8 #131)
 
 ---
 
@@ -18,9 +18,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** E6 (#129) Ollama Zero-Config Fallback: get_effective_llm() в config (API или ollama/<model> при отсутствии ключей); analyze/live_summary/action-items используют effective_llm; понятная ошибка при отсутствии бэкенда; status показывает LLM backend и llm_ollama_fallback; preflight error.ollama_not_running; тесты test_ollama_fallback.py.
+**Сделано в сессии:** E7 (#130) Setup Wizard: voiceforge setup (интерактивный wizard: PipeWire, язык, Whisper, API keys, pre-download, voiceforge.yaml, status --doctor, предложение meeting); voiceforge config init (генерация конфига с комментариями, --overwrite); first-run detection и welcome hint при первом запуске; тесты test_setup_wizard.py.
 
-**Следующий шаг:** взять **E7 (#130) Setup Wizard: voiceforge setup & First-Run** — следующий блок Wave 2.
+**Следующий шаг:** взять **E8 (#131) Model Pre-Download & Bootstrap** — следующий блок Wave 2.
 
 ---
 
@@ -31,7 +31,7 @@
 | Wave | Issues | Статус | Что делать |
 |------|--------|--------|------------|
 | **Wave 1 (P0)** | #124✓→#125✓→#126✓→#127✓→#128✓ | **Done** | DDR 35→55 |
-| **Wave 2 (P1 core)** | #129✓→#130→#131→#132→#133→#141 | In progress | E7 следующий. DDR 55→70 |
+| **Wave 2 (P1 core)** | #129✓→#130✓→#131→#132→#133→#141 | In progress | E8 следующий. DDR 55→70 |
 | **Wave 3 (P1 quality)** | #135→#136→#137→#138 | Todo | Testing + Core + CLI + Obs |
 | **Wave 4 (P2 polish)** | #134→#139→#140 | Todo | Calendar + CI/CD + Security |
 | **User decisions** | #142, #143, #144 | Awaiting user | Требуют решения пользователя |
@@ -52,7 +52,7 @@
 
 Задача: взять верхний незакрытый E-блок из текущего Wave. Перевести issue в In Progress на доске. Реализовать по чеклисту в issue body. Targeted tests. Commit с `Closes #N` (Conventional Commits). Done на доске. Обновить docs. Выдать prompt для следующего чата.
 
-Текущий блок: E7 (#130) — Setup Wizard: voiceforge setup & First-Run.
+Текущий блок: E8 (#131) — Model Pre-Download & Bootstrap.
 ```
 
 ---

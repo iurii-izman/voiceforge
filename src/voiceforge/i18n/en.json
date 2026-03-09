@@ -114,5 +114,7 @@
   "feedback.rag_no_index": "ℹ No knowledge base indexed. Use: voiceforge index",
   "feedback.model_downloading": "Model {model_size} not cached, downloading (~{size_mb} MB)...",
   "feedback.model_ready": "Model ready.",
-  "feedback.budget_warning": "⚠ Daily budget: {cost_today}/{limit} used. This analysis ~{estimate}."
+  "feedback.budget_warning": "⚠ Daily budget: {cost_today}/{limit} used. This analysis ~{estimate}.",
+  "setup.keyring_fail": "Keyring save failed for {key}: {error}",
+  "setup.welcome_first_run": "Welcome to VoiceForge! Run `voiceforge setup` for guided configuration."
 }

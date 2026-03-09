@@ -29,6 +29,7 @@ from voiceforge.cli.history_helpers import (
     session_not_found_message,
 )
 from voiceforge.cli.meeting import run_meeting
+from voiceforge.cli.setup import run_config_init, run_setup_wizard
 from voiceforge.cli.status_helpers import (
     get_doctor_data,
     get_doctor_text,
@@ -38,7 +39,7 @@ from voiceforge.cli.status_helpers import (
     get_status_text,
 )
 from voiceforge.cli.watch_helpers import get_watch_banner, install_watch_stop_signal_handlers
-from voiceforge.core.config import Settings
+from voiceforge.core.config import Settings, get_default_config_yaml_path
 from voiceforge.core.contracts import (
     BudgetExceeded,
     build_cli_error_payload,
@@ -67,11 +68,23 @@ def _get_app_version() -> str:
         return "0.2.0-alpha.1"
 
 
+def _is_first_run() -> bool:
+    """E7 (#130): True if no DB and no config file (first-run: show setup hint)."""
+    from voiceforge.core.transcript_log import DB_NAME
+
+    data_base = os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
+    db_path = Path(data_base) / "voiceforge" / DB_NAME
+    config_path = get_default_config_yaml_path()
+    return not db_path.exists() and not config_path.is_file()
+
+
 @app.callback(invoke_without_command=True)
 def _cli_trace(ctx: typer.Context) -> None:
-    """Bind trace_id; when no command given, show help instead of error."""
+    """Bind trace_id; when no command given, show help; first-run shows setup hint."""
     bind_trace_id()
     if ctx.invoked_subcommand is None:
+        if _is_first_run():
+            typer.echo(t("setup.welcome_first_run"), err=True)
         typer.echo(ctx.get_help())
         raise typer.Exit(0)
 
@@ -80,6 +93,24 @@ def _cli_trace(ctx: typer.Context) -> None:
 def version() -> None:
     """Print VoiceForge version (block 55)."""
     typer.echo(_get_app_version())
+
+
+@app.command()
+def setup() -> None:
+    """E7 (#130): Guided setup wizard — PipeWire, language, Whisper model, API keys, config."""
+    run_setup_wizard()
+
+
+config_app = typer.Typer(help="Config: init (generate voiceforge.yaml)")
+app.add_typer(config_app, name="config")
+
+
+@config_app.command("init")
+def config_init(
+    overwrite: bool = typer.Option(False, "--overwrite", "-f", help="Overwrite existing voiceforge.yaml"),
+) -> None:
+    """E7 (#130): Generate voiceforge.yaml with defaults and comments (quick alternative to full setup)."""
+    run_config_init(overwrite=overwrite)
 
 
 _INDEX_EXTENSIONS = (

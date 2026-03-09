@@ -4,6 +4,8 @@ Source of truth: `src/voiceforge/core/config.py`.
 
 **VOICEFORGE_\* variables:** Every Settings field below can be overridden with `VOICEFORGE_<UPPER_FIELD_NAME>` (e.g. `VOICEFORGE_LANGUAGE`, `VOICEFORGE_RETENTION_DAYS`). Runtime-only variables (not in Settings): `VOICEFORGE_IPC_ENVELOPE`, `VOICEFORGE_SERVICE_FILE`, `VOICEFORGE_WEB_ASYNC`, `VOICEFORGE_OTEL_ENABLED` — see tables and sections below.
 
+**Setup (E7 #130):** First run (no DB, no config file) shows a welcome hint. Use `voiceforge setup` for a guided wizard (PipeWire check, language, Whisper model, API keys, pre-download, generate `voiceforge.yaml`, doctor, suggest `voiceforge meeting`). Quick alternative: `voiceforge config init` to generate `voiceforge.yaml` with defaults and comments; `--overwrite` / `-f` to overwrite existing.
+
 Priority order:
 1. CLI/runtime explicit values (when applicable)
 2. Environment variables (`VOICEFORGE_*`)

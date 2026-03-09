@@ -17,6 +17,12 @@ def _config_base_dir() -> str:
     return os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config")
 
 
+def get_default_config_yaml_path() -> Path:
+    """Path to voiceforge.yaml in XDG_CONFIG_HOME/voiceforge (E7 setup wizard)."""
+    base = _config_base_dir()
+    return Path(base) / "voiceforge" / "voiceforge.yaml"
+
+
 def _config_yaml_paths(base: str) -> list[Path]:
     return [
         Path(base) / "voiceforge" / "voiceforge.yaml",
@@ -327,3 +333,21 @@ class Settings(BaseSettings):
             return (None, False)
         model = (self.ollama_model or "phi3:mini").strip() or "phi3:mini"
         return (f"ollama/{model}", True)
+
+
+def default_config_yaml_content() -> str:
+    """E7 (#130): Default voiceforge.yaml content with comments for config init / setup wizard."""
+    return """# VoiceForge config (voiceforge.yaml)
+# See docs/runbooks/config-env-contract.md for full options.
+
+# STT: faster-whisper model (tiny=~75MB, small=~466MB, medium=~1.5GB RAM)
+model_size: small
+# Language for STT: auto | ru | en
+language: auto
+# Default LLM for analyze (anthropic/..., openai/..., ollama/phi3:mini)
+default_llm: anthropic/claude-haiku-4-5
+# Monthly API budget USD
+budget_limit_usd: 75.0
+# Sample rate Hz
+sample_rate: 16000
+"""

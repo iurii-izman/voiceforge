@@ -114,5 +114,7 @@
   "feedback.rag_no_index": "ℹ База знаний не проиндексирована. Выполните: voiceforge index",
   "feedback.model_downloading": "Модель {model_size} не в кэше, загрузка (~{size_mb} МБ)...",
   "feedback.model_ready": "Модель загружена.",
-  "feedback.budget_warning": "⚠ Дневной бюджет: {cost_today}/{limit} использовано. Этот анализ ~{estimate}."
+  "feedback.budget_warning": "⚠ Дневной бюджет: {cost_today}/{limit} использовано. Этот анализ ~{estimate}.",
+  "setup.keyring_fail": "Не удалось сохранить в keyring для {key}: {error}",
+  "setup.welcome_first_run": "Добро пожаловать в VoiceForge! Запустите `voiceforge setup` для пошаговой настройки."
 }
