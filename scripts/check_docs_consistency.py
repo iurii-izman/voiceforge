@@ -91,8 +91,8 @@ def _normalize_target(raw_target: str) -> str:
     target = raw_target.strip()
     if not target:
         return target
-    if " \"" in target:
-        target = target.split(" \"", 1)[0]
+    if ' "' in target:
+        target = target.split(' "', 1)[0]
     if " '" in target:
         target = target.split(" '", 1)[0]
     return target.strip()
