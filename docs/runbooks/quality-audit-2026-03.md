@@ -21,7 +21,7 @@
 - `ruff` — зелёный
 - `bandit` — без blocking findings
 - `pip-audit --ignore-vuln CVE-2025-69872` — зелёный
-- `mypy` — красный: `2` ошибки
+- `mypy` — зелёный (исправлено в QA2 [#153](https://github.com/iurii-izman/voiceforge/issues/153))
 
 ### SonarCloud
 

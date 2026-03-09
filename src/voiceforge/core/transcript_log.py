@@ -19,11 +19,10 @@ from voiceforge.core.fs import ensure_private_dir, ensure_private_file
 log = structlog.get_logger()
 
 # E17 #140: Optional SQLCipher for encryption at rest (encrypt_db=True + key in keyring)
-_sqlcipher = None
 try:
     import sqlcipher3 as _sqlcipher  # type: ignore[import-untyped]
 except ImportError:
-    _sqlcipher = None
+    _sqlcipher = None  # type: ignore[assignment]
 
 DB_NAME = "transcripts.db"
 _SCHEMA_ERROR_NO_SUCH_TABLE = "no such table"

@@ -234,7 +234,7 @@ Wave QA-C: #155 → #157
 |---|---|---|
 | **#65 CVE-2025-69872** | Waiting upstream | Снять `--ignore-vuln` после fix в diskcache/instructor |
 | **QA1 #152** | Open | CodeQL alert + 3 Dependabot alerts нужно закрыть или корректно отtriage'ить |
-| **QA2 #153** | Open | `mypy` сейчас красный: 2 ошибки в `transcriber.py` и `transcript_log.py` |
+| **QA2 #153** | Done | mypy зелёный (transcriber: BaseException + assert; transcript_log: убрано переопределение _sqlcipher) |
 | **Pre-commit на хосте** | Python 3.12 в toolbox 43 | `git commit --no-verify` на хосте без 3.12 |
 
 ---

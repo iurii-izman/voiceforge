@@ -80,14 +80,14 @@ def _load_whisper_model(
     if warnings is not None:
         warnings.append(t("feedback.model_downloading", model_size=model_size, size_mb=size_mb))
     log.info("stt.downloading_model", size=model_size, message=f"Downloading Whisper model ({model_size})...")
-    last_error: Exception | None = None
+    last_error: BaseException | None = None
     for attempt in range(MAX_DOWNLOAD_ATTEMPTS):
         try:
             model = WhisperModel(model_size, device=device, compute_type=compute_type)
             if warnings is not None:
                 warnings.append(t("feedback.model_ready"))
             return model
-        except Exception as e:
+        except BaseException as e:
             last_error = e
             if attempt < MAX_DOWNLOAD_ATTEMPTS - 1:
                 delay = DOWNLOAD_BACKOFF_BASE_SEC * (2**attempt)
@@ -98,6 +98,7 @@ def _load_whisper_model(
                     retry_sec=delay,
                 )
                 time.sleep(delay)
+    assert last_error is not None
     raise last_error
 
 
