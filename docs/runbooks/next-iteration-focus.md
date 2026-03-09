@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-09 (E13 #136 закрыт; следующий — E14 #137 Wave 3)
+**Обновлено:** 2026-03-09 (E14 #137 закрыт; следующий — E15 #138 Wave 3)
 
 ---
 
@@ -19,9 +19,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** E13 (#136) Core Logic: prompt cache savings log (Claude), CLI `analyze --stream`, large-v3-turbo + model_size=auto (resolve by RAM), rag_auto_index_path (one-time index on first analyze), STT confidence <0.3 → [unclear], config/docs update.
+**Сделано в сессии:** E14 (#137) CLI & API Polish: Rich tables для history/cost/status, `voiceforge config show` (--json, highlight overrides), ErrorCode enum + docs/error-codes.md, shell completion в README, targeted tests.
 
-**Следующий шаг:** взять **E14 (#137) CLI & API Polish** (Wave 3): Rich output, config show, error catalog. После E15 — **E19 (#142)** desktop-first track.
+**Следующий шаг:** взять **E15 (#138) Observability** (Wave 3): Grafana dashboard, alert rules. После E15 — **E19 (#142)** desktop-first track.
 
 ---
 
@@ -33,7 +33,7 @@
 |------|--------|--------|------------|
 | **Wave 1 (P0)** | #124✓→#125✓→#126✓→#127✓→#128✓ | **Done** | DDR 35→55 |
 | **Wave 2 (P1 core)** | #129✓→#130✓→#131✓→#132✓→#133✓→#141✓ | **Done** | DDR 55→70 |
-| **Wave 3 (P1 quality)** | #135✓→#136✓→#137→#138 | In progress | CLI + Obs |
+| **Wave 3 (P1 quality)** | #135✓→#136✓→#137✓→#138 | In progress | Obs (E15) |
 | **Wave 3.5 (Frontend)** | #142 | Todo | Desktop-first Tauri track после E15 |
 | **Wave 4 (P2 polish)** | #134→#139→#140 | Todo | Calendar (narrow CalDAV) + CI/CD + Security |
 | **Decision log** | #143✓, #144✓ | Resolved | Scope guard для автопилота; новых user decisions сейчас не нужно |
@@ -54,7 +54,8 @@
 
 Задача: взять верхний незакрытый E-блок из текущего Wave. Перевести существующий issue в In Progress на доске. Реализовать по чеклисту в issue body. Строго соблюдать phase-e-decision-log: Tauri = primary GUI, Web UI/Telegram/RAG watcher = maintenance-only, Calendar = narrow CalDAV scope; placeholders #148-#151 не активировать. Targeted tests. Commit с `Closes #N` (Conventional Commits). Done на доске. Обновить docs. Выдать prompt для следующего чата.
 
-Текущий блок: E14 (#137) — CLI & API Polish: Rich output, config show, error catalog (Wave 3).
+Текущий блок: E15 (#138) — Observability: Grafana dashboard, alert rules (Wave 3).
+
 ```
 
 ---
