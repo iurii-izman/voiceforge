@@ -48,13 +48,11 @@
 ```
 Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Статус: @docs/runbooks/PROJECT-STATUS-SUMMARY.md. Scope guard: @docs/runbooks/phase-e-decision-log.md. AI/tooling source of truth: @docs/runbooks/ai-tooling-setup.md.
 
-Режим: максимальный автопилот, Phase E productization. Работать по уже существующим E-issues и текущему Wave order из PROJECT-STATUS-SUMMARY: E1→E18, E19 (desktop-first) закрыт; далее Wave 4. Новые E-issues не создавать без отдельной задачи. Брать 1 блок за сессию: код, targeted tests, docs sync, GitHub Project status, commit + push, обновить PROJECT-STATUS-SUMMARY и next-iteration-focus.
+Режим: максимальный автопилот, Phase E productization. Wave 4 (E11, E16, E17) завершён. Работать по существующим E-issues и доске; новые E-issues не создавать без отдельной задачи. Брать 1 блок за сессию: код, targeted tests, docs sync, GitHub Project status, commit + push, обновить PROJECT-STATUS-SUMMARY и next-iteration-focus.
 
 Среда: Fedora Atomic, toolbox 43, uv sync --extra all. Ключи в keyring (keyring-keys-reference.md). Тесты: targeted subset, не полный pytest (OOM risk). Для infra/docs сначала прогонять `./scripts/preflight_repo.sh --with-tests`. Pre-commit в toolbox; на хосте git push --no-verify если нет Python 3.12.
 
-Задача: взять верхний незакрытый E-блок из Wave 4. Перевести issue в In Progress. Реализовать по чеклисту. Соблюдать phase-e-decision-log: Tauri = primary GUI, Web UI/Telegram/RAG watcher = maintenance-only, Calendar = narrow CalDAV; placeholders #148–#151 не активировать. Targeted tests. Commit с Closes #N (Conventional Commits). Done на доске. Обновить docs. Выдать промпт для следующего чата.
-
-Текущий блок: Wave 4 завершён. Следующий — по доске / PROJECT-STATUS-SUMMARY (следующая волна или приоритет).
+Задача: взять следующий блок по доске или приоритету из PROJECT-STATUS-SUMMARY (все Wave 1–4 закрыты). Перевести issue в In Progress. Реализовать по чеклисту. Соблюдать phase-e-decision-log: Tauri = primary GUI, Web UI/Telegram/RAG watcher = maintenance-only, Calendar = narrow CalDAV; placeholders #148–#151 не активировать. Targeted tests. Commit с Closes #N (Conventional Commits). Done на доске. Обновить docs. Выдать промпт для следующего чата.
 ```
 
 ---
