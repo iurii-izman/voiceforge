@@ -42,6 +42,9 @@ Priority order:
 | `retention_days` | `VOICEFORGE_RETENTION_DAYS` | `90` | Data retention: sessions with started_at before (today − retention_days) are purged at daemon start and every 24h while daemon runs; `0` = disable (#43, #63). Manual: `voiceforge history --purge-before YYYY-MM-DD`. |
 | `response_cache_ttl_seconds` | `VOICEFORGE_RESPONSE_CACHE_TTL_SECONDS` | `86400` | LLM response cache TTL (seconds); `0` = disable (#44) |
 | `calendar_context_enabled` | `VOICEFORGE_CALENDAR_CONTEXT_ENABLED` | `false` | D3 (#48): inject next CalDAV event into analyze context (keyring: caldav_*) |
+| `calendar_autostart_enabled` | `VOICEFORGE_CALENDAR_AUTOSTART_ENABLED` | `false` | Block 78: auto-start listen N minutes before next calendar event |
+| `calendar_autostart_minutes` | `VOICEFORGE_CALENDAR_AUTOSTART_MINUTES` | `5` | Minutes before event start to start listen when calendar_autostart_enabled |
+| `calendar_auto_listen` | `VOICEFORGE_CALENDAR_AUTO_LISTEN` | `false` | E11 #134: poll CalDAV every 5 min; auto-start listen when meeting in ≤2 min; auto-analyze when meeting ended ≥1 min ago |
 
 ## OpenTelemetry (Phase D #71)
 

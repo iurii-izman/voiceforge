@@ -374,3 +374,70 @@ def test_create_event_success_mocked(monkeypatch: pytest.MonkeyPatch) -> None:
     assert "DTSTART:20250307T100000Z" in call_ical
     assert "SUMMARY:" in call_ical
     assert "DESCRIPTION:" in call_ical
+
+
+# --- E11 #134: get_events_ended_at_least_minutes_ago ---
+
+
+def test_events_ended_in_range_filters_by_cutoff() -> None:
+    """_events_ended_in_range returns only events with end_iso <= cutoff_end."""
+    from voiceforge.calendar.caldav_poll import _events_ended_in_range
+
+    range_start = datetime(2025, 3, 4, 8, 0, 0, tzinfo=UTC)
+    range_end = datetime(2025, 3, 4, 10, 0, 0, tzinfo=UTC)
+    cutoff_end = datetime(2025, 3, 4, 9, 30, 0, tzinfo=UTC)
+    comp_ended = MagicMock()
+    comp_ended.get = lambda k, default=None: {
+        "DTSTART": datetime(2025, 3, 4, 9, 0, 0, tzinfo=UTC),
+        "DTEND": datetime(2025, 3, 4, 9, 15, 0, tzinfo=UTC),
+        "SUMMARY": "Ended",
+    }.get(k, default or "")
+    comp_late = MagicMock()
+    comp_late.get = lambda k, default=None: {
+        "DTSTART": datetime(2025, 3, 4, 9, 30, 0, tzinfo=UTC),
+        "DTEND": datetime(2025, 3, 4, 10, 0, 0, tzinfo=UTC),
+        "SUMMARY": "Late",
+    }.get(k, default or "")
+    mock_ev_ended = MagicMock(icalendar_component=comp_ended)
+    mock_ev_late = MagicMock(icalendar_component=comp_late)
+    cal = MagicMock()
+    cal.name = "Work"
+    cal.date_search = MagicMock(return_value=[mock_ev_ended, mock_ev_late])
+    out = _events_ended_in_range(cal, range_start, range_end, cutoff_end)
+    assert len(out) == 1
+    assert out[0]["summary"] == "Ended"
+
+
+def test_get_events_ended_at_least_minutes_ago_missing_keyring(monkeypatch: pytest.MonkeyPatch) -> None:
+    """get_events_ended_at_least_minutes_ago returns ([], error) when keyring keys missing."""
+    from voiceforge.calendar.caldav_poll import get_events_ended_at_least_minutes_ago
+
+    monkeypatch.setattr("voiceforge.calendar.caldav_poll.get_api_key", lambda name: None)
+    events, err = get_events_ended_at_least_minutes_ago(minutes_ago=1, lookback_hours=2)
+    assert events == []
+    assert err is not None
+    assert "Missing keyring" in err
+
+
+def test_get_events_ended_at_least_minutes_ago_no_calendars(monkeypatch: pytest.MonkeyPatch) -> None:
+    """get_events_ended_at_least_minutes_ago returns ([], None) when principal has no calendars."""
+    from voiceforge.calendar.caldav_poll import get_events_ended_at_least_minutes_ago
+
+    def fake_key(name: str) -> str:
+        if name == "caldav_url":
+            return "https://x/"
+        if name == "caldav_username":
+            return "u"
+        return "p"
+
+    monkeypatch.setattr("voiceforge.calendar.caldav_poll.get_api_key", fake_key)
+    mock_principal = MagicMock()
+    mock_principal.calendars = MagicMock(return_value=[])
+    mock_client = MagicMock()
+    mock_client.principal = MagicMock(return_value=mock_principal)
+    mock_caldav = MagicMock()
+    mock_caldav.DAVClient = MagicMock(return_value=mock_client)
+    with patch.dict(sys.modules, {"caldav": mock_caldav}):
+        events, err = get_events_ended_at_least_minutes_ago(minutes_ago=1, lookback_hours=2)
+    assert events == []
+    assert err is None

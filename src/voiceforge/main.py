@@ -19,6 +19,8 @@ import typer
 
 from voiceforge.cli.download_models import run_download_models
 from voiceforge.cli.history_helpers import (
+    _action_items_csv,
+    _action_items_markdown,
     build_session_export_notion,
     build_session_export_otter,
     build_session_markdown,
@@ -1267,6 +1269,60 @@ def action_items_update(
     if save and updates:
         _action_items_update_persist(from_session, updates)
     _action_items_update_echo(output, from_session, next_session, updates, cost_usd, save)
+
+
+@action_items_app.command("export")
+def action_items_export(
+    format: str = typer.Option(
+        "markdown",
+        "--format",
+        "-f",
+        help="markdown | csv | clipboard (E11 #134)",
+    ),
+    output: Path | None = typer.Option(
+        None,
+        "--output",
+        "-o",
+        path_type=Path,
+        help="Write to file (markdown/csv); clipboard ignores this",
+    ),
+    limit: int = typer.Option(100, "--limit", help="Max action items to export"),
+) -> None:
+    """Export action items as Markdown checklist, CSV, or to clipboard (E11 #134)."""
+    from voiceforge.core.transcript_log import TranscriptLog
+
+    log_db = TranscriptLog()
+    try:
+        items = log_db.get_action_items(limit=limit)
+    finally:
+        log_db.close()
+    if not items:
+        typer.echo(t("history.no_action_items"))
+        raise SystemExit(0)
+    fmt = (format or "markdown").strip().lower()
+    if fmt == "clipboard":
+        text = _action_items_markdown(items)
+        if not text:
+            typer.echo(t("history.no_action_items"))
+            raise SystemExit(0)
+        if _copy_to_clipboard(text):
+            typer.echo("Action items copied to clipboard.")
+        else:
+            typer.echo("Clipboard copy failed (install wl-copy or xclip).", err=True)
+            raise SystemExit(1)
+        return
+    if fmt == "markdown":
+        text = _action_items_markdown(items)
+    elif fmt == "csv":
+        text = _action_items_csv(items)
+    else:
+        typer.echo("Format must be markdown, csv, or clipboard.", err=True)
+        raise SystemExit(1)
+    if output is not None:
+        output.write_text(text, encoding="utf-8")
+        typer.echo(f"Written to {output}")
+    else:
+        typer.echo(text)
 
 
 def _index_directory(indexer: Any, p: Path, exclude_patterns: list[str] | None = None) -> tuple[int, set[str]]:

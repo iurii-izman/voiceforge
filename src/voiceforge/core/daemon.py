@@ -352,6 +352,7 @@ class VoiceForgeDaemon:
                 "language": getattr(c, "language", "auto"),
                 "calendar_autostart_enabled": getattr(c, "calendar_autostart_enabled", False),
                 "calendar_autostart_minutes": getattr(c, "calendar_autostart_minutes", 5),
+                "calendar_auto_listen": getattr(c, "calendar_auto_listen", False),
             },
             ensure_ascii=False,
         )
@@ -667,6 +668,12 @@ class VoiceForgeDaemon:
                         notify_analyze_done(session_id, (text or "")[:400])
                     except Exception as _e:
                         log.debug("smart_trigger.telegram_notify_failed", error=str(_e))
+                    try:
+                        from voiceforge.core.desktop_notify import notify_analyze_done as desktop_notify_done
+
+                        desktop_notify_done((text or "")[:200])
+                    except Exception as _e:
+                        log.debug("smart_trigger.desktop_notify_failed", error=str(_e))
                 finally:
                     log_db.close()
             except Exception as e:
@@ -835,6 +842,88 @@ def _calendar_autostart_loop(daemon: VoiceForgeDaemon) -> None:
             _calendar_autostart_try_start(daemon, minutes_ahead)
 
 
+def _calendar_auto_listen_try_start(daemon: VoiceForgeDaemon, minutes_ahead: int = 2) -> None:
+    """E11: if an event starts within minutes_ahead (default 2 min), start listen."""
+    try:
+        from voiceforge.calendar import get_upcoming_events
+
+        events, err = get_upcoming_events(hours_ahead=1)
+        if err or not events:
+            return
+        now = datetime.now(UTC)
+        window_end = now + timedelta(minutes=minutes_ahead)
+        for ev in events:
+            if _event_start_in_window(ev, now, window_end):
+                log.info(
+                    "calendar_auto_listen.starting",
+                    summary=ev.get("summary", ""),
+                    start=ev.get("start_iso", ""),
+                )
+                daemon.listen_start()
+                return
+    except Exception as e:
+        log.debug("calendar_auto_listen.check_start_failed", error=str(e))
+
+
+def _calendar_auto_listen_try_analyze(daemon: VoiceForgeDaemon, last_processed_end: list[str]) -> None:
+    """E11: if an event ended ≥1 min ago (and not yet processed), run analyze on ring tail and log+notify."""
+    try:
+        from voiceforge.calendar import get_events_ended_at_least_minutes_ago
+
+        events, err = get_events_ended_at_least_minutes_ago(minutes_ago=1, lookback_hours=2)
+        if err or not events:
+            return
+        events_sorted = sorted(events, key=lambda e: e.get("end_iso") or "", reverse=True)
+        ev = events_sorted[0]
+        end_iso = ev.get("end_iso") or ""
+        if end_iso in last_processed_end:
+            return
+        last_processed_end[:] = [end_iso]
+        if len(last_processed_end) > 20:
+            last_processed_end.pop(0)
+        log.info(
+            "calendar_auto_listen.analyzing_after_end",
+            summary=ev.get("summary", ""),
+            end_iso=end_iso,
+        )
+        analyze_seconds = 60
+        template = getattr(daemon._cfg, "smart_trigger_template", None)
+        text, session_id = daemon.analyze(analyze_seconds, template=template)
+        if (text or "").startswith("Ошибка:") or (text or "").startswith("Error:"):
+            log.warning("calendar_auto_listen.analyze_failed", message=(text or "")[:100])
+            return
+        try:
+            from voiceforge.core.telegram_notify import notify_analyze_done
+
+            notify_analyze_done(session_id, (text or "")[:400])
+        except Exception as _e:
+            log.debug("calendar_auto_listen.telegram_notify_failed", error=str(_e))
+        try:
+            from voiceforge.core.desktop_notify import notify_analyze_done as desktop_notify_done
+
+            desktop_notify_done((text or "")[:200])
+        except Exception as _e:
+            log.debug("calendar_auto_listen.desktop_notify_failed", error=str(_e))
+    except Exception as e:
+        log.debug("calendar_auto_listen.try_analyze_failed", error=str(e))
+
+
+def _calendar_auto_listen_loop(daemon: VoiceForgeDaemon) -> None:
+    """E11 #134: every 5 min, upcoming ≤2 min → listen_start; ended ≥1 min → auto-analyze + notify."""
+    if not getattr(daemon._cfg, "calendar_auto_listen", False):
+        return
+    interval_sec = 300  # 5 min
+    last_processed_end: list[str] = []
+    while True:
+        try:
+            time.sleep(interval_sec)
+        except Exception:
+            break
+        if not daemon.is_listening():
+            _calendar_auto_listen_try_start(daemon, minutes_ahead=2)
+        _calendar_auto_listen_try_analyze(daemon, last_processed_end)
+
+
 async def _periodic_purge_task(daemon: VoiceForgeDaemon, stop_event: asyncio.Event) -> None:
     """Run retention purge every 24h (S3776: extracted from _run_daemon_loop)."""
     PURGE_INTERVAL_SEC = 86400  # 24h (#63)
@@ -917,7 +1006,11 @@ def run_daemon() -> None:
     _retention_purge_at_startup(daemon)
     _wire_daemon_iface(iface, daemon)
 
-    if getattr(daemon._cfg, "calendar_autostart_enabled", False):
+    if getattr(daemon._cfg, "calendar_auto_listen", False):
+        _calendar_thread = threading.Thread(target=_calendar_auto_listen_loop, args=(daemon,), daemon=True)
+        _calendar_thread.start()
+        log.info("daemon.calendar_auto_listen_enabled", interval_sec=300)
+    elif getattr(daemon._cfg, "calendar_autostart_enabled", False):
         _calendar_thread = threading.Thread(target=_calendar_autostart_loop, args=(daemon,), daemon=True)
         _calendar_thread.start()
         log.info("daemon.calendar_autostart_enabled", minutes=getattr(daemon._cfg, "calendar_autostart_minutes", 5))

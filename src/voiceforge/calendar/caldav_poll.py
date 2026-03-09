@@ -159,6 +159,68 @@ def _candidates_from_calendars(client: Any, now: datetime, end_range: datetime) 
     return candidates
 
 
+def _events_ended_in_range(cal: Any, range_start: datetime, range_end: datetime, cutoff_end: datetime) -> list[dict[str, Any]]:
+    """Events from calendar with end_iso in [range_start, range_end] and end_iso <= cutoff_end (E11)."""
+    out: list[dict[str, Any]] = []
+    try:
+        events = cal.date_search(start=range_start, end=range_end, compfilter="VEVENT")
+    except Exception as e:
+        log.warning("caldav.date_search_failed", calendar=getattr(cal, "name", ""), error=str(e))
+        return out
+    cal_name = getattr(cal, "name", None) or ""
+    for ev in events:
+        comp = getattr(ev, "icalendar_component", None)
+        if not comp:
+            continue
+        end_dt = _dt_to_aware(comp.get("DTEND"))
+        if end_dt is None or end_dt > cutoff_end:
+            continue
+        start_dt = _dt_to_aware(comp.get("DTSTART"))
+        if start_dt is None:
+            continue
+        out.append(_event_dict(comp, cal_name, start_dt, end_dt))
+    return out
+
+
+def get_events_ended_at_least_minutes_ago(
+    minutes_ago: int = 1, lookback_hours: int = 2
+) -> tuple[list[dict[str, Any]], str | None]:
+    """Fetch events that ended at least minutes_ago ago (E11 auto-analyze after meeting).
+
+    Returns (list of event dicts with summary, start_iso, end_iso, calendar_name), or error message.
+    lookback_hours limits how far back we search (default 2h) to avoid re-processing old events.
+    """
+    url = get_api_key(_CALDAV_URL)
+    username = get_api_key(_CALDAV_USERNAME)
+    password = get_api_key(_CALDAV_PASSWORD)
+    if not url or not username or not password:
+        missing = [k for k, v in [(_CALDAV_URL, url), (_CALDAV_USERNAME, username), (_CALDAV_PASSWORD, password)] if not v]
+        return [], f"Missing keyring keys: {', '.join(missing)}. Set: keyring set voiceforge <key>"
+
+    try:
+        import caldav
+    except ImportError:
+        return [], _CALENDAR_DEPS_HINT
+
+    now = datetime.now(UTC)
+    cutoff_end = now - timedelta(minutes=minutes_ago)
+    range_start = now - timedelta(hours=lookback_hours)
+    out: list[dict[str, Any]] = []
+    try:
+        client = caldav.DAVClient(url=url, username=username, password=password)
+        principal = client.principal()
+        calendars = principal.calendars()
+        if not calendars:
+            log.debug("caldav.no_calendars")
+            return [], None
+        for cal in calendars:
+            out.extend(_events_ended_in_range(cal, range_start, cutoff_end, cutoff_end))
+    except Exception as e:
+        log.warning("caldav.poll_ended_failed", error=str(e))
+        return [], str(e)
+    return out, None
+
+
 def get_upcoming_events(hours_ahead: int = 48) -> tuple[list[dict[str, Any]], str | None]:
     """Fetch events that start from now until now+hours_ahead (for dashboard widget).
 

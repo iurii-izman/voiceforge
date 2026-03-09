@@ -181,6 +181,10 @@ class Settings(BaseSettings):
         le=60,
         description="Block 78: start listen this many minutes before event start when calendar_autostart_enabled.",
     )
+    calendar_auto_listen: bool = Field(
+        default=False,
+        description="E11 #134: poll CalDAV every 5 min; auto-start listen when meeting in ≤2 min; auto-analyze when meeting ended ≥1 min ago.",
+    )
 
     @field_validator("model_size")
     @classmethod

@@ -2,6 +2,7 @@
 
 from voiceforge.calendar.caldav_poll import (
     create_event,
+    get_events_ended_at_least_minutes_ago,
     get_next_meeting_context,
     get_upcoming_events,
     list_calendars,
@@ -10,6 +11,7 @@ from voiceforge.calendar.caldav_poll import (
 
 __all__ = [
     "create_event",
+    "get_events_ended_at_least_minutes_ago",
     "get_next_meeting_context",
     "get_upcoming_events",
     "list_calendars",

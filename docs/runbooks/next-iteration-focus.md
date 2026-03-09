@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-09 (E19 #142 закрыт; следующий — Wave 4: E11 #134 или E16 #139)
+**Обновлено:** 2026-03-09 (E11 #134 закрыт; следующий — E16 #139 CI/CD Polish)
 
 ---
 
@@ -19,9 +19,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** E19 (#142) Desktop-first: E2E meeting flow (Record→Analyze→View→Export) в autopilot.spec.js, tray/hotkeys задокументированы (tray.rs + main.js), скрипт verify-desktop-packaging.sh, обновлены desktop-gui-testing, offline-package, desktop-release-gate-matrix.
+**Сделано в сессии:** E11 (#134) Calendar Auto-Analyze: calendar_auto_listen (poll 5 min, start listen ≤2 min, auto-analyze after meeting end), desktop notify on smart trigger, action-items export (markdown/csv/clipboard), config key calendar_auto_listen, tests test_caldav_poll + test_action_export.
 
-**Следующий шаг:** взять **Wave 4** — первый открытый блок: **E11 (#134)** Calendar Auto-Analyze (narrow CalDAV) или **E16 (#139)** CI/CD Polish.
+**Следующий шаг:** взять **E16 (#139)** CI/CD Polish (Auto-Release, Nightly Smoke).
 
 ---
 
@@ -35,7 +35,7 @@
 | **Wave 2 (P1 core)** | #129✓→#130✓→#131✓→#132✓→#133✓→#141✓ | **Done** | DDR 55→70 |
 | **Wave 3 (P1 quality)** | #135✓→#136✓→#137✓→#138✓ | **Done** | — |
 | **Wave 3.5 (Frontend)** | #142✓ | Done | Desktop-first Tauri (E19) |
-| **Wave 4 (P2 polish)** | #134→#139→#140 | Todo | Calendar (narrow CalDAV) + CI/CD + Security |
+| **Wave 4 (P2 polish)** | #134✓→#139→#140 | In progress | Calendar (narrow CalDAV) ✓; next E16 CI/CD |
 | **Decision log** | #143✓, #144✓ | Resolved | Scope guard для автопилота; новых user decisions сейчас не нужно |
 | **External wait** | #65 | Waiting upstream | CVE — ждём fix |
 
@@ -54,7 +54,7 @@
 
 Задача: взять верхний незакрытый E-блок из Wave 4. Перевести issue в In Progress. Реализовать по чеклисту. Соблюдать phase-e-decision-log: Tauri = primary GUI, Web UI/Telegram/RAG watcher = maintenance-only, Calendar = narrow CalDAV; placeholders #148–#151 не активировать. Targeted tests. Commit с Closes #N (Conventional Commits). Done на доске. Обновить docs. Выдать промпт для следующего чата.
 
-Текущий блок: Wave 4 — E11 (#134) Calendar Auto-Analyze (narrow CalDAV) или E16 (#139) CI/CD Polish (по приоритету на доске).
+Текущий блок: Wave 4 — **E16 (#139)** CI/CD Polish (по приоритету на доске).
 ```
 
 ---

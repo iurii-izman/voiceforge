@@ -296,6 +296,49 @@ def _action_items_lines(items: list[Any]) -> list[str]:
     ]
 
 
+def _action_items_markdown(items: list[Any]) -> str:
+    """E11 #134: Markdown checklist for action items export."""
+    if not items:
+        return ""
+    lines = ["# Action items", ""]
+    for r in items:
+        checkbox = "- [ ]" if (getattr(r, "status", "") or "").lower() not in ("done", "completed") else "- [x]"
+        desc = getattr(r, "description", "") or ""
+        extra = []
+        if getattr(r, "assignee", ""):
+            extra.append(getattr(r, "assignee", ""))
+        if getattr(r, "deadline", ""):
+            extra.append(getattr(r, "deadline", ""))
+        if extra:
+            desc = f"{desc} ({', '.join(extra)})"
+        lines.append(f"{checkbox} {desc} (session #{getattr(r, 'session_id', '')})")
+    return "\n".join(lines)
+
+
+def _action_items_csv(items: list[Any]) -> str:
+    """E11 #134: CSV for action items export."""
+    if not items:
+        return "session_id,idx,description,assignee,deadline,status"
+    import csv
+    import io
+
+    out = io.StringIO()
+    w = csv.writer(out)
+    w.writerow(["session_id", "idx", "description", "assignee", "deadline", "status"])
+    for r in items:
+        w.writerow(
+            [
+                getattr(r, "session_id", ""),
+                getattr(r, "idx_in_analysis", ""),
+                getattr(r, "description", "") or "",
+                getattr(r, "assignee", "") or "",
+                getattr(r, "deadline", "") or "",
+                getattr(r, "status", "") or "",
+            ]
+        )
+    return out.getvalue().strip()
+
+
 def history_action_items_result(log_db: Any, output: str) -> tuple[str, Any]:
     """Return ("json", payload) | ("lines", list[str]) | ("message", i18n_key)."""
     items = log_db.get_action_items(limit=100)

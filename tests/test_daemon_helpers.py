@@ -145,6 +145,7 @@ def _make_daemon(
     cfg.language = "auto"
     cfg.calendar_autostart_enabled = False
     cfg.calendar_autostart_minutes = 5
+    cfg.calendar_auto_listen = False
     cfg.get_rag_db_path = MagicMock(return_value="/nonexistent/rag.db")
     if settings_overrides:
         for k, v in settings_overrides.items():
