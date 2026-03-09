@@ -38,6 +38,8 @@ git push origin v0.2.0-alpha.2
 
 **Ожидаемые артефакты:** `dist/*.whl`, Release workflow загружает SBOM (`dist/sbom.cdx.json`).
 
+**E16 #139 — Auto-release и CI/CD:** при пуше тега `v*` workflow Release автоматически собирает wheel, создаёт GitHub Release и (при настроенном окружении) публикует на PyPI. Окружение `pypi` в репо и Trusted Publishing на PyPI (OIDC) — по [packaging.python.org](https://packaging.python.org/en/latest/guides/publishing-package-distribution-releases-using-github-actions-ci-cd-workflows/). Nightly smoke (`.github/workflows/nightly.yml`): cron 03:00 UTC — uv sync, `voiceforge status`, тест-подмножество, сборка wheel; при падении создаётся issue. Тесты audio capture (PipeWire) в CI выполняются с mock: фикстура `mock_pw_record_silence` в `tests/conftest.py` подменяет `pw-record` на процесс, отдающий тишину (PCM).
+
 ---
 
 ### 1.1 Release validation (packaging/updater)
