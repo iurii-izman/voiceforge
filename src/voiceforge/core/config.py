@@ -89,6 +89,10 @@ class Settings(BaseSettings):
         default=None,
         description="Daily LLM budget USD; default budget_limit_usd/30 (#38).",
     )
+    cost_anomaly_multiplier: float = Field(
+        default=2.0,
+        description="E15 #138: cost anomaly threshold; 1 if today > multiplier × 7-day avg.",
+    )
     ring_seconds: float = Field(default=300.0, description="Ring buffer length seconds")
     ring_persist_interval_sec: float = Field(
         default=10.0,
@@ -205,6 +209,13 @@ class Settings(BaseSettings):
     def _daily_budget_non_negative(cls, v: float | None) -> float | None:
         if v is not None and v < 0:
             raise ValueError("daily_budget_limit_usd must be >= 0")
+        return v
+
+    @field_validator("cost_anomaly_multiplier")
+    @classmethod
+    def _cost_anomaly_positive(cls, v: float) -> float:
+        if v <= 0:
+            raise ValueError("cost_anomaly_multiplier must be > 0")
         return v
 
     @model_validator(mode="after")

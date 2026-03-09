@@ -175,6 +175,7 @@
 | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | README.md                                      | Prometheus + Grafana, алерты; см. также [runbooks/observability-alerts.md](runbooks/observability-alerts.md) |
 | prometheus.yml, alerts.yml, docker-compose.yml | Конфиги стека                                                                                                |
+| grafana/voiceforge-dashboard.json              | E15 #138: дашборд Grafana (STT/diarization/cost/errors/circuit breaker/data dir/cost anomaly)                |
 
 
 ### docs/en/

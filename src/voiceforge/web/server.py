@@ -560,10 +560,16 @@ class _VoiceForgeHandler(BaseHTTPRequestHandler):
             from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
             try:
-                from voiceforge.core.observability import set_circuit_breaker_states
+                from voiceforge.core.observability import (
+                    set_circuit_breaker_states,
+                    update_cost_anomaly,
+                    update_data_dir_free_bytes,
+                )
                 from voiceforge.llm.circuit_breaker import get_circuit_breaker
 
                 set_circuit_breaker_states(get_circuit_breaker().get_all_states())
+                update_cost_anomaly()
+                update_data_dir_free_bytes()
             except ImportError:
                 pass
             body = generate_latest()

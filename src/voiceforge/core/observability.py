@@ -1,8 +1,15 @@
-"""Prometheus metrics for production monitoring. Issue #36: latency, cost, errors."""
+"""Prometheus metrics for production monitoring. Issue #36: latency, cost, errors. E15 #138: cost anomaly, data dir free."""
 
 from __future__ import annotations
 
+import os
+import shutil
+from pathlib import Path
+
+import structlog
 from prometheus_client import REGISTRY, CollectorRegistry, Counter, Gauge, Histogram
+
+log = structlog.get_logger()
 
 # Histograms: duration in seconds
 stt_duration_seconds = Histogram(
@@ -48,6 +55,16 @@ llm_circuit_breaker_state = Gauge(
     "LLM circuit breaker state (0=closed, 1=half_open, 2=open)",
     ["model"],
 )
+# E15 #138: cost anomaly (1 if today > threshold × 7-day average)
+llm_cost_anomaly = Gauge(
+    "voiceforge_llm_cost_anomaly",
+    "1 if today LLM cost exceeds cost_anomaly_multiplier × 7-day average",
+)
+# E15 #138: free bytes on data directory filesystem (for low-disk alert)
+data_dir_free_bytes = Gauge(
+    "voiceforge_data_dir_free_bytes",
+    "Free bytes on VoiceForge data directory filesystem",
+)
 
 
 def get_registry() -> CollectorRegistry:
@@ -87,3 +104,49 @@ def set_circuit_breaker_states(states: dict[str, int]) -> None:
     """Update circuit breaker gauge from get_circuit_breaker().get_all_states(). #62"""
     for model, state in states.items():
         llm_circuit_breaker_state.labels(model=model).set(state)
+
+
+def _data_dir_path() -> Path:
+    """VoiceForge data directory (parent of metrics.db)."""
+    base = os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
+    return Path(base) / "voiceforge"
+
+
+def update_data_dir_free_bytes() -> None:
+    """E15 #138: set voiceforge_data_dir_free_bytes from disk usage of data dir."""
+    try:
+        path = _data_dir_path()
+        path.mkdir(parents=True, exist_ok=True)
+        usage = shutil.disk_usage(path)
+        data_dir_free_bytes.set(float(usage.free))
+    except OSError as e:
+        log.warning("observability.data_dir_usage_failed", path=str(_data_dir_path()), error=str(e))
+        data_dir_free_bytes.set(-1.0)
+
+
+def update_cost_anomaly() -> None:
+    """E15 #138: set llm_cost_anomaly (1 if today > multiplier × 7-day avg), log warning when anomaly."""
+    try:
+        from voiceforge.core.config import Settings
+        from voiceforge.core.metrics import get_cost_today, get_stats
+
+        today = get_cost_today()
+        stats_7 = get_stats(7)
+        total_7 = stats_7.get("total_cost_usd") or 0.0
+        avg_7 = total_7 / 7.0 if total_7 else 0.0
+        cfg = Settings()
+        threshold = cfg.cost_anomaly_multiplier * avg_7
+        if avg_7 > 0 and today > threshold:
+            llm_cost_anomaly.set(1.0)
+            log.warning(
+                "observability.cost_anomaly",
+                cost_today=today,
+                avg_7d=round(avg_7, 4),
+                threshold=round(threshold, 4),
+                multiplier=cfg.cost_anomaly_multiplier,
+            )
+        else:
+            llm_cost_anomaly.set(0.0)
+    except Exception as e:
+        log.warning("observability.cost_anomaly_failed", error=str(e))
+        llm_cost_anomaly.set(-1.0)

@@ -21,6 +21,7 @@ Priority order:
 | `default_llm` | `VOICEFORGE_DEFAULT_LLM` | `anthropic/claude-haiku-4-5` | User preference LLM id; actual backend from `get_effective_llm()` (E6: Ollama fallback when no API keys) |
 | `budget_limit_usd` | `VOICEFORGE_BUDGET_LIMIT_USD` | `75.0` | Monthly API budget |
 | `daily_budget_limit_usd` | `VOICEFORGE_DAILY_BUDGET_LIMIT_USD` | `budget_limit_usd/30` | Daily LLM budget; pre-call enforcement (#38) |
+| `cost_anomaly_multiplier` | `VOICEFORGE_COST_ANOMALY_MULTIPLIER` | `2.0` | E15 #138: threshold for cost anomaly (1 if today > multiplier × 7-day avg); metric `voiceforge_llm_cost_anomaly` |
 | `ring_seconds` | `VOICEFORGE_RING_SECONDS` | `300.0` | Ring buffer duration |
 | `ring_persist_interval_sec` | `VOICEFORGE_RING_PERSIST_INTERVAL_SEC` | `10.0` | Interval (s) between full ring file writes in listen loop; reduces I/O (#100) |
 | `ring_file_path` | `VOICEFORGE_RING_FILE_PATH` | auto (`XDG_RUNTIME_DIR`/`~/.cache`) | Ring PCM path |
@@ -49,7 +50,7 @@ Priority order:
 | `VOICEFORGE_OTEL_ENABLED` | unset | Set to `1` to enable OTel tracing (requires `voiceforge[otel]`). Spans: pipeline.run, prepare_audio, step1_stt, step2_parallel. |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | `http://localhost:4318` | OTLP HTTP endpoint (e.g. Jaeger collector). When set, OTel is enabled even without VOICEFORGE_OTEL_ENABLED. |
 
-**Validation:** Settings validates `model_size` (allowed: tiny, base, small, medium, large-v2, large-v3, large-v3-turbo, large, auto), `sample_rate` (1..192000), `default_llm` (non-empty), `budget_limit_usd` (≥ 0), `daily_budget_limit_usd` (≥ 0 when set), `pipeline_step2_timeout_sec` (positive), `analyze_timeout_sec` (positive), `ollama_model` (non-empty), `ring_seconds` (positive), `ring_persist_interval_sec` (≥ 1), `pyannote_restart_hours` (≥ 1), `live_summary_interval_sec` (≥ 1), `retention_days` (≥ 0), `response_cache_ttl_seconds` (≥ 0). Invalid values raise at load.
+**Validation:** Settings validates `model_size` (allowed: tiny, base, small, medium, large-v2, large-v3, large-v3-turbo, large, auto), `sample_rate` (1..192000), `default_llm` (non-empty), `budget_limit_usd` (≥ 0), `daily_budget_limit_usd` (≥ 0 when set), `cost_anomaly_multiplier` (> 0, E15 #138), `pipeline_step2_timeout_sec` (positive), `analyze_timeout_sec` (positive), `ollama_model` (non-empty), `ring_seconds` (positive), `ring_persist_interval_sec` (≥ 1), `pyannote_restart_hours` (≥ 1), `live_summary_interval_sec` (≥ 1), `retention_days` (≥ 0), `response_cache_ttl_seconds` (≥ 0). Invalid values raise at load.
 
 ## Runtime / Non-Settings Environment
 

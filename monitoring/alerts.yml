@@ -1,5 +1,5 @@
-# Prometheus alert rules for VoiceForge. Issue #64.
-# Alerts: pipeline errors, LLM error rate, optional budget (if daily cost exported).
+# Prometheus alert rules for VoiceForge. Issue #64, E15 #138.
+# Alerts: pipeline errors, LLM error rate, circuit breaker, cost, disk, daemon down.
 
 groups:
   - name: voiceforge
@@ -13,6 +13,16 @@ groups:
         annotations:
           summary: "VoiceForge pipeline errors elevated"
           description: "Pipeline errors (STT/diarization/RAG) increased by more than 3 in 15m."
+
+      # E15 #138: High pipeline error rate (> 5 in 5m)
+      - alert: VoiceForgePipelineErrorRateHigh
+        expr: sum(increase(voiceforge_pipeline_errors_total[5m])) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "VoiceForge pipeline error rate high"
+          description: "Pipeline errors increased by more than 5 in 5m."
 
       # LLM error rate > 5% over 5m
       - alert: VoiceForgeLLMErrorRateHigh
@@ -28,3 +38,43 @@ groups:
         annotations:
           summary: "VoiceForge LLM error rate > 5%"
           description: "Fraction of LLM calls with status=error exceeds 5% over 5m."
+
+      # E15 #138: Circuit breaker open for > 5min
+      - alert: VoiceForgeCircuitBreakerOpen
+        expr: max(voiceforge_llm_circuit_breaker_state) == 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "VoiceForge circuit breaker open"
+          description: "LLM circuit breaker has been open for more than 5 minutes."
+
+      # E15 #138: High LLM cost ($5/day threshold)
+      - alert: VoiceForgeLLMCostHigh
+        expr: sum(increase(voiceforge_llm_cost_usd_total[1d])) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "VoiceForge LLM cost high"
+          description: "Daily LLM cost exceeds $5."
+
+      # E15 #138: Low disk space on data dir (< 1GB)
+      - alert: VoiceForgeDataDirLowDisk
+        expr: voiceforge_data_dir_free_bytes < 1073741824
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "VoiceForge data dir low disk"
+          description: "Free space on VoiceForge data directory is below 1GB."
+
+      # E15 #138: Daemon down (no metrics for 5min)
+      - alert: VoiceForgeDaemonDown
+        expr: up{job="voiceforge"} == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "VoiceForge daemon down"
+          description: "No metrics received from VoiceForge for 5 minutes; scrape target may be down."
