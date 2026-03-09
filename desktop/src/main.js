@@ -651,16 +651,18 @@ function openSessionFromWidget(sessionId) {
 }
 
 function renderRecentSessionsList(sessions) {
-  if (!Array.isArray(sessions) || sessions.length === 0) return null;
+  if (Array.isArray(sessions) && sessions.length > 0) {
   let html = "<ul class=\"recent-sessions-ul\">";
   sessions.forEach((s) => {
     const id = s.id ?? s.session_id ?? "—";
     const start = s.started_at ?? s.created_at ?? "";
-    const dur = s.duration_sec != null ? s.duration_sec + " с" : "";
+    const dur = s.duration_sec == null ? "" : s.duration_sec + " с";
     html += `<li><button type="button" class="btn-link" data-session-id="${id}">Сессия ${id}</button> ${start} ${dur}</li>`;
   });
   html += "</ul>";
   return html;
+  }
+  return null;
 }
 
 function loadRecentSessions() {
@@ -1299,7 +1301,7 @@ function renderSessionDetailTranscript(segs, highlightQuery) {
   let html = "<div class=\"detail-section\"><h4>Транскрипт</h4><p class=\"muted detail-stats\">Слов: " + totalWords + ", символов: " + totalChars + "</p>";
   html += "<div class=\"detail-segment-minimap\" role=\"navigation\" aria-label=\"Навигация по сегментам\">";
   segs.forEach((s, idx) => {
-    const t = s.start_sec != null ? Math.floor(Number(s.start_sec) / 60) + ":" + String(Math.floor(Number(s.start_sec) % 60)).padStart(2, "0") : String(idx + 1);
+    const t = s.start_sec == null ? String(idx + 1) : Math.floor(Number(s.start_sec) / 60) + ":" + String(Math.floor(Number(s.start_sec) % 60)).padStart(2, "0");
     html += `<button type="button" class="minimap-segment-btn" data-segment-idx="${idx}" title="Сегмент ${idx + 1}">${escapeHtml(t)}</button>`;
   });
   html += "</div><ul class=\"segment-list\">";
@@ -1378,7 +1380,7 @@ function bindMinimapSegmentButtons(container) {
   container.querySelectorAll(".minimap-segment-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       const idx = btn.dataset.segmentIdx;
-      const el = idx != null ? document.getElementById("segment-" + idx) : null;
+      const el = idx == null ? null : document.getElementById("segment-" + idx);
       if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
     });
   });
@@ -2229,12 +2231,21 @@ function buildRagHitsHtml(hits) {
   hits.forEach((h) => {
     const src = escapeHtml((h.source ?? "").trim() || "—");
     const content = escapeHtml((h.content ?? "").trim().slice(0, 200) || "—");
-    const score = h.score != null ? escapeHtml(String(h.score)) : "";
+    const score = h.score == null ? "" : escapeHtml(String(h.score));
     const scoreSpan = score ? " <span class=\"muted\">(" + score + ")</span>" : "";
     parts.push("<li class=\"rag-hit\"><span class=\"rag-hit-source\">", src, "</span>", scoreSpan, "<br><span class=\"rag-hit-content\">", content, "</span></li>");
   });
   parts.push("</ul>");
   return parts.join("");
+}
+
+function applyRagSearchResult(resultsEl, ftsResultsEl, listEl, innerHtml) {
+  if (resultsEl) {
+    resultsEl.innerHTML = innerHtml;
+    resultsEl.style.display = "block";
+  }
+  if (ftsResultsEl) ftsResultsEl.style.display = "none";
+  if (listEl) listEl.style.display = "none";
 }
 
 async function handleRagSearch(q, listEl, ftsResultsEl, resultsEl) {
@@ -2243,29 +2254,18 @@ async function handleRagSearch(q, listEl, ftsResultsEl, resultsEl) {
     const raw = await invoke("search_rag", { query: q, limit: 15 });
     const env = parseEnvelope(raw);
     const hits = env?.data?.rag_hits ?? env?.rag_hits ?? [];
-    if (!Array.isArray(hits) || hits.length === 0) {
-      if (resultsEl) {
-        resultsEl.innerHTML = "<p class=\"muted\">" + t("rag_no_hits") + "</p>";
-        resultsEl.style.display = "block";
-      }
-      if (ftsResultsEl) ftsResultsEl.style.display = "none";
-      if (listEl) listEl.style.display = "none";
-      return;
+    if (Array.isArray(hits) && hits.length > 0) {
+      applyRagSearchResult(resultsEl, ftsResultsEl, listEl, buildRagHitsHtml(hits));
+    } else {
+      applyRagSearchResult(resultsEl, ftsResultsEl, listEl, "<p class=\"muted\">" + t("rag_no_hits") + "</p>");
     }
-    const html = buildRagHitsHtml(hits);
-    if (resultsEl) {
-      resultsEl.innerHTML = html;
-      resultsEl.style.display = "block";
-    }
-    if (ftsResultsEl) ftsResultsEl.style.display = "none";
-    if (listEl) listEl.style.display = "none";
   } catch (e) {
-    if (resultsEl) {
-      resultsEl.innerHTML = "<p class=\"muted\">" + t("error_prefix") + escapeHtml(e?.message || e) + "</p>";
-      resultsEl.style.display = "block";
-    }
-    if (ftsResultsEl) ftsResultsEl.style.display = "none";
-    if (listEl) listEl.style.display = "none";
+    applyRagSearchResult(
+      resultsEl,
+      ftsResultsEl,
+      listEl,
+      "<p class=\"muted\">" + t("error_prefix") + escapeHtml(e?.message || e) + "</p>",
+    );
   }
 }
 

@@ -58,7 +58,7 @@ describe("VoiceForge desktop native smoke", () => {
       localStorage.setItem("voiceforge_close_to_tray", "false");
       localStorage.setItem("voiceforge_updater_check_on_launch", "false");
       localStorage.setItem("voiceforge_settings_as_panel", "true");
-      window.location.reload();
+      globalThis.location.reload();
     });
 
     const settingsNav = await $("[data-tab='settings']");

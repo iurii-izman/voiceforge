@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-09 (Sonar: S1066, S1192, S5603, S7500, S112 NOSONAR)
+**Обновлено:** 2026-03-09 (JS Sonar: S7764, S7784, S7763, S7735, S3776, S2004)
 
 ---
 
@@ -19,9 +19,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Sonar: (1) S1066 — bootstrap.sh: объединён вложенный if с внешним. (2) S1192 — router.py: константа _OLLAMA_MODEL_PREFIX = "ollama/", замена трёх вхождений. (3) S5603 — test_daemon_helpers: удалён неиспользуемый класс FakeLog из test_retention_purge_at_startup_no_op_when_zero. (4) S7500 — test_main_status_export_action_items: lambda с generator.throw заменён на raise_when_called(BudgetExceeded(...)). (5) S112 — conftest: добавлен NOSONAR-комментарий для raise exc. Тесты: 38 passed по затронутым модулям; test_main_status_text_and_json_branches падает по-прежнему (pre-existing).
+**Сделано в сессии:** JS Sonar: (1) S7764 — native-smoke.e2e.js: window → globalThis. (2) S7784 — desktopHarness: JSON.parse(JSON.stringify) → structuredClone. (3) S7763 — platform.js: re-export LogicalPosition/LogicalSize via export…from. (4) S7735 — main.js: сняты негативные условия (renderRecentSessionsList, dur/start_sec/idx/score, handleRagSearch). (5) S3776 — main.js: вынесен applyRagSearchResult, упрощён handleRagSearch. (6) S2004 — desktopHarness: createUnsubscribe вынесен из listen для уменьшения вложенности.
 
-**Следующий шаг:** Продолжить Sonar (S3776 cognitive complexity, JS) или roadmap/docs.
+**Следующий шаг:** roadmap/docs или оставшиеся Sonar (Python S3776).
 
 ---
 

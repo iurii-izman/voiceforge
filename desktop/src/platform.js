@@ -1,7 +1,7 @@
 /** Tauri API shim: delegates to __VOICEFORGE_TEST_HOOKS__ when present (e2e), else real Tauri. */
 import { invoke as tauriInvoke } from "@tauri-apps/api/core";
 import { listen as tauriListen } from "@tauri-apps/api/event";
-import { getCurrentWindow as tauriGetCurrentWindow, LogicalPosition, LogicalSize } from "@tauri-apps/api/window";
+import { getCurrentWindow as tauriGetCurrentWindow } from "@tauri-apps/api/window";
 import {
   isPermissionGranted as notificationIsPermissionGranted,
   requestPermission as notificationRequestPermission,
@@ -40,7 +40,7 @@ export function getCurrentWindow() {
   return hooks?.getCurrentWindow ? hooks.getCurrentWindow() : tauriGetCurrentWindow();
 }
 
-export { LogicalPosition, LogicalSize };
+export { LogicalPosition, LogicalSize } from "@tauri-apps/api/window";
 
 export function isPermissionGranted() {
   const hooks = getTestHooks();

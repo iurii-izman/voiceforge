@@ -81,7 +81,7 @@ export async function installDesktopMocks(page, scenarioOverrides = {}) {
   const scenario = buildDesktopScenario(scenarioOverrides);
 
   await page.addInitScript((scenarioData) => {
-    const clone = (value) => JSON.parse(JSON.stringify(value));
+    const clone = (value) => structuredClone(value);
     const listeners = new Map();
     const scenario = clone(scenarioData);
     const state = {
@@ -110,6 +110,13 @@ export async function installDesktopMocks(page, scenarioOverrides = {}) {
       const callbacks = listeners.get(eventName) || [];
       callbacks.forEach((callback) => callback({ payload }));
     };
+
+    function createUnsubscribe(eventName, callback) {
+      return () => {
+        const current = listeners.get(eventName) || [];
+        listeners.set(eventName, current.filter((item) => item !== callback));
+      };
+    }
 
     const writeStorage = () => {
       Object.entries(state.storeData).forEach(([key, value]) => {
@@ -263,13 +270,7 @@ export async function installDesktopMocks(page, scenarioOverrides = {}) {
         const callbacks = listeners.get(eventName) || [];
         callbacks.push(callback);
         listeners.set(eventName, callbacks);
-        return Promise.resolve(() => {
-          const current = listeners.get(eventName) || [];
-          listeners.set(
-            eventName,
-            current.filter((item) => item !== callback),
-          );
-        });
+        return Promise.resolve(createUnsubscribe(eventName, callback));
       },
       getCurrentWindow() {
         return fakeWindow;
