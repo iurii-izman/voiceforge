@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-09 (QA1 #152, QA2 #153 закрыты; QA3 #154 — частичный прогресс)
+**Обновлено:** 2026-03-09 (QA3 #154 закрыт; следующий — QA5 #156 или QA4 #155)
 
 ---
 
@@ -19,9 +19,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** QA1 #152: CodeQL alert отклонён (false positive), security-decision-log и quality-audit обновлены, Cargo.lock обновлён. QA2 #153: mypy зелёный (transcriber BaseException + assert; transcript_log _sqlcipher без переопределения). QA3 #154 (частично): в fs добавлены get_data_home/voiceforge_data_dir, в main.py заменены 3 дубликата путей данных.
+**Сделано в сессии:** QA3 #154 закрыт: fs.get_cache_home(); config.get_data_dir()→voiceforge_data_dir(); status_helpers→get_cache_home; daemon: _notify_analyze_done(), _calendar_try_start_listen(); caldav_poll: _get_caldav_credentials(), _require_caldav_credentials(). Targeted tests + commit+push.
 
-**Следующий шаг:** Продолжить QA3 #154 (оставшиеся hotspot-файлы: daemon, status_helpers, setup, meeting, digest, pipeline, config, router, caldav_poll — снижение когнитивной сложности и дубликатов) или взять QA5 #156 (DevOps/scripts Sonar). Порядок: #154 → #156 → #155 → #157.
+**Следующий шаг:** Взять QA5 #156 (DevOps/scripts Sonar: bootstrap, preflight, create-issues, helper scripts) или QA4 #155 (Test suite Sonar). Порядок: #156 → #155 → #157.
 
 ---
 
@@ -33,7 +33,7 @@
 |------|--------|--------|------------|
 | **Phase E** | #124✓→#142✓ | **Done** | Feature-track закрыт |
 | **QA-A** | #152✓ → #153✓ | **Done** | Security + mypy закрыты |
-| **QA-B** | #154 (partial) → #156 | **Next** | Продолжить Python hotspots или взять scripts |
+| **QA-B** | #154✓ → #156 | **Next** | DevOps/scripts Sonar (QA5 #156) или Test Sonar (QA4 #155) |
 | **QA-C** | #155 → #157 | Queued | Tests, затем desktop/frontend Sonar |
 | **Decision log** | #143✓, #144✓ | Resolved | Scope guard для автопилота; новых user decisions сейчас не нужно |
 | **External wait** | #65 | Waiting upstream | CVE остаётся tracked wait state до upstream fix |
