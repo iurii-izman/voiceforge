@@ -461,6 +461,27 @@ def _complete_structured_cached(key: str, response_model: type[TModel], ttl: int
     return None
 
 
+def estimate_analyze_cost(transcript: str, model_id: str) -> float:
+    """E9 (#132): Estimated cost in USD for analyze (tokens ≈ words × 1.3, cost = model price)."""
+    if not (transcript or "").strip():
+        return 0.0
+    try:
+        from litellm import cost_per_token, token_counter
+
+        messages = [{"role": "user", "content": transcript}]
+        try:
+            prompt_tokens = token_counter(model=model_id, messages=messages)
+        except Exception:
+            words = len(transcript.split())
+            prompt_tokens = int(words * 1.3)
+        completion_tokens = 800
+        prompt_c, completion_c = cost_per_token(model=model_id, prompt_tokens=prompt_tokens, completion_tokens=completion_tokens)
+        return float(prompt_c or 0) + float(completion_c or 0)
+    except Exception as e:
+        log.warning("llm.estimate_cost_failed", error=str(e), model=model_id)
+        return 0.0
+
+
 def get_budget_warning_if_near_limit(cfg: Any, estimate_usd: float = 0.03) -> str | None:
     """E4 (#127): Return user-facing warning when daily cost >= 80% of limit; else None."""
     from voiceforge.core.metrics import get_cost_today

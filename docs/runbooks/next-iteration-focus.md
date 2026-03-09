@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-09 (E8 #131 закрыт; следующий — E9 #132)
+**Обновлено:** 2026-03-09 (E9 #132 закрыт; следующий — E10 #133)
 
 ---
 
@@ -18,9 +18,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** E8 (#131) Model Pre-Download & Bootstrap: voiceforge download-models (Whisper по config + ONNX check, rich progress, retry); bootstrap.sh — uv run voiceforge download-models (если не --skip-models), RAM warning <4GB, финальное «Setup complete! Run: voiceforge meeting»; status --doctor — models cached (Whisper/ONNX/pyannote), disk usage ~/.cache/huggingface, RAM recommended ≥4 GB; тесты test_download_models.py.
+**Сделано в сессии:** E9 (#132) Post-Listen Auto-Analyze & Cost Estimate: listen — при Ctrl+C промпт «Analyze captured audio? [Y/n]», флаг --auto-analyze для немедленного analyze; analyze --estimate — показ estimated cost без выполнения (router.estimate_analyze_cost); при первом analyze (нет сессий в БД) — показ estimate и подтверждение; тесты test_post_listen.py, test_cost_estimate.py.
 
-**Следующий шаг:** взять **E9 (#132) Post-Listen Auto-Analyze & Cost Estimate** — следующий блок Wave 2.
+**Следующий шаг:** взять **E10 (#133) Output Polish: History, Export, Daily Digest** — следующий блок Wave 2.
 
 ---
 
@@ -31,7 +31,7 @@
 | Wave | Issues | Статус | Что делать |
 |------|--------|--------|------------|
 | **Wave 1 (P0)** | #124✓→#125✓→#126✓→#127✓→#128✓ | **Done** | DDR 35→55 |
-| **Wave 2 (P1 core)** | #129✓→#130✓→#131✓→#132→#133→#141 | In progress | E9 следующий. DDR 55→70 |
+| **Wave 2 (P1 core)** | #129✓→#130✓→#131✓→#132✓→#133→#141 | In progress | E10 следующий. DDR 55→70 |
 | **Wave 3 (P1 quality)** | #135→#136→#137→#138 | Todo | Testing + Core + CLI + Obs |
 | **Wave 4 (P2 polish)** | #134→#139→#140 | Todo | Calendar + CI/CD + Security |
 | **User decisions** | #142, #143, #144 | Awaiting user | Требуют решения пользователя |
@@ -52,7 +52,7 @@
 
 Задача: взять верхний незакрытый E-блок из текущего Wave. Перевести issue в In Progress на доске. Реализовать по чеклисту в issue body. Targeted tests. Commit с `Closes #N` (Conventional Commits). Done на доске. Обновить docs. Выдать prompt для следующего чата.
 
-Текущий блок: E9 (#132) — Post-Listen Auto-Analyze & Cost Estimate.
+Текущий блок: E10 (#133) — Output Polish: History, Export, Daily Digest.
 ```
 
 ---

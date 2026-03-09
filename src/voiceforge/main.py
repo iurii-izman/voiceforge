@@ -474,7 +474,7 @@ def run_analyze_pipeline(
             f"Dry-run: would analyze last {seconds}s, template={template or 'default'}, "
             f"{len(segments)} segments, transcript ~{len(transcript or '')} chars. No LLM call."
         )
-        return (msg, segments_for_log, {})
+        return (msg, segments_for_log, {"transcript": transcript or ""})
 
     effective_model, is_ollama_fallback = cfg.get_effective_llm()
     if effective_model is None:
@@ -689,6 +689,11 @@ def listen(
         "--live-summary/--no-live-summary",
         help="Периодически выводить краткий саммари (ключевые моменты + действия) по последним 90 с",
     ),
+    auto_analyze: bool = typer.Option(
+        False,
+        "--auto-analyze/--no-auto-analyze",
+        help="On Ctrl+C, run analyze immediately without prompting.",
+    ),
 ) -> None:
     """Start microphone/system recording to ring buffer for analyze."""
     cfg = _get_config()
@@ -779,6 +784,48 @@ def listen(
             sys.stdout.flush()
         capture.stop()
 
+        # E9 (#132): Post-listen prompt to run analyze on full buffer
+        ring_file = Path(ring_path)
+        if ring_file.exists() and ring_file.stat().st_size > 0:
+            do_analyze = auto_analyze
+            if not do_analyze and sys.stdin.isatty():
+                try:
+                    answer = input(t("listen.analyze_prompt")).strip().lower()
+                    do_analyze = answer in ("", "y", "yes")
+                except (EOFError, OSError):
+                    do_analyze = False
+            if do_analyze:
+                analyze_seconds = int(cfg.ring_seconds)
+                display_text, segments_for_log, analysis_for_log = run_analyze_pipeline(
+                    analyze_seconds, template=None, dry_run=False
+                )
+                error_message = _extract_error_message(display_text)
+                if error_message is not None:
+                    typer.echo(error_message, err=True)
+                    raise SystemExit(1)
+                session_id = None
+                try:
+                    from voiceforge.core.transcript_log import TranscriptLog
+
+                    log_db = TranscriptLog()
+                    session_id = log_db.log_session(
+                        segments=segments_for_log,
+                        duration_sec=analyze_seconds,
+                        model=analysis_for_log.get("model", ""),
+                        questions=analysis_for_log.get("questions"),
+                        answers=analysis_for_log.get("answers"),
+                        recommendations=analysis_for_log.get("recommendations"),
+                        action_items=analysis_for_log.get("action_items"),
+                        cost_usd=analysis_for_log.get("cost_usd", 0.0),
+                        template=analysis_for_log.get("template"),
+                    )
+                    log_db.close()
+                except Exception as e:
+                    log.warning("analyze.log_failed", error=str(e))
+                if session_id is not None:
+                    typer.echo(f"session_id={session_id}")
+                typer.echo(display_text or "")
+
 
 _TEMPLATE_CHOICES = ["standup", "sprint_review", "one_on_one", "brainstorm", "interview"]
 
@@ -853,6 +900,11 @@ def analyze(
         "--dry-run",
         help="Показать, что будет проанализировано (транскрипт, сегменты), без вызова LLM (блок 60).",
     ),
+    estimate: bool = typer.Option(
+        False,
+        "--estimate",
+        help="Show estimated LLM cost without running analyze (E9 #132).",
+    ),
 ) -> None:
     """Analyze ring-buffer fragment: transcribe -> diarize -> rag -> llm."""
     cfg = _get_config()
@@ -869,6 +921,51 @@ def analyze(
         raise SystemExit(1)
     if disk_warn:
         typer.echo(t(disk_warn), err=True)
+
+    # E9 (#132): --estimate shows cost and exits
+    if estimate:
+        _display_text, _segments, dry_result = run_analyze_pipeline(seconds, template=template, dry_run=True)
+        transcript = (dry_result or {}).get("transcript", "") or ""
+        effective_model, _ = cfg.get_effective_llm()
+        if effective_model is None:
+            typer.echo(t("error.no_llm_backend"), err=True)
+            raise SystemExit(1)
+        from voiceforge.llm.router import estimate_analyze_cost
+
+        cost_usd = estimate_analyze_cost(transcript, effective_model)
+        if output == "json":
+            typer.echo(json.dumps(_cli_success_payload({"estimate_usd": round(cost_usd, 6)}), ensure_ascii=False))
+        else:
+            typer.echo(t("analyze.estimate_line", cost=f"${cost_usd:.4f}"))
+        return
+
+    # E9 (#132): first analyze (no history) — show estimate and ask confirmation
+    if not dry_run and sys.stdin.isatty():
+        try:
+            from voiceforge.core.transcript_log import TranscriptLog
+
+            log_db = TranscriptLog()
+            sessions = log_db.get_sessions(last_n=1)
+            log_db.close()
+            if not sessions:
+                _dt, _seg, dry_result = run_analyze_pipeline(seconds, template=template, dry_run=True)
+                transcript = (dry_result or {}).get("transcript", "") or ""
+                effective_model, _ = cfg.get_effective_llm()
+                if effective_model and transcript.strip():
+                    from voiceforge.llm.router import estimate_analyze_cost
+
+                    cost_usd = estimate_analyze_cost(transcript, effective_model)
+                    try:
+                        answer = input(t("analyze.first_confirm", cost=f"${cost_usd:.4f}")).strip().lower()
+                        if answer not in ("", "y", "yes"):
+                            raise SystemExit(0)
+                    except (EOFError, OSError):
+                        raise SystemExit(0)
+        except SystemExit:
+            raise
+        except Exception as e:
+            log.debug("analyze.first_confirm_skip", error=str(e))
+
     if not dry_run and output == "text" and sys.stderr.isatty():
         # Block 72: rough estimate (transcribe + LLM) for user feedback
         est_lo = max(10, seconds // 5 + 5)
