@@ -73,6 +73,6 @@ def check_network_for_llm(model_id: str) -> str | None:
         sock = socket.create_connection((host, port), timeout=NETWORK_TIMEOUT_SEC)
         sock.close()
         return None
-    except (TimeoutError, OSError) as e:
+    except OSError as e:
         log.warning("preflight.network_unreachable", host=host, error=str(e))
         return "error.ollama_not_running" if matched_prefix == "ollama" else "error.no_network"

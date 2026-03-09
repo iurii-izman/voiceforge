@@ -490,6 +490,7 @@ async def test_run_one_retention_purge_and_cancel_helper(monkeypatch) -> None:
 
         def __await__(self):
             async def _inner():
+                await asyncio.sleep(0)  # S7503: use async in async def
                 if self.raises_cancel:
                     raise asyncio.CancelledError()
                 return None

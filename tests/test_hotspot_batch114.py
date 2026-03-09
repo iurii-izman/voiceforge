@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 from types import SimpleNamespace
 
@@ -24,6 +25,7 @@ class _FakeJsonRequest:
         self._exc = exc
 
     async def json(self):
+        await asyncio.sleep(0)  # S7503: use async in async def
         if self._exc is not None:
             raise self._exc
         return self._payload

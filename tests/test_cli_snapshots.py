@@ -50,7 +50,7 @@ def test_cli_history_snapshot_keywords(monkeypatch: pytest.MonkeyPatch, tmp_path
     result = runner.invoke(app, ["history"])
     assert result.exit_code == 0
     out = result.output
-    assert "session" in out.lower() or "history" in out.lower() or "No sessions" in out or "ID" in out or len(out.strip()) >= 0
+    assert "session" in out.lower() or "сессий" in out or "history" in out.lower() or "No sessions" in out or "ID" in out
 
 
 def test_cli_cost_snapshot_keywords(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:

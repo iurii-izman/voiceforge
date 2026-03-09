@@ -137,7 +137,7 @@ def config_show(
     if as_json:
         typer.echo(
             json.dumps(
-                {"config": config_dict, "overridden": list(sorted(overridden))},
+                {"config": config_dict, "overridden": sorted(overridden)},
                 ensure_ascii=False,
                 indent=2,
             )

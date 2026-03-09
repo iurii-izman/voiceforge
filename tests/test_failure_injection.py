@@ -22,7 +22,7 @@ def test_transcript_log_graceful_on_corrupted_db(tmp_path: Path) -> None:
         log._get_conn()
         # If it opens (SQLite creates new), that's also acceptable
         log.close()
-    except (sqlite3.DatabaseError, Exception) as e:
+    except Exception as e:
         assert "database" in str(e).lower() or "sqlite" in str(e).lower() or "file" in str(e).lower()
 
 

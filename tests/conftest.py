@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 
-def raise_when_called(exc: BaseException):
+def raise_when_called(exc: Exception):
     """Return a callable that raises exc when called. Replaces (x for x in ()).throw(exc) for Sonar S7500."""
 
     def _inner(*args: object, **kwargs: object) -> None:
