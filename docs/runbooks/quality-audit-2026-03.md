@@ -96,3 +96,9 @@ uv run mypy src/voiceforge/core src/voiceforge/llm src/voiceforge/rag src/voicef
 uv run bandit -r src -ll -q --configfile .bandit.yaml
 uv run pip-audit --desc --ignore-vuln CVE-2025-69872
 ```
+
+---
+
+## 6. Wave completion (2026-03-09)
+
+**QA wave #152–#157 завершена.** Все блоки QA1–QA6 закрыты. Следующий приоритет для автопилота: roadmap (docs/plans.md), следующий P0/P1 из PROJECT-STATUS-SUMMARY по решению пользователя, или docs/governance / preflight sweep. Периодический re-check CVE #65 — по security-and-dependencies.md разд. 4.

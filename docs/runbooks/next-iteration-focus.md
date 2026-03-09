@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-09 (QA6 #157 закрыт; QA wave #152–#157 завершена)
+**Обновлено:** 2026-03-09 (docs sync после QA wave; следующий приоритет — roadmap/docs/preflight)
 
 ---
 
@@ -19,9 +19,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** QA6 #157 закрыт: Desktop/frontend Sonar — main.js (i18n status_ready/status_analyzing, compact_daemon_ok/off); platform.js JSDoc; desktopHarness envelope(); native-smoke константы таймаутов и assert.ok. Build + Playwright e2e зелёные.
+**Сделано в сессии:** Docs sync после QA wave: quality-audit — раздел «Wave completion»; PROJECT-STATUS-SUMMARY — batching discipline при отсутствии открытых QA-блоков; DOCS-INDEX — дата; next-iteration-focus — следующий шаг.
 
-**Следующий шаг:** QA wave #152–#157 завершена. Выбрать следующий приоритет из PROJECT-STATUS-SUMMARY (roadmap, docs, или следующий P0/P1 блок).
+**Следующий шаг:** Приоритет — по выбору: (1) preflight sweep: `./scripts/preflight_repo.sh --with-tests` для проверки зелёного состояния репо; (2) периодический CVE re-check (#65) по security-and-dependencies.md разд. 4; (3) следующий пункт roadmap (docs/plans.md) или governance по решению пользователя. Новые feature issues не создавать без отдельной задачи.
 
 ---
 
@@ -88,4 +88,4 @@
 
 Всё закрытое: [docs/history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
 
-Вкратце: Roadmap 1-18 реализован. Phase A-D (#55-#73) закрыт. Score-to-100 (#97-#123) закрыт. Phase E Daily Driver (#124-#144) закрыт. Текущий live queue: quality remediation wave `#152-#157`.
+Вкратце: Roadmap 1-18 реализован. Phase A-D (#55-#73) закрыт. Score-to-100 (#97-#123) закрыт. Phase E Daily Driver (#124-#144) закрыт. QA wave #152–#157 завершена. Следующий приоритет: preflight sweep, CVE re-check (#65), roadmap или docs/governance по решению пользователя.

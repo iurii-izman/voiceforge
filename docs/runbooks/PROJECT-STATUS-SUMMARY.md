@@ -248,8 +248,7 @@ Wave QA-C: #155 → #157
 
 **Batching discipline:**
 - Брать 1 QA-блок за сессию (max 2 только если это один subsystem и один verification loop)
-- QA1-QA2 — строго по порядку
-- QA3-QA6 — по очереди из [quality-audit-2026-03.md](quality-audit-2026-03.md), без смешивания unrelated surfaces
+- QA1-QA6 — **все закрыты** (wave complete 2026-03-09). При отсутствии открытых QA-блоков: приоритет = roadmap (plans.md), следующий P0/P1 по решению пользователя, docs/governance или preflight sweep; placeholders #148–#151 не активировать.
 - E20/E21 остаются policy-слоем; QA-wave не повод активировать placeholders или новые feature tracks
 
 **В конце каждой сессии:**
