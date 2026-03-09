@@ -29,10 +29,13 @@ def test_contract_status_returns_ok_and_ram(monkeypatch: pytest.MonkeyPatch) -> 
 
 def test_contract_ready_returns_ready_boolean(monkeypatch: pytest.MonkeyPatch) -> None:
     """GET /api/ready: JSON has 'ready' boolean (sync/async same)."""
-    monkeypatch.setattr("voiceforge.core.transcript_log.TranscriptLog", lambda: MagicMock(
-        get_sessions=lambda **kw: [],
-        close=lambda: None,
-    ))
+    monkeypatch.setattr(
+        "voiceforge.core.transcript_log.TranscriptLog",
+        lambda: MagicMock(
+            get_sessions=lambda **kw: [],
+            close=lambda: None,
+        ),
+    )
     status, _, body = server_async._sync_ready()
     data = json.loads(body.decode("utf-8"))
     assert status == 200
@@ -50,10 +53,13 @@ def test_contract_health_returns_status_ok() -> None:
 
 def test_contract_sessions_returns_sessions_key(monkeypatch: pytest.MonkeyPatch) -> None:
     """GET /api/sessions: JSON has 'sessions' array (sync/async same)."""
-    monkeypatch.setattr("voiceforge.core.transcript_log.TranscriptLog", lambda: MagicMock(
-        get_sessions=lambda **kw: [],
-        close=lambda: None,
-    ))
+    monkeypatch.setattr(
+        "voiceforge.core.transcript_log.TranscriptLog",
+        lambda: MagicMock(
+            get_sessions=lambda **kw: [],
+            close=lambda: None,
+        ),
+    )
     status, _, body = server_async._sync_sessions()
     data = json.loads(body.decode("utf-8"))
     assert status == 200
