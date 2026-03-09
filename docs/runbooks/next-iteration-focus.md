@@ -55,7 +55,6 @@
 Задача: взять верхний незакрытый E-блок из текущего Wave. Перевести существующий issue в In Progress на доске. Реализовать по чеклисту в issue body. Строго соблюдать phase-e-decision-log: Tauri = primary GUI, Web UI/Telegram/RAG watcher = maintenance-only, Calendar = narrow CalDAV scope; placeholders #148-#151 не активировать. Targeted tests. Commit с `Closes #N` (Conventional Commits). Done на доске. Обновить docs. Выдать prompt для следующего чата.
 
 Текущий блок: E19 (#142) — Desktop-first track: Tauri E2E flow, tray, hotkeys, packaging verification (Wave 3.5).
-
 ```
 
 ---
