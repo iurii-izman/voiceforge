@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import io
 from unittest.mock import patch
 
 from voiceforge.cli.setup import (
+    _confirm_resilient,
     _ensure_config_dir,
+    _prompt_resilient,
     _write_config_yaml,
     run_config_init,
     run_setup_wizard,
@@ -147,6 +150,69 @@ def test_run_setup_wizard_hides_secret_prompts(tmp_path, monkeypatch) -> None:
     secret_calls = [kwargs for msg, kwargs in prompt_calls if "API key" in msg or "HuggingFace" in msg]
     assert secret_calls
     assert all(call.get("hide_input") is True for call in secret_calls)
+
+
+def test_prompt_resilient_falls_back_to_raw_stdin(monkeypatch) -> None:
+    """Fallback prompt path should decode raw stdin when Typer prompt crashes."""
+
+    class FakeStdin:
+        def __init__(self, raw: bytes) -> None:
+            self.buffer = io.BytesIO(raw)
+            self.encoding = "utf-8"
+
+    monkeypatch.setattr("voiceforge.cli.setup.sys.stdin", FakeStdin(b"auto\n"))
+
+    def boom(*_args: object, **_kwargs: object) -> str:
+        raise UnicodeDecodeError("utf-8", b"\xd0", 0, 1, "bad input")
+
+    monkeypatch.setattr("voiceforge.cli.setup.typer.prompt", boom)
+    assert _prompt_resilient("Language for STT/UI (ru / en / auto):", default="auto") == "auto"
+
+
+def test_confirm_resilient_falls_back_to_raw_stdin(monkeypatch) -> None:
+    """Fallback confirm path should parse yes/no answers when Typer confirm crashes."""
+
+    class FakeStdin:
+        def __init__(self, raw: bytes) -> None:
+            self.buffer = io.BytesIO(raw)
+            self.encoding = "utf-8"
+
+    monkeypatch.setattr("voiceforge.cli.setup.sys.stdin", FakeStdin(b"\xd0\xb4\xd0\xb0\n"))
+
+    def boom(*_args: object, **_kwargs: object) -> bool:
+        raise UnicodeDecodeError("utf-8", b"\xd0", 0, 1, "bad input")
+
+    monkeypatch.setattr("voiceforge.cli.setup.typer.confirm", boom)
+    assert _confirm_resilient("Continue anyway?", default=False) is True
+
+
+def test_prompt_resilient_skips_hidden_tty_prompt_on_non_tty(monkeypatch) -> None:
+    """Hidden-input prompts should bypass Typer/getpass when stdin/stderr are not TTYs."""
+
+    class FakeStdin:
+        def __init__(self, raw: bytes) -> None:
+            self.buffer = io.BytesIO(raw)
+            self.encoding = "utf-8"
+
+        def isatty(self) -> bool:
+            return False
+
+    class FakeStderr:
+        def isatty(self) -> bool:
+            return False
+
+    monkeypatch.setattr("voiceforge.cli.setup.sys.stdin", FakeStdin(b"secret\n"))
+    monkeypatch.setattr("voiceforge.cli.setup.sys.stderr", FakeStderr())
+
+    def unexpected_getpass(_prompt: str) -> str:
+        raise AssertionError("getpass should not be called for non-tty fallback")
+
+    def unexpected_prompt(*_args: object, **_kwargs: object) -> str:
+        raise AssertionError("typer.prompt should not be called for non-tty hidden input")
+
+    monkeypatch.setattr("voiceforge.cli.setup.typer.prompt", unexpected_prompt)
+    monkeypatch.setattr("voiceforge.cli.setup.getpass.getpass", unexpected_getpass)
+    assert _prompt_resilient("Anthropic API key (or Enter to skip):", hide_input=True) == "secret"
 
 
 def test_setup_cli_help_exposes_setup_and_config_init() -> None:

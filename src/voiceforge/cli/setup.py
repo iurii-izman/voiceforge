@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import getpass
+import locale
 import sys
 from pathlib import Path
 from typing import Any
@@ -26,6 +28,87 @@ _WHISPER_RAM_MB: dict[str, int] = {
     "large-v2": 3000,
     "large-v3": 3000,
 }
+
+
+def _decode_prompt_bytes(raw: bytes) -> str:
+    """Decode raw stdin bytes without crashing on locale/PTY mismatches."""
+    candidates = [
+        "utf-8",
+        getattr(sys.stdin, "encoding", None),
+        locale.getpreferredencoding(False),
+        sys.getfilesystemencoding(),
+    ]
+    for encoding in candidates:
+        if not encoding:
+            continue
+        try:
+            return raw.decode(encoding).strip()
+        except (LookupError, UnicodeDecodeError):
+            continue
+    return raw.decode("utf-8", errors="ignore").strip()
+
+
+def _supports_hidden_input() -> bool:
+    """Return True when the current terminal can safely handle hidden prompts."""
+    stdin_is_tty = bool(getattr(sys.stdin, "isatty", lambda: False)())
+    stderr_is_tty = bool(getattr(sys.stderr, "isatty", lambda: False)())
+    return stdin_is_tty and stderr_is_tty
+
+
+def _fallback_prompt(message: str, default: str = "", show_default: bool = True, hide_input: bool = False) -> str:
+    """Fallback prompt path when Click/Typer input decoding crashes in toolbox/PTY."""
+    label = message.strip()
+    if show_default and default not in ("", None):
+        label = f"{label} [{default}]"
+    label = f"{label}: "
+    if hide_input and _supports_hidden_input():
+        try:
+            value = getpass.getpass(label)
+            return (value or default or "").strip()
+        except UnicodeDecodeError:
+            pass
+    sys.stdout.write(label)
+    sys.stdout.flush()
+    raw = getattr(sys.stdin, "buffer", sys.stdin).readline()
+    if isinstance(raw, str):
+        value = raw.strip()
+    else:
+        value = _decode_prompt_bytes(raw)
+    return (value or default or "").strip()
+
+
+def _prompt_resilient(message: str, **kwargs: Any) -> str:
+    """Use Typer prompt first; fall back to raw stdin if terminal decoding breaks."""
+    if kwargs.get("hide_input") and not _supports_hidden_input():
+        return _fallback_prompt(
+            message,
+            default=str(kwargs.get("default", "") or ""),
+            show_default=bool(kwargs.get("show_default", True)),
+            hide_input=False,
+        )
+    try:
+        return typer.prompt(message, **kwargs)
+    except UnicodeDecodeError:
+        return _fallback_prompt(
+            message,
+            default=str(kwargs.get("default", "") or ""),
+            show_default=bool(kwargs.get("show_default", True)),
+            hide_input=bool(kwargs.get("hide_input", False)),
+        )
+
+
+def _confirm_resilient(message: str, **kwargs: Any) -> bool:
+    """Use Typer confirm first; fall back to raw stdin if terminal decoding breaks."""
+    try:
+        return typer.confirm(message, **kwargs)
+    except UnicodeDecodeError:
+        default = bool(kwargs.get("default", False))
+        answer = _fallback_prompt(message, default="y" if default else "n", show_default=True, hide_input=False).lower()
+        if answer in ("y", "yes", "true", "1", "д", "да"):
+            return True
+        if answer in ("n", "no", "false", "0", "н", "нет"):
+            return False
+        return default
 
 
 def _ensure_config_dir() -> Path:
@@ -71,8 +154,8 @@ def run_setup_wizard(
     prompt_fn(msg, default=...), confirm_fn(msg, default=...), echo_fn(msg) can be
     overridden for tests (mocked prompts).
     """
-    prompt = prompt_fn or (lambda msg, **kw: typer.prompt(msg, **kw))
-    confirm = confirm_fn or (lambda msg, **kw: typer.confirm(msg, **kw))
+    prompt = prompt_fn or _prompt_resilient
+    confirm = confirm_fn or _confirm_resilient
     echo = echo_fn or typer.echo
 
     echo("=== VoiceForge Setup ===\n")
