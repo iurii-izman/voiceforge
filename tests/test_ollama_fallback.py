@@ -5,6 +5,8 @@ from __future__ import annotations
 from types import SimpleNamespace
 from unittest.mock import patch
 
+import pytest
+
 from voiceforge.core.config import Settings
 
 
@@ -121,6 +123,7 @@ def test_run_analyze_pipeline_skips_llm_on_silence(monkeypatch) -> None:
 
     class FakePipeline:
         def __init__(self, cfg=None):
+            # No-op for test fake (S1186).
             pass
 
         def __enter__(self):
@@ -139,4 +142,4 @@ def test_run_analyze_pipeline_skips_llm_on_silence(monkeypatch) -> None:
     assert "тишина" in text.lower()
     assert "llm" in text.lower() or "анализ пропущен" in text.lower()
     assert segments == []
-    assert analysis["cost_usd"] == 0.0
+    assert analysis["cost_usd"] == pytest.approx(0.0)

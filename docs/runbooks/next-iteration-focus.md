@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-09 (JS Sonar: S7764, S7784, S7763, S7735, S3776, S2004)
+**Обновлено:** 2026-03-09 (Sonar: S1186 S1244 test_ollama_fallback, coverage в workflow)
 
 ---
 
@@ -19,9 +19,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** JS Sonar: (1) S7764 — native-smoke.e2e.js: window → globalThis. (2) S7784 — desktopHarness: JSON.parse(JSON.stringify) → structuredClone. (3) S7763 — platform.js: re-export LogicalPosition/LogicalSize via export…from. (4) S7735 — main.js: сняты негативные условия (renderRecentSessionsList, dur/start_sec/idx/score, handleRagSearch). (5) S3776 — main.js: вынесен applyRagSearchResult, упрощён handleRagSearch. (6) S2004 — desktopHarness: createUnsubscribe вынесен из listen для уменьшения вложенности.
+**Сделано в сессии:** (1) S1186 — test_ollama_fallback: комментарий в пустом __init__ FakePipeline. (2) S1244 — assert cost_usd через pytest.approx(0.0). (3) sonar.yml: в args добавлен -Dsonar.python.coverage.reportPaths=coverage.xml для явной передачи отчёта (возможная причина «No data» в Coverage).
 
-**Следующий шаг:** roadmap/docs или оставшиеся Sonar (Python S3776).
+**Следующий шаг:** после пуша проверить Quality Gate; при необходимости снижать когнитивную сложность (S3776) или смотреть 2 failed conditions в SonarCloud.
 
 ---
 

@@ -42,7 +42,7 @@ jobs:
           SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
         with:
-          args: -Dsonar.python.version=3.12
+          args: -Dsonar.python.version=3.12 -Dsonar.python.coverage.reportPaths=coverage.xml
       - name: SonarCloud Skip (no token)
         if: ${{ env.SONAR_TOKEN == '' }}
         run: echo "SONAR_TOKEN is not configured; scan skipped."
