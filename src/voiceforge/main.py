@@ -78,15 +78,18 @@ app.add_typer(calendar_app, name="calendar")
 
 def _configure_structlog(level: int, *, stream: Any | None = None) -> None:
     """Configure structlog for CLI/daemon with a sensible default log level."""
-    renderer = structlog.dev.ConsoleRenderer(stream=stream) if stream is not None else structlog.dev.ConsoleRenderer()
-    structlog.configure(
-        wrapper_class=structlog.make_filtering_bound_logger(level),
-        processors=[
+    renderer = structlog.dev.ConsoleRenderer()
+    kwargs: dict[str, Any] = {
+        "wrapper_class": structlog.make_filtering_bound_logger(level),
+        "processors": [
             structlog.contextvars.merge_contextvars,
             structlog.processors.TimeStamper(fmt="iso"),
             renderer,
         ],
-    )
+    }
+    if stream is not None:
+        kwargs["logger_factory"] = structlog.PrintLoggerFactory(file=stream)
+    structlog.configure(**kwargs)
 
 
 def _get_app_version() -> str:
