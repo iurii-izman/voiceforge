@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-13 (time lock refreshed and verified; #164 narrowed to remaining glib ecosystem alert)
+**Обновлено:** 2026-03-13 (time alert fixed; only remaining security queue is Linux GTK/glib alert)
 
 ---
 
@@ -19,9 +19,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** в `desktop/src-tauri/Cargo.lock` через coordinated refresh поднят `time` до `0.3.47`; `cargo tauri build` и `npm --prefix desktop run e2e:release-gate` прошли на обновлённом lock. npm alert `serialize-javascript` уже закрыт, а `#164` фактически сузился до remaining `glib` ecosystem alert.
+**Сделано в сессии:** в `desktop/src-tauri/Cargo.lock` через coordinated refresh поднят `time` до `0.3.47`; `cargo tauri build` и `npm --prefix desktop run e2e:release-gate` прошли на обновлённом lock, а remote Dependabot alert `time` уже закрылся. npm alert `serialize-javascript` тоже закрыт. Активный security queue сузился до remaining `glib` ecosystem alert.
 
-**Следующий шаг:** продолжить `#164` как узкий Rust/Tauri/GTK refresh только для remaining `glib` alert. Перед реализацией: зафиксировать точную минимальную цепочку обновления, которая может вытеснить transitive `glib 0.18.5` из Linux desktop stack, затем снова прогнать desktop build + `npm --prefix desktop run e2e:release-gate`.
+**Следующий шаг:** продолжить `#164` как узкий Linux GTK/Tauri refresh только для remaining `glib` alert. Перед реализацией: зафиксировать точную минимальную цепочку обновления, которая может вытеснить transitive `glib 0.18.5` из Linux desktop stack, затем снова прогнать desktop build + `npm --prefix desktop run e2e:release-gate`.
 
 ---
 
@@ -38,7 +38,7 @@
 | **Desktop Stabilization** | #159✓ → #160✓ → #161✓ | **Done** | UX bugs, test policy и regression matrix закрыты |
 | **Decision log** | #143✓, #144✓ | Resolved | Scope guard для автопилота; новых user decisions сейчас не нужно |
 | **Maintenance** | #162✓ | Done | Weekly re-check добавлен |
-| **Security Hardening** | #163✓ → #164 | Active | npm native-e2e alert закрыт; `time` refreshed and verified; remaining coordinated block = `glib` in Linux desktop stack |
+| **Security Hardening** | #163✓ → #164 | Active | npm native-e2e alert закрыт; `time` alert закрыт; remaining coordinated block = `glib` in Linux desktop stack |
 
 ---
 
@@ -53,7 +53,7 @@
 
 Среда: Fedora Atomic, toolbox 43, uv sync --extra all. Ключи в keyring (keyring-keys-reference.md). Тесты: targeted subset, не полный pytest (OOM risk). Для infra/docs/governance cleanup сначала прогонять `./scripts/preflight_repo.sh --with-tests`. Pre-commit в toolbox; на хосте git push --no-verify если нет Python 3.12.
 
-Задача: взять `#164` как следующий targeted hardening block. Сначала выполнить `uv run python scripts/check_maintenance_state.py`, затем работать только по remaining `glib` alert для `desktop/src-tauri/Cargo.lock`: найти минимальный безопасный ecosystem refresh, после изменений прогнать `cargo tauri build` и `npm --prefix desktop run e2e:release-gate`, синхронизировать docs и перевести issue на доске.
+Задача: взять `#164` как следующий targeted hardening block. Сначала выполнить `uv run python scripts/check_maintenance_state.py`, затем работать только по remaining `glib` alert для `desktop/src-tauri/Cargo.lock`: найти минимальный безопасный ecosystem refresh для Linux GTK/Tauri chain, после изменений прогнать `cargo tauri build` и `npm --prefix desktop run e2e:release-gate`, синхронизировать docs и перевести issue на доске.
 ```
 
 ---
