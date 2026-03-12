@@ -16,7 +16,7 @@
 
 `#65` / `CVE-2025-69872` больше не является активным wait-state: 2026-03-13 `uv run pip-audit --desc` проходит без `--ignore-vuln`.
 
-Dependabot alert `#4` / `serialize-javascript` больше не является активным tracked alert: 2026-03-13 в `desktop/e2e-native` добавлен npm override до `serialize-javascript@7.0.4`, а `npm audit` для native-e2e workspace снова чист. После следующего push/scанирования remote alert должен закрыться как fixed.
+Dependabot alert `#4` / `serialize-javascript` больше не является активным tracked alert: 2026-03-13 в `desktop/e2e-native` добавлен npm override до `serialize-javascript@7.0.4`, `npm audit` для native-e2e workspace снова чист, а remote Dependabot alert уже перешёл в `fixed`.
 
 ---
 
