@@ -71,6 +71,7 @@ npm run e2e:report
 
 - functional/autopilot flows: daemon ok, listen/analyze, sessions/detail, settings/autostart/updater
 - stateful regression matrix: onboarding persistence, compact/full recovery, recent-session open/back, settings persistence, daemon retry recovery
+- stateful regression matrix: onboarding persistence, compact/full recovery, recent-session open/back, settings persistence, daemon retry recovery, runtime i18n empty states, dashboard refresh after recovery/analyze
 - a11y smoke: home, sessions, settings panel
 - visual baselines: home dashboard, sessions list, settings slide-out panel
 

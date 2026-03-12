@@ -157,6 +157,91 @@ const I18N = {
     status_ready: "Готово.",
     status_analyzing: "Анализ…",
     status_analyzing_60: "Анализ 60 сек…",
+    status_daemon_unexpected: "Неожиданный ответ: {value}",
+    status_daemon_run_hint: "Запустите демон: voiceforge daemon. {message}",
+    recent_sessions_daemon_hint: "Запустите демон.",
+    recent_sessions_empty: "Нет сессий. Запустите анализ с блока выше.",
+    calendar_empty: "Нет событий на ближайшие 48 ч.",
+    calendar_setup: "Настройка CalDAV",
+    calendar_load_error: "Не удалось загрузить календарь: {message}",
+    calendar_untitled: "(без названия)",
+    calendar_more: "и ещё {count}…",
+    notify_analysis_done: "Анализ завершён.",
+    notify_analysis_error: "Анализ: ошибка.",
+    date_group_today: "Сегодня",
+    date_group_yesterday: "Вчера",
+    date_group_this_week: "На этой неделе",
+    date_group_older: "Ранее",
+    sessions_empty_filtered: "Нет сессий по заданным фильтрам.",
+    sessions_col_favorite: "Избранное",
+    sessions_col_start: "Начало",
+    sessions_col_duration: "Длительность",
+    favorite_add: "В избранное",
+    favorite_remove: "Убрать из избранного",
+    open_session_aria: "Открыть сессию {id}",
+    session_label: "Сессия {id}",
+    duration_sec_short: "{seconds} с",
+    last_analysis_more_actions: "… ещё {count}",
+    last_analysis_qr_summary: "Вопросов: {questions}, рекомендаций: {recommendations}",
+    notify_link_copied: "Ссылка скопирована.",
+    notify_segment_copied: "Сегмент скопирован.",
+    notify_copied_generic: "Скопировано.",
+    copy_no_transcript: "Нет транскрипта для копирования.",
+    copy_transcript_done: "Транскрипт скопирован.",
+    copy_no_actions: "Нет action items для копирования.",
+    copy_actions_done: "Action items скопированы.",
+    copy_failed: "Не удалось скопировать: {message}",
+    empty_daemon_title: "Демон не запущен",
+    empty_daemon_hint: "Запустите: voiceforge daemon",
+    empty_sessions_title: "Сессий пока нет",
+    empty_sessions_hint: "Запустите запись и анализ на главной.",
+    detail_transcript: "Транскрипт",
+    detail_analysis: "Анализ",
+    detail_stats: "Слов: {words}, символов: {chars}",
+    detail_model: "Модель: {model}",
+    detail_questions: "Вопросы",
+    detail_answers: "Ответы / выводы",
+    detail_recommendations: "Рекомендации",
+    detail_actions: "Действия",
+    detail_cost: "Стоимость: ${cost}",
+    empty_no_data: "Нет данных.",
+    empty_no_analysis: "Нет анализа.",
+    export_sessions_empty: "Нет сессий для экспорта.",
+    export_costs_empty: "Сначала загрузите отчёт (7 или 30 дней).",
+    quickstart_link: "Быстрый старт в репозитории",
+    settings_daemon_hint: "Настройки загружаются с демона.",
+    settings_none: "Нет настроек.",
+    settings_daemon_version: "Версия демона: {version}",
+    settings_daemon_version_unavailable: "Версия демона: недоступна",
+    analytics_no_data: "Нет данных.",
+    analytics_total: "Итого за период:",
+    analytics_calls: "{count} вызовов",
+    analytics_by_model: "По моделям",
+    analytics_by_day: "По дням",
+    analytics_col_model: "Модель",
+    analytics_col_cost: "Стоимость ($)",
+    analytics_col_calls: "Вызовы",
+    analytics_col_date: "Дата",
+    cost_widget_summary: "${cost} ({calls} вызовов)",
+    transcript_nav: "Навигация по сегментам",
+    transcript_segment_title: "Сегмент {index}",
+    time_range_short: "{start}–{end} с ",
+    export_done: "Экспорт: {value}",
+    export_done_default: "выполнен",
+    chart_cost_label: "Стоимость ($)",
+    tag_filter_all: "Все",
+    transcript_hits_title: "Найдено по тексту:",
+    transcript_no_hits: "Ничего не найдено.",
+    export_sessions_confirm: "Экспорт в CSV? (Отмена = JSON)",
+    update_available_status: "Доступна версия {version}. Нажмите «Проверить сейчас» для установки.",
+    update_found_status: "Найдено обновление {version}…",
+    update_confirm: "Доступна версия {version}.\n\n{body}\n\nУстановить сейчас?",
+    update_installing: "Установка…",
+    update_deferred: "Обновление отложено.",
+    update_none: "Обновлений нет.",
+    update_unavailable: "Обновления отключены или недоступны.",
+    dashboard_expand: "Развернуть",
+    dashboard_collapse: "Свернуть",
   },
   en: {
     nav: { home: "Home", sessions: "Sessions", costs: "Costs", settings: "Settings" },
@@ -272,6 +357,91 @@ const I18N = {
     status_ready: "Done.",
     status_analyzing: "Analyzing…",
     status_analyzing_60: "Analyzing 60 sec…",
+    status_daemon_unexpected: "Unexpected response: {value}",
+    status_daemon_run_hint: "Run the daemon: voiceforge daemon. {message}",
+    recent_sessions_daemon_hint: "Start the daemon.",
+    recent_sessions_empty: "No sessions yet. Run analysis from the panel above.",
+    calendar_empty: "No events in the next 48 h.",
+    calendar_setup: "CalDAV setup",
+    calendar_load_error: "Failed to load calendar: {message}",
+    calendar_untitled: "(untitled)",
+    calendar_more: "... {count} more",
+    notify_analysis_done: "Analysis completed.",
+    notify_analysis_error: "Analysis failed.",
+    date_group_today: "Today",
+    date_group_yesterday: "Yesterday",
+    date_group_this_week: "This week",
+    date_group_older: "Earlier",
+    sessions_empty_filtered: "No sessions match the selected filters.",
+    sessions_col_favorite: "Favorite",
+    sessions_col_start: "Started",
+    sessions_col_duration: "Duration",
+    favorite_add: "Add to favorites",
+    favorite_remove: "Remove from favorites",
+    open_session_aria: "Open session {id}",
+    session_label: "Session {id}",
+    duration_sec_short: "{seconds} sec",
+    last_analysis_more_actions: "... {count} more",
+    last_analysis_qr_summary: "Questions: {questions}, recommendations: {recommendations}",
+    notify_link_copied: "Link copied.",
+    notify_segment_copied: "Segment copied.",
+    notify_copied_generic: "Copied.",
+    copy_no_transcript: "No transcript to copy.",
+    copy_transcript_done: "Transcript copied.",
+    copy_no_actions: "No action items to copy.",
+    copy_actions_done: "Action items copied.",
+    copy_failed: "Failed to copy: {message}",
+    empty_daemon_title: "Daemon is not running",
+    empty_daemon_hint: "Run: voiceforge daemon",
+    empty_sessions_title: "No sessions yet",
+    empty_sessions_hint: "Start recording and analysis on the Home tab.",
+    detail_transcript: "Transcript",
+    detail_analysis: "Analysis",
+    detail_stats: "Words: {words}, characters: {chars}",
+    detail_model: "Model: {model}",
+    detail_questions: "Questions",
+    detail_answers: "Answers / findings",
+    detail_recommendations: "Recommendations",
+    detail_actions: "Actions",
+    detail_cost: "Cost: ${cost}",
+    empty_no_data: "No data.",
+    empty_no_analysis: "No analysis yet.",
+    export_sessions_empty: "No sessions to export.",
+    export_costs_empty: "Load a report first (7 or 30 days).",
+    quickstart_link: "Quick start in the repository",
+    settings_daemon_hint: "Settings are loaded from the daemon.",
+    settings_none: "No settings available.",
+    settings_daemon_version: "Daemon version: {version}",
+    settings_daemon_version_unavailable: "Daemon version: unavailable",
+    analytics_no_data: "No data.",
+    analytics_total: "Total for period:",
+    analytics_calls: "{count} calls",
+    analytics_by_model: "By model",
+    analytics_by_day: "By day",
+    analytics_col_model: "Model",
+    analytics_col_cost: "Cost ($)",
+    analytics_col_calls: "Calls",
+    analytics_col_date: "Date",
+    cost_widget_summary: "${cost} ({calls} calls)",
+    transcript_nav: "Segment navigation",
+    transcript_segment_title: "Segment {index}",
+    time_range_short: "{start}–{end} sec ",
+    export_done: "Export: {value}",
+    export_done_default: "done",
+    chart_cost_label: "Cost ($)",
+    tag_filter_all: "All",
+    transcript_hits_title: "Found in transcript:",
+    transcript_no_hits: "Nothing found.",
+    export_sessions_confirm: "Export as CSV? (Cancel = JSON)",
+    update_available_status: "Version {version} is available. Click “Check now” to install.",
+    update_found_status: "Update {version} found…",
+    update_confirm: "Version {version} is available.\n\n{body}\n\nInstall now?",
+    update_installing: "Installing…",
+    update_deferred: "Update deferred.",
+    update_none: "No updates available.",
+    update_unavailable: "Updates are disabled or unavailable.",
+    dashboard_expand: "Expand",
+    dashboard_collapse: "Collapse",
   },
 };
 
@@ -280,6 +450,13 @@ function t(key) {
   const map = I18N[lang] || I18N.ru;
   const val = key.split(".").reduce((o, p) => o?.[p], map);
   return val != null && typeof val === "string" ? val : key;
+}
+
+function tf(key, vars = {}) {
+  return Object.entries(vars).reduce(
+    (text, [name, value]) => text.replaceAll(`{${name}}`, String(value ?? "")),
+    t(key),
+  );
 }
 
 function applyUiLangDataAttrs() {
@@ -428,6 +605,27 @@ function errorMessage(envelope) {
   return JSON.stringify(envelope.error);
 }
 
+function refreshHomeDashboard() {
+  loadRecentSessions();
+  loadUpcomingEvents();
+  loadCostWidget();
+  loadLastAnalysisWidget();
+}
+
+async function refreshAfterDaemonRecovery() {
+  if (!daemonOk) return;
+  await updateListenState();
+  loadSettings();
+  loadSessions();
+  refreshHomeDashboard();
+}
+
+function refreshAfterAnalysisSuccess() {
+  if (!daemonOk) return;
+  loadSessions();
+  refreshHomeDashboard();
+}
+
 const INVOKE_DEFAULT_TIMEOUT_MS = 10000;
 const INVOKE_DEFAULT_RETRIES = 1;
 
@@ -452,13 +650,13 @@ async function checkDaemon() {
   try {
     const pong = await invokeWithRetry("ping", {}, { timeoutMs: 5000, retries: 1 });
     if (pong !== "pong") {
-      setDaemonOff("Неожиданный ответ: " + pong);
+      setDaemonOff(tf("status_daemon_unexpected", { value: pong }));
       return false;
     }
     setDaemonOk();
     return true;
   } catch (e) {
-    setDaemonOff("Запустите демон: voiceforge daemon. " + (e?.message || ""));
+    setDaemonOff(tf("status_daemon_run_hint", { message: e?.message || "" }).trim());
     return false;
   }
 }
@@ -484,10 +682,7 @@ function switchTab(tabId) {
   if (tabId === "costs") loadAnalytics("7d");
   if (tabId === "settings") loadSettings();
   if (tabId === "home") {
-    loadRecentSessions();
-    loadUpcomingEvents();
-    loadCostWidget();
-    loadLastAnalysisWidget();
+    refreshHomeDashboard();
   }
 }
 
@@ -621,22 +816,14 @@ async function pollStreaming() {
 document.getElementById("retry").addEventListener("click", async () => {
   document.getElementById("retry").disabled = true;
   await checkDaemon();
-  if (daemonOk) {
-    await updateListenState();
-    loadSettings();
-    loadSessions();
-  }
+  if (daemonOk) await refreshAfterDaemonRecovery();
   document.getElementById("retry").disabled = false;
 });
 document.getElementById("daemon-retry-btn")?.addEventListener("click", async () => {
   const btn = document.getElementById("daemon-retry-btn");
   if (btn) btn.disabled = true;
   await checkDaemon();
-  if (daemonOk) {
-    await updateListenState();
-    loadSettings();
-    loadSessions();
-  }
+  if (daemonOk) await refreshAfterDaemonRecovery();
   if (btn) btn.disabled = false;
 });
 
@@ -673,8 +860,8 @@ function renderRecentSessionsList(sessions) {
   sessions.forEach((s) => {
     const id = s.id ?? s.session_id ?? "—";
     const start = s.started_at ?? s.created_at ?? "";
-    const dur = s.duration_sec == null ? "" : s.duration_sec + " с";
-    html += `<li><button type="button" class="btn-link" data-session-id="${id}">Сессия ${id}</button> ${start} ${dur}</li>`;
+    const dur = s.duration_sec == null ? "" : tf("duration_sec_short", { seconds: s.duration_sec });
+    html += `<li><button type="button" class="btn-link" data-session-id="${id}">${escapeHtml(tf("session_label", { id }))}</button> ${start} ${dur}</li>`;
   });
   html += "</ul>";
   return html;
@@ -686,7 +873,7 @@ function loadRecentSessions() {
   const el = document.getElementById("recent-sessions-list");
   if (!el) return;
   if (!daemonOk) {
-    el.textContent = "Запустите демон.";
+    el.textContent = t("recent_sessions_daemon_hint");
     return;
   }
   invoke("get_sessions", { limit: 5 })
@@ -695,7 +882,7 @@ function loadRecentSessions() {
       const sessions = env?.data?.sessions ?? env?.sessions ?? [];
       const html = renderRecentSessionsList(sessions);
       if (html === null) {
-        el.innerHTML = "<p>Нет сессий. Запустите анализ с блока выше.</p>";
+        el.innerHTML = `<p>${escapeHtml(t("recent_sessions_empty"))}</p>`;
         return;
       }
       el.innerHTML = html;
@@ -719,22 +906,22 @@ function loadUpcomingEvents() {
       const env = parseEnvelope(raw);
       const events = env?.data?.events ?? env?.events ?? [];
       if (!Array.isArray(events) || events.length === 0) {
-        el.innerHTML = "<p class=\"muted\">Нет событий на ближайшие 48 ч.</p><p><a href=\"" + DOCS_CALENDAR + "\" target=\"_blank\" rel=\"noopener\">Настройка CalDAV</a></p>";
+        el.innerHTML = `<p class="muted">${escapeHtml(t("calendar_empty"))}</p><p><a href="${DOCS_CALENDAR}" target="_blank" rel="noopener">${escapeHtml(t("calendar_setup"))}</a></p>`;
         return;
       }
       let html = "<ul class=\"upcoming-events-list\">";
       events.slice(0, 10).forEach((ev) => {
-        const summary = escapeHtml(ev.summary ?? "(без названия)");
+        const summary = escapeHtml(ev.summary ?? t("calendar_untitled"));
         const start = ev.start_iso ?? "";
         const startShort = start.replace(/T.*/, "").replaceAll("-", ".") + (start.includes("T") ? " " + start.split("T")[1].slice(0, 5) : "");
         html += "<li><strong>" + summary + "</strong> <span class=\"muted\">" + startShort + "</span></li>";
       });
       html += "</ul>";
-      if (events.length > 10) html += "<p class=\"muted\">и ещё " + (events.length - 10) + "…</p>";
+      if (events.length > 10) html += `<p class="muted">${escapeHtml(tf("calendar_more", { count: events.length - 10 }))}</p>`;
       el.innerHTML = html;
     })
     .catch((e) => {
-      el.innerHTML = "<p class=\"muted\">Не удалось загрузить календарь: " + escapeHtml(e?.message || e) + "</p><p><a href=\"" + DOCS_CALENDAR + "\" target=\"_blank\" rel=\"noopener\">Настройка CalDAV</a></p>";
+      el.innerHTML = `<p class="muted">${escapeHtml(tf("calendar_load_error", { message: e?.message || e }))}</p><p><a href="${DOCS_CALENDAR}" target="_blank" rel="noopener">${escapeHtml(t("calendar_setup"))}</a></p>`;
     });
 }
 
@@ -755,7 +942,7 @@ function buildLastAnalysisActionsList(ana) {
     const d = typeof ai === "object" ? (ai.description || "") : String(ai);
     html += "<li>" + escapeHtml(d) + "</li>";
   });
-  if (n > 3) html += "<li class=\"muted\">… ещё " + (n - 3) + "</li>";
+  if (n > 3) html += "<li class=\"muted\">" + escapeHtml(tf("last_analysis_more_actions", { count: n - 3 })) + "</li>";
   return html + "</ul>";
 }
 
@@ -763,14 +950,14 @@ function buildLastAnalysisQrLine(ana) {
   if (!ana) return "";
   const q = Array.isArray(ana.questions) ? ana.questions.length : 0;
   const r = Array.isArray(ana.recommendations) ? ana.recommendations.length : 0;
-  return (q || r) ? "<p class=\"muted\">Вопросов: " + q + ", рекомендаций: " + r + "</p>" : "";
+  return (q || r) ? `<p class="muted">${escapeHtml(tf("last_analysis_qr_summary", { questions: q, recommendations: r }))}</p>` : "";
 }
 
 function buildLastAnalysisSummaryHtml(sessionId, session, detail) {
   const ana = detail?.analysis || null;
   const started = session?.started_at ?? session?.created_at ?? "";
   const startShort = formatStartedShort(started);
-  let html = "<p class=\"muted\">Сессия " + escapeHtml(String(sessionId)) + (startShort ? " · " + escapeHtml(startShort) : "") + "</p>";
+  let html = `<p class="muted">${escapeHtml(tf("session_label", { id: String(sessionId) }))}${startShort ? " · " + escapeHtml(startShort) : ""}</p>`;
   if (ana) {
     html += buildLastAnalysisActionsList(ana);
     const hasActions = Array.isArray(ana.action_items) && ana.action_items.length > 0;
@@ -832,7 +1019,7 @@ function applyCostWidgetContent(el, raw) {
   }
   const total = data.total_cost_usd ?? 0;
   const calls = data.total_calls ?? 0;
-  el.textContent = "$" + Number(total).toFixed(4) + " (" + calls + " вызовов)";
+  el.textContent = tf("cost_widget_summary", { cost: Number(total).toFixed(4), calls });
 }
 
 function loadCostWidget() {
@@ -878,8 +1065,8 @@ async function runQuickAnalyze60() {
     const env = parseEnvelope(raw);
     if (env?.ok && env?.data?.text) {
       if (statusEl) statusEl.textContent = t("status_ready");
-      loadSessions();
-      notify("VoiceForge", "Анализ завершён.");
+      refreshAfterAnalysisSuccess();
+      notify("VoiceForge", t("notify_analysis_done"));
     } else if (statusEl) {
       statusEl.textContent = errorMessage(env);
     }
@@ -905,8 +1092,8 @@ async function runDefaultAnalyze() {
     const env = parseEnvelope(raw);
     if (env?.ok && env?.data?.text) {
       if (statusEl) statusEl.textContent = t("status_ready");
-      loadSessions();
-      notify("VoiceForge", "Анализ завершён.");
+      refreshAfterAnalysisSuccess();
+      notify("VoiceForge", t("notify_analysis_done"));
     } else if (statusEl) {
       statusEl.textContent = errorMessage(env);
     }
@@ -985,9 +1172,13 @@ listen("analysis-done", (e) => {
   document.getElementById("analyze-btn").disabled = false;
   const outEl = document.getElementById("analyze-streaming-output");
   if (outEl?.dataset?.streamEnd === "1") outEl.dataset.streamEnd = "";
-  if (daemonOk) loadSessions();
-  if (status === "ok") notify("VoiceForge", "Анализ завершён.");
-  else if (status === "error") notify("VoiceForge", "Анализ: ошибка.");
+  if (status === "ok") {
+    refreshAfterAnalysisSuccess();
+    notify("VoiceForge", t("notify_analysis_done"));
+  } else if (status === "error") {
+    if (daemonOk) loadSessions();
+    notify("VoiceForge", t("notify_analysis_error"));
+  }
 });
 listen("transcript-chunk", (e) => {
   const text = e.payload?.text ?? "";
@@ -1005,8 +1196,7 @@ listen("transcript-updated", () => {
 });
 listen("session-created", (e) => {
   if (daemonOk) {
-    loadSessions();
-    loadLastAnalysisWidget();
+    refreshAfterAnalysisSuccess();
   }
   const id = e.payload?.session_id;
   if (id != null) {
@@ -1129,14 +1319,19 @@ function getDateGroupKey(d) {
   return "older";
 }
 
-const DATE_GROUP_LABELS = { today: "Сегодня", yesterday: "Вчера", this_week: "На этой неделе", older: "Ранее" };
+const DATE_GROUP_LABELS = {
+  today: () => t("date_group_today"),
+  yesterday: () => t("date_group_yesterday"),
+  this_week: () => t("date_group_this_week"),
+  older: () => t("date_group_older"),
+};
 const DATE_GROUP_ORDER = ["today", "yesterday", "this_week", "older"];
 
 function renderSessionsTable(sessions) {
   const container = document.getElementById("sessions-list");
   if (!container) return;
   if (!sessions.length) {
-    container.innerHTML = "<div class=\"empty-state\"><p class=\"muted\">Нет сессий по заданным фильтрам.</p></div>";
+    container.innerHTML = `<div class="empty-state"><p class="muted">${escapeHtml(t("sessions_empty_filtered"))}</p></div>`;
     return;
   }
   const fav = getFavorites();
@@ -1146,18 +1341,18 @@ function renderSessionsTable(sessions) {
     const key = getDateGroupKey(parseSessionDate(s.started_at ?? s.created_at));
     if (groups[key]) groups[key].push(s);
   });
-  let html = "<table><thead><tr><th aria-label=\"Избранное\"></th><th>ID</th><th>Начало</th><th>Длительность</th></tr></thead><tbody>";
+  let html = `<table><thead><tr><th aria-label="${escapeHtml(t("sessions_col_favorite"))}"></th><th>ID</th><th>${escapeHtml(t("sessions_col_start"))}</th><th>${escapeHtml(t("sessions_col_duration"))}</th></tr></thead><tbody>`;
   DATE_GROUP_ORDER.forEach((key) => {
     const list = groups[key] || [];
     if (list.length === 0) return;
-    html += "<tr class=\"session-group-header\"><td colspan=\"4\">" + escapeHtml(DATE_GROUP_LABELS[key]) + "</td></tr>";
+    html += "<tr class=\"session-group-header\"><td colspan=\"4\">" + escapeHtml(DATE_GROUP_LABELS[key]()) + "</td></tr>";
     list.forEach((s) => {
       const id = s.id ?? s.session_id ?? "—";
       const start = s.started_at ?? s.created_at ?? "—";
-      const dur = s.duration_sec == null ? "—" : s.duration_sec + " с";
+      const dur = s.duration_sec == null ? "—" : tf("duration_sec_short", { seconds: s.duration_sec });
       const isFav = fav.has(Number(id));
-      const star = `<button type="button" class="favorite-star" data-id="${id}" aria-label="${isFav ? "Убрать из избранного" : "В избранное"}">${isFav ? "★" : "☆"}</button>`;
-      const openBtn = `<button type="button" class="btn-link session-open-link" data-id="${id}" aria-label="Открыть сессию ${id}">${id}</button>`;
+      const star = `<button type="button" class="favorite-star" data-id="${id}" aria-label="${escapeHtml(isFav ? t("favorite_remove") : t("favorite_add"))}">${isFav ? "★" : "☆"}</button>`;
+      const openBtn = `<button type="button" class="btn-link session-open-link" data-id="${id}" aria-label="${escapeHtml(tf("open_session_aria", { id }))}">${id}</button>`;
       html += `<tr data-id="${id}"><td>${star}</td><td>${openBtn}</td><td>${start}</td><td>${dur}</td></tr>`;
     });
   });
@@ -1196,7 +1391,7 @@ function showSessionContextMenu(x, y, sessionId) {
   if (!menu) return;
   sessionContextMenuSessionId = sessionId;
   const favBtn = menu.querySelector('[data-action="favorite"]');
-  if (favBtn) favBtn.textContent = getFavorites().has(sessionId) ? "Убрать из избранного" : "В избранное";
+  if (favBtn) favBtn.textContent = getFavorites().has(sessionId) ? t("favorite_remove") : t("favorite_add");
   menu.style.left = x + "px";
   menu.style.top = y + "px";
   menu.style.display = "block";
@@ -1223,7 +1418,7 @@ function initSessionContextMenu() {
     if (action === "open") showSessionDetail(id);
     else if (action === "copy-link") {
       const url = "voiceforge://session/" + id;
-      navigator.clipboard.writeText(url).then(() => notify("VoiceForge", "Ссылка скопирована.")).catch(() => {});
+      navigator.clipboard.writeText(url).then(() => notify("VoiceForge", t("notify_link_copied"))).catch(() => {});
     } else if (action === "favorite") toggleFavorite(id);
     else if (action === "export-md") exportSession(id, "md");
     else if (action === "export-pdf") exportSession(id, "pdf");
@@ -1287,7 +1482,7 @@ function loadSessions() {
   const detailBlock = document.getElementById("session-detail");
   if (detailBlock?.close) detailBlock.close();
   if (!daemonOk) {
-    container.innerHTML = emptyStateHtml("⚠️", "Демон не запущен", "Выполните: voiceforge daemon", DOCS_QUICKSTART);
+    container.innerHTML = emptyStateHtml("⚠️", t("empty_daemon_title"), t("empty_daemon_hint"), DOCS_QUICKSTART);
     sessionsCache = [];
     return;
   }
@@ -1299,7 +1494,7 @@ function loadSessions() {
       sessionsCache = Array.isArray(sessions) ? sessions : [];
       sessionIdsWithActionItemsCache = null;
       if (sessionsCache.length === 0) {
-        container.innerHTML = emptyStateHtml("📋", "Сессий пока нет", "Запустите запись и анализ на главной.", DOCS_QUICKSTART);
+        container.innerHTML = emptyStateHtml("📋", t("empty_sessions_title"), t("empty_sessions_hint"), DOCS_QUICKSTART);
         return;
       }
       applySessionsFilter();
@@ -1315,16 +1510,16 @@ function renderSessionDetailTranscript(segs, highlightQuery) {
   const fullText = segs.map((s) => s.text || "").join(" ");
   const totalChars = fullText.length;
   const totalWords = fullText.trim() ? fullText.trim().split(/\s+/).length : 0;
-  let html = "<div class=\"detail-section\"><h4>Транскрипт</h4><p class=\"muted detail-stats\">Слов: " + totalWords + ", символов: " + totalChars + "</p>";
-  html += "<div class=\"detail-segment-minimap\" role=\"navigation\" aria-label=\"Навигация по сегментам\">";
+  let html = `<div class="detail-section"><h4>${escapeHtml(t("detail_transcript"))}</h4><p class="muted detail-stats">${escapeHtml(tf("detail_stats", { words: totalWords, chars: totalChars }))}</p>`;
+  html += `<div class="detail-segment-minimap" role="navigation" aria-label="${escapeHtml(t("transcript_nav"))}">`;
   segs.forEach((s, idx) => {
     const t = s.start_sec == null ? String(idx + 1) : Math.floor(Number(s.start_sec) / 60) + ":" + String(Math.floor(Number(s.start_sec) % 60)).padStart(2, "0");
-    html += `<button type="button" class="minimap-segment-btn" data-segment-idx="${idx}" title="Сегмент ${idx + 1}">${escapeHtml(t)}</button>`;
+    html += `<button type="button" class="minimap-segment-btn" data-segment-idx="${idx}" title="${escapeHtml(tf("transcript_segment_title", { index: idx + 1 }))}">${escapeHtml(t)}</button>`;
   });
   html += "</div><ul class=\"segment-list\">";
   segs.forEach((s, idx) => {
     const speaker = s.speaker ? `[${s.speaker}] ` : "";
-    const time = (s.start_sec != null && s.end_sec != null) ? `${Number(s.start_sec).toFixed(1)}–${Number(s.end_sec).toFixed(1)} с ` : "";
+    const time = (s.start_sec != null && s.end_sec != null) ? tf("time_range_short", { start: Number(s.start_sec).toFixed(1), end: Number(s.end_sec).toFixed(1) }) : "";
     const textHtml = highlightQuery ? highlightSegmentText(s.text || "", highlightQuery) : escapeHtml(s.text || "");
     html += `<li id="segment-${idx}" data-segment-index="${idx}"><span class="segment-meta">${time}${speaker}</span>${textHtml} <button type="button" class="btn small segment-copy" aria-label="${t("segment_copy")}">${t("segment_copy")}</button></li>`;
   });
@@ -1333,25 +1528,25 @@ function renderSessionDetailTranscript(segs, highlightQuery) {
 }
 
 function renderSessionDetailAnalysis(ana) {
-  let html = "<div class=\"detail-section\"><h4>Анализ</h4>";
-  if (ana.model) html += `<p class="muted">Модель: ${escapeHtml(ana.model)}</p>`;
+  let html = `<div class="detail-section"><h4>${escapeHtml(t("detail_analysis"))}</h4>`;
+  if (ana.model) html += `<p class="muted">${escapeHtml(tf("detail_model", { model: ana.model }))}</p>`;
   if (ana.questions?.length) {
-    html += "<p><strong>Вопросы</strong></p><ul>";
+    html += `<p><strong>${escapeHtml(t("detail_questions"))}</strong></p><ul>`;
     ana.questions.forEach((q) => { html += "<li>" + escapeHtml(String(q)) + "</li>"; });
     html += "</ul>";
   }
   if (ana.answers?.length) {
-    html += "<p><strong>Ответы / выводы</strong></p><ul>";
+    html += `<p><strong>${escapeHtml(t("detail_answers"))}</strong></p><ul>`;
     ana.answers.forEach((a) => { html += "<li>" + escapeHtml(String(a)) + "</li>"; });
     html += "</ul>";
   }
   if (ana.recommendations?.length) {
-    html += "<p><strong>Рекомендации</strong></p><ul>";
+    html += `<p><strong>${escapeHtml(t("detail_recommendations"))}</strong></p><ul>`;
     ana.recommendations.forEach((r) => { html += "<li>" + escapeHtml(String(r)) + "</li>"; });
     html += "</ul>";
   }
   if (ana.action_items?.length) {
-    html += "<p><strong>Действия</strong></p><ul>";
+    html += `<p><strong>${escapeHtml(t("detail_actions"))}</strong></p><ul>`;
     ana.action_items.forEach((ai) => {
       const d = typeof ai === "object" ? (ai.description || "") : String(ai);
       const who = typeof ai === "object" ? ai.assignee : "";
@@ -1359,14 +1554,14 @@ function renderSessionDetailAnalysis(ana) {
     });
     html += "</ul>";
   }
-  if (ana.cost_usd != null) html += "<p class=\"muted\">Стоимость: $" + Number(ana.cost_usd).toFixed(4) + "</p>";
+  if (ana.cost_usd != null) html += `<p class="muted">${escapeHtml(tf("detail_cost", { cost: Number(ana.cost_usd).toFixed(4) }))}</p>`;
   html += "</div>";
   return html;
 }
 
 function renderSessionDetail(detail, highlightQuery) {
   if (!detail || (typeof detail === "object" && !detail.segments && !detail.analysis)) {
-    return "<p class=\"muted\">Нет данных.</p>";
+    return `<p class="muted">${escapeHtml(t("empty_no_data"))}</p>`;
   }
   const segs = Array.isArray(detail.segments) ? detail.segments : [];
   const ana = detail.analysis || null;
@@ -1374,7 +1569,7 @@ function renderSessionDetail(detail, highlightQuery) {
   if (segs.length > 0) html += renderSessionDetailTranscript(segs, highlightQuery);
   const hasAnalysis = ana && (ana.questions?.length || ana.answers?.length || ana.recommendations?.length || ana.action_items?.length);
   if (hasAnalysis) html += renderSessionDetailAnalysis(ana);
-  return html || "<p class=\"muted\">Нет анализа.</p>";
+  return html || `<p class="muted">${escapeHtml(t("empty_no_analysis"))}</p>`;
 }
 
 function bindSegmentCopyButtons(container) {
@@ -1386,7 +1581,7 @@ function bindSegmentCopyButtons(container) {
         const text = lastSessionDetail.segments[idx].text || "";
         navigator.clipboard.writeText(text).then(() => {
           pushClipboardHistory(text);
-          notify("VoiceForge", "Сегмент скопирован.");
+          notify("VoiceForge", t("notify_segment_copied"));
         }).catch(() => {});
       }
     });
@@ -1446,7 +1641,9 @@ function transcriptToText(detail) {
   return segs
     .map((s) => {
       const speaker = s.speaker ? `[${s.speaker}] ` : "";
-      const time = (s.start_sec != null && s.end_sec != null) ? `${Number(s.start_sec).toFixed(1)}–${Number(s.end_sec).toFixed(1)} с ` : "";
+      const time = (s.start_sec != null && s.end_sec != null)
+        ? tf("time_range_short", { start: Number(s.start_sec).toFixed(1), end: Number(s.end_sec).toFixed(1) })
+        : "";
       return time + speaker + (s.text || "");
     })
     .join("\n");
@@ -1468,15 +1665,15 @@ async function copyTranscriptToClipboard() {
   if (!lastSessionDetail) return;
   const text = transcriptToText(lastSessionDetail);
   if (!text) {
-    notify("VoiceForge", "Нет транскрипта для копирования.");
+    notify("VoiceForge", t("copy_no_transcript"));
     return;
   }
   try {
     await navigator.clipboard.writeText(text);
     pushClipboardHistory(text);
-    notify("VoiceForge", "Транскрипт скопирован.");
+    notify("VoiceForge", t("copy_transcript_done"));
   } catch (e) {
-    notify("VoiceForge", "Не удалось скопировать: " + (e?.message || e));
+    notify("VoiceForge", tf("copy_failed", { message: e?.message || e }));
   }
 }
 
@@ -1484,15 +1681,15 @@ async function copyActionItemsToClipboard() {
   if (!lastSessionDetail) return;
   const text = actionItemsToText(lastSessionDetail);
   if (!text) {
-    notify("VoiceForge", "Нет action items для копирования.");
+    notify("VoiceForge", t("copy_no_actions"));
     return;
   }
   try {
     await navigator.clipboard.writeText(text);
     pushClipboardHistory(text);
-    notify("VoiceForge", "Action items скопированы.");
+    notify("VoiceForge", t("copy_actions_done"));
   } catch (e) {
-    notify("VoiceForge", "Не удалось скопировать: " + (e?.message || e));
+    notify("VoiceForge", tf("copy_failed", { message: e?.message || e }));
   }
 }
 
@@ -1583,7 +1780,7 @@ function showSessionDetail(id, opts) {
 async function exportSession(id, format) {
   try {
     const out = await invoke("export_session", { sessionId: id, format });
-    alert("Экспорт: " + (out || "выполнен"));
+    alert(tf("export_done", { value: out || t("export_done_default") }));
   } catch (e) {
     alert(t("export_error_prefix") + (e?.message || e));
   }
@@ -1654,7 +1851,7 @@ function drawCostsCharts(data) {
       type: "bar",
       data: {
         labels: byDay.map((r) => String(r.date ?? "")),
-        datasets: [{ label: "Стоимость ($)", data: byDay.map((r) => r.cost_usd ?? r.cost ?? 0), backgroundColor: colors.accent }],
+        datasets: [{ label: t("chart_cost_label"), data: byDay.map((r) => r.cost_usd ?? r.cost ?? 0), backgroundColor: colors.accent }],
       },
       options: {
         responsive: true,
@@ -1692,14 +1889,14 @@ function drawCostsCharts(data) {
 }
 
 function renderAnalytics(data, period) {
-  if (!data || typeof data !== "object") return "<p class=\"muted\">Нет данных.</p>";
+  if (!data || typeof data !== "object") return `<p class="muted">${escapeHtml(t("analytics_no_data"))}</p>`;
   const total = data.total_cost_usd ?? 0;
   const calls = data.total_calls ?? 0;
   const byModel = data.by_model ?? [];
   const byDay = data.by_day ?? [];
-  let html = "<div class=\"analytics-summary\"><p><strong>Итого за период:</strong> $" + Number(total).toFixed(4) + " <span class=\"muted\">(" + calls + " вызовов)</span></p></div>";
+  let html = `<div class="analytics-summary"><p><strong>${escapeHtml(t("analytics_total"))}</strong> $${Number(total).toFixed(4)} <span class="muted">(${escapeHtml(tf("analytics_calls", { count: calls }))})</span></p></div>`;
   if (byModel.length > 0) {
-    html += "<div class=\"detail-section\"><h4>По моделям</h4><table><thead><tr><th>Модель</th><th>Стоимость ($)</th><th>Вызовы</th></tr></thead><tbody>";
+    html += `<div class="detail-section"><h4>${escapeHtml(t("analytics_by_model"))}</h4><table><thead><tr><th>${escapeHtml(t("analytics_col_model"))}</th><th>${escapeHtml(t("analytics_col_cost"))}</th><th>${escapeHtml(t("analytics_col_calls"))}</th></tr></thead><tbody>`;
     byModel.forEach((r) => {
       const cost = (r.cost_usd ?? r.cost ?? 0);
       const n = r.calls ?? r.count ?? "—";
@@ -1709,7 +1906,7 @@ function renderAnalytics(data, period) {
   }
   if (byDay.length > 0) {
     const slice = byDay.slice(-14).reverse();
-    html += "<div class=\"detail-section\"><h4>По дням</h4><table><thead><tr><th>Дата</th><th>Стоимость ($)</th><th>Вызовы</th></tr></thead><tbody>";
+    html += `<div class="detail-section"><h4>${escapeHtml(t("analytics_by_day"))}</h4><table><thead><tr><th>${escapeHtml(t("analytics_col_date"))}</th><th>${escapeHtml(t("analytics_col_cost"))}</th><th>${escapeHtml(t("analytics_col_calls"))}</th></tr></thead><tbody>`;
     slice.forEach((r) => {
       const cost = (r.cost_usd ?? r.cost ?? 0);
       const n = r.calls ?? r.count ?? "—";
@@ -1723,7 +1920,7 @@ function renderAnalytics(data, period) {
 function loadAnalytics(period) {
   const container = document.getElementById("analytics-content");
   if (!daemonOk) {
-    container.innerHTML = emptyStateHtml("⚠️", "Демон не запущен", "Запустите: voiceforge daemon", DOCS_QUICKSTART);
+    container.innerHTML = emptyStateHtml("⚠️", t("empty_daemon_title"), t("empty_daemon_hint"), DOCS_QUICKSTART);
     return;
   }
   container.innerHTML = "<p class=\"muted\">" + t("loading") + "</p>";
@@ -1750,26 +1947,40 @@ function loadAnalytics(period) {
 }
 
 const SETTINGS_LABELS = {
-  model_size: "Размер модели (diarization)",
-  default_llm: "LLM по умолчанию",
-  budget_limit_usd: "Лимит бюджета (USD)",
-  smart_trigger: "Умный триггер",
-  sample_rate: "Частота дискретизации",
-  streaming_stt: "Стриминг STT",
-  pii_mode: "Режим PII",
-  privacy_mode: "Режим конфиденциальности",
-  language: "Язык распознавания (STT)",
+  ru: {
+    model_size: "Размер модели (diarization)",
+    default_llm: "LLM по умолчанию",
+    budget_limit_usd: "Лимит бюджета (USD)",
+    smart_trigger: "Умный триггер",
+    sample_rate: "Частота дискретизации",
+    streaming_stt: "Стриминг STT",
+    pii_mode: "Режим PII",
+    privacy_mode: "Режим конфиденциальности",
+    language: "Язык распознавания (STT)",
+  },
+  en: {
+    model_size: "Model size (diarization)",
+    default_llm: "Default LLM",
+    budget_limit_usd: "Budget limit (USD)",
+    smart_trigger: "Smart trigger",
+    sample_rate: "Sample rate",
+    streaming_stt: "Streaming STT",
+    pii_mode: "PII mode",
+    privacy_mode: "Privacy mode",
+    language: "Recognition language (STT)",
+  },
 };
 
 function renderSettings(data) {
-  if (!data || typeof data !== "object") return "<p class=\"muted\">Нет данных.</p>";
-  const keys = Object.keys(SETTINGS_LABELS).filter((k) => Object.hasOwn(data, k));
+  if (!data || typeof data !== "object") return `<p class="muted">${escapeHtml(t("empty_no_data"))}</p>`;
+  const labels = SETTINGS_LABELS[localStorage.getItem(UI_LANG_KEY) || "ru"] || SETTINGS_LABELS.ru;
+  const keys = Object.keys(labels).filter((k) => Object.hasOwn(data, k));
   if (keys.length === 0) {
-    return "<p class=\"muted\">Нет настроек.</p>";
+    return `<p class="muted">${escapeHtml(t("settings_none"))}</p>`;
   }
   let html = "";
   keys.forEach((key) => {
-    const label = SETTINGS_LABELS[key] || key;
+    const label = labels[key] || key;
     let val = data[key];
     if (typeof val === "number" && key === "budget_limit_usd") val = "$" + Number(val).toFixed(2);
     else if (typeof val === "object") val = JSON.stringify(val);
@@ -1782,7 +1993,7 @@ function renderSettings(data) {
 function loadSettings() {
   const container = document.getElementById("settings-content");
   if (!daemonOk) {
-    container.innerHTML = emptyStateHtml("⚠️", "Демон не запущен", "Настройки загружаются с демона.", DOCS_QUICKSTART);
+    container.innerHTML = emptyStateHtml("⚠️", t("empty_daemon_title"), t("settings_daemon_hint"), DOCS_QUICKSTART);
     return;
   }
   invoke("get_settings")
@@ -1797,15 +2008,15 @@ function loadSettings() {
           return;
         }
       }
-      container.innerHTML = renderSettings(data) + "<p class=\"muted settings-hint\" id=\"daemon-version-line\">Версия демона: …</p>";
+      container.innerHTML = renderSettings(data) + `<p class="muted settings-hint" id="daemon-version-line">${escapeHtml(tf("settings_daemon_version", { version: "…" }))}</p>`;
       invoke("get_daemon_version")
         .then((v) => {
           const el = document.getElementById("daemon-version-line");
-          if (el) el.textContent = "Версия демона: " + (v || "—");
+          if (el) el.textContent = tf("settings_daemon_version", { version: v || "—" });
         })
         .catch(() => {
           const el = document.getElementById("daemon-version-line");
-          if (el) el.textContent = "Версия демона: недоступна";
+          if (el) el.textContent = t("settings_daemon_version_unavailable");
         });
     })
     .catch((e) => {
@@ -1865,7 +2076,7 @@ function updateSessionTagFilterOptions() {
   const tagsMap = getSessionTags();
   const allTags = [...new Set(Object.values(tagsMap).flat())].filter(Boolean).sort((a, b) => String(a).localeCompare(String(b), undefined, { sensitivity: "base" }));
   const current = sel.value;
-  sel.innerHTML = "<option value=\"all\">Все</option>" + allTags.map((t) => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
+  sel.innerHTML = `<option value="all">${escapeHtml(t("tag_filter_all"))}</option>` + allTags.map((t) => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
   if (allTags.includes(current)) sel.value = current; else sel.value = "all";
 }
 
@@ -1922,7 +2133,7 @@ function toggleClipboardHistoryPopover() {
       const text = entries[idx]?.t ?? "";
       el.addEventListener("click", () => {
         navigator.clipboard.writeText(text).then(() => {
-          notify("VoiceForge", "Скопировано.");
+          notify("VoiceForge", t("notify_copied_generic"));
           popover.hidden = true;
           btn.setAttribute("aria-expanded", "false");
         }).catch(() => {});
@@ -2071,7 +2282,7 @@ function applyTheme(theme) {
 }
 
 function emptyStateHtml(icon, title, hint, linkHref) {
-  const link = linkHref ? `<p><a href="${escapeHtml(linkHref)}" target="_blank" rel="noopener">Быстрый старт в репозитории</a></p>` : "";
+  const link = linkHref ? `<p><a href="${escapeHtml(linkHref)}" target="_blank" rel="noopener">${escapeHtml(t("quickstart_link"))}</a></p>` : "";
   return `<div class="empty-state"><div class="empty-state-icon" aria-hidden="true">${icon}</div><p><strong>${escapeHtml(title)}</strong></p><p>${escapeHtml(hint)}</p>${link}</div>`;
 }
 
@@ -2172,7 +2383,7 @@ function downloadBlob(blob, filename) {
 function exportSessionsList(format) {
   const list = lastFilteredSessions.length ? lastFilteredSessions : sessionsCache;
   if (!list.length) {
-    alert("Нет сессий для экспорта.");
+    alert(t("export_sessions_empty"));
     return;
   }
   if (format === "json") {
@@ -2199,7 +2410,7 @@ function exportSessionsList(format) {
 
 function exportCostsReport() {
   if (!lastAnalyticsData) {
-    alert("Сначала загрузите отчёт (7 или 30 дней).");
+    alert(t("export_costs_empty"));
     return;
   }
   const byDay = lastAnalyticsData.by_day ?? [];
@@ -2226,17 +2437,17 @@ async function handleFtsSearch(q, listEl, resultsEl) {
     const hits = env?.data?.hits ?? env?.hits ?? [];
     if (!Array.isArray(hits) || hits.length === 0) {
       if (resultsEl) {
-        resultsEl.innerHTML = "<p class=\"muted\">Ничего не найдено.</p>";
+        resultsEl.innerHTML = `<p class="muted">${escapeHtml(t("transcript_no_hits"))}</p>`;
         resultsEl.style.display = "block";
       }
       if (listEl) listEl.style.display = "none";
       return;
     }
-    let html = "<p class=\"muted\">Найдено по тексту:</p><ul class=\"fts-hits-list\">";
+    let html = `<p class="muted">${escapeHtml(t("transcript_hits_title"))}</p><ul class="fts-hits-list">`;
     hits.forEach((h) => {
       const sid = h.session_id ?? "—";
       const snip = escapeHtml((h.snippet ?? h.text ?? "").trim() || "—");
-      html += `<li><button type="button" class="btn-link fts-hit" data-session-id="${sid}">Сессия ${sid}</button>: ${snip}</li>`;
+      html += `<li><button type="button" class="btn-link fts-hit" data-session-id="${sid}">${escapeHtml(tf("session_label", { id: sid }))}</button>: ${snip}</li>`;
     });
     html += "</ul>";
     if (resultsEl) {
@@ -2347,7 +2558,7 @@ function initSessionsToolbar() {
     }, 350);
   });
   document.getElementById("sessions-export-btn")?.addEventListener("click", () => {
-    const format = confirm("Экспорт в CSV? (Отмена = JSON)") ? "csv" : "json";
+    const format = confirm(t("export_sessions_confirm")) ? "csv" : "json";
     exportSessionsList(format);
   });
 }
@@ -2359,17 +2570,17 @@ function setUpdateStatus(text) {
 
 async function handleUpdateFound(update, silentIfNone) {
   if (silentIfNone) {
-    setUpdateStatus("Доступна версия " + update.version + ". Нажмите «Проверить сейчас» для установки.");
+    setUpdateStatus(tf("update_available_status", { version: update.version }));
     return;
   }
-  setUpdateStatus("Найдено обновление " + update.version + "…");
-  const install = confirm("Доступна версия " + update.version + ".\n\n" + (update.body || "") + "\n\nУстановить сейчас?");
+  setUpdateStatus(tf("update_found_status", { version: update.version }));
+  const install = confirm(tf("update_confirm", { version: update.version, body: update.body || "" }));
   if (install) {
-    setUpdateStatus("Установка…");
+    setUpdateStatus(t("update_installing"));
     await update.downloadAndInstall();
     await relaunch();
   } else {
-    setUpdateStatus("Обновление отложено.");
+    setUpdateStatus(t("update_deferred"));
   }
 }
 
@@ -2380,9 +2591,9 @@ async function checkForUpdate(silentIfNone = false) {
       await handleUpdateFound(update, silentIfNone);
       return;
     }
-    setUpdateStatus(silentIfNone ? "" : "Обновлений нет.");
+    setUpdateStatus(silentIfNone ? "" : t("update_none"));
   } catch (e) {
-    setUpdateStatus("Обновления отключены или недоступны.");
+    setUpdateStatus(t("update_unavailable"));
     if (!silentIfNone && e != null) console.debug("updater check", e);
   }
 }
@@ -2587,12 +2798,15 @@ function initDashboardWidgets() {
     const toggle = widget.querySelector(".widget-toggle");
     const up = widget.querySelector(".widget-up");
     const down = widget.querySelector(".widget-down");
+    if (toggle) {
+      toggle.setAttribute("aria-label", widget.classList.contains("collapsed") ? t("dashboard_expand") : t("dashboard_collapse"));
+    }
     toggle?.addEventListener("click", () => {
       widget.classList.toggle("collapsed");
       const c = getDashboardCollapsed();
       c[id] = widget.classList.contains("collapsed");
       saveDashboardCollapsed(c);
-      toggle.setAttribute("aria-label", widget.classList.contains("collapsed") ? "Развернуть" : "Свернуть");
+      toggle.setAttribute("aria-label", widget.classList.contains("collapsed") ? t("dashboard_expand") : t("dashboard_collapse"));
       toggle.textContent = widget.classList.contains("collapsed") ? "▶" : "▼";
     });
     up?.addEventListener("click", () => {

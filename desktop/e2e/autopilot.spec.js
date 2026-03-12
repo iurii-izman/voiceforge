@@ -72,6 +72,11 @@ test.describe("Desktop QA autopilot", () => {
     await expect(page.locator("#analyze-streaming-output")).toContainText("Шаг 1");
     await expect(page.locator("#sessions-list")).toContainText("103");
 
+    await page.getByRole("navigation").locator("[data-tab='home']").click();
+    await expect(page.locator("#recent-sessions-list")).toContainText("Сессия 103");
+    await expect(page.locator("#last-analysis-content")).toContainText("Review desktop QA report");
+    await expect(page.locator("#cost-widget-content")).toContainText("$1.2345");
+
     const state = await page.evaluate(() => globalThis.__VOICEFORGE_TEST_STATE__);
     expect(state.notifications.some((entry) => entry.body.includes("Анализ завершён"))).toBeTruthy();
     expect(state.invokes.some((entry) => entry.cmd === "analyze" && entry.args.seconds === 60)).toBeTruthy();

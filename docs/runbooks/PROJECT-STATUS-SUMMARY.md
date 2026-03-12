@@ -149,13 +149,14 @@ E11 (narrow CalDAV scope) ✓ → E16 ✓ → E17 ✓
 | DS1 | [#159](https://github.com/iurii-izman/voiceforge/issues/159) ✓ | Desktop UX Stabilization · onboarding dismissal and mode recovery | P0 | M | Frontend | Убрать реальные stuck-state UX bugs из Tauri UI |
 | DS2 | [#160](https://github.com/iurii-izman/voiceforge/issues/160) ✓ | Desktop Test Policy · stabilize native smoke and release evidence | P1 | M | Testing | Закреплены две канонические команды: blocking `e2e:release-gate` и advisory `e2e:native:headless` |
 | DS3 | [#161](https://github.com/iurii-izman/voiceforge/issues/161) ✓ | Desktop Regression Matrix · cover state persistence and navigation recovery | P1 | M | Testing | User-visible regressions закрыты regression-тестами |
+| DS4 | [#166](https://github.com/iurii-izman/voiceforge/issues/166) ✓ | Desktop GUI Audit · i18n polish and recovery consistency | P1 | M | Frontend | Runtime i18n и dashboard refresh после recovery/analyze закреплены кодом и regression coverage |
 
 **Рекомендуемый порядок:**
 ```
 desktop stabilization wave complete
 ```
 
-**Почему так:** реальные stuck-state UX bugs закрыты в `#159`, policy/evidence вокруг native smoke закрыта в `#160`, а regression matrix для desktop daily-driver path закрыта в `#161`. Historical CVE wait-state `#65` тоже снят. Дальше — только новые конкретные баг-репорты.
+**Почему так:** реальные stuck-state UX bugs закрыты в `#159`, policy/evidence вокруг native smoke закрыта в `#160`, regression matrix для desktop daily-driver path закрыта в `#161`, а runtime GUI polish и recovery consistency добиты в `#166`. Historical CVE wait-state `#65` тоже снят. Дальше — только новые конкретные баг-репорты.
 
 ### Maintenance / Security Follow-up
 

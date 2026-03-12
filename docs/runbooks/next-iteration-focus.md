@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-13 (low-risk Sonar sweep landed locally; remaining follow-up is remote Sonar recheck plus GTK/glib alert)
+**Обновлено:** 2026-03-13 (desktop GUI audit closed; remaining follow-up is remote Sonar recheck plus GTK/glib alert)
 
 ---
 
@@ -19,9 +19,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** добран low-risk Sonar sweep по shell/native desktop harness/helper modules: `run_desktop_native_smoke.sh`, `wdio.conf.js`, `desktopHarness.js`, `dependabot_dismiss_moderate.py`, `preflight.py`, `digest.py`, `capture.py`, `transcriber.py`, `status_helpers.py`, `setup.py`, `meeting.py` и test-only cleanup. Локальные проверки зелёные: `48 passed`, `ruff`, `npm --prefix desktop run e2e:release-gate`, `check_docs_consistency.py`. Remote SonarCloud ещё показывает старый срез до re-analysis.
+**Сделано в сессии:** закрыт desktop GUI audit `#166`: runtime i18n добит для живых empty/error/notification/update states, home/dashboard refresh унифицирован после daemon recovery и analyze, regression matrix расширена на English runtime и widget recovery consistency. Локальные проверки зелёные: `npm --prefix desktop run e2e:release-gate` (`28 passed`), `check_docs_consistency.py`. Desktop stabilization wave теперь закрыта полностью.
 
-**Следующий шаг:** завершить `#165`: запушить текущий low-risk Sonar sweep, дождаться re-analysis SonarCloud и снять новый issue snapshot. Если low-risk findings реально ушли, закрыть `#165` и только потом возвращаться к `#164` как узкому Linux GTK/Tauri refresh для remaining `glib` alert.
+**Следующий шаг:** завершить `#165`: дождаться re-analysis SonarCloud после уже запушенного low-risk cleanup и снять новый issue snapshot. Если low-risk findings реально ушли, закрыть `#165` и только потом возвращаться к `#164` как узкому Linux GTK/Tauri refresh для remaining `glib` alert.
 
 ---
 

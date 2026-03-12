@@ -119,9 +119,36 @@ test.describe("Desktop regression matrix", () => {
     await expect(page.locator("#daemon-off-banner")).toBeHidden();
     await expect(page.locator("#listen-toggle")).toBeEnabled();
     await expect(page.locator("#analyze-btn")).toBeEnabled();
+    await expect(page.locator("#recent-sessions-list")).toContainText("Сессия 101");
+    await expect(page.locator("#upcoming-events-content")).toContainText("Sprint Review");
+    await expect(page.locator("#last-analysis-content")).toContainText("Добавить visual regression");
+    await expect(page.locator("#cost-widget-content")).toContainText("$1.2345");
 
     await page.getByRole("navigation").locator("[data-tab='sessions']").click();
     await expect(page.locator("#tab-sessions")).toHaveClass(/active/);
     await expect(page.locator("#sessions-list")).toBeVisible();
+  });
+
+  test("english ui localizes runtime empty states and widget copy", async ({ page }) => {
+    await bootDesktop(page, {
+      language: "en",
+      sessions: [],
+      upcomingEvents: [],
+      sessionDetails: {},
+      onboardingDismissed: true,
+    });
+
+    await expect(page.locator("#status-bar")).toHaveText(/Daemon available/);
+    await expect(page.locator("#recent-sessions-list")).toContainText("No sessions yet");
+    await expect(page.locator("#upcoming-events-content")).toContainText("No events in the next 48 h.");
+    await expect(page.locator("#upcoming-events-content")).toContainText("CalDAV setup");
+    await expect(page.locator("#last-analysis-content")).toContainText("No analyzed sessions yet.");
+
+    await page.getByRole("navigation").locator("[data-tab='sessions']").click();
+    await expect(page.locator("#sessions-list")).toContainText("No sessions yet");
+
+    await page.getByRole("navigation").locator("[data-tab='settings']").click();
+    await expect(page.locator("#settings-content")).toContainText("Default LLM");
+    await expect(page.locator("#settings-content")).toContainText("Daemon version:");
   });
 });
