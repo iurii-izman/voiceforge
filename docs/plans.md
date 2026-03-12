@@ -46,7 +46,7 @@
 | B | 8 | Circuit breaker для LLM | [#62](https://github.com/iurii-izman/voiceforge/issues/62) |
 | B | 9 | Periodic purge + backup CLI | [#63](https://github.com/iurii-izman/voiceforge/issues/63) |
 | B | 10 | Monitoring stack (Grafana + alerts) | [#64](https://github.com/iurii-izman/voiceforge/issues/64) |
-| **C · Scale** | 11 | CVE-2025-69872 (upstream fix) | [#65](https://github.com/iurii-izman/voiceforge/issues/65) |
+| **C · Scale** | 11 | CVE-2025-69872 (historical wait-state, now clean) | [#65](https://github.com/iurii-izman/voiceforge/issues/65) |
 | C | 12 | Async web (Starlette/Litestar опционально) | [#66](https://github.com/iurii-izman/voiceforge/issues/66) |
 | C | 13 | Prompt hash validation | [#67](https://github.com/iurii-izman/voiceforge/issues/67) |
 | C | 14 | Benchmark suite | [#68](https://github.com/iurii-izman/voiceforge/issues/68) |
@@ -65,7 +65,7 @@
 ### 3.1 Текущие (не Phase D)
 
 - **#56 (Step 2):** закрыто — fail_under=75, тесты status_helpers (doctor), history_helpers (result builders), config paths.
-- **#65 (Step 11):** убрать `--ignore-vuln CVE-2025-69872` после фикса upstream (diskcache/instructor).
+- **#65 (Step 11):** закрывается как historical wait-state; `pip-audit` снова чист без `--ignore-vuln`.
 - **#66 (Step 12):** закрыто — опциональный async-сервер (Starlette + uvicorn): `voiceforge web --async`, VOICEFORGE_WEB_ASYNC=1, [web-async] в pyproject.
 - **W17:** закрыто — do_GET/do_POST через dispatch table (S3776).
 
@@ -87,13 +87,13 @@
 - **Roadmap 1–18:** в коде; см. [history/closed-plans-and-roadmap.md](history/closed-plans-and-roadmap.md).
 - **План развития (development-plan) Часть I:** все 10 пунктов реализованы (--template, streaming listen, export, status --detailed, history --search, action items DB, history --date/--from/--to, quickstart, GetAnalytics, status --doctor).
 - **Issues #32–49, #51–53:** закрыты. Текущий фокус — только Linux (macOS/WSL2 вне скоупа).
-- **Phase A–C (Steps 1–15):** большинство в статусе «СДЕЛАНО»; частично #56, #65, #66, W17. См. [audit/audit.md](audit/audit.md).
+- **Phase A–C (Steps 1–15):** в статусе «СДЕЛАНО». Historical issue `#65` закрыта; см. [audit/audit.md](audit/audit.md).
 - **Phase D (Steps 16–19):** #70–#73 реализованы (eval-ab, OTel/Jaeger runbook, custom templates, offline-package runbook + make flatpak-build).
 
 ---
 
 ## 5. Текущие задачи и фокус
 
-- **В работе / частично:** #65 (CVE, чеклист снятия). #66 закрыто (async web). Phase D (#70–#73) закрыт.
+- **В работе / частично:** активной engineering очереди нет; репо находится в maintenance mode.
 
 Фокус итерации: [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md). Статус W1–W20: [audit/audit.md](audit/audit.md).

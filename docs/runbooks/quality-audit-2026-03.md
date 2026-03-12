@@ -1,6 +1,6 @@
 # Quality Audit 2026-03
 
-**Обновлено:** 2026-03-09.
+**Обновлено:** 2026-03-13.
 
 Этот runbook фиксирует пост-Phase-E quality/security debt snapshot и переводит его в автономные блоки для Project. Источники сигнала: GitHub Security, CodeQL, SonarCloud, local gates (`preflight`, `ruff`, `mypy`, `bandit`, `pip-audit`).
 
@@ -10,7 +10,7 @@
 
 ### GitHub
 
-- Открытые repo issues по API: фактически остался внешний wait-state [#65](https://github.com/iurii-izman/voiceforge/issues/65).
+- На момент snapshot 2026-03-09 repo queue фактически уже свелась к внешнему wait-state `#65`; по состоянию на 2026-03-13 этот wait-state снят, и runbook остаётся историческим снимком QA wave.
 - Открытые GitHub Security alerts: `3` (Dependabot; CodeQL alert dismissed in QA1 [#152](https://github.com/iurii-izman/voiceforge/issues/152))
   - CodeQL `py/clear-text-logging-sensitive-data`: **dismissed** (false positive — Git credential helper protocol)
   - `3` Dependabot alerts (`serialize-javascript`, `time`, `glib`) — tracked, see security-decision-log.md
@@ -20,7 +20,7 @@
 - `./scripts/preflight_repo.sh --with-tests` — зелёный
 - `ruff` — зелёный
 - `bandit` — без blocking findings
-- `pip-audit --ignore-vuln CVE-2025-69872` — зелёный
+- `pip-audit` — зелёный
 - `mypy` — зелёный (исправлено в QA2 [#153](https://github.com/iurii-izman/voiceforge/issues/153))
 
 ### SonarCloud
@@ -94,11 +94,11 @@ uv run python scripts/sonar_fetch_issues.py
 uv run ruff check src tests scripts
 uv run mypy src/voiceforge/core src/voiceforge/llm src/voiceforge/rag src/voiceforge/stt --ignore-missing-imports
 uv run bandit -r src -ll -q --configfile .bandit.yaml
-uv run pip-audit --desc --ignore-vuln CVE-2025-69872
+uv run pip-audit --desc
 ```
 
 ---
 
 ## 6. Wave completion (2026-03-09)
 
-**QA wave #152–#157 завершена.** Все блоки QA1–QA6 закрыты. Следующий приоритет для автопилота: roadmap (docs/plans.md), следующий P0/P1 из PROJECT-STATUS-SUMMARY по решению пользователя, или docs/governance / preflight sweep. Периодический re-check CVE #65 — по security-and-dependencies.md разд. 4.
+**QA wave #152–#157 завершена.** Все блоки QA1–QA6 закрыты. Historical wait-state `#65` тоже снят. Следующий приоритет для автопилота теперь только bug-driven maintenance или новые подтверждённые задачи пользователя.

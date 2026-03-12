@@ -33,7 +33,7 @@
 | Тип PR | Действие |
 |--------|----------|
 | **Dependabot (без CVE)** | Мержить по одному после прохода CI или батчем. После мержа: `gh pr merge N --delete-branch` (или кнопка «Delete branch»). |
-| **Dependabot (CVE #65)** | Фикса upstream нет. Dismiss с комментарием: «No fix yet. See docs/runbooks/security-and-dependencies.md. Revisit when upstream fixes.» Либо скрипт: `uv run python scripts/dependabot_dismiss_moderate.py` (нужен `github_token` с правом security_events). |
+| **Dependabot (historical CVE #65)** | Historical wait-state уже снят локально (`pip-audit` чист). Если remote alert ещё висит, закрыть как fixed/obsolete и синхронизировать `security-decision-log.md`. |
 | **pre-commit-ci** | Мержить после проверки или закрыть, если не нужен автоапдейт. |
 
 **Очистка устаревших PR (опционально):**
@@ -54,7 +54,7 @@ gh pr close <N>                   # закрыть без мержа
 
 | Issue | Тема | Действие перед бета |
 |-------|------|----------------------|
-| **#65** | CVE-2025-69872 (diskcache) | Оставить открытым до появления фикса upstream. Dependabot-алерт отклонить с комментарием (см. security-and-dependencies). |
+| **#65** | CVE-2025-69872 (diskcache) | Historical issue закрыта; использовать только как reference в audit trail. |
 | **#50** | macOS/WSL2 — исследование | По желанию: перевести в backlog или оставить открытым. |
 
 **Итог:** Критичные issues закрыты или осознанно отложены; статус зафиксирован в next-iteration-focus.
@@ -64,9 +64,9 @@ gh pr close <N>                   # закрыть без мержа
 ## 4. Чеклист «Всё в порядке»
 
 - [ ] Sonar: `sonar_fetch_issues.py` выполнен; критические замечания исправлены или приняты.
-- [ ] GitHub PR: Dependabot без CVE — смержены или закрыты; CVE #65 — алерт отложен с комментарием.
+- [ ] GitHub PR: Dependabot без CVE — смержены или закрыты; historical CVE #65 не висит как open alert без объяснения.
 - [ ] GitHub PR: pre-commit-ci и прочие — решены (merge/close).
-- [ ] GitHub Issues: #65 открыт с понятной причиной; #50 по решению (backlog или open).
+- [ ] GitHub Issues: historical `#65` закрыт; #50 по решению (backlog или open).
 - [ ] После порядка: в следующем чате — закрыть оставшиеся проблемы (если есть), затем релиз следующей беты по [release-and-quality.md](release-and-quality.md).
 
 ---

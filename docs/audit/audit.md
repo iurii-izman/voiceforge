@@ -20,7 +20,7 @@
 | W10 / Step 13 | Prompt hash validation | **СДЕЛАНО** | prompt_loader.get_prompt_hashes(), warning при fallback, test_prompt_content_snapshot (#67) |
 | W11 / Step 9 | Periodic retention purge | **СДЕЛАНО** | daemon: Timer 24h purge (#63) |
 | W12 / Step 9 | DB backup CLI | **СДЕЛАНО** | voiceforge backup (--keep N) (#63) |
-| W13 / Step 11 | CVE-2025-69872 | **ЧАСТИЧНО** | Источник (instructor) задокументирован; pip-audit с ignore в CI до фикса upstream (#65); чеклист снятия — [security-and-dependencies.md](../runbooks/security-and-dependencies.md) разд. 4. |
+| W13 / Step 11 | CVE-2025-69872 | **СДЕЛАНО** | Historical wait-state снят: `pip-audit` снова чист без ignore, issue [#65](https://github.com/iurii-izman/voiceforge/issues/65) закрыта; audit trail — [security-and-dependencies.md](../runbooks/security-and-dependencies.md) разд. 4. |
 | W14 / Step 6 | /ready endpoint | **СДЕЛАНО** | web/server.py: GET /ready, 200/503; test_web_smoke |
 | W15 / Step 4 | Version inconsistency | **СДЕЛАНО** | __init__.py: importlib.metadata.version("voiceforge") |
 | W16 / Step 5 | .editorconfig | **СДЕЛАНО** | .editorconfig в корне |
@@ -47,7 +47,7 @@
 ## 3. Оставшееся до 100% (кратко)
 
 - **#56 Coverage:** закрыто — fail_under=75, тесты стабилизированы (eval/llm_retry skip при отсутствии instructor), добавлены тесты config/otel; `uv sync --extra all` включает [otel] для покрытия OTel-путей.
-- **#65 CVE:** убрать `--ignore-vuln` после фикса upstream (diskcache/instructor).
+- **#65 CVE:** закрыто; ignore убран из активных CI/scripts.
 - **#66 Async web (полный):** миграция на Starlette/Litestar — опционально; минимальный путь (ThreadingMixIn) выполнен.
 - **W17:** закрыто — do_GET/do_POST через dispatch table (S3776).
 - **Phase D (#70–#73):** закрыт — #70 eval-ab, #71 OTel (core/otel.py + observability-alerts), #72 custom templates, #73 packaging (offline-package.md, make flatpak-build). См. [plans.md](../plans.md) разд. 3.2.
@@ -64,6 +64,6 @@
 
 **Дата:** 2026-03-05. Полный текст отчёта: [archive/audit/audit-2026-03-full.md](../archive/audit/audit-2026-03-full.md).
 
-**Резюме:** VoiceForge — local-first AI для аудиовстреч на Linux (PipeWire → STT → diarization → RAG → LLM → SQLite). Alpha 0.2, CLI, daemon, Web UI, Telegram, десктоп (Tauri 2). Большинство W1–W20 в статусе «СДЕЛАНО». Phase D (#70–#73) закрыт. Остаётся: #65 (CVE), блок 66 (prompt caching), ручные шаги, Sonar по желанию. Сильные стороны: доки, CI, безопасность (keyring, pip-audit, bandit, gitleaks), observability.
+**Резюме:** VoiceForge — local-first AI для аудиовстреч на Linux (PipeWire → STT → diarization → RAG → LLM → SQLite). Alpha 0.2, CLI, daemon, Web UI, Telegram, десктоп (Tauri 2). W1–W20 по сути закрыты, historical CVE wait-state тоже снят, а repo перешёл в maintenance mode. Сильные стороны: доки, CI, безопасность (keyring, pip-audit, bandit, gitleaks), observability.
 
 **Системный аудит (оценки):** Код 4/5, Тесты 3/5, Доки 5/5, CI/CD 4/5, Безопасность 4/5, Observability 4/5. Блочный аудит и рекомендуемые шаги — в полном отчёте по ссылке выше.

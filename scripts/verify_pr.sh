@@ -45,7 +45,7 @@ echo "[8/10] CLI contract"
 ./scripts/check_cli_contract.sh
 
 echo "[9/10] Security"
-uv run pip-audit --desc --ignore-vuln CVE-2025-69872
+uv run pip-audit --desc
 uv run bandit -r src -ll -q --configfile .bandit.yaml
 
 echo "[10/10] Gitleaks"

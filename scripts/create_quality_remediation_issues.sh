@@ -97,13 +97,13 @@ Visible GitHub security debt is now concentrated in:
 - Dependabot alert `#4` (`serialize-javascript`, npm, `desktop/e2e-native/package-lock.json`)
 - Dependabot alert `#3` (`time`, rust, `desktop/src-tauri/Cargo.lock`)
 - Dependabot alert `#2` (`glib`, rust, `desktop/src-tauri/Cargo.lock`)
-- existing external wait-state: `#65` / `CVE-2025-69872`
+- historical CVE wait-state `#65` has been cleared locally; remaining debt is GitHub-visible alerts
 
 ## Scope
 
 - Fix the CodeQL alert or prove it is a false positive and document the reason
 - Triage and remediate GitHub Dependabot alerts where safe
-- Keep `#65` as a tracked upstream wait-state unless an upstream fix actually exists
+- Keep the remediation focused on real GitHub-visible alerts and sync `security-decision-log.md`
 - Sync `docs/runbooks/security-decision-log.md` with the resulting state
 
 ## Acceptance Criteria

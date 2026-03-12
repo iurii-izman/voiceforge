@@ -12,4 +12,4 @@ Single source: **GitHub → Repository → Security → Dependabot alerts**.
 
 ## Current status
 
-- **CVE-2025-69872 (diskcache):** no fix version available (transitive dependency, pulled via **instructor**). CI already uses `pip-audit --ignore-vuln CVE-2025-69872` (see [security-and-dependencies.md](../security-and-dependencies.md)). Recommended: **dismiss the alert manually**: Dependabot → Alert → Dismiss → "Accept risk", comment: "No fix version yet. See docs/runbooks/security-and-dependencies.md. Revisit when upstream fixes." After an upstream fix appears, remove the ignore in security.md and update the dependency.
+- **Historical CVE-2025-69872 (diskcache):** the local wait-state is cleared as of 2026-03-13; `uv run pip-audit --desc` is clean again. If the remote Dependabot alert still exists, close it as fixed/obsolete and sync [security-decision-log.md](../security-decision-log.md).

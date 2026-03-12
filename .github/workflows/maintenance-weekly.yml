@@ -1,22 +1,24 @@
-name: Weekly Security
+name: Weekly maintenance state
 
 on:
   schedule:
-    - cron: "0 5 * * 1"
+    - cron: "30 5 * * 5"
   workflow_dispatch:
 
 concurrency:
-  group: security-weekly
+  group: maintenance-weekly
   cancel-in-progress: true
 
 env:
   UV_VERSION: "0.8"
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 permissions:
   contents: read
+  issues: read
 
 jobs:
-  deps-and-static:
+  maintenance-state:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -28,9 +30,10 @@ jobs:
           version: ${{ env.UV_VERSION }}
           enable-cache: true
       - run: uv sync --extra all
-      - run: uv run pip-audit --desc
-      - run: uv run bandit -r src -ll -q --configfile .bandit.yaml
-      - uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_CONFIG: .gitleaks.toml
+      - name: Maintenance state
+        run: uv run python scripts/check_maintenance_state.py --json | tee maintenance-state.json
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: maintenance-state
+          path: maintenance-state.json

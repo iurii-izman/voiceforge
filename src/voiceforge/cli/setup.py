@@ -121,6 +121,7 @@ def _ensure_config_dir() -> Path:
 def _write_config_yaml(path: Path, model_size: str, language: str) -> None:
     """Write voiceforge.yaml with chosen model_size and language."""
     content = default_config_yaml_content()
+    # Secrets from the wizard go to keyring only; the config file stores non-secret defaults.
     # Override key fields from wizard choices
     lines = content.split("\n")
     out: list[str] = []

@@ -144,7 +144,7 @@ jobs:
           version: ${{ env.UV_VERSION }}
           enable-cache: true
       - run: uv sync --extra all
-      - run: uv run pip-audit --desc --ignore-vuln CVE-2025-69872
+      - run: uv run pip-audit --desc
       - run: uv run bandit -r src -ll -q --configfile .bandit.yaml
 
   desktop-audit:

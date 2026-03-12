@@ -1,6 +1,6 @@
 # VoiceForge: Project Status & Productization Roadmap
 
-**Обновлено:** 2026-03-13 (DS1 closed; release gate green; native evidence policy next). **Версия:** 0.2.0-alpha.2. **Стадия:** Post-Phase-E desktop stabilization + UX hardening.
+**Обновлено:** 2026-03-13 (desktop stabilization complete; maintenance mode locked). **Версия:** 0.2.0-alpha.2. **Стадия:** Post-Phase-E maintenance mode with weekly recheck.
 **Предыдущий цикл (#97-#123):** закрыт полностью; архив: [history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
 
 ---
@@ -21,7 +21,7 @@
 | LLM / prompts / PII | 78 | 87 | 9 | Router coverage 91%; non-Claude caching — research |
 | Interfaces & integrations | 76 | 85 | 9 | Sync/async glue тоньше; drift risk при изменениях |
 | Testing & QA | 82 | 86 | 4 | Coverage target 75% (fail_under=75); E12 real-audio, concurrent, failure injection, CLI snapshots |
-| Security & dependency hygiene | 82 | 89 | 7 | fs.py 0700/0600 baseline; #65 CVE — external wait |
+| Security & dependency hygiene | 84 | 89 | 5 | fs.py 0700/0600 baseline; `pip-audit` снова чист; remaining alerts tracked in security-decision-log |
 | Observability & runtime ops | 79 | 88 | 9 | OTel + Prometheus + Jaeger proof path; live execution manual |
 | CI/CD & release / packaging | 81 | 87 | 6 | Release proof scripts; updater disabled |
 | Documentation & governance | 75 | 86 | 11 | 15+ runbooks, 6 ADR; residual drift |
@@ -155,7 +155,7 @@ E11 (narrow CalDAV scope) ✓ → E16 ✓ → E17 ✓
 desktop stabilization wave complete
 ```
 
-**Почему так:** реальные stuck-state UX bugs закрыты в `#159`, policy/evidence вокруг native smoke закрыта в `#160`, а regression matrix для desktop daily-driver path закрыта в `#161`. Дальше — только новые конкретные баг-репорты или внешний wait-state `#65`.
+**Почему так:** реальные stuck-state UX bugs закрыты в `#159`, policy/evidence вокруг native smoke закрыта в `#160`, а regression matrix для desktop daily-driver path закрыта в `#161`. Historical CVE wait-state `#65` тоже снят. Дальше — только новые конкретные баг-репорты.
 
 ### Post-Phase-E: Quality Remediation Wave
 
@@ -249,7 +249,7 @@ Wave QA-C: #155 → #157
 
 | Item | Статус | Действие |
 |---|---|---|
-| **#65 CVE-2025-69872** | Waiting upstream | Снять `--ignore-vuln` после fix в diskcache/instructor |
+| **#65 CVE-2025-69872** | Resolved | `pip-audit` снова чист; historical issue можно закрыть |
 | **QA1 #152** | Done | CodeQL dismissed (false positive); Dependabot tracked в security-decision-log |
 | **QA2 #153** | Done | mypy зелёный (transcriber: BaseException + assert; transcript_log: убрано переопределение _sqlcipher) |
 | **QA3 #154** | Done | fs: get_cache_home; config→voiceforge_data_dir; status_helpers→get_cache_home; daemon: _notify_analyze_done, _calendar_try_start_listen; caldav_poll: credentials helpers |
@@ -259,36 +259,33 @@ Wave QA-C: #155 → #157
 
 ---
 
-## 8. Cursor Autopilot: как работать после Phase E
+## 8. Maintenance Mode: как работать после закрытия очереди
 
-**Формат:** feature-track Phase E уже закрыт. QA wave `#152-#157` завершена. Новый источник очереди для автопилота — desktop stabilization wave `#159-#161`.
+**Формат:** feature-track Phase E закрыт. QA wave `#152-#157` завершена. Desktop stabilization `#159-#161` завершена. Репо находится в maintenance mode без активного open blocker.
 
-**Batching discipline:**
-- Брать 1 desktop block за сессию (max 2 только если это один subsystem и один verification loop)
-- Текущий execution order: `#159 → #160 → #161`
-- `#160` и `#161` не должны обходить `#159`: сначала реальные UX bugs, потом policy/evidence и расширение regression matrix
-- E20/E21 остаются policy-слоем; desktop stabilization не повод активировать placeholders или новые feature tracks
+**Каноническая проверка:**
 
-**В конце каждой сессии:**
-1. Targeted tests по изменённой поверхности
-2. Commit + push (Conventional Commits, `Closes #N`)
-3. Обновить этот документ (таблица issue numbers, score progress)
-4. Обновить [next-iteration-focus.md](next-iteration-focus.md)
-5. Выдать prompt для следующего чата
-
----
-
-## 9. Промпт для старта quality remediation wave
-
+```bash
+uv run python scripts/check_maintenance_state.py
 ```
-Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Статус: @docs/runbooks/PROJECT-STATUS-SUMMARY.md. Quality audit: @docs/runbooks/quality-audit-2026-03.md. Scope guard: @docs/runbooks/phase-e-decision-log.md. AI/tooling source of truth: @docs/runbooks/ai-tooling-setup.md.
 
-Режим: максимальный автопилот, post-Phase-E quality remediation wave. Работать по QA-блокам `#152-#157` в порядке `QA-A → QA-B → QA-C`. Новые feature issues не создавать без отдельной задачи пользователя. Брать 1 QA-блок за сессию, доводить до конца: код, targeted tests, docs sync, GitHub Project status, commit + push, обновить PROJECT-STATUS-SUMMARY и next-iteration-focus.
+Что она подтверждает:
 
-Среда: Fedora Atomic, toolbox 43, uv sync --extra all. Ключи в keyring. Тесты: targeted subset, не полный pytest (OOM risk). Для infra/docs/governance cleanup сначала прогонять `./scripts/preflight_repo.sh --with-tests`. Pre-commit в toolbox.
+- release-proof boundary не ушла в drift
+- docs consistency остаётся зелёной
+- `pip-audit` остаётся чистым и не появился новый security drift
 
-Задача: взять верхний открытый QA-блок из next-iteration-focus, перевести issue в In Progress, реализовать по чеклисту, targeted checks, commit с `Closes #N`, Done на доске. Строго соблюдать phase-e-decision-log и не активировать policy placeholders #148-#151. Обновить docs. Выдать prompt для следующего чата.
-```
+**Если новых багов нет:**
+- не разворачивать новый feature-track
+- не создавать новые placeholder issues
+- ограничиться periodic maintenance re-check и фиксацией состояния в [next-iteration-focus.md](next-iteration-focus.md)
+
+**Если появляется новый подтверждённый баг:**
+1. оформить issue на GitHub Project
+2. перевести в `In Progress`
+3. починить bug + добавить regression coverage
+4. commit + push (`Closes #N`)
+5. обновить этот документ и [next-iteration-focus.md](next-iteration-focus.md)
 
 ---
 

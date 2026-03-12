@@ -12,6 +12,7 @@
 |------|------------|
 | [agent-context.md](agent-context.md) | Единый контекст для Cursor: правила, keyring, чеклист конца сессии, универсальный промпт. Прикладывать в новый чат. |
 | [next-iteration-focus.md](next-iteration-focus.md) | Следующий шаг (один для следующего чата); обновляет агент в конце сессии. |
+| [maintenance-mode.md](maintenance-mode.md) | Каноническая maintenance-mode проверка после закрытия активной очереди: release/docs/security wait-state. |
 | [phase-e-decision-log.md](phase-e-decision-log.md) | Зафиксированные решения по E19-E21; что можно и нельзя расширять в автопилоте. |
 | [quality-audit-2026-03.md](quality-audit-2026-03.md) | Post-Phase-E quality/security audit: Sonar, GitHub Security, local gates, QA1-QA6 remediation wave. |
 | [ai-tooling-setup.md](ai-tooling-setup.md) | Source of truth для Cursor / Codex / Claude / Sonar / GitHub CLI; что хранится в git, а что локально. |

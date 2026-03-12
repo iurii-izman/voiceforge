@@ -11,11 +11,11 @@
   ```bash
   gitleaks detect --source . --config .gitleaks.toml
   uv run bandit -r src -ll -q --configfile .bandit.yaml
-  uv run pip-audit --desc --ignore-vuln CVE-2025-69872
+  uv run pip-audit --desc
   ```
   Если `gitleaks` не установлен локально, `scripts/verify_pr.sh` запускает скан через Podman/Docker.
 - **Исключения gitleaks:** в `.gitleaks.toml` в allowlist добавлены `.venv/`, кэши (`.mypy_cache/`, `.pytest_cache/`, `.ruff_cache/`) и `.hypothesis/` (кэш Hypothesis — тестовые данные могут давать ложные срабатывания при локальном `verify_pr` с `--no-git`).
-- **Исключение CVE-2025-69872:** дискcache (transitive через instructor); снять ignore после фикса upstream. Weekly workflow запускает pip-audit без ignore (allowed to fail), чтобы обнаружить появление фикса.
+- **CVE-2025-69872:** historical wait-state закрыт 2026-03-13 — `pip-audit` снова чист без ignore. Источник правды по текущим remote alerts: [security-decision-log.md](security-decision-log.md).
 - **Ротация токенов:** минимум раз в 90 дней; least privilege; удалять устаревшие; фиксировать в аудит-логе.
 
 ---
@@ -25,7 +25,7 @@
 - **Источник истины:** `pyproject.toml` (намерения), `uv.lock` (зафиксированные версии). Runtime и CI: `uv sync --extra all`, если не задано иное.
 - **Контракт тулчейна:** Python 3.12, 3.13 в CI; `requires-python >=3.12`; CI на uv 0.8. Проверка: `./scripts/check_toolchain.sh`.
 - **Обновления:** только через `./scripts/update_deps.sh`; каждое обновление должно проходить `./scripts/verify_pr.sh` и `./scripts/smoke_clean_env.sh`.
-- **CVE-2025-69872:** временное исключение (diskcache через instructor). Держать ignore в скриптах/workflow до фикса upstream. См. также раздел 1.
+- Изменения security-скриптов и CI должны оставлять `pip-audit --desc` чистым без локальных allowlist, если новый explicit wait-state не зафиксирован отдельно в [security-decision-log.md](security-decision-log.md).
 - **uv.lock:** не править вручную; при изменении pyproject.toml перегенерировать lock; коммитить pyproject.toml и uv.lock вместе.
 
 ---
@@ -35,19 +35,19 @@
 - **Где смотреть:** GitHub → Repository → Security → Dependabot alerts.
 - **Действия:** для каждого алерта — принять (мержить PR после проверки тестов) или отложить (Dismiss с комментарием).
 - **Source of truth для открытых alerts:** [security-decision-log.md](security-decision-log.md). Любой открытый remote alert должен быть отражён там с revisit trigger.
-- **CVE-2025-69872 (diskcache):** фиксирующей версии нет (проверено 2026-03: upstream не выпустил патч). В CI уже `pip-audit --ignore-vuln CVE-2025-69872`. Рекомендуется отложить алерт: Dependabot → Dismiss → «Accept risk», комментарий: «No fix version yet. See docs/runbooks/security-and-dependencies.md. Revisit when upstream fixes.» Либо скрипт (нужен `github_token` в keyring с правом security_events): `uv run python scripts/dependabot_dismiss_moderate.py`. После появления фикса — выполнить чеклист ниже.
+- **CVE-2025-69872 (diskcache):** historical wait-state закрыт 2026-03-13. `uv run pip-audit --desc` проходит без ignore. Если GitHub Dependabot alert всё ещё открыт на remote, его нужно закрыть как fixed/obsolete и синхронизировать [security-decision-log.md](security-decision-log.md).
 
 ---
 
-## 4. Чеклист снятия CVE-2025-69872 (#65)
+## 4. Чеклист закрытия historical CVE wait-state (#65)
 
-Когда в upstream (diskcache или instructor) появится версия с фиксом:
+Фикс подтверждён локально на 2026-03-13 (`uv run pip-audit --desc` чист). Для полного закрытия historical следа:
 
-1. **Проверить:** [PyPI diskcache](https://pypi.org/project/diskcache/), [instructor](https://pypi.org/project/instructor/) или `uv run pip-audit --desc` (без ignore) — что vuln закрыта.
-2. **Обновить зависимости:** `uv lock --upgrade-package diskcache` или `--upgrade-package instructor`; при необходимости поправить pyproject.toml; `uv sync --extra all`; прогнать тесты.
-3. **Удалить `--ignore-vuln CVE-2025-69872`** из: `scripts/verify_pr.sh`, `.github/workflows/test.yml`, `.github/workflows/security-weekly.yml`; в этом runbook — убрать ignore из примеров команд и упоминаний.
-4. **Проверить:** `uv run pip-audit --desc` без аргументов — проходит без ошибок.
-5. **Dependabot:** при наличии открытого алерта — принять PR с обновлением или закрыть с комментарием «Fixed in commit …».
+1. **Проверить:** `uv run pip-audit --desc` — проходит без ошибок.
+2. **Синхронизировать CI/scripts:** не должно остаться `--ignore-vuln CVE-2025-69872` в активных workflow и скриптах.
+3. **Закрыть issue:** `#65`.
+4. **Dependabot:** при наличии открытого алерта — закрыть как fixed/obsolete.
+5. **Обновить docs:** `security-decision-log.md`, `next-iteration-focus.md`, `PROJECT-STATUS-SUMMARY.md`.
 
 ---
 
@@ -82,9 +82,9 @@
 
 **Чеклист (dependency risk):**
 
-- Еженедельно: `uv run pip-audit --desc` (с учётом временного `--ignore-vuln` для #65 до фикса upstream).
+- Еженедельно: `uv run pip-audit --desc`.
 - При добавлении зависимости: проверить лицензию и известные CVE; обновлять через `./scripts/update_deps.sh`; коммитить pyproject.toml и uv.lock вместе.
-- Dependabot: не игнорировать алерты без решения; для #65 — Dismiss с комментарием по разделу 3.
+- Dependabot: не игнорировать алерты без решения; для новых wait-state сначала оформить запись в [security-decision-log.md](security-decision-log.md).
 
 **Чеклист (data-at-rest):**
 

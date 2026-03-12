@@ -2,13 +2,13 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-13 (desktop regression matrix #161 done)
+**Обновлено:** 2026-03-13 (maintenance mode locked; weekly recheck added)
 
 ---
 
 ## Что требуется от вас (подтверждения и решения)
 
-- **#65 CVE:** Фикса в upstream (diskcache/instructor) **пока нет — отдельно делать ничего не нужно**, кроме periodic re-check в рамках QA1. Чеклист снятия: [security-and-dependencies.md](security-and-dependencies.md) разд. 4.
+- **Security/CVE:** дополнительных ручных действий сейчас **не требуется**. `pip-audit` снова чист; источник правды по remaining remote alerts — [security-decision-log.md](security-decision-log.md).
 - **E19-E21:** дополнительных решений сейчас **не требуется**. Политика зафиксирована в [phase-e-decision-log.md](phase-e-decision-log.md):
   - `#142`: **Invest in Tauri**
   - `#143`: **Freeze Web UI / Telegram / RAG watcher; Invest narrow in Calendar**
@@ -19,9 +19,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** закрыт `#161`: добавлен `desktop/e2e/regression.spec.js` и покрыты реальные desktop UX-regressions для daily-driver path: recent-session open/back recovery, settings panel close/reopen recovery, settings persistence + safe defaults, compact mode reload/recovery, daemon-off → retry recovery. `cd desktop && npm run e2e:release-gate` теперь зелёный с `27 passed`.
+**Сделано в сессии:** закрыт `#162`: добавлен maintenance-mode recheck (`uv run python scripts/check_maintenance_state.py`), weekly workflow `.github/workflows/maintenance-weekly.yml`, `pip-audit` снова чист без ignore, а docs переведены в честное состояние maintenance mode без активного external blocker.
 
-**Следующий шаг:** активной инженерной очереди, кроме внешнего wait-state `#65`, сейчас нет. Следующий практический шаг зависит от новых реальных desktop UX bug reports: каждый найденный руками UI баг превращать в новую issue и сразу в regression test. Если новых багов нет, ограничиться периодическим re-check по `#65`.
+**Следующий шаг:** активной инженерной очереди сейчас нет. Следующий практический шаг — либо новый реальный bug report, который сразу оформляется в issue и regression test, либо periodic maintenance re-check: `uv run python scripts/check_maintenance_state.py`.
 
 ---
 
@@ -37,22 +37,22 @@
 | **QA-C** | #155 ✓ → #157 ✓ | **Done** | Desktop/frontend Sonar закрыт |
 | **Desktop Stabilization** | #159✓ → #160✓ → #161✓ | **Done** | UX bugs, test policy и regression matrix закрыты |
 | **Decision log** | #143✓, #144✓ | Resolved | Scope guard для автопилота; новых user decisions сейчас не нужно |
-| **External wait** | #65 | Waiting upstream | CVE остаётся tracked wait state до upstream fix |
+| **Maintenance** | — | Steady state | Активной очереди нет; periodic re-check через `check_maintenance_state.py` |
 
 ---
 
 ## Промпт для следующего чата (desktop stabilization autopilot)
 
-**Скопируй блок ниже в начало нового чата.** Агент работает по доске и next-iteration-focus; при появлении новой issue-задачи переводит её в In Progress и выполняет по чеклисту.
+**Скопируй блок ниже в начало нового чата.** Агент работает в maintenance mode: если нет новой issue-задачи или нового bug report, ограничивается periodic re-check и не разворачивает новый feature-track.
 
 ```
 Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Статус: @docs/runbooks/PROJECT-STATUS-SUMMARY.md. Desktop QA policy: @docs/runbooks/desktop-gui-testing.md. Desktop release gate: @docs/runbooks/desktop-release-gate-matrix.md. Scope guard: @docs/runbooks/phase-e-decision-log.md. AI/tooling source of truth: @docs/runbooks/ai-tooling-setup.md.
 
-Режим: максимальный автопилот. Активная очередь после Phase E и QA wave — desktop stabilization wave `#159 → #160 → #161`. Новые feature issues не создавать без отдельной задачи. Полный цикл: код → targeted tests → docs sync → GitHub Project status → commit + push → next-iteration-focus.
+Режим: максимальный автопилот, maintenance mode. Активная инженерная очередь закрыта. Новые feature issues не создавать без отдельной задачи. Если появляется новый bug report, сначала оформить issue на доске, затем работать по полному циклу: код → targeted tests → docs sync → GitHub Project status → commit + push → next-iteration-focus.
 
 Среда: Fedora Atomic, toolbox 43, uv sync --extra all. Ключи в keyring (keyring-keys-reference.md). Тесты: targeted subset, не полный pytest (OOM risk). Для infra/docs/governance cleanup сначала прогонять `./scripts/preflight_repo.sh --with-tests`. Pre-commit в toolbox; на хосте git push --no-verify если нет Python 3.12.
 
-Задача: активной feature/testing очереди сейчас нет; все desktop stabilization issues (#159–#161) закрыты. Если появляется новый desktop UX bug, сначала оформить issue на доске, затем починить bug + добавить regression test в `desktop/e2e/regression.spec.js` или соседний релевантный spec. Если новых багов нет, ограничиться periodic re-check внешнего wait-state `#65`.
+Задача: активной feature/testing очереди сейчас нет; все desktop stabilization issues (#159–#161) закрыты. Сначала выполнить `uv run python scripts/check_maintenance_state.py`. Если появляется новый desktop UX bug или другой подтверждённый баг, сначала оформить issue на доске, затем починить bug + добавить regression test в релевантный suite. Если новых багов нет и maintenance check зелёный, ограничиться фиксацией состояния без новых code changes.
 ```
 
 ---
@@ -89,4 +89,4 @@
 
 Всё закрытое: [docs/history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
 
-Вкратце: Roadmap 1-18 реализован. Phase A-D (#55-#73) закрыт. Score-to-100 (#97-#123) закрыт. Phase E Daily Driver (#124-#144) закрыт. QA wave #152–#157 завершена. Desktop UX stabilization `#159` закрыт. Следующий активный трек: `#160 → #161`.
+Вкратце: Roadmap 1-18 реализован. Phase A-D (#55-#73) закрыт. Score-to-100 (#97-#123) закрыт. Phase E Daily Driver (#124-#144) закрыт. QA wave #152–#157 завершена. Desktop stabilization `#159-#161` завершена. Репо в maintenance mode; активных open blockers сейчас нет.
