@@ -1,6 +1,6 @@
 # VoiceForge: Project Status & Productization Roadmap
 
-**Обновлено:** 2026-03-09 (Phase E закрыт; QA wave #152–#157 завершена). **Версия:** 0.2.0-alpha.2. **Стадия:** Post-Phase-E maintenance + quality remediation complete.
+**Обновлено:** 2026-03-12 (Phase E закрыт; QA wave завершена; desktop stabilization wave queued). **Версия:** 0.2.0-alpha.2. **Стадия:** Post-Phase-E desktop stabilization + UX hardening.
 **Предыдущий цикл (#97-#123):** закрыт полностью; архив: [history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
 
 ---
@@ -140,6 +140,23 @@ E11 (narrow CalDAV scope) ✓ → E16 ✓ → E17 ✓
 
 **Post–Wave 4 (2026-03-09):** Все autopilot E-блоки (E1–E19, #124–#142) закрыты. Feature-track автопилот на этом завершён. Дальше идёт отдельная remediation wave QA1-QA6 по security, Sonar и local gates. Placeholders #148–#151 не активировать.
 
+### Post-QA: Desktop Stabilization Wave
+
+После закрытия QA wave следующий практический приоритет определяется уже не Sonar/quality debt, а реальными desktop UX bugs и честным desktop regression policy.
+
+| DS | Issue | Блок | Priority | Effort | Area | Зачем |
+|---|---|---|---|---|---|---|
+| DS1 | [#159](https://github.com/iurii-izman/voiceforge/issues/159) | Desktop UX Stabilization · onboarding dismissal and mode recovery | P0 | M | Frontend | Убрать реальные stuck-state UX bugs из Tauri UI |
+| DS2 | [#160](https://github.com/iurii-izman/voiceforge/issues/160) | Desktop Test Policy · stabilize native smoke and release evidence | P1 | M | Testing | Закрепить честную policy для mocked gate vs native shell evidence |
+| DS3 | [#161](https://github.com/iurii-izman/voiceforge/issues/161) | Desktop Regression Matrix · cover state persistence and navigation recovery | P1 | M | Testing | Закрыть user-visible regressions regression-тестами |
+
+**Рекомендуемый порядок:**
+```
+#159 → #160 → #161
+```
+
+**Почему так:** сначала исправляем реальные баги, которые уже мешают пользователю, затем стабилизируем policy/evidence вокруг native smoke, и только потом расширяем regression matrix.
+
 ### Post-Phase-E: Quality Remediation Wave
 
 Подробный аудит: [quality-audit-2026-03.md](quality-audit-2026-03.md).
@@ -244,12 +261,13 @@ Wave QA-C: #155 → #157
 
 ## 8. Cursor Autopilot: как работать после Phase E
 
-**Формат:** feature-track Phase E уже закрыт. Новый источник очереди для автопилота — QA-блоки `#152-#157` с label `quality-remediation`.
+**Формат:** feature-track Phase E уже закрыт. QA wave `#152-#157` завершена. Новый источник очереди для автопилота — desktop stabilization wave `#159-#161`.
 
 **Batching discipline:**
-- Брать 1 QA-блок за сессию (max 2 только если это один subsystem и один verification loop)
-- QA1-QA6 — **все закрыты** (wave complete 2026-03-09). При отсутствии открытых QA-блоков: приоритет = roadmap (plans.md), следующий P0/P1 по решению пользователя, docs/governance или preflight sweep; placeholders #148–#151 не активировать.
-- E20/E21 остаются policy-слоем; QA-wave не повод активировать placeholders или новые feature tracks
+- Брать 1 desktop block за сессию (max 2 только если это один subsystem и один verification loop)
+- Текущий execution order: `#159 → #160 → #161`
+- `#160` и `#161` не должны обходить `#159`: сначала реальные UX bugs, потом policy/evidence и расширение regression matrix
+- E20/E21 остаются policy-слоем; desktop stabilization не повод активировать placeholders или новые feature tracks
 
 **В конце каждой сессии:**
 1. Targeted tests по изменённой поверхности

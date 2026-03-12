@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-09 (Sonar: S1186 S1244 test_ollama_fallback, coverage в workflow)
+**Обновлено:** 2026-03-12 (desktop stabilization wave queued; unified UI gate live)
 
 ---
 
@@ -19,9 +19,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** (1) S1186 — test_ollama_fallback: комментарий в пустом __init__ FakePipeline. (2) S1244 — assert cost_usd через pytest.approx(0.0). (3) sonar.yml: в args добавлен -Dsonar.python.coverage.reportPaths=coverage.xml для явной передачи отчёта (возможная причина «No data» в Coverage).
+**Сделано в сессии:** собран единый бесплатный desktop UI gate (`cd desktop && npm run e2e:release-gate`), синхронизированы CI/runbooks, подтверждён реальный desktop runtime, и по результатам ручного прогона заведена desktop stabilization wave: `#159 → #160 → #161`.
 
-**Следующий шаг:** после пуша проверить Quality Gate; при необходимости снижать когнитивную сложность (S3776) или смотреть 2 failed conditions в SonarCloud.
+**Следующий шаг:** начать с `#159` — исправить реальные desktop UX bugs из ручного прогона: dismiss/persist onboarding modal, recoverability из compact/reduced mode, и регрессионные тесты на эти состояния.
 
 ---
 
@@ -35,23 +35,24 @@
 | **QA-A** | #152✓ → #153✓ | **Done** | Security + mypy закрыты |
 | **QA-B** | #154✓ → #156✓ | **Done** | DevOps/scripts Sonar закрыт |
 | **QA-C** | #155 ✓ → #157 ✓ | **Done** | Desktop/frontend Sonar закрыт |
+| **Desktop Stabilization** | #159 → #160 → #161 | **Queued** | UX bugs, regression matrix, native evidence policy |
 | **Decision log** | #143✓, #144✓ | Resolved | Scope guard для автопилота; новых user decisions сейчас не нужно |
 | **External wait** | #65 | Waiting upstream | CVE остаётся tracked wait state до upstream fix |
 
 ---
 
-## Промпт для следующего чата (quality remediation autopilot)
+## Промпт для следующего чата (desktop stabilization autopilot)
 
 **Скопируй блок ниже в начало нового чата.** Агент работает по доске и next-iteration-focus; при появлении новой issue-задачи переводит её в In Progress и выполняет по чеклисту.
 
 ```
-Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Статус: @docs/runbooks/PROJECT-STATUS-SUMMARY.md. Quality audit: @docs/runbooks/quality-audit-2026-03.md. Scope guard: @docs/runbooks/phase-e-decision-log.md. AI/tooling source of truth: @docs/runbooks/ai-tooling-setup.md.
+Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Статус: @docs/runbooks/PROJECT-STATUS-SUMMARY.md. Desktop QA policy: @docs/runbooks/desktop-gui-testing.md. Desktop release gate: @docs/runbooks/desktop-release-gate-matrix.md. Scope guard: @docs/runbooks/phase-e-decision-log.md. AI/tooling source of truth: @docs/runbooks/ai-tooling-setup.md.
 
-Режим: максимальный автопилот. QA wave #152–#157 завершена. Новые feature issues не создавать без отдельной задачи. Следующий приоритет — roadmap (docs/plans.md), PROJECT-STATUS-SUMMARY или docs/governance. Полный цикл: код → targeted tests → docs sync → commit + push → next-iteration-focus.
+Режим: максимальный автопилот. Активная очередь после Phase E и QA wave — desktop stabilization wave `#159 → #160 → #161`. Новые feature issues не создавать без отдельной задачи. Полный цикл: код → targeted tests → docs sync → GitHub Project status → commit + push → next-iteration-focus.
 
 Среда: Fedora Atomic, toolbox 43, uv sync --extra all. Ключи в keyring (keyring-keys-reference.md). Тесты: targeted subset, не полный pytest (OOM risk). Для infra/docs/governance cleanup сначала прогонять `./scripts/preflight_repo.sh --with-tests`. Pre-commit в toolbox; на хосте git push --no-verify если нет Python 3.12.
 
-Задача: QA wave #152–#157 завершена. Выбрать следующий приоритет: roadmap (docs/plans.md), следующий P0/P1 из PROJECT-STATUS-SUMMARY, или доки/governance по next-iteration-focus.
+Задача: начать с `#159` — исправить desktop UX bugs из ручного прогона: onboarding modal dismiss/persistence, compact/full mode recovery, regression tests. После закрытия `#159` перейти к `#160`, затем к `#161`.
 ```
 
 ---
@@ -88,4 +89,4 @@
 
 Всё закрытое: [docs/history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
 
-Вкратце: Roadmap 1-18 реализован. Phase A-D (#55-#73) закрыт. Score-to-100 (#97-#123) закрыт. Phase E Daily Driver (#124-#144) закрыт. QA wave #152–#157 завершена. Следующий приоритет: preflight sweep, CVE re-check (#65), roadmap или docs/governance по решению пользователя.
+Вкратце: Roadmap 1-18 реализован. Phase A-D (#55-#73) закрыт. Score-to-100 (#97-#123) закрыт. Phase E Daily Driver (#124-#144) закрыт. QA wave #152–#157 завершена. Следующий активный трек: desktop stabilization wave `#159 → #160 → #161`.
