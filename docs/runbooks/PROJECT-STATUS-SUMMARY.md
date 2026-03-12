@@ -1,6 +1,6 @@
 # VoiceForge: Project Status & Productization Roadmap
 
-**Обновлено:** 2026-03-12 (Phase E закрыт; QA wave завершена; desktop stabilization wave queued). **Версия:** 0.2.0-alpha.2. **Стадия:** Post-Phase-E desktop stabilization + UX hardening.
+**Обновлено:** 2026-03-13 (DS1 closed; release gate green; native evidence policy next). **Версия:** 0.2.0-alpha.2. **Стадия:** Post-Phase-E desktop stabilization + UX hardening.
 **Предыдущий цикл (#97-#123):** закрыт полностью; архив: [history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
 
 ---
@@ -146,16 +146,16 @@ E11 (narrow CalDAV scope) ✓ → E16 ✓ → E17 ✓
 
 | DS | Issue | Блок | Priority | Effort | Area | Зачем |
 |---|---|---|---|---|---|---|
-| DS1 | [#159](https://github.com/iurii-izman/voiceforge/issues/159) | Desktop UX Stabilization · onboarding dismissal and mode recovery | P0 | M | Frontend | Убрать реальные stuck-state UX bugs из Tauri UI |
+| DS1 | [#159](https://github.com/iurii-izman/voiceforge/issues/159) ✓ | Desktop UX Stabilization · onboarding dismissal and mode recovery | P0 | M | Frontend | Убрать реальные stuck-state UX bugs из Tauri UI |
 | DS2 | [#160](https://github.com/iurii-izman/voiceforge/issues/160) | Desktop Test Policy · stabilize native smoke and release evidence | P1 | M | Testing | Закрепить честную policy для mocked gate vs native shell evidence |
 | DS3 | [#161](https://github.com/iurii-izman/voiceforge/issues/161) | Desktop Regression Matrix · cover state persistence and navigation recovery | P1 | M | Testing | Закрыть user-visible regressions regression-тестами |
 
 **Рекомендуемый порядок:**
 ```
-#159 → #160 → #161
+#160 → #161
 ```
 
-**Почему так:** сначала исправляем реальные баги, которые уже мешают пользователю, затем стабилизируем policy/evidence вокруг native smoke, и только потом расширяем regression matrix.
+**Почему так:** реальные stuck-state UX bugs уже закрыты в `#159`; теперь сначала стабилизируем policy/evidence вокруг native smoke, и только потом расширяем regression matrix.
 
 ### Post-Phase-E: Quality Remediation Wave
 

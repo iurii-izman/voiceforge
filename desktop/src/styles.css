@@ -153,7 +153,8 @@ table th { color: var(--muted); font-weight: 600; font-size: 0.875rem; }
 .session-detail-header h3 { margin: 0; }
 #session-detail-close { font-size: 1.25rem; line-height: 1; padding: 0.2rem 0.5rem; }
 .nav-mnemonic { text-decoration: underline; }
-.onboarding-overlay { border: none; background: transparent; position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.onboarding-overlay { border: none; background: transparent; position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 1000; }
+.onboarding-overlay[open] { display: flex; }
 .onboarding-overlay::backdrop { background: rgba(0,0,0,0.6); }
 .onboarding-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; max-width: 420px; }
 .onboarding-card h2 { margin: 0 0 1rem; font-size: 1.1rem; }

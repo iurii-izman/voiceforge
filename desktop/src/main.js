@@ -29,6 +29,7 @@ const STORE_KEYS = [
   "voiceforge_hotkeys_enabled",
   "voiceforge_close_to_tray",
   "voiceforge_compact_mode",
+  "voiceforge_onboarding_dismissed",
   "voiceforge_dashboard_order",
   "voiceforge_dashboard_collapsed",
   "voiceforge_favorites",
@@ -85,6 +86,7 @@ const I18N = {
     daemon_retry_btn: "Повторить подключение",
     compact_daemon_off: "Демон выкл",
     compact_daemon_ok: "Демон ок",
+    compact_expand: "Полный режим",
     costs_7d: "7 дней",
     costs_30d: "30 дней",
     costs_export_btn: "Экспорт отчёта",
@@ -199,6 +201,7 @@ const I18N = {
     daemon_retry_btn: "Retry connection",
     compact_daemon_off: "Daemon off",
     compact_daemon_ok: "Daemon ok",
+    compact_expand: "Full mode",
     costs_7d: "7 days",
     costs_30d: "30 days",
     costs_export_btn: "Export report",
@@ -2058,13 +2061,26 @@ function emptyStateHtml(icon, title, hint, linkHref) {
   return `<div class="empty-state"><div class="empty-state-icon" aria-hidden="true">${icon}</div><p><strong>${escapeHtml(title)}</strong></p><p>${escapeHtml(hint)}</p>${link}</div>`;
 }
 
+function closeOnboardingOverlay(overlay) {
+  if (!overlay) return;
+  if (overlay.close) overlay.close();
+  overlay.removeAttribute("open");
+  overlay.hidden = true;
+  overlay.style.display = "none";
+}
+
 function showOnboarding() {
   const overlay = document.getElementById("onboarding-overlay");
   if (localStorage.getItem(ONBOARDING_DISMISSED_KEY) === "true" || !overlay) return;
-  if (overlay.showModal) overlay.showModal();
+  const neverAgain = document.getElementById("onboarding-never");
+  if (neverAgain) neverAgain.checked = false;
+  overlay.hidden = false;
+  overlay.style.display = "flex";
+  if (!overlay.open && overlay.showModal) overlay.showModal();
+  if (!overlay.open) overlay.setAttribute("open", "true");
   document.getElementById("onboarding-ok").onclick = () => {
-    if (document.getElementById("onboarding-never")?.checked) localStorage.setItem(ONBOARDING_DISMISSED_KEY, "true");
-    if (overlay.close) overlay.close();
+    if (neverAgain?.checked) setStored(ONBOARDING_DISMISSED_KEY, "true");
+    closeOnboardingOverlay(overlay);
   };
 }
 
@@ -2451,6 +2467,7 @@ async function applyCompactModeOn(win) {
     compactStatus.textContent = daemonOk ? t("compact_daemon_ok") : t("compact_daemon_off");
     compactStatus.className = "status " + (daemonOk ? "daemon-ok" : "daemon-off");
   }
+  document.getElementById("compact-expand")?.focus({ preventScroll: true });
 }
 
 async function applyCompactModeOff(win) {
@@ -2495,6 +2512,12 @@ function initCompactMode() {
   });
   document.getElementById("compact-listen")?.addEventListener("click", () => { if (daemonOk) toggleListen(); });
   document.getElementById("compact-analyze")?.addEventListener("click", () => runDefaultAnalyze());
+  document.getElementById("compact-expand")?.addEventListener("click", async () => {
+    cb.checked = false;
+    setStored(COMPACT_MODE_KEY, "false");
+    await applyCompactMode(false);
+    switchTab("home");
+  });
 }
 
 function saveCompactWindowState() {

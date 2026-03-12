@@ -62,7 +62,7 @@ npm run e2e:report
 Минимальная policy:
 
 - обязательный бесплатный regression gate для каждой итерации: `npm run e2e:gate`
-- минимальный бесплатный desktop release-gate: `npm run e2e:release-gate`
+- минимальный бесплатный desktop release-gate: `npm run e2e:release-gate` (пересобирает свежий `dist` перед тестами)
 - native shell smoke пока остаётся отдельной дополнительной проверкой: `npm run e2e:native`
 
 Что покрывается:

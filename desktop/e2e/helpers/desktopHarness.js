@@ -82,8 +82,20 @@ export async function installDesktopMocks(page, scenarioOverrides = {}) {
 
   await page.addInitScript((scenarioData) => {
     const clone = (value) => structuredClone(value);
+    const HARNESS_STORE_KEY = "__VOICEFORGE_HARNESS_STORE__";
     const listeners = new Map();
     const scenario = clone(scenarioData);
+    const readPersistedStoreData = () => {
+      try {
+        const raw = globalThis.name || "";
+        if (!raw.startsWith(HARNESS_STORE_KEY)) return {};
+        const parsed = JSON.parse(raw.slice(HARNESS_STORE_KEY.length));
+        return parsed && typeof parsed === "object" ? parsed : {};
+      } catch {
+        return {};
+      }
+    };
+    const persistedStoreData = readPersistedStoreData();
     const state = {
       autostartEnabled: !!scenario.autostartEnabled,
       clipboard: "",
@@ -96,11 +108,13 @@ export async function installDesktopMocks(page, scenarioOverrides = {}) {
       settings: clone(scenario.settings),
       shortcuts: [],
       storeData: {
-        voiceforge_onboarding_dismissed: "true",
         voiceforge_settings_as_panel: scenario.settingsAsPanel ? "true" : "false",
         voiceforge_ui_lang: scenario.language || "ru",
         voiceforge_theme: "dark",
         voiceforge_hotkeys_enabled: "true",
+        voiceforge_onboarding_dismissed: scenario.onboardingDismissed ? "true" : "false",
+        voiceforge_compact_mode: scenario.compactMode ? "true" : "false",
+        ...persistedStoreData,
       },
       updateChecks: 0,
       windowState: { x: 40, y: 30, width: 1440, height: 1080 },
@@ -120,11 +134,44 @@ export async function installDesktopMocks(page, scenarioOverrides = {}) {
 
     const writeStorage = () => {
       Object.entries(state.storeData).forEach(([key, value]) => {
+        if (localStorage.getItem(key) !== null) return;
         localStorage.setItem(key, typeof value === "string" ? value : JSON.stringify(value));
       });
     };
 
+    const persistStoreData = () => {
+      try {
+        globalThis.name = HARNESS_STORE_KEY + JSON.stringify(state.storeData);
+      } catch {}
+    };
+
     writeStorage();
+    persistStoreData();
+
+    const originalSetItem = Storage.prototype.setItem;
+    const originalRemoveItem = Storage.prototype.removeItem;
+    const originalClear = Storage.prototype.clear;
+    Storage.prototype.setItem = function patchedSetItem(key, value) {
+      originalSetItem.call(this, key, value);
+      if (this === localStorage && typeof key === "string" && key.startsWith("voiceforge_")) {
+        state.storeData[key] = String(value);
+        persistStoreData();
+      }
+    };
+    Storage.prototype.removeItem = function patchedRemoveItem(key) {
+      originalRemoveItem.call(this, key);
+      if (this === localStorage && typeof key === "string" && key.startsWith("voiceforge_")) {
+        delete state.storeData[key];
+        persistStoreData();
+      }
+    };
+    Storage.prototype.clear = function patchedClear() {
+      originalClear.call(this);
+      if (this === localStorage) {
+        state.storeData = {};
+        persistStoreData();
+      }
+    };
 
     const envelope = (data) => JSON.stringify({ ok: true, data });
 

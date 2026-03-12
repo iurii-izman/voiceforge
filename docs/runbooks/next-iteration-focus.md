@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-12 (desktop stabilization wave queued; unified UI gate live)
+**Обновлено:** 2026-03-13 (desktop UX stabilization #159 done; release gate green)
 
 ---
 
@@ -19,9 +19,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** собран единый бесплатный desktop UI gate (`cd desktop && npm run e2e:release-gate`), синхронизированы CI/runbooks, подтверждён реальный desktop runtime, и по результатам ручного прогона заведена desktop stabilization wave: `#159 → #160 → #161`.
+**Сделано в сессии:** закрыт `#159`: исправлены dismiss/persist onboarding modal, recoverability из compact mode, persistence-aware desktop harness, и добавлены regression-тесты на эти состояния. `cd desktop && npm run e2e:release-gate` снова зелёный (`22 passed`).
 
-**Следующий шаг:** начать с `#159` — исправить реальные desktop UX bugs из ручного прогона: dismiss/persist onboarding modal, recoverability из compact/reduced mode, и регрессионные тесты на эти состояния.
+**Следующий шаг:** перейти к `#160` — стабилизировать native smoke / release evidence policy: разобраться с `tauri-driver` handshake, отделить blocking vs advisory Linux desktop evidence, и синхронизировать runbooks/CI policy.
 
 ---
 
@@ -35,7 +35,7 @@
 | **QA-A** | #152✓ → #153✓ | **Done** | Security + mypy закрыты |
 | **QA-B** | #154✓ → #156✓ | **Done** | DevOps/scripts Sonar закрыт |
 | **QA-C** | #155 ✓ → #157 ✓ | **Done** | Desktop/frontend Sonar закрыт |
-| **Desktop Stabilization** | #159 → #160 → #161 | **Queued** | UX bugs, regression matrix, native evidence policy |
+| **Desktop Stabilization** | #159✓ → #160 → #161 | **In progress** | UX bugs закрываются, дальше native evidence policy |
 | **Decision log** | #143✓, #144✓ | Resolved | Scope guard для автопилота; новых user decisions сейчас не нужно |
 | **External wait** | #65 | Waiting upstream | CVE остаётся tracked wait state до upstream fix |
 
@@ -52,7 +52,7 @@
 
 Среда: Fedora Atomic, toolbox 43, uv sync --extra all. Ключи в keyring (keyring-keys-reference.md). Тесты: targeted subset, не полный pytest (OOM risk). Для infra/docs/governance cleanup сначала прогонять `./scripts/preflight_repo.sh --with-tests`. Pre-commit в toolbox; на хосте git push --no-verify если нет Python 3.12.
 
-Задача: начать с `#159` — исправить desktop UX bugs из ручного прогона: onboarding modal dismiss/persistence, compact/full mode recovery, regression tests. После закрытия `#159` перейти к `#160`, затем к `#161`.
+Задача: взять `#160` — стабилизировать native smoke / release evidence policy для desktop. Разобрать `tauri-driver` handshake, закрепить что именно blocking, а что advisory, синхронизировать runbooks/CI policy и оставить честный release evidence path. После закрытия `#160` перейти к `#161`.
 ```
 
 ---
@@ -89,4 +89,4 @@
 
 Всё закрытое: [docs/history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
 
-Вкратце: Roadmap 1-18 реализован. Phase A-D (#55-#73) закрыт. Score-to-100 (#97-#123) закрыт. Phase E Daily Driver (#124-#144) закрыт. QA wave #152–#157 завершена. Следующий активный трек: desktop stabilization wave `#159 → #160 → #161`.
+Вкратце: Roadmap 1-18 реализован. Phase A-D (#55-#73) закрыт. Score-to-100 (#97-#123) закрыт. Phase E Daily Driver (#124-#144) закрыт. QA wave #152–#157 завершена. Desktop UX stabilization `#159` закрыт. Следующий активный трек: `#160 → #161`.

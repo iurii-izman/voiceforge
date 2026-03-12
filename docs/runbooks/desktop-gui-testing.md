@@ -27,7 +27,7 @@
 Чтобы не держать в голове несколько разрозненных команд, в `desktop/package.json` закреплены две canonical entrypoints:
 
 - `npm run e2e:gate` — **обязательный бесплатный desktop regression gate** для каждой итерации
-- `npm run e2e:release-gate` — **минимальный бесплатный desktop release-gate**, сейчас равен `e2e:gate`
+- `npm run e2e:release-gate` — **минимальный бесплатный desktop release-gate**, сначала пересобирает свежий `dist`, затем гоняет `e2e:gate`
 
 Policy:
 
@@ -40,7 +40,6 @@ Policy:
 ```bash
 cd desktop
 npm ci
-npm run build
 npm run e2e:gate
 npm run e2e:release-gate
 npm run e2e:ui

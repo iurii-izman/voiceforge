@@ -3,19 +3,16 @@ import { expect, test } from "@playwright/test";
 import { installDesktopMocks } from "./helpers/desktopHarness";
 
 async function dismissOnboarding(page) {
-  await page.waitForTimeout(200);
-  await page.evaluate(() => {
-    localStorage.setItem("voiceforge_onboarding_dismissed", "true");
-    const overlay = document.getElementById("onboarding-overlay");
-    if (!overlay) return;
-    overlay.close?.();
-    overlay.removeAttribute("open");
-    overlay.style.display = "none";
-  });
+  const overlay = page.locator("#onboarding-overlay");
+  if (await overlay.isVisible().catch(() => false)) {
+    await page.waitForFunction(() => typeof document.getElementById("onboarding-ok")?.onclick === "function");
+    await page.locator("#onboarding-ok").click();
+    await expect(overlay).not.toBeVisible();
+  }
 }
 
 test.beforeEach(async ({ page }) => {
-  await installDesktopMocks(page);
+  await installDesktopMocks(page, { onboardingDismissed: false, compactMode: false });
   await page.goto("/");
   await dismissOnboarding(page);
   await expect(page.locator("#quick-analyze-60")).toBeVisible();
@@ -31,6 +28,41 @@ test.describe("Desktop QA autopilot", () => {
     await expect(page.locator("#last-analysis-content")).toContainText("Добавить visual regression");
     await expect(page.locator("#cost-widget-content")).toContainText("$1.2345");
     await expect(page.locator("#daemon-off-banner")).toBeHidden();
+  });
+
+  test("onboarding dismisses for current session and can persist with dont-show-again", async ({ page }) => {
+    await installDesktopMocks(page, { onboardingDismissed: false, compactMode: false });
+    await page.goto("/");
+
+    const overlay = page.locator("#onboarding-overlay");
+    await expect(overlay).toBeVisible();
+    await page.waitForFunction(() => typeof document.getElementById("onboarding-ok")?.onclick === "function");
+    await page.locator("#onboarding-ok").click();
+    await expect(overlay).not.toBeVisible();
+
+    await page.reload();
+    await expect(overlay).toBeVisible();
+    await page.waitForFunction(() => typeof document.getElementById("onboarding-ok")?.onclick === "function");
+    await page.locator("#onboarding-never").check();
+    await page.locator("#onboarding-ok").click();
+    await expect(overlay).not.toBeVisible();
+
+    await page.reload();
+    await expect(overlay).not.toBeVisible();
+    await expect.poll(async () => page.evaluate(() => localStorage.getItem("voiceforge_onboarding_dismissed"))).toBe("true");
+  });
+
+  test("compact mode can return to full mode from compact bar", async ({ page }) => {
+    await page.getByRole("navigation").locator("[data-tab='settings']").click();
+    await page.locator("#compact-mode-toggle").check();
+    await expect(page.locator("#compact-bar")).toBeVisible();
+    await expect(page.locator("#full-content")).not.toBeVisible();
+    await page.locator("#compact-expand").click();
+
+    await expect(page.locator("#compact-bar")).toBeHidden();
+    await expect(page.locator("#full-content")).toBeVisible();
+    await expect(page.locator("#tab-home")).toHaveClass(/active/);
+    await expect.poll(async () => page.evaluate(() => localStorage.getItem("voiceforge_compact_mode"))).toBe("false");
   });
 
   test("quick analyze completes and emits notification/reportable state", async ({ page }) => {
