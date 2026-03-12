@@ -1,6 +1,6 @@
 # Maintenance Mode
 
-VoiceForge сейчас в режиме **maintenance + bug-driven work**: активная инженерная очередь закрыта, а периодическая задача сводится к re-check release/docs/security drift.
+VoiceForge сейчас в режиме **maintenance + bug-driven work**: feature-track закрыт, а новые work items появляются только как targeted hardening или подтверждённые bug reports.
 
 Этот runbook фиксирует одну каноническую проверку, которая помогает быстро понять, что репо по-прежнему находится в здоровом состоянии.
 
@@ -32,7 +32,7 @@ uv run python scripts/check_maintenance_state.py --json
 - `pip-audit(raw): unexpected-vulnerabilities`
   появился новый security drift
 - `queue: new-work-present`
-  в репо снова есть живая рабочая очередь; это не failure само по себе, но maintenance mode уже не “пустой”
+  в репо снова есть targeted hardening queue; это не failure само по себе, но maintenance mode уже не “пустой”
 
 ## Weekly automation
 

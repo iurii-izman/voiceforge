@@ -1,6 +1,6 @@
 # VoiceForge: Project Status & Productization Roadmap
 
-**Обновлено:** 2026-03-13 (desktop stabilization complete; maintenance mode locked). **Версия:** 0.2.0-alpha.2. **Стадия:** Post-Phase-E maintenance mode with weekly recheck.
+**Обновлено:** 2026-03-13 (npm native-e2e alert fixed locally; Rust desktop refresh queued as #164). **Версия:** 0.2.0-alpha.2. **Стадия:** Post-Phase-E maintenance / targeted hardening mode.
 **Предыдущий цикл (#97-#123):** закрыт полностью; архив: [history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
 
 ---
@@ -156,6 +156,19 @@ desktop stabilization wave complete
 ```
 
 **Почему так:** реальные stuck-state UX bugs закрыты в `#159`, policy/evidence вокруг native smoke закрыта в `#160`, а regression matrix для desktop daily-driver path закрыта в `#161`. Historical CVE wait-state `#65` тоже снят. Дальше — только новые конкретные баг-репорты.
+
+### Maintenance / Security Follow-up
+
+| MH | Issue | Блок | Priority | Effort | Area | Зачем |
+|---|---|---|---|---|---|---|
+| MH1 | [#162](https://github.com/iurii-izman/voiceforge/issues/162) ✓ | Maintenance Hardening · maintenance-mode checks and wait-state recheck | P1 | S | DevOps | Добавлен weekly maintenance re-check и канонический `check_maintenance_state.py` |
+| MH2 | [#163](https://github.com/iurii-izman/voiceforge/issues/163) ✓ | Security Hardening · npm alert resolution and Rust rebaseline | P1 | S | Security | Закрыт npm native-e2e alert (`serialize-javascript`) через safe override/lock refresh |
+| MH3 | [#164](https://github.com/iurii-izman/voiceforge/issues/164) | Desktop Rust Dependency Refresh · resolve remaining Dependabot alerts | P1 | M | Security | Остаётся coordinated refresh для remaining Rust alerts `time` и `glib` |
+
+**Рекомендуемый порядок:**
+```
+#164 only; everything else above is complete
+```
 
 ### Post-Phase-E: Quality Remediation Wave
 

@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-13 (maintenance mode locked; weekly recheck added)
+**Обновлено:** 2026-03-13 (npm security refresh done; Rust refresh queued as #164)
 
 ---
 
@@ -19,9 +19,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** закрыт `#162`: добавлен maintenance-mode recheck (`uv run python scripts/check_maintenance_state.py`), weekly workflow `.github/workflows/maintenance-weekly.yml`, `pip-audit` снова чист без ignore, а docs переведены в честное состояние maintenance mode без активного external blocker.
+**Сделано в сессии:** закрыт `#163`: в `desktop/e2e-native` добавлен npm override до безопасного `serialize-javascript@7.0.4`, `npm audit` для native-e2e workspace снова чист, security docs пересинхронизированы.
 
-**Следующий шаг:** активной инженерной очереди сейчас нет. Следующий практический шаг — либо новый реальный bug report, который сразу оформляется в issue и regression test, либо periodic maintenance re-check: `uv run python scripts/check_maintenance_state.py`.
+**Следующий шаг:** взять `#164` — coordinated Rust/Tauri dependency refresh для remaining Dependabot alerts `time` и `glib`. Перед реализацией зафиксировать минимальную безопасную цепочку обновления, затем прогнать desktop build + `npm --prefix desktop run e2e:release-gate`.
 
 ---
 
@@ -37,7 +37,8 @@
 | **QA-C** | #155 ✓ → #157 ✓ | **Done** | Desktop/frontend Sonar закрыт |
 | **Desktop Stabilization** | #159✓ → #160✓ → #161✓ | **Done** | UX bugs, test policy и regression matrix закрыты |
 | **Decision log** | #143✓, #144✓ | Resolved | Scope guard для автопилота; новых user decisions сейчас не нужно |
-| **Maintenance** | — | Steady state | Активной очереди нет; periodic re-check через `check_maintenance_state.py` |
+| **Maintenance** | #162✓ | Done | Weekly re-check добавлен |
+| **Security Hardening** | #163✓ → #164 | Active | npm native-e2e alert закрыт; remaining Rust refresh вынесен в отдельный coordinated block |
 
 ---
 
@@ -48,11 +49,11 @@
 ```
 Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Статус: @docs/runbooks/PROJECT-STATUS-SUMMARY.md. Desktop QA policy: @docs/runbooks/desktop-gui-testing.md. Desktop release gate: @docs/runbooks/desktop-release-gate-matrix.md. Scope guard: @docs/runbooks/phase-e-decision-log.md. AI/tooling source of truth: @docs/runbooks/ai-tooling-setup.md.
 
-Режим: максимальный автопилот, maintenance mode. Активная инженерная очередь закрыта. Новые feature issues не создавать без отдельной задачи. Если появляется новый bug report, сначала оформить issue на доске, затем работать по полному циклу: код → targeted tests → docs sync → GitHub Project status → commit + push → next-iteration-focus.
+Режим: максимальный автопилот, maintenance/hardening mode. Feature-track закрыт. Работать только по существующим targeted hardening issues или по новым подтверждённым bug reports. Новые feature issues не создавать без отдельной задачи. Если появляется новый bug report, сначала оформить issue на доске, затем работать по полному циклу: код → targeted tests → docs sync → GitHub Project status → commit + push → next-iteration-focus.
 
 Среда: Fedora Atomic, toolbox 43, uv sync --extra all. Ключи в keyring (keyring-keys-reference.md). Тесты: targeted subset, не полный pytest (OOM risk). Для infra/docs/governance cleanup сначала прогонять `./scripts/preflight_repo.sh --with-tests`. Pre-commit в toolbox; на хосте git push --no-verify если нет Python 3.12.
 
-Задача: активной feature/testing очереди сейчас нет; все desktop stabilization issues (#159–#161) закрыты. Сначала выполнить `uv run python scripts/check_maintenance_state.py`. Если появляется новый desktop UX bug или другой подтверждённый баг, сначала оформить issue на доске, затем починить bug + добавить regression test в релевантный suite. Если новых багов нет и maintenance check зелёный, ограничиться фиксацией состояния без новых code changes.
+Задача: взять `#164` как следующий targeted hardening block. Сначала выполнить `uv run python scripts/check_maintenance_state.py`, затем разобраться в цепочках remaining Dependabot alerts `time` и `glib` для `desktop/src-tauri/Cargo.lock`, найти минимальный безопасный refresh, после изменений прогнать desktop build + `npm --prefix desktop run e2e:release-gate`, синхронизировать docs и перевести issue на доске.
 ```
 
 ---

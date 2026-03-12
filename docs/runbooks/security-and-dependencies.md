@@ -16,6 +16,7 @@
   Если `gitleaks` не установлен локально, `scripts/verify_pr.sh` запускает скан через Podman/Docker.
 - **Исключения gitleaks:** в `.gitleaks.toml` в allowlist добавлены `.venv/`, кэши (`.mypy_cache/`, `.pytest_cache/`, `.ruff_cache/`) и `.hypothesis/` (кэш Hypothesis — тестовые данные могут давать ложные срабатывания при локальном `verify_pr` с `--no-git`).
 - **CVE-2025-69872:** historical wait-state закрыт 2026-03-13 — `pip-audit` снова чист без ignore. Источник правды по текущим remote alerts: [security-decision-log.md](security-decision-log.md).
+- **Native e2e npm alert (`serialize-javascript`):** локально закрыт 2026-03-13 через npm override в `desktop/e2e-native`; `npm audit` для workspace снова чист. Источник правды по remaining remote alerts: [security-decision-log.md](security-decision-log.md).
 - **Ротация токенов:** минимум раз в 90 дней; least privilege; удалять устаревшие; фиксировать в аудит-логе.
 
 ---
@@ -36,6 +37,7 @@
 - **Действия:** для каждого алерта — принять (мержить PR после проверки тестов) или отложить (Dismiss с комментарием).
 - **Source of truth для открытых alerts:** [security-decision-log.md](security-decision-log.md). Любой открытый remote alert должен быть отражён там с revisit trigger.
 - **CVE-2025-69872 (diskcache):** historical wait-state закрыт 2026-03-13. `uv run pip-audit --desc` проходит без ignore. Если GitHub Dependabot alert всё ещё открыт на remote, его нужно закрыть как fixed/obsolete и синхронизировать [security-decision-log.md](security-decision-log.md).
+- **Desktop native-e2e (`serialize-javascript`):** локально закрыт 2026-03-13; после push remote Dependabot alert должен перейти в fixed. Если не перейдёт, проверить, что GitHub видит обновлённый `desktop/e2e-native/package-lock.json`.
 
 ---
 

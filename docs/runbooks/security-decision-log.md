@@ -11,11 +11,12 @@
 | Item | Источник | Статус на 2026-03-09 | Решение | Когда пересматривать |
 |---|---|---|---|---|
 | CodeQL alert `py/clear-text-storage-sensitive-data` | GitHub Code Scanning, `src/voiceforge/cli/setup.py` | **Dismissed** (2026-03-13) | False positive: wizard writes only non-secret config defaults (`model_size`, `language`) to `voiceforge.yaml`; secrets go only to keyring. Alert dismissed with rationale in GitHub UI; code comment added in `setup.py`. | — |
-| Dependabot alert `#4` / `serialize-javascript` | GitHub Dependabot, `desktop/e2e-native/package-lock.json` | `high`, transitive dev dependency | Tracked. В lock: 6.0.2. Пересмотреть при обновлении `desktop/e2e-native` и до managed packaging. | Перед desktop packaging и при следующем обновлении e2e-native |
 | Dependabot alert `#3` / `time` | GitHub Dependabot, `desktop/src-tauri/Cargo.lock` | `medium`, transitive Rust | Tracked. Не менять без верификации Tauri chain. | При следующем Rust/Tauri dependency refresh и до beta packaging proof |
 | Dependabot alert `#2` / `glib` | GitHub Dependabot, `desktop/src-tauri/Cargo.lock` | `medium`, transitive Rust | Tracked. В Cargo.toml закреплён glib 0.20 (RUSTSEC-2024-0429); transitive 0.18 до полного refresh. | При следующем Rust/Tauri dependency refresh и до beta packaging proof |
 
-`#65` / `CVE-2025-69872` больше не является активным wait-state: 2026-03-13 `uv run pip-audit --desc` проходит без `--ignore-vuln`, поэтому remaining security state сводится к tracked Dependabot alerts выше.
+`#65` / `CVE-2025-69872` больше не является активным wait-state: 2026-03-13 `uv run pip-audit --desc` проходит без `--ignore-vuln`.
+
+Dependabot alert `#4` / `serialize-javascript` больше не является активным tracked alert: 2026-03-13 в `desktop/e2e-native` добавлен npm override до `serialize-javascript@7.0.4`, а `npm audit` для native-e2e workspace снова чист. После следующего push/scанирования remote alert должен закрыться как fixed.
 
 ---
 
