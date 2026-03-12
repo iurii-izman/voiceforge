@@ -38,6 +38,8 @@
 - **Source of truth для открытых alerts:** [security-decision-log.md](security-decision-log.md). Любой открытый remote alert должен быть отражён там с revisit trigger.
 - **CVE-2025-69872 (diskcache):** historical wait-state закрыт 2026-03-13. `uv run pip-audit --desc` проходит без ignore. Если GitHub Dependabot alert всё ещё открыт на remote, его нужно закрыть как fixed/obsolete и синхронизировать [security-decision-log.md](security-decision-log.md).
 - **Desktop native-e2e (`serialize-javascript`):** закрыт 2026-03-13; remote Dependabot alert уже перешёл в `fixed` после обновления `desktop/e2e-native/package-lock.json`.
+- **Desktop Rust `time`:** локально обновлён до `0.3.47` в `desktop/src-tauri/Cargo.lock`; `cargo tauri build` и `npm --prefix desktop run e2e:release-gate` прошли на обновлённом lock. Если remote Dependabot alert не закроется после push/rescan, перепроверить ingestion lock-файла в GitHub.
+- **Desktop Rust `glib`:** остаётся tracked alert в Linux GTK/Tauri/wry dependency chain; это уже coordinated ecosystem refresh, а не patch-level update.
 
 ---
 

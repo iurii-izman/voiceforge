@@ -1,6 +1,6 @@
 # VoiceForge: Project Status & Productization Roadmap
 
-**Обновлено:** 2026-03-13 (npm native-e2e alert fixed locally; Rust desktop refresh queued as #164). **Версия:** 0.2.0-alpha.2. **Стадия:** Post-Phase-E maintenance / targeted hardening mode.
+**Обновлено:** 2026-03-13 (Rust `time` alert refreshed and verified; remaining targeted hardening narrowed to `glib`). **Версия:** 0.2.0-alpha.2. **Стадия:** Post-Phase-E maintenance / targeted hardening mode.
 **Предыдущий цикл (#97-#123):** закрыт полностью; архив: [history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
 
 ---
@@ -163,7 +163,7 @@ desktop stabilization wave complete
 |---|---|---|---|---|---|---|
 | MH1 | [#162](https://github.com/iurii-izman/voiceforge/issues/162) ✓ | Maintenance Hardening · maintenance-mode checks and wait-state recheck | P1 | S | DevOps | Добавлен weekly maintenance re-check и канонический `check_maintenance_state.py` |
 | MH2 | [#163](https://github.com/iurii-izman/voiceforge/issues/163) ✓ | Security Hardening · npm alert resolution and Rust rebaseline | P1 | S | Security | Закрыт npm native-e2e alert (`serialize-javascript`) через safe override/lock refresh |
-| MH3 | [#164](https://github.com/iurii-izman/voiceforge/issues/164) | Desktop Rust Dependency Refresh · resolve remaining Dependabot alerts | P1 | M | Security | Остаётся coordinated refresh для remaining Rust alerts `time` и `glib` |
+| MH3 | [#164](https://github.com/iurii-izman/voiceforge/issues/164) | Desktop Rust Dependency Refresh · resolve remaining Dependabot alerts | P1 | M | Security | `time` refreshed to 0.3.47 and verified; remaining coordinated refresh = transitive `glib 0.18.5` in Linux desktop chain |
 
 **Рекомендуемый порядок:**
 ```

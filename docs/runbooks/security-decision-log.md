@@ -11,8 +11,8 @@
 | Item | Источник | Статус на 2026-03-09 | Решение | Когда пересматривать |
 |---|---|---|---|---|
 | CodeQL alert `py/clear-text-storage-sensitive-data` | GitHub Code Scanning, `src/voiceforge/cli/setup.py` | **Dismissed** (2026-03-13) | False positive: wizard writes only non-secret config defaults (`model_size`, `language`) to `voiceforge.yaml`; secrets go only to keyring. Alert dismissed with rationale in GitHub UI; code comment added in `setup.py`. | — |
-| Dependabot alert `#3` / `time` | GitHub Dependabot, `desktop/src-tauri/Cargo.lock` | `medium`, transitive Rust | Tracked. Не менять без верификации Tauri chain. | При следующем Rust/Tauri dependency refresh и до beta packaging proof |
-| Dependabot alert `#2` / `glib` | GitHub Dependabot, `desktop/src-tauri/Cargo.lock` | `medium`, transitive Rust | Tracked. В Cargo.toml закреплён glib 0.20 (RUSTSEC-2024-0429); transitive 0.18 до полного refresh. | При следующем Rust/Tauri dependency refresh и до beta packaging proof |
+| Dependabot alert `#3` / `time` | GitHub Dependabot, `desktop/src-tauri/Cargo.lock` | `medium`, transitive Rust | 2026-03-13 lock locally refreshed to `time 0.3.47` via coordinated `cargo update`, with `cargo tauri build` and desktop release gate passing. Remote alert should clear after push/rescan. | После push/rescan; если не закроется — перепроверить remote lock ingestion |
+| Dependabot alert `#2` / `glib` | GitHub Dependabot, `desktop/src-tauri/Cargo.lock` | `medium`, transitive Rust | Tracked. В Cargo.toml закреплён glib 0.20 (RUSTSEC-2024-0429), но transitive `glib 0.18.5` остаётся глубоко в GTK/Tauri/wry Linux chain. Требуется coordinated ecosystem refresh, а не patch-level fix. | Следующий targeted hardening block `#164` |
 
 `#65` / `CVE-2025-69872` больше не является активным wait-state: 2026-03-13 `uv run pip-audit --desc` проходит без `--ignore-vuln`.
 
