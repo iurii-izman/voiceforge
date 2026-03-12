@@ -38,12 +38,12 @@ def run_meeting(
     seconds: int | None = None,
 ) -> None:
     """Run standalone listen loop; on Ctrl+C run analyze and exit. Smart trigger in background if enabled."""
-    from voiceforge.core.preflight import check_disk_space, check_pipewire
+    from voiceforge.core.preflight import check_disk_space, check_pipewire, get_pipewire_fix_key
 
     pw_err = check_pipewire()
     if pw_err:
         typer.echo(t(pw_err), err=True)
-        typer.echo(t("error.pipewire_fix"), err=True)
+        typer.echo(t(get_pipewire_fix_key(pw_err)), err=True)
         raise SystemExit(1)
     data_dir = cfg.get_data_dir()
     disk_err, disk_warn = check_disk_space(data_dir)

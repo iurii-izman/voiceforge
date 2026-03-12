@@ -15,7 +15,7 @@ from voiceforge.core.config import (
     default_config_yaml_content,
     get_default_config_yaml_path,
 )
-from voiceforge.core.preflight import check_pipewire
+from voiceforge.core.preflight import check_pipewire, get_pipewire_fix_key
 from voiceforge.i18n import t
 
 # Whisper model size -> approximate RAM (MB) for wizard description
@@ -164,7 +164,7 @@ def run_setup_wizard(
     pw_err = check_pipewire()
     if pw_err:
         echo(t(pw_err), err=True)
-        echo(t("error.pipewire_fix"), err=True)
+        echo(t(get_pipewire_fix_key(pw_err)), err=True)
         if not confirm("Continue anyway?", default=False):
             raise SystemExit(1)
     else:

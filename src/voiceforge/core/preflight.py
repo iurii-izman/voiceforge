@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import shutil
 import socket
+import subprocess
 
 import structlog
 
@@ -32,11 +33,57 @@ _LLM_HOSTS: list[tuple[str, str, int]] = [
 ]
 
 
-def check_pipewire() -> str | None:
-    """Return None if pw-record is available; else user-facing error message with fix."""
-    if shutil.which("pw-record"):
+def _list_pactl_nodes(kind: str) -> list[str] | None:
+    """Return Pulse/PipeWire node names for `sources` or `sinks`, or None if unavailable."""
+    pactl = shutil.which("pactl")
+    if not pactl:
         return None
-    return "error.pipewire_not_found"
+    try:
+        proc = subprocess.run(  # nosec B603
+            [pactl, "list", "short", kind],
+            capture_output=True,
+            text=True,
+            timeout=3,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if proc.returncode != 0:
+        return None
+    names: list[str] = []
+    for line in proc.stdout.splitlines():
+        parts = line.split("\t")
+        if len(parts) >= 2 and parts[1].strip():
+            names.append(parts[1].strip())
+    return names
+
+
+def _is_dummy_node(name: str) -> bool:
+    """Return True for dummy/null PipeWire nodes that cannot carry real meeting audio."""
+    lowered = (name or "").lower()
+    return lowered.startswith("auto_null") or lowered.startswith("null")
+
+
+def check_pipewire() -> str | None:
+    """Return None if PipeWire capture looks usable; else user-facing error message key."""
+    if not shutil.which("pw-record"):
+        return "error.pipewire_not_found"
+    sources = _list_pactl_nodes("sources")
+    sinks = _list_pactl_nodes("sinks")
+    if sources is None and sinks is None:
+        return None
+    real_sources = [name for name in (sources or []) if not _is_dummy_node(name)]
+    real_sinks = [name for name in (sinks or []) if not _is_dummy_node(name)]
+    if not real_sources and not real_sinks:
+        return "error.pipewire_no_audio_devices"
+    return None
+
+
+def get_pipewire_fix_key(err_key: str | None) -> str:
+    """Return the most helpful follow-up hint key for a PipeWire preflight error."""
+    if err_key == "error.pipewire_no_audio_devices":
+        return "error.pipewire_devices_fix"
+    return "error.pipewire_fix"
 
 
 def check_disk_space(data_dir: str) -> tuple[str | None, str | None]:

@@ -185,6 +185,19 @@ def _doctor_check_keyring(t: Any) -> tuple[bool, str, str]:
         return (False, f"keyring: {e}", _DOCTOR_KEYRING_FAIL)
 
 
+def _doctor_check_pipewire_audio(t: Any) -> tuple[bool, str, str]:
+    """Check whether PipeWire capture is likely usable for meeting audio."""
+    try:
+        from voiceforge.core.preflight import check_pipewire
+
+        err_key = check_pipewire()
+        if err_key is None:
+            return (True, t("doctor.pipewire_ok"), "doctor.pipewire_ok")
+        return (False, t(err_key), "doctor.pipewire_fail")
+    except Exception as e:
+        return (False, f"pipewire: {e}", "doctor.pipewire_fail")
+
+
 def _doctor_check_rag_ring(cfg: Any, t: Any) -> list[tuple[bool, str, str]]:
     out: list[tuple[bool, str, str]] = []
     if Path(cfg.get_rag_db_path()).exists():
@@ -368,6 +381,7 @@ def _doctor_checks() -> list[tuple[bool, str, str]]:
 
     cfg = Settings()
     results: list[tuple[bool, str, str]] = [(True, t("doctor.config_ok"), "doctor.config_ok")]
+    results.append(_doctor_check_pipewire_audio(t))
     results.append(_doctor_check_keyring(t))
     results.extend(_doctor_check_rag_ring(cfg, t))
     results.append(_doctor_check_ollama(t))

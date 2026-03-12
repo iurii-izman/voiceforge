@@ -10,6 +10,7 @@ from voiceforge.core.preflight import (
     check_disk_space,
     check_network_for_llm,
     check_pipewire,
+    get_pipewire_fix_key,
 )
 
 
@@ -23,6 +24,28 @@ def test_check_pipewire_not_found(monkeypatch) -> None:
     """When pw-record is missing, check_pipewire returns i18n key."""
     monkeypatch.setattr("shutil.which", lambda cmd: None)
     assert check_pipewire() == "error.pipewire_not_found"
+
+
+def test_check_pipewire_no_audio_devices(monkeypatch) -> None:
+    """When only dummy/null nodes exist, check_pipewire reports unusable audio session."""
+    monkeypatch.setattr("shutil.which", lambda cmd: "/usr/bin/pw-record" if cmd == "pw-record" else "/usr/bin/pactl")
+    monkeypatch.setattr("voiceforge.core.preflight._list_pactl_nodes", lambda kind: [] if kind == "sources" else ["auto_null"])
+    assert check_pipewire() == "error.pipewire_no_audio_devices"
+
+
+def test_check_pipewire_real_source_ok(monkeypatch) -> None:
+    """When a real source exists, check_pipewire passes."""
+    monkeypatch.setattr("shutil.which", lambda cmd: "/usr/bin/pw-record" if cmd == "pw-record" else "/usr/bin/pactl")
+    monkeypatch.setattr(
+        "voiceforge.core.preflight._list_pactl_nodes",
+        lambda kind: ["alsa_input.usb_mic"] if kind == "sources" else ["alsa_output.speakers"],
+    )
+    assert check_pipewire() is None
+
+
+def test_get_pipewire_fix_key_for_dummy_audio() -> None:
+    """Dummy-audio case should point to host/device diagnostics, not package installation."""
+    assert get_pipewire_fix_key("error.pipewire_no_audio_devices") == "error.pipewire_devices_fix"
 
 
 def test_check_disk_space_ok(monkeypatch, tmp_path) -> None:

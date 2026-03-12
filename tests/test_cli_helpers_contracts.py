@@ -153,6 +153,7 @@ def test_doctor_text_and_data(monkeypatch) -> None:
     """get_doctor_text and get_doctor_data run _doctor_checks; cover doctor helpers (#56)."""
     from voiceforge.cli import status_helpers as sh
 
+    monkeypatch.setattr("voiceforge.cli.status_helpers._doctor_check_pipewire_audio", lambda t: (True, "pipewire ok", "pw"))
     monkeypatch.setattr("voiceforge.cli.status_helpers._doctor_check_keyring", lambda t: (True, "keyring ok", "k"))
     monkeypatch.setattr(
         "voiceforge.cli.status_helpers._doctor_check_rag_ring",
@@ -227,6 +228,21 @@ def test_doctor_check_rag_ring_optional(monkeypatch) -> None:
     assert len(results) == 2
     keys = [r[2] for r in results]
     assert "doctor.ring_ok" in keys or "doctor.ring_absent" in keys
+
+
+def test_doctor_check_pipewire_audio_fail(monkeypatch) -> None:
+    """_doctor_check_pipewire_audio returns a failed check when PipeWire has no real devices."""
+    from voiceforge.cli.status_helpers import _doctor_check_pipewire_audio
+
+    monkeypatch.setattr("voiceforge.core.preflight.check_pipewire", lambda: "error.pipewire_no_audio_devices")
+
+    def fake_t(key: str, **kwargs: object) -> str:
+        return key
+
+    ok, msg, key = _doctor_check_pipewire_audio(fake_t)
+    assert ok is False
+    assert msg == "error.pipewire_no_audio_devices"
+    assert key == "doctor.pipewire_fail"
 
 
 def test_watch_helpers_banner_and_stop_handlers() -> None:
