@@ -18,6 +18,19 @@ from voiceforge.i18n import t
 log = structlog.get_logger()
 
 
+def _persist_ring_snapshot(capture: Any, ring_path: str, seconds: float) -> bool:
+    """Persist current capture snapshot to ring file; prefer mic, fall back to monitor."""
+    mic, monitor = capture.get_chunk(seconds)
+    audio = mic if mic.size > 0 else monitor
+    if audio.size <= 0:
+        return False
+    ring = Path(ring_path)
+    tmp = ring.with_suffix(".tmp")
+    tmp.write_bytes(audio.tobytes())
+    os.replace(tmp, ring)
+    return True
+
+
 def run_meeting(
     cfg: Any,
     template: str | None = None,
@@ -132,15 +145,9 @@ def run_meeting(
     last_persist_at: float = 0.0
     try:
         while not stop:
-            mic, _ = capture.get_chunk(cfg.ring_seconds)
-            if mic.size > 0:
-                now = time.monotonic()
-                if now - last_persist_at >= persist_interval:
-                    ring = Path(ring_path)
-                    tmp = ring.with_suffix(".tmp")
-                    tmp.write_bytes(mic.tobytes())
-                    os.replace(tmp, ring)
-                    last_persist_at = now
+            now = time.monotonic()
+            if now - last_persist_at >= persist_interval and _persist_ring_snapshot(capture, ring_path, cfg.ring_seconds):
+                last_persist_at = now
             if stop:
                 break
             time.sleep(2.0)
@@ -148,6 +155,7 @@ def run_meeting(
         trigger_stop.set()
         if trigger_thread:
             trigger_thread.join(timeout=4.0)
+        _persist_ring_snapshot(capture, ring_path, cfg.ring_seconds)
         capture.stop()
 
     if no_analyze:
