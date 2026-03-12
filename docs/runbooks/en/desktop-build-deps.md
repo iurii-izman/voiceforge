@@ -11,6 +11,8 @@ sudo dnf install -y \
   gcc \
   nodejs \
   npm \
+  pipewire-utils \
+  pulseaudio-utils \
   pkg-config \
   webkit2gtk4.1-devel \
   gtk3-devel \
@@ -67,7 +69,7 @@ cd /path/to/voiceforge
 ./scripts/setup-desktop-toolbox.sh
 ```
 
-The script installs: system packages (gcc, nodejs, npm, pkg-config, webkit2gtk4.1-devel, gtk3-devel, openssl-devel), Rust (rustup), tauri-cli, dependencies in `desktop/` (npm install), and finally runs `check-desktop-deps.sh`.
+The script installs: system packages (gcc, nodejs, npm, `pipewire-utils`, `pulseaudio-utils`, pkg-config, webkit2gtk4.1-devel, gtk3-devel, openssl-devel), Rust (rustup), tauri-cli, dependencies in `desktop/` (npm install), and finally runs `check-desktop-deps.sh`.
 
 **Build:**
 

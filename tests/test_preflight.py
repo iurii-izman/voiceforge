@@ -43,6 +43,22 @@ def test_check_pipewire_real_source_ok(monkeypatch) -> None:
     assert check_pipewire() is None
 
 
+def test_check_pipewire_falls_back_to_wpctl(monkeypatch) -> None:
+    """When pactl is missing but wpctl has real nodes, PipeWire check should still pass."""
+    monkeypatch.setattr(
+        "shutil.which",
+        lambda cmd: "/usr/bin/pw-record" if cmd == "pw-record" else ("/usr/bin/wpctl" if cmd == "wpctl" else None),
+    )
+    monkeypatch.setattr("voiceforge.core.preflight._list_pactl_nodes", lambda kind: None)
+    monkeypatch.setattr(
+        "voiceforge.core.preflight._list_wpctl_nodes",
+        lambda kind: (
+            ["Ryzen HD Audio Controller Digital Microphone"] if kind == "sources" else ["Ryzen HD Audio Controller Speaker"]
+        ),
+    )
+    assert check_pipewire() is None
+
+
 def test_get_pipewire_fix_key_for_dummy_audio() -> None:
     """Dummy-audio case should point to host/device diagnostics, not package installation."""
     assert get_pipewire_fix_key("error.pipewire_no_audio_devices") == "error.pipewire_devices_fix"

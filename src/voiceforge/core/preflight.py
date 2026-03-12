@@ -58,6 +58,49 @@ def _list_pactl_nodes(kind: str) -> list[str] | None:
     return names
 
 
+def _list_wpctl_nodes(kind: str) -> list[str] | None:
+    """Return PipeWire node names from `wpctl status`, or None if unavailable."""
+    wpctl = shutil.which("wpctl")
+    if not wpctl:
+        return None
+    try:
+        proc = subprocess.run(  # nosec B603
+            [wpctl, "status"],
+            capture_output=True,
+            text=True,
+            timeout=3,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if proc.returncode != 0:
+        return None
+    header = "Sources:" if kind == "sources" else "Sinks:"
+    names: list[str] = []
+    in_section = False
+    for raw_line in proc.stdout.splitlines():
+        line = raw_line.strip()
+        if not in_section:
+            if line.startswith(header):
+                in_section = True
+            continue
+        if not line or line.startswith("Filters:") or line.startswith("Streams:"):
+            break
+        item = line.lstrip("* ").strip()
+        if ". " not in item:
+            continue
+        _node_id, rest = item.split(". ", 1)
+        name = rest.rsplit(" [", 1)[0].strip()
+        if name:
+            names.append(name)
+    return names or None
+
+
+def _list_audio_nodes(kind: str) -> list[str] | None:
+    """Return audio node names using pactl when available, otherwise wpctl."""
+    return _list_pactl_nodes(kind) or _list_wpctl_nodes(kind)
+
+
 def _is_dummy_node(name: str) -> bool:
     """Return True for dummy/null PipeWire nodes that cannot carry real meeting audio."""
     lowered = (name or "").lower()
@@ -68,8 +111,8 @@ def check_pipewire() -> str | None:
     """Return None if PipeWire capture looks usable; else user-facing error message key."""
     if not shutil.which("pw-record"):
         return "error.pipewire_not_found"
-    sources = _list_pactl_nodes("sources")
-    sinks = _list_pactl_nodes("sinks")
+    sources = _list_audio_nodes("sources")
+    sinks = _list_audio_nodes("sinks")
     if sources is None and sinks is None:
         return None
     real_sources = [name for name in (sources or []) if not _is_dummy_node(name)]

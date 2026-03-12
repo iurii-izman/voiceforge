@@ -70,7 +70,7 @@ For audio recording (`voiceforge listen`) in the container you need `pw-record`:
 **In toolbox:**
 
 ```bash
-sudo dnf install -y pipewire-utils
+sudo dnf install -y pipewire-utils pulseaudio-utils
 ```
 
 Then install desktop build dependencies:

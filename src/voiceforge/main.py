@@ -11,6 +11,7 @@ import subprocess  # nosec B404 -- pandoc for PDF export, args from our paths
 import sys
 import threading
 import time
+import warnings
 from datetime import UTC
 from pathlib import Path
 from typing import Any
@@ -110,6 +111,7 @@ def _is_first_run() -> bool:
 @app.callback(invoke_without_command=True)
 def _cli_trace(ctx: typer.Context) -> None:
     """Bind trace_id; when no command given, show help; first-run shows setup hint."""
+    _install_runtime_warning_filters()
     bind_trace_id()
     if ctx.invoked_subcommand is None:
         if _is_first_run():
@@ -217,6 +219,25 @@ _SERVICE_UNIT_NAME = "voiceforge.service"
 _ISO_UTC_SUFFIX = "+00:00"
 _ICAL_DT_FORMAT = "%Y%m%dT%H%M%SZ"
 _I18N_CALENDAR_POLL_ERROR = "calendar.poll_error"
+
+
+def _install_runtime_warning_filters() -> None:
+    """Suppress noisy ML/runtime warnings in normal user-facing CLI flows."""
+    warnings.filterwarnings(
+        "ignore",
+        message=r"Asking to truncate to max_length but no maximum length is provided.*",
+        category=UserWarning,
+    )
+    warnings.filterwarnings(
+        "ignore",
+        message=r"torchcodec is not installed correctly so built-in audio decoding will fail\..*",
+        category=UserWarning,
+    )
+    warnings.filterwarnings(
+        "ignore",
+        message=r"The sentencepiece tokenizer that you are converting to a fast tokenizer uses the byte fallback option.*",
+        category=UserWarning,
+    )
 
 
 def _calendar_export_ical_fail(err: str) -> None:

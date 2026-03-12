@@ -70,7 +70,7 @@ cd /var/home/user/Projects/voiceforge
 **В toolbox:**
 
 ```bash
-sudo dnf install -y pipewire-utils
+sudo dnf install -y pipewire-utils pulseaudio-utils
 ```
 
 Затем установка зависимостей для десктопа:
