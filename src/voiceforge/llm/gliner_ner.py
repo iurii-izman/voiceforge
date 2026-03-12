@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import warnings
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol, cast
@@ -40,6 +41,20 @@ def _model_cache_dir() -> Path:
 _class_detector: object | None = None
 
 
+def _install_gliner_warning_filters() -> None:
+    """Suppress noisy transformer/tokenizer warnings during optional PII model use."""
+    warnings.filterwarnings(
+        "ignore",
+        message=r"The sentencepiece tokenizer that you are converting to a fast tokenizer uses the byte fallback option.*",
+        category=UserWarning,
+    )
+    warnings.filterwarnings(
+        "ignore",
+        message=r"Asking to truncate to max_length but no maximum length is provided.*",
+        category=UserWarning,
+    )
+
+
 class _GlinerProtocol(Protocol):
     def predict_entities(self, text: str, labels: list[str], threshold: float = 0.5) -> list[dict]: ...
 
@@ -54,7 +69,9 @@ def _get_detector() -> object | None:
 
         cache = _model_cache_dir()
         ensure_private_dir(cache)
-        _class_detector = GLiNER.from_pretrained(MODEL_ID, cache_dir=cache)
+        with warnings.catch_warnings(record=True):
+            _install_gliner_warning_filters()
+            _class_detector = GLiNER.from_pretrained(MODEL_ID, cache_dir=cache)
         return _class_detector
     except ImportError:
         return None
@@ -72,7 +89,9 @@ def detect(text: str) -> list[PIIEntity]:
     try:
         # Labels: gliner_multi_pii uses these; use uppercase for consistency
         detector = cast(_GlinerProtocol, model)
-        entities = detector.predict_entities(text, PII_LABELS, threshold=0.5)
+        with warnings.catch_warnings(record=True):
+            _install_gliner_warning_filters()
+            entities = detector.predict_entities(text, PII_LABELS, threshold=0.5)
     except Exception:
         return []
     result: list[PIIEntity] = []

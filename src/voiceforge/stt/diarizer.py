@@ -1,5 +1,7 @@
 """Speaker diarization via pyannote.audio (3.x/4.x compatible loading)."""
 
+from __future__ import annotations
+
 import gc
 import os
 import threading
@@ -48,33 +50,34 @@ def _hf_hub_download(*args, **kwargs):
 
 huggingface_hub.hf_hub_download = _hf_hub_download
 
-# We always pass in-memory waveform tensors to pyannote, so its optional
-# file-decoding stack is not part of the VoiceForge runtime path.
-warnings.filterwarnings(
-    "ignore",
-    message=r"torchcodec is not installed correctly so built-in audio decoding will fail\.",
-    category=UserWarning,
-)
-warnings.filterwarnings(
-    "ignore",
-    message=r"`resume_download` is deprecated and will be removed in version 1\.0\.0\..*",
-    category=FutureWarning,
-)
-warnings.filterwarnings(
-    "ignore",
-    message=r"The sentencepiece tokenizer that you are converting to a fast tokenizer uses the byte fallback option.*",
-    category=UserWarning,
-)
-warnings.filterwarnings(
-    "ignore",
-    message=r"Mean of empty slice",
-    category=RuntimeWarning,
-)
-warnings.filterwarnings(
-    "ignore",
-    message=r"invalid value encountered in divide",
-    category=RuntimeWarning,
-)
+
+def _install_ml_warning_filters() -> None:
+    """Suppress known noisy ML warnings that do not affect our in-memory inference path."""
+    warnings.filterwarnings(
+        "ignore",
+        message=r"torchcodec is not installed correctly so built-in audio decoding will fail\..*",
+        category=UserWarning,
+    )
+    warnings.filterwarnings(
+        "ignore",
+        message=r"`resume_download` is deprecated and will be removed in version 1\.0\.0\..*",
+        category=FutureWarning,
+    )
+    warnings.filterwarnings(
+        "ignore",
+        message=r"The sentencepiece tokenizer that you are converting to a fast tokenizer uses the byte fallback option.*",
+        category=UserWarning,
+    )
+    warnings.filterwarnings(
+        "ignore",
+        message=r"Asking to truncate to max_length but no maximum length is provided.*",
+        category=UserWarning,
+    )
+    warnings.filterwarnings("ignore", message=r"Mean of empty slice", category=RuntimeWarning)
+    warnings.filterwarnings("ignore", message=r"invalid value encountered in divide", category=RuntimeWarning)
+
+
+_install_ml_warning_filters()
 
 import numpy as np
 import psutil
@@ -124,12 +127,14 @@ class Diarizer:
                 _prev = os.environ.get("TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD")
                 os.environ["TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD"] = "1"
                 try:
-                    try:
-                        kwargs: dict[str, Any] = {"token": self._auth_token}
-                        loaded = Pipeline.from_pretrained(self._model_id, **kwargs)
-                    except TypeError:
-                        kwargs = {"use_auth_token": self._auth_token}
-                        loaded = Pipeline.from_pretrained(self._model_id, **kwargs)
+                    with warnings.catch_warnings(record=True):
+                        _install_ml_warning_filters()
+                        try:
+                            kwargs: dict[str, Any] = {"token": self._auth_token}
+                            loaded = Pipeline.from_pretrained(self._model_id, **kwargs)
+                        except TypeError:
+                            kwargs = {"use_auth_token": self._auth_token}
+                            loaded = Pipeline.from_pretrained(self._model_id, **kwargs)
                     if loaded is None:
                         raise RuntimeError(f"pyannote pipeline failed to load: {self._model_id}")
                     self._pipeline = loaded
@@ -180,24 +185,8 @@ class Diarizer:
             # Pipeline accepts {"waveform": (C, T) Tensor, "sample_rate": int}
             waveform = torch.from_numpy(chunk.reshape(1, -1)).float()
             input_dict = {"waveform": waveform, "sample_rate": sample_rate}
-            with torch.no_grad(), warnings.catch_warnings():
-                warnings.filterwarnings(
-                    "ignore",
-                    message=r"torchcodec is not installed correctly so built-in audio decoding will fail\.",
-                    category=UserWarning,
-                )
-                warnings.filterwarnings(
-                    "ignore",
-                    message=r"`resume_download` is deprecated and will be removed in version 1\.0\.0\..*",
-                    category=FutureWarning,
-                )
-                warnings.filterwarnings(
-                    "ignore",
-                    message=r"The sentencepiece tokenizer that you are converting to a fast tokenizer uses the byte fallback option.*",
-                    category=UserWarning,
-                )
-                warnings.filterwarnings("ignore", message=r"Mean of empty slice", category=RuntimeWarning)
-                warnings.filterwarnings("ignore", message=r"invalid value encountered in divide", category=RuntimeWarning)
+            with torch.no_grad(), warnings.catch_warnings(record=True):
+                _install_ml_warning_filters()
                 diar = pipeline(input_dict)
             annotation = getattr(diar, "speaker_diarization", diar)
             itertracks = getattr(annotation, "itertracks", None)

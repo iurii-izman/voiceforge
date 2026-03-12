@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 import shutil
 import signal
@@ -72,6 +73,19 @@ action_items_app = typer.Typer(help=t("cli.action_items_help"))
 app.add_typer(action_items_app, name="action-items")
 calendar_app = typer.Typer(help="CalDAV calendar poll (keyring: caldav_url, caldav_username, caldav_password)")
 app.add_typer(calendar_app, name="calendar")
+
+
+def _configure_structlog(level: int, *, stream: Any | None = None) -> None:
+    """Configure structlog for CLI/daemon with a sensible default log level."""
+    renderer = structlog.dev.ConsoleRenderer(stream=stream) if stream is not None else structlog.dev.ConsoleRenderer()
+    structlog.configure(
+        wrapper_class=structlog.make_filtering_bound_logger(level),
+        processors=[
+            structlog.contextvars.merge_contextvars,
+            structlog.processors.TimeStamper(fmt="iso"),
+            renderer,
+        ],
+    )
 
 
 def _get_app_version() -> str:
@@ -1493,13 +1507,7 @@ def daemon(
     from voiceforge.core.daemon import run_daemon
 
     if foreground:
-        structlog.configure(
-            processors=[
-                structlog.contextvars.merge_contextvars,
-                structlog.processors.TimeStamper(fmt="iso"),
-                structlog.dev.ConsoleRenderer(stream=sys.stdout),
-            ]
-        )
+        _configure_structlog(logging.INFO, stream=sys.stdout)
     log_file_handle = None
     if log_file is not None:
         log_file.parent.mkdir(parents=True, exist_ok=True)
@@ -2297,13 +2305,7 @@ def calendar_create_from_session(
 
 
 def main() -> None:
-    structlog.configure(
-        processors=[
-            structlog.contextvars.merge_contextvars,
-            structlog.processors.TimeStamper(fmt="iso"),
-            structlog.dev.ConsoleRenderer(),
-        ]
-    )
+    _configure_structlog(logging.WARNING)
     app()
 
 

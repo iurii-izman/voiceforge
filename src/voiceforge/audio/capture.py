@@ -126,7 +126,10 @@ class AudioCapture:
             if not data:
                 rc = proc.poll() if proc is not None else None
                 if rc is not None:
-                    log.warning("capture.stream_closed", name=name, returncode=rc)
+                    if name == "monitor":
+                        log.debug("capture.stream_closed", name=name, returncode=rc)
+                    else:
+                        log.warning("capture.stream_closed", name=name, returncode=rc)
                 break
             buf.write(data)
         log.debug("capture.reader_stopped", name=name)
