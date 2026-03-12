@@ -11,13 +11,14 @@ echo "=== VoiceForge desktop: setup (repo $REPO_ROOT) ==="
 
 # 1. System packages (Fedora)
 if command -v dnf >/dev/null 2>&1; then
-  echo "--- Installing system packages (gcc, webkit, gtk, openssl, audio utils)..."
+  echo "--- Installing system packages (gcc, webkit, gtk, openssl, audio utils, xvfb)..."
   sudo dnf install -y \
     gcc \
     nodejs \
     npm \
     pipewire-utils \
     pulseaudio-utils \
+    xorg-x11-server-Xvfb \
     webkit2gtk4.1-devel \
     gtk3-devel \
     openssl-devel \

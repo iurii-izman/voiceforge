@@ -60,19 +60,21 @@ git push origin v0.2.0-alpha.2
 
 - **Blocking для релиза:** только `check_release_metadata.py` (включая packaging/updater contract). Он вызывается в CI job `quality` и должен проходить перед тегом.
 - **Advisory в CI:** jobs `desktop-audit` (npm audit, cargo audit) и `desktop-a11y` (pa11y) выполняются с `continue-on-error: true` из-за принятых рисков (известные CVE без фикса) и нестабильности окружения a11y. Они не блокируют merge и релиз. Политика: при появлении критичных уязвимостей — исправить или задокументировать allowlist в [security-and-dependencies.md](security-and-dependencies.md).
-- **Local release gate для desktop shell:** `cd desktop && npm run e2e:native` считается обязательным локальным Linux smoke перед desktop релизом, но пока не вынесен в CI из-за зависимости от `tauri-driver`, `WebKitWebDriver` и GUI-capable runner. Полная матрица automated/native/manual checks: [desktop-release-gate-matrix.md](desktop-release-gate-matrix.md).
+- **Local release gate для desktop UI:** `cd desktop && npm run e2e:release-gate` считается минимальным обязательным бесплатным release gate перед desktop релизом. Сейчас он закреплён как надёжный Playwright gate (`functional + a11y + visual`). Native часть (`npm run e2e:native`, `npm run e2e:native:headless`) остаётся advisory Linux smoke до стабилизации WebDriver handshake. Полная матрица automated/native/manual checks: [desktop-release-gate-matrix.md](desktop-release-gate-matrix.md).
 
 Практический порядок для release proof:
 
 1. `uv run python scripts/check_release_metadata.py`
 2. `uv run python scripts/check_release_proof.py`
-3. `cd desktop && npm run e2e:native`
+3. `cd desktop && npm run e2e:release-gate`
+4. (Advisory) `cd desktop && npm run e2e:native`
 4. `cargo install cargo-audit && cd desktop/src-tauri && cargo audit`
 
 Интерпретация:
 
 - шаги 1-2 фиксируют repo-level contract и honest boundary;
-- шаг 3 остаётся local/native gate, а не CI-blocking;
+- шаг 3 остаётся локальным desktop release gate и соответствует CI policy;
+- шаг 4 даёт дополнительное native evidence, но пока не блокирует релиз;
 - шаг 4 остаётся advisory dependency proof: полезен для evidence и triage, но не блокирует релиз, пока CI policy держит `continue-on-error`.
 
 ---

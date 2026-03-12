@@ -22,13 +22,27 @@
 
 Текущий стек запускается против **vite preview** (localhost:4173), но уже не ограничивается простым layout smoke. В проекте есть bridge `desktop/src/platform.js`, который переключает frontend между реальными Tauri APIs и test hooks `window.__VOICEFORGE_TEST_HOOKS__`.
 
+### 2.0. Один обязательный запуск
+
+Чтобы не держать в голове несколько разрозненных команд, в `desktop/package.json` закреплены две canonical entrypoints:
+
+- `npm run e2e:gate` — **обязательный бесплатный desktop regression gate** для каждой итерации
+- `npm run e2e:release-gate` — **минимальный бесплатный desktop release-gate**, сейчас равен `e2e:gate`
+
+Policy:
+
+- CI и обычная разработка опираются на `npm run e2e:gate`
+- перед desktop release или заметным desktop-first изменением прогоняется `npm run e2e:release-gate`
+- `npm run e2e:native` и `npm run e2e:native:headless` пока остаются advisory Linux-native smoke, а не частью обязательного gate
+
 ### 2.1. Запуск локально
 
 ```bash
 cd desktop
 npm ci
 npm run build
-npm run e2e
+npm run e2e:gate
+npm run e2e:release-gate
 npm run e2e:ui
 npm run e2e:report
 ```
@@ -192,6 +206,13 @@ cd desktop
 npm run e2e:native
 ```
 
+Полный локальный release-gate одной командой:
+
+```bash
+cd desktop
+npm run e2e:release-gate
+```
+
 Если дисплея нет:
 
 ```bash
@@ -219,6 +240,12 @@ npm run e2e:native:headless
 - Playwright/autopilot закрывает functional/a11y/visual regressions
 - native smoke доказывает, что реальный Tauri shell вообще поднимается и не ломает базовые сценарии
 - tray, updater install, global shortcuts, Wayland/X11 quirks и multi-monitor остаются manual/environment-specific proof
+
+Краткая policy:
+
+- **обязательный бесплатный gate:** `cd desktop && npm run e2e:gate`
+- **минимальный desktop release-gate:** `cd desktop && npm run e2e:release-gate`
+- **advisory native smoke:** `cd desktop && npm run e2e:native` или `npm run e2e:native:headless`
 
 ---
 

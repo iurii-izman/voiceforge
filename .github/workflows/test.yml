@@ -225,7 +225,7 @@ jobs:
           cache-dependency-path: desktop/package-lock.json
       - run: cd desktop && npm ci && npm run build
       - run: cd desktop && npx playwright install chromium --with-deps
-      - run: cd desktop && npm run e2e
+      - run: cd desktop && npm run e2e:release-gate
       - uses: actions/upload-artifact@v6
         if: always()
         with:

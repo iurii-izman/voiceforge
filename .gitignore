@@ -25,6 +25,8 @@ reports/
 *.json.bak
 gitleaks-report.json
 .tmp-smoke.*/
+session_*.md
+session_*.txt
 
 # Coverage
 .coverage

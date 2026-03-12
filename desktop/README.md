@@ -51,12 +51,19 @@ npm run tauri build  # релизный бинарник в src-tauri/target/rel
 ```bash
 cd desktop
 npm ci
-npm run e2e
+npm run e2e:gate
+npm run e2e:release-gate
 npm run e2e:native
 npm run e2e:ui
 npm run e2e:update-snapshots
 npm run e2e:report
 ```
+
+Минимальная policy:
+
+- обязательный бесплатный regression gate для каждой итерации: `npm run e2e:gate`
+- минимальный бесплатный desktop release-gate: `npm run e2e:release-gate`
+- native shell smoke пока остаётся отдельной дополнительной проверкой: `npm run e2e:native`
 
 Что покрывается:
 

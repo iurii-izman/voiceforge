@@ -37,8 +37,9 @@ Playwright/autopilot и visual/a11y suite дают сильный regression sig
 1. `uv run python scripts/check_release_metadata.py`
 2. `uv run python scripts/check_release_proof.py`
 3. `cd desktop && npm run e2e`
-4. `cd desktop && npx playwright test e2e/a11y.spec.js --project=chromium`
-5. `cd desktop && npx playwright test e2e/visual.spec.js --project=chromium`
+4. `cd desktop && npm run e2e:gate`
+5. `cd desktop && npm run e2e:release-gate`
+6. (Advisory) `cd desktop && npm run e2e:native`
 6. `cd desktop && npm run e2e:native`
 7. `cd desktop && npm run tauri build`
 8. `./scripts/verify-desktop-packaging.sh` (E19: проверка .deb/.AppImage в bundle)
@@ -70,7 +71,9 @@ Playwright/autopilot и visual/a11y suite дают сильный regression sig
 
 - `desktop-e2e` с mocked runtime остаётся CI baseline и блокирующим regression signal
 - `desktop-a11y` и visual regression используются как automated quality signal
-- native smoke через `tauri-driver` пока считается **toolbox/local release gate**, а не обязательным CI job:
+- `npm run e2e:gate` — обязательный бесплатный CI/local regression gate
+- `npm run e2e:release-gate` — минимальный бесплатный локальный desktop release gate
+- native smoke через `tauri-driver` пока считается **advisory Linux shell smoke**, а не обязательным CI job:
   причина: runner должен иметь `tauri-driver`, `WebKitWebDriver`, GUI-capable environment и более дорогую поддержку Linux desktop stack
 - если в будущем появится стабильный Linux desktop runner, native smoke можно переводить в отдельный blocking job без замены mocked suite
 
