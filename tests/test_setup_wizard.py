@@ -89,16 +89,24 @@ def test_run_setup_wizard_mocked_no_download(tmp_path, monkeypatch) -> None:
     prompts: list[str] = []
     confirms: list[tuple[str, bool]] = []
 
+    prompt_answers = {
+        "language": "auto",
+        "whisper": "tiny",
+        "anthropic": "",
+        "huggingface": "",
+    }
+
     def fake_prompt(msg: str, default: str = "", **kwargs: object) -> str:
         prompts.append(msg)
-        if "Language" in msg or "language" in msg.lower():
-            return "auto"
-        if "Whisper" in msg or "model" in msg.lower():
-            return "tiny"
-        if "Anthropic" in msg or "API key" in msg:
-            return ""
-        if "HuggingFace" in msg:
-            return ""
+        lowered = msg.lower()
+        if "language" in lowered:
+            return prompt_answers["language"]
+        if "whisper" in lowered or "model" in lowered:
+            return prompt_answers["whisper"]
+        if "anthropic" in lowered or "api key" in lowered:
+            return prompt_answers["anthropic"]
+        if "huggingface" in lowered:
+            return prompt_answers["huggingface"]
         return default
 
     def fake_confirm(msg: str, default: bool = True) -> bool:

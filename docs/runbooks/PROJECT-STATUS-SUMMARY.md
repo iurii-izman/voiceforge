@@ -1,6 +1,6 @@
 # VoiceForge: Project Status & Productization Roadmap
 
-**Обновлено:** 2026-03-13 (Rust `time` alert closed; remaining targeted hardening narrowed to `glib`). **Версия:** 0.2.0-alpha.2. **Стадия:** Post-Phase-E maintenance / targeted hardening mode.
+**Обновлено:** 2026-03-13 (low-risk Sonar sweep landed locally; remaining hardening queue = Sonar recheck + `glib`). **Версия:** 0.2.0-alpha.2. **Стадия:** Post-Phase-E maintenance / targeted hardening mode.
 **Предыдущий цикл (#97-#123):** закрыт полностью; архив: [history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
 
 ---
@@ -164,10 +164,11 @@ desktop stabilization wave complete
 | MH1 | [#162](https://github.com/iurii-izman/voiceforge/issues/162) ✓ | Maintenance Hardening · maintenance-mode checks and wait-state recheck | P1 | S | DevOps | Добавлен weekly maintenance re-check и канонический `check_maintenance_state.py` |
 | MH2 | [#163](https://github.com/iurii-izman/voiceforge/issues/163) ✓ | Security Hardening · npm alert resolution and Rust rebaseline | P1 | S | Security | Закрыт npm native-e2e alert (`serialize-javascript`) через safe override/lock refresh |
 | MH3 | [#164](https://github.com/iurii-izman/voiceforge/issues/164) | Desktop Linux GTK Refresh · resolve remaining glib Dependabot alert | P1 | M | Security | `time` alert already closed; remaining coordinated refresh = transitive `glib 0.18.5` in Linux desktop chain |
+| MH4 | [#165](https://github.com/iurii-izman/voiceforge/issues/165) | Sonar Sweep · low-risk desktop and script cleanup | P1 | M | Quality | Local cleanup готов; нужен remote Sonar re-analysis и residual triage before closure |
 
 **Рекомендуемый порядок:**
 ```
-#164 only; everything else above is complete
+#165 → #164
 ```
 
 ### Post-Phase-E: Quality Remediation Wave

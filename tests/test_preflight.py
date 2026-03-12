@@ -14,6 +14,14 @@ from voiceforge.core.preflight import (
 )
 
 
+def _which_with_wpctl(cmd: str) -> str | None:
+    if cmd == "pw-record":
+        return "/usr/bin/pw-record"
+    if cmd == "wpctl":
+        return "/usr/bin/wpctl"
+    return None
+
+
 def test_check_pipewire_found(monkeypatch) -> None:
     """When pw-record is in PATH, check_pipewire returns None."""
     monkeypatch.setattr("shutil.which", lambda cmd: "/usr/bin/pw-record" if cmd == "pw-record" else None)
@@ -45,10 +53,7 @@ def test_check_pipewire_real_source_ok(monkeypatch) -> None:
 
 def test_check_pipewire_falls_back_to_wpctl(monkeypatch) -> None:
     """When pactl is missing but wpctl has real nodes, PipeWire check should still pass."""
-    monkeypatch.setattr(
-        "shutil.which",
-        lambda cmd: "/usr/bin/pw-record" if cmd == "pw-record" else ("/usr/bin/wpctl" if cmd == "wpctl" else None),
-    )
+    monkeypatch.setattr("shutil.which", _which_with_wpctl)
     monkeypatch.setattr("voiceforge.core.preflight._list_pactl_nodes", lambda kind: None)
     monkeypatch.setattr(
         "voiceforge.core.preflight._list_wpctl_nodes",

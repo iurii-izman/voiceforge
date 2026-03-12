@@ -80,43 +80,74 @@ def _load_whisper_model(
     size_mb = _WHISPER_SIZE_MB.get(model_size, 500)
     cached = _is_whisper_model_cached(model_size)
     should_emit_download_warning = not cached
-    if should_emit_download_warning and warnings is not None:
-        warnings.append(t("feedback.model_downloading", model_size=model_size, size_mb=size_mb))
-        log.info("stt.downloading_model", size=model_size, message=f"Downloading Whisper model ({model_size})...")
-    else:
-        log.info("stt.model_cached", size=model_size)
+    _emit_model_load_status(model_size, size_mb, should_emit_download_warning, warnings)
     last_error: BaseException | None = None
     for attempt in range(MAX_DOWNLOAD_ATTEMPTS):
         try:
-            model = WhisperModel(
-                model_size,
-                device=device,
-                compute_type=compute_type,
-                local_files_only=cached,
-            )
-            if should_emit_download_warning and warnings is not None:
-                warnings.append(t("feedback.model_ready"))
+            model = _build_whisper_model(model_size, device, compute_type, cached)
+            _emit_model_ready(should_emit_download_warning, warnings)
             return model
         except Exception as e:
             last_error = e
             if cached:
-                cached = False
-                should_emit_download_warning = True
-                if warnings is not None:
-                    warnings.append(t("feedback.model_downloading", model_size=model_size, size_mb=size_mb))
-                log.warning("stt.cached_model_load_failed", size=model_size, error=str(e))
+                cached, should_emit_download_warning = _recover_from_cached_model_failure(model_size, size_mb, e, warnings)
                 continue
             if attempt < MAX_DOWNLOAD_ATTEMPTS - 1:
-                delay = DOWNLOAD_BACKOFF_BASE_SEC * (2**attempt)
-                log.warning(
-                    "stt.model_download_retry",
-                    attempt=attempt + 1,
-                    error=str(e),
-                    retry_sec=delay,
-                )
+                delay = _retry_download_after_failure(attempt, e)
                 time.sleep(delay)
     assert last_error is not None
     raise last_error
+
+
+def _build_whisper_model(model_size: str, device: str, compute_type: str, cached: bool) -> WhisperModel:
+    return WhisperModel(
+        model_size,
+        device=device,
+        compute_type=compute_type,
+        local_files_only=cached,
+    )
+
+
+def _emit_model_load_status(
+    model_size: str,
+    size_mb: int,
+    should_emit_download_warning: bool,
+    warnings: list[str] | None,
+) -> None:
+    if should_emit_download_warning:
+        if warnings is not None:
+            warnings.append(t("feedback.model_downloading", model_size=model_size, size_mb=size_mb))
+        log.info("stt.downloading_model", size=model_size, message=f"Downloading Whisper model ({model_size})...")
+        return
+    log.info("stt.model_cached", size=model_size)
+
+
+def _emit_model_ready(should_emit_download_warning: bool, warnings: list[str] | None) -> None:
+    if should_emit_download_warning and warnings is not None:
+        warnings.append(t("feedback.model_ready"))
+
+
+def _recover_from_cached_model_failure(
+    model_size: str,
+    size_mb: int,
+    error: Exception,
+    warnings: list[str] | None,
+) -> tuple[bool, bool]:
+    if warnings is not None:
+        warnings.append(t("feedback.model_downloading", model_size=model_size, size_mb=size_mb))
+    log.warning("stt.cached_model_load_failed", size=model_size, error=str(error))
+    return (False, True)
+
+
+def _retry_download_after_failure(attempt: int, error: Exception) -> float:
+    delay = DOWNLOAD_BACKOFF_BASE_SEC * (2**attempt)
+    log.warning(
+        "stt.model_download_retry",
+        attempt=attempt + 1,
+        error=str(error),
+        retry_sec=delay,
+    )
+    return delay
 
 
 def _is_whisper_model_cached(model_size: str) -> bool:

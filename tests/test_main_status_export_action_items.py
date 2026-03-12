@@ -33,7 +33,7 @@ class _FakeValidateLogDb:
         return None
 
 
-def test_main_status_text_and_json_branches(monkeypatch) -> None:
+def test_main_status_text_and_json_branches(monkeypatch, capsys) -> None:
     from voiceforge import main
 
     echoed: list[tuple[str, bool]] = []
@@ -51,11 +51,11 @@ def test_main_status_text_and_json_branches(monkeypatch) -> None:
     main.status(output="json", detailed=True, doctor=False)
     main.status(output="json", doctor=True, detailed=False)
 
-    text_messages = [message for message, _ in echoed[:3]]
-    assert "doctor text" in text_messages
-    assert "detailed text 12.5" in text_messages
-    assert "status text" in text_messages
-    json_payloads = [json.loads(message) for message, _ in echoed[3:]]
+    rendered_output = capsys.readouterr().out
+    assert "doctor text" in rendered_output
+    assert "detailed text 12.5" in rendered_output
+    assert "status text" in rendered_output
+    json_payloads = [json.loads(message) for message, _ in echoed]
     detailed_payload = next(payload for payload in json_payloads if "budget_limit_usd" in payload["data"])
     doctor_payload = next(payload for payload in json_payloads if "checks" in payload["data"])
     assert detailed_payload["ok"] is True

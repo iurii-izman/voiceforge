@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-13 (time alert fixed; only remaining security queue is Linux GTK/glib alert)
+**Обновлено:** 2026-03-13 (low-risk Sonar sweep landed locally; remaining follow-up is remote Sonar recheck plus GTK/glib alert)
 
 ---
 
@@ -19,9 +19,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** в `desktop/src-tauri/Cargo.lock` через coordinated refresh поднят `time` до `0.3.47`; `cargo tauri build` и `npm --prefix desktop run e2e:release-gate` прошли на обновлённом lock, а remote Dependabot alert `time` уже закрылся. npm alert `serialize-javascript` тоже закрыт. Активный security queue сузился до remaining `glib` ecosystem alert.
+**Сделано в сессии:** добран low-risk Sonar sweep по shell/native desktop harness/helper modules: `run_desktop_native_smoke.sh`, `wdio.conf.js`, `desktopHarness.js`, `dependabot_dismiss_moderate.py`, `preflight.py`, `digest.py`, `capture.py`, `transcriber.py`, `status_helpers.py`, `setup.py`, `meeting.py` и test-only cleanup. Локальные проверки зелёные: `48 passed`, `ruff`, `npm --prefix desktop run e2e:release-gate`, `check_docs_consistency.py`. Remote SonarCloud ещё показывает старый срез до re-analysis.
 
-**Следующий шаг:** продолжить `#164` как узкий Linux GTK/Tauri refresh только для remaining `glib` alert. Перед реализацией: зафиксировать точную минимальную цепочку обновления, которая может вытеснить transitive `glib 0.18.5` из Linux desktop stack, затем снова прогнать desktop build + `npm --prefix desktop run e2e:release-gate`.
+**Следующий шаг:** завершить `#165`: запушить текущий low-risk Sonar sweep, дождаться re-analysis SonarCloud и снять новый issue snapshot. Если low-risk findings реально ушли, закрыть `#165` и только потом возвращаться к `#164` как узкому Linux GTK/Tauri refresh для remaining `glib` alert.
 
 ---
 
@@ -39,6 +39,7 @@
 | **Decision log** | #143✓, #144✓ | Resolved | Scope guard для автопилота; новых user decisions сейчас не нужно |
 | **Maintenance** | #162✓ | Done | Weekly re-check добавлен |
 | **Security Hardening** | #163✓ → #164 | Active | npm native-e2e alert закрыт; `time` alert закрыт; remaining coordinated block = `glib` in Linux desktop stack |
+| **Sonar Sweep** | #165 | Active | Low-risk local cleanup готов; нужен remote Sonar recheck и residual triage |
 
 ---
 
@@ -53,7 +54,7 @@
 
 Среда: Fedora Atomic, toolbox 43, uv sync --extra all. Ключи в keyring (keyring-keys-reference.md). Тесты: targeted subset, не полный pytest (OOM risk). Для infra/docs/governance cleanup сначала прогонять `./scripts/preflight_repo.sh --with-tests`. Pre-commit в toolbox; на хосте git push --no-verify если нет Python 3.12.
 
-Задача: взять `#164` как следующий targeted hardening block. Сначала выполнить `uv run python scripts/check_maintenance_state.py`, затем работать только по remaining `glib` alert для `desktop/src-tauri/Cargo.lock`: найти минимальный безопасный ecosystem refresh для Linux GTK/Tauri chain, после изменений прогнать `cargo tauri build` и `npm --prefix desktop run e2e:release-gate`, синхронизировать docs и перевести issue на доске.
+Задача: взять `#165` как следующий targeted hardening block. Сначала выполнить `uv run python scripts/check_maintenance_state.py`, затем запушить текущий low-risk Sonar cleanup, дождаться SonarCloud re-analysis и снять новый snapshot через `uv run python scripts/sonar_fetch_issues.py --json`. Если low-risk findings ушли, закрыть `#165`, обновить docs и только потом возвращаться к `#164` как отдельному Rust/GTK refresh для remaining `glib` alert.
 ```
 
 ---

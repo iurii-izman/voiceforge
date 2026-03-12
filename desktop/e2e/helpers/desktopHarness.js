@@ -127,11 +127,9 @@ export async function installDesktopMocks(page, scenarioOverrides = {}) {
       callbacks.forEach((callback) => callback({ payload }));
     };
 
-    function createUnsubscribe(eventName, callback) {
-      return () => {
-        const current = listeners.get(eventName) || [];
-        listeners.set(eventName, current.filter((item) => item !== callback));
-      };
+    function removeListener(eventName, callback) {
+      const current = listeners.get(eventName) || [];
+      listeners.set(eventName, current.filter((item) => item !== callback));
     }
 
     const writeStorage = () => {
@@ -322,7 +320,7 @@ export async function installDesktopMocks(page, scenarioOverrides = {}) {
         const callbacks = listeners.get(eventName) || [];
         callbacks.push(callback);
         listeners.set(eventName, callbacks);
-        return Promise.resolve(createUnsubscribe(eventName, callback));
+        return Promise.resolve(() => removeListener(eventName, callback));
       },
       getCurrentWindow() {
         return fakeWindow;

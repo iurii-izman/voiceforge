@@ -108,6 +108,17 @@ class AudioCapture:
 
         log.info("capture.started", sample_rate=self._sample_rate)
 
+    def _handle_stream_closed(self, proc: subprocess.Popen[bytes] | None, name: str) -> bool:
+        """Log a closed stream when the subprocess already exited. Returns True when loop should stop."""
+        rc = proc.poll() if proc is not None else None
+        if rc is None:
+            return True
+        if name == "monitor":
+            log.debug("capture.stream_closed", name=name, returncode=rc)
+        else:
+            log.warning("capture.stream_closed", name=name, returncode=rc)
+        return True
+
     def _reader_loop(
         self,
         proc: subprocess.Popen[bytes] | None,
@@ -124,26 +135,27 @@ class AudioCapture:
             except (ValueError, OSError):
                 break
             if not data:
-                rc = proc.poll() if proc is not None else None
-                if rc is not None:
-                    if name == "monitor":
-                        log.debug("capture.stream_closed", name=name, returncode=rc)
-                    else:
-                        log.warning("capture.stream_closed", name=name, returncode=rc)
+                if self._handle_stream_closed(proc, name):
+                    break
                 break
             buf.write(data)
         log.debug("capture.reader_stopped", name=name)
+
+    @staticmethod
+    def _terminate_proc(proc: subprocess.Popen[bytes] | None) -> None:
+        if proc is None or proc.poll() is not None:
+            return
+        proc.terminate()
+        try:
+            proc.wait(timeout=2)
+        except subprocess.TimeoutExpired:
+            proc.kill()
 
     def stop(self) -> None:
         """Stop capture."""
         self._stop.set()
         for proc in (self._mic_proc, self._monitor_proc):
-            if proc is not None and proc.poll() is None:
-                proc.terminate()
-                try:
-                    proc.wait(timeout=2)
-                except subprocess.TimeoutExpired:
-                    proc.kill()
+            self._terminate_proc(proc)
         self._mic_proc = None
         self._monitor_proc = None
         if self._mic_thread is not None:

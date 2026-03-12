@@ -112,6 +112,23 @@ function waitForPort(port, timeoutMs = 15000) {
 
 function waitForWebDriverStatus(timeoutMs = sessionTimeoutMs) {
   const started = Date.now();
+
+  const retryOrReject = (reject, tryConnect, message) => {
+    if (Date.now() - started > timeoutMs) {
+      reject(new Error(message));
+      return;
+    }
+    setTimeout(tryConnect, 500);
+  };
+
+  const handleStatusResponse = (resolve, reject, tryConnect, res, body) => {
+    if (res.statusCode && res.statusCode < 500) {
+      resolve(body);
+      return;
+    }
+    retryOrReject(reject, tryConnect, `Timed out waiting for WebDriver status at /status (HTTP ${res.statusCode ?? "unknown"})`);
+  };
+
   return new Promise((resolve, reject) => {
     const tryConnect = () => {
       const req = http.request(
@@ -122,15 +139,7 @@ function waitForWebDriverStatus(timeoutMs = sessionTimeoutMs) {
             body += chunk;
           });
           res.on("end", () => {
-            if (res.statusCode && res.statusCode < 500) {
-              resolve(body);
-              return;
-            }
-            if (Date.now() - started > timeoutMs) {
-              reject(new Error(`Timed out waiting for WebDriver status at /status (HTTP ${res.statusCode ?? "unknown"})`));
-            } else {
-              setTimeout(tryConnect, 500);
-            }
+            handleStatusResponse(resolve, reject, tryConnect, res, body);
           });
         },
       );
@@ -138,11 +147,7 @@ function waitForWebDriverStatus(timeoutMs = sessionTimeoutMs) {
         req.destroy(new Error("status request timed out"));
       });
       req.on("error", () => {
-        if (Date.now() - started > timeoutMs) {
-          reject(new Error("Timed out waiting for responsive WebDriver /status endpoint"));
-        } else {
-          setTimeout(tryConnect, 500);
-        }
+        retryOrReject(reject, tryConnect, "Timed out waiting for responsive WebDriver /status endpoint");
       });
       req.end();
     };

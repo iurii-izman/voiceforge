@@ -107,6 +107,18 @@ def _is_dummy_node(name: str) -> bool:
     return lowered.startswith("auto_null") or lowered.startswith("null")
 
 
+def _resolve_llm_host(model_id: str) -> tuple[str, str, int] | None:
+    model_lower = (model_id or "").lower()
+    for prefix, host, port in _LLM_HOSTS:
+        if prefix in model_lower:
+            return (prefix, host, port)
+    return None
+
+
+def _network_error_key(prefix: str) -> str:
+    return "error.ollama_not_running" if prefix == "ollama" else "error.no_network"
+
+
 def check_pipewire() -> str | None:
     """Return None if PipeWire capture looks usable; else user-facing error message key."""
     if not shutil.which("pw-record"):
@@ -148,21 +160,14 @@ def check_disk_space(data_dir: str) -> tuple[str | None, str | None]:
 def check_network_for_llm(model_id: str) -> str | None:
     """Quick socket connect to API host for model_id (timeout 3s).
     Return None if reachable; else i18n key for error (E6: ollama_not_running when using Ollama)."""
-    model_lower = (model_id or "").lower()
-    matched_prefix: str | None = None
-    host_port: tuple[str, int] | None = None
-    for prefix, host, port in _LLM_HOSTS:
-        if prefix in model_lower:
-            matched_prefix = prefix
-            host_port = (host, port)
-            break
-    if not host_port:
+    resolved = _resolve_llm_host(model_id)
+    if not resolved:
         return None
-    host, port = host_port
+    matched_prefix, host, port = resolved
     try:
         sock = socket.create_connection((host, port), timeout=NETWORK_TIMEOUT_SEC)
         sock.close()
         return None
     except OSError as e:
         log.warning("preflight.network_unreachable", host=host, error=str(e))
-        return "error.ollama_not_running" if matched_prefix == "ollama" else "error.no_network"
+        return _network_error_key(matched_prefix)

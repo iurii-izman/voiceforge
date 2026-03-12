@@ -58,27 +58,41 @@ def format_daily_digest_text(digest: DailyDigest) -> str:
         f"Total cost: ${digest.total_cost_usd:.4f}",
         "",
     ]
-    if digest.session_summaries:
-        lines.append("## Sessions")
-        lines.append("")
-        for sid, started_at, duration_sec in digest.session_summaries:
-            lines.append(f"- Session {sid}: {started_at[:19] if len(started_at) >= 19 else started_at} — {duration_sec:.0f}s")
-        lines.append("")
-    if digest.action_items:
-        lines.append("## Action items")
-        lines.append("")
-        for ai in digest.action_items:
-            sid = ai.get("session_id", "")
-            desc = ai.get("description", "")
-            assignee = ai.get("assignee") or ""
-            status = ai.get("status", "")
-            lines.append(f"- [{sid}] {desc}" + (f" ({assignee})" if assignee else "") + (f" — {status}" if status else ""))
-        lines.append("")
-    else:
-        lines.append("## Action items")
-        lines.append("")
-        lines.append("None.")
+    lines.extend(_format_session_summary_lines(digest.session_summaries))
+    lines.extend(_format_action_item_lines(digest.action_items))
     return "\n".join(lines)
+
+
+def _format_session_summary_lines(session_summaries: list[tuple[int, str, float]]) -> list[str]:
+    if not session_summaries:
+        return []
+    lines = ["## Sessions", ""]
+    for sid, started_at, duration_sec in session_summaries:
+        started = started_at[:19] if len(started_at) >= 19 else started_at
+        lines.append(f"- Session {sid}: {started} — {duration_sec:.0f}s")
+    lines.append("")
+    return lines
+
+
+def _format_action_item_lines(action_items: list[dict[str, Any]]) -> list[str]:
+    lines = ["## Action items", ""]
+    if not action_items:
+        lines.append("None.")
+        return lines
+    for ai in action_items:
+        lines.append(_format_action_item_line(ai))
+    lines.append("")
+    return lines
+
+
+def _format_action_item_line(action_item: dict[str, Any]) -> str:
+    sid = action_item.get("session_id", "")
+    desc = action_item.get("description", "")
+    assignee = action_item.get("assignee") or ""
+    status = action_item.get("status", "")
+    assignee_text = f" ({assignee})" if assignee else ""
+    status_text = f" — {status}" if status else ""
+    return f"- [{sid}] {desc}{assignee_text}{status_text}"
 
 
 def summarize_daily_with_llm(day: date, log_db: TranscriptLog) -> str:

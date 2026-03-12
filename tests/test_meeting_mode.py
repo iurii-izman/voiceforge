@@ -17,16 +17,16 @@ class _FakeCapture:
     """Minimal AudioCapture that returns empty chunks and obeys stop."""
 
     def __init__(self, *args: object, **kwargs: object) -> None:
-        # Empty: test fake (S1186).
-        pass
+        """No-op init for test fake."""
+        return None
 
     def start(self) -> None:
-        # Empty: test fake (S1186).
-        pass
+        """No-op start for test fake."""
+        return None
 
     def stop(self) -> None:
-        # Empty: test fake (S1186).
-        pass
+        """No-op stop for test fake."""
+        return None
 
     def get_chunk(self, seconds: float) -> tuple[np.ndarray, np.ndarray]:
         arr = np.zeros(0, dtype=np.int16)
@@ -37,13 +37,16 @@ class _FakeCaptureWithAudio:
     """Capture fake that always has audio available for final snapshot persistence."""
 
     def __init__(self, *args: object, **kwargs: object) -> None:
-        pass
+        """No-op init for test fake."""
+        return None
 
     def start(self) -> None:
-        pass
+        """No-op start for test fake."""
+        return None
 
     def stop(self) -> None:
-        pass
+        """No-op stop for test fake."""
+        return None
 
     def get_chunk(self, seconds: float) -> tuple[np.ndarray, np.ndarray]:
         mic = np.ones(16000, dtype=np.int16)
@@ -139,8 +142,8 @@ def test_meeting_analyze_on_exit_calls_pipeline(monkeypatch, tmp_path) -> None:
             return 99
 
         def close(self) -> None:
-            # No-op for test fake (S1186).
-            pass
+            """No-op close for test fake."""
+            return None
 
     monkeypatch.setattr("voiceforge.core.transcript_log.TranscriptLog", FakeLogDb)
 
@@ -189,7 +192,8 @@ def test_meeting_final_flush_persists_ring_before_analyze(monkeypatch, tmp_path)
             return 1
 
         def close(self) -> None:
-            pass
+            """No-op close for test fake."""
+            return None
 
     monkeypatch.setattr("voiceforge.core.transcript_log.TranscriptLog", FakeLogDb)
 

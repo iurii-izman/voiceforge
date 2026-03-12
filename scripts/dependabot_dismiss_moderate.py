@@ -44,25 +44,28 @@ def _dismiss_alert(alert_number: int, headers: dict) -> None:
     print(f"Dismissed alert #{alert_number}: {result.get('state', 'dismissed')}")
 
 
-def main() -> None:
+def _load_github_token() -> str:
     from voiceforge.core.secrets import get_api_key
 
     token = get_api_key("github_token") or get_api_key("github_token_pat")
-    if not token:
-        print("github_token / github_token_pat not in keyring (service=voiceforge)", file=sys.stderr)
-        print("Add: keyring set voiceforge github_token", file=sys.stderr)
-        sys.exit(1)
-    print("Using token from keyring (voiceforge/github_token or github_token_pat).")
+    if token:
+        return token
+    print("github_token / github_token_pat not in keyring (service=voiceforge)", file=sys.stderr)
+    print("Add: keyring set voiceforge github_token", file=sys.stderr)
+    sys.exit(1)
 
-    dry_run = "--dry-run" in sys.argv
-    headers = {
+
+def _build_headers(token: str) -> dict[str, str]:
+    return {
         "Accept": "application/vnd.github+json",
         "Authorization": f"Bearer {token}",
         "X-GitHub-Api-Version": "2022-11-28",
     }
 
+
+def _fetch_alerts_or_exit(headers: dict[str, str]) -> list:
     try:
-        alerts = _fetch_open_alerts(headers)
+        return _fetch_open_alerts(headers)
     except urllib.error.HTTPError as e:
         body = e.read().decode() if e.fp else ""
         print(f"GitHub API error {e.code}: {body[:500]}", file=sys.stderr)
@@ -76,6 +79,26 @@ def main() -> None:
         print(f"Request failed: {e}", file=sys.stderr)
         sys.exit(2)
 
+
+def _dismiss_or_exit(alert_number: int, headers: dict[str, str]) -> None:
+    try:
+        _dismiss_alert(alert_number, headers)
+    except urllib.error.HTTPError as e:
+        body_read = e.read().decode() if e.fp else ""
+        print(f"Dismiss failed {e.code}: {body_read[:500]}", file=sys.stderr)
+        if e.code == 401:
+            print("401: token rejected. Ensure token has repo (or security_events) scope and is not expired.", file=sys.stderr)
+        sys.exit(2)
+
+
+def main() -> None:
+    token = _load_github_token()
+    print("Using token from keyring (voiceforge/github_token or github_token_pat).")
+
+    dry_run = "--dry-run" in sys.argv
+    headers = _build_headers(token)
+
+    alerts = _fetch_alerts_or_exit(headers)
     target = _find_target_alert(alerts)
     if not target:
         print("No open Dependabot alert for diskcache / CVE-2025-69872. Already dismissed or fixed.")
@@ -90,15 +113,7 @@ def main() -> None:
         print("Dry-run: would dismiss with reason=risk_accepted")
         sys.exit(0)
 
-    try:
-        _dismiss_alert(alert_number, headers)
-    except urllib.error.HTTPError as e:
-        body_read = e.read().decode() if e.fp else ""
-        print(f"Dismiss failed {e.code}: {body_read[:500]}", file=sys.stderr)
-        if e.code == 401:
-            print("401: token rejected. Ensure token has repo (or security_events) scope and is not expired.", file=sys.stderr)
-        sys.exit(2)
-
+    _dismiss_or_exit(alert_number, headers)
     sys.exit(0)
 
 

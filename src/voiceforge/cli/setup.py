@@ -145,6 +145,85 @@ def _set_keyring_password(service: str, key_name: str, value: str) -> None:
         typer.echo(t("setup.keyring_fail", key_name=key_name, error=str(e)), err=True)
 
 
+def _echo_pipewire_status(confirm: Any, echo: Any) -> None:
+    pw_err = check_pipewire()
+    if pw_err:
+        echo(t(pw_err), err=True)
+        echo(t(get_pipewire_fix_key(pw_err)), err=True)
+        if not confirm("Continue anyway?", default=False):
+            raise SystemExit(1)
+        return
+    echo("1. PipeWire: OK (pw-record found)")
+
+
+def _prompt_language(prompt: Any, echo: Any) -> str:
+    lang_choice = prompt("Language for STT/UI (ru / en / auto):", default="auto").strip().lower() or "auto"
+    if lang_choice not in ("ru", "en", "auto"):
+        lang_choice = "auto"
+    echo(f"   Using: {lang_choice}")
+    return lang_choice
+
+
+def _prompt_model_choice(prompt: Any, echo: Any) -> str:
+    echo("\nWhisper model sizes: tiny (~75MB), small (~466MB), medium (~1.5GB RAM)")
+    model_choice = prompt("Whisper model (tiny / small / medium):", default="small").strip().lower() or "small"
+    if model_choice not in _WHISPER_RAM_MB:
+        model_choice = "small"
+    ram_mb = _WHISPER_RAM_MB.get(model_choice, 500)
+    echo(f"   Using: {model_choice} (~{ram_mb} MB)")
+    return model_choice
+
+
+def _prompt_optional_secret(prompt: Any, echo: Any, prompt_text: str, key_name: str, skipped_text: str) -> None:
+    value = prompt(
+        prompt_text,
+        default="",
+        show_default=False,
+        hide_input=True,
+    )
+    if value and value.strip():
+        _set_keyring_password("voiceforge", key_name, value.strip())
+        echo(f"   Saved to keyring (voiceforge/{key_name})")
+        return
+    echo(skipped_text)
+
+
+def _maybe_predownload_model(confirm: Any, echo: Any, model_choice: str) -> None:
+    if not confirm("Pre-download Whisper model now? (recommended)", default=True):
+        echo("   Skipped (model will download on first listen)")
+        return
+    echo("   Downloading...")
+    try:
+        from voiceforge.stt.transcriber import Transcriber
+
+        Transcriber(model_size=model_choice, device="cpu", compute_type="int8")
+        echo("   Model ready.")
+    except Exception as e:
+        echo(f"   Download failed: {e}. You can retry later when running listen.", err=True)
+
+
+def _run_setup_diagnostics(echo: Any) -> None:
+    echo("\n9. Running diagnostics (voiceforge status --doctor)...")
+    try:
+        from voiceforge.cli.status_helpers import get_doctor_text
+
+        doctor_text = get_doctor_text()
+        echo(doctor_text)
+    except Exception as e:
+        echo(f"   Diagnostics error: {e}", err=True)
+
+
+def _offer_test_meeting(confirm: Any, echo: Any) -> None:
+    echo("\n10. Next step: run a test meeting")
+    if not confirm("Run 'voiceforge meeting' now for a quick test?", default=False):
+        echo("   Run when ready: voiceforge meeting")
+        return
+    from voiceforge.cli.meeting import run_meeting
+
+    cfg = Settings()
+    run_meeting(cfg)
+
+
 def run_setup_wizard(
     prompt_fn: Any = None,
     confirm_fn: Any = None,
@@ -160,90 +239,39 @@ def run_setup_wizard(
     echo = echo_fn or typer.echo
 
     echo("=== VoiceForge Setup ===\n")
-
-    # 1. PipeWire
-    pw_err = check_pipewire()
-    if pw_err:
-        echo(t(pw_err), err=True)
-        echo(t(get_pipewire_fix_key(pw_err)), err=True)
-        if not confirm("Continue anyway?", default=False):
-            raise SystemExit(1)
-    else:
-        echo("1. PipeWire: OK (pw-record found)")
+    _echo_pipewire_status(confirm, echo)
 
     # 2. Python/uv — informational
     py_ver = f"{sys.version_info.major}.{sys.version_info.minor}"
     echo(f"2. Python: {py_ver}")
 
     # 3. Language
-    lang_choice = (
-        prompt(
-            "Language for STT/UI (ru / en / auto):",
-            default="auto",
-        )
-        .strip()
-        .lower()
-        or "auto"
-    )
-    if lang_choice not in ("ru", "en", "auto"):
-        lang_choice = "auto"
-    echo(f"   Using: {lang_choice}")
+    lang_choice = _prompt_language(prompt, echo)
 
     # 4. Whisper model
-    echo("\nWhisper model sizes: tiny (~75MB), small (~466MB), medium (~1.5GB RAM)")
-    model_choice = (
-        prompt(
-            "Whisper model (tiny / small / medium):",
-            default="small",
-        )
-        .strip()
-        .lower()
-        or "small"
-    )
-    if model_choice not in _WHISPER_RAM_MB:
-        model_choice = "small"
-    ram_mb = _WHISPER_RAM_MB.get(model_choice, 500)
-    echo(f"   Using: {model_choice} (~{ram_mb} MB)")
+    model_choice = _prompt_model_choice(prompt, echo)
 
     # 5. Anthropic API key
     echo("\n5. API keys (optional; press Enter to skip)")
-    anthropic_key = prompt(
+    _prompt_optional_secret(
+        prompt,
+        echo,
         "Anthropic API key (or Enter to skip):",
-        default="",
-        show_default=False,
-        hide_input=True,
+        "anthropic",
+        "   Skipped (you can use Ollama or set later: keyring set voiceforge anthropic)",
     )
-    if anthropic_key and anthropic_key.strip():
-        _set_keyring_password("voiceforge", "anthropic", anthropic_key.strip())
-        echo("   Saved to keyring (voiceforge/anthropic)")
-    else:
-        echo("   Skipped (you can use Ollama or set later: keyring set voiceforge anthropic)")
 
     # 6. HuggingFace token (diarization)
-    hf_token = prompt(
+    _prompt_optional_secret(
+        prompt,
+        echo,
         "HuggingFace token for diarization (or Enter to skip):",
-        default="",
-        show_default=False,
-        hide_input=True,
+        "huggingface",
+        "   Skipped (diarization will be disabled; set later: keyring set voiceforge huggingface)",
     )
-    if hf_token and hf_token.strip():
-        _set_keyring_password("voiceforge", "huggingface", hf_token.strip())
-        echo("   Saved to keyring (voiceforge/huggingface)")
-    else:
-        echo("   Skipped (diarization will be disabled; set later: keyring set voiceforge huggingface)")
 
     # 7. Pre-download Whisper model (optional)
-    if confirm("Pre-download Whisper model now? (recommended)", default=True):
-        echo("   Downloading...")
-        try:
-            from voiceforge.stt.transcriber import Transcriber
-
-            Transcriber(model_size=model_choice, device="cpu", compute_type="int8")
-            echo("   Model ready.")
-        except Exception as e:
-            echo(f"   Download failed: {e}. You can retry later when running listen.", err=True)
-    else:
-        echo("   Skipped (model will download on first listen)")
+    _maybe_predownload_model(confirm, echo, model_choice)
 
     # 8. Generate voiceforge.yaml
     config_path = _ensure_config_dir()
@@ -251,25 +279,10 @@ def run_setup_wizard(
     echo(f"\n8. Config written: {config_path}")
 
     # 9. Run status --doctor
-    echo("\n9. Running diagnostics (voiceforge status --doctor)...")
-    try:
-        cfg = Settings()
-        from voiceforge.cli.status_helpers import get_doctor_text
-
-        doctor_text = get_doctor_text()
-        echo(doctor_text)
-    except Exception as e:
-        echo(f"   Diagnostics error: {e}", err=True)
+    _run_setup_diagnostics(echo)
 
     # 10. Suggest first test
-    echo("\n10. Next step: run a test meeting")
-    if confirm("Run 'voiceforge meeting' now for a quick test?", default=False):
-        from voiceforge.cli.meeting import run_meeting
-
-        cfg = Settings()
-        run_meeting(cfg)
-    else:
-        echo("   Run when ready: voiceforge meeting")
+    _offer_test_meeting(confirm, echo)
     echo("\nSetup complete.")
 
 

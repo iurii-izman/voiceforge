@@ -253,124 +253,122 @@ def _doctor_check_module(mod: str, t: Any) -> tuple[bool, str, str]:
         return (False, t(key), key)
 
 
+def _append_model_cache_size(out: list[tuple[bool, str, str]], t: Any) -> None:
+    hf_path = Path(get_cache_home()) / "huggingface"
+    if not hf_path.exists():
+        hf_path = Path(get_cache_home())
+    if not hf_path.exists():
+        return
+    try:
+        total = sum(f.stat().st_size for f in hf_path.rglob("*") if f.is_file())
+    except OSError:
+        return
+    size_mb = total // (1024 * 1024)
+    out.append((True, t("doctor.models_disk_usage", path=str(hf_path), size_mb=size_mb), "doctor.models_disk"))
+
+
+def _append_whisper_cache_status(out: list[tuple[bool, str, str]], model_size: str, t: Any) -> None:
+    try:
+        hub = Path(get_cache_home()) / "huggingface" / "hub"
+        has_whisper = hub.exists() and any("whisper" in p.name.lower() or "ctranslate" in p.name.lower() for p in hub.iterdir())
+    except Exception:
+        has_whisper = False
+    key = _KEY_DOCTOR_WHISPER if has_whisper else _KEY_DOCTOR_WHISPER_MISSING
+    out.append((True, t(key, size=model_size), key))
+
+
+def _append_onnx_embedder_status(out: list[tuple[bool, str, str]], t: Any) -> None:
+    try:
+        from voiceforge.rag.embedder import get_default_model_dir
+
+        base = Path(get_default_model_dir())
+        has_onnx = (base / "model.onnx").exists() or (base / "onnx" / "model.onnx").exists()
+    except Exception:
+        has_onnx = False
+    key = _KEY_DOCTOR_ONNX if has_onnx else _KEY_DOCTOR_ONNX_MISSING
+    out.append((True, t(key), key))
+
+
+def _append_pyannote_status(out: list[tuple[bool, str, str]], t: Any) -> None:
+    try:
+        import keyring
+
+        hf_token = (keyring.get_password("voiceforge", "huggingface") or "").strip()
+    except Exception:
+        hf_token = ""
+    key = _KEY_DOCTOR_PYANNOTE if hf_token else _KEY_DOCTOR_PYANNOTE_MISSING
+    out.append((True, t(key), key))
+
+
+def _append_ram_recommendation(out: list[tuple[bool, str, str]], t: Any) -> float | None:
+    try:
+        import psutil
+
+        avail_gb = psutil.virtual_memory().available / 1024**3
+    except Exception:
+        out.append((True, "RAM: check skipped", _KEY_DOCTOR_RAM_RECOMMENDED))
+        return None
+    out.append((avail_gb >= 4.0, t(_KEY_DOCTOR_RAM_RECOMMENDED, available_gb=avail_gb), _KEY_DOCTOR_RAM_RECOMMENDED))
+    return avail_gb
+
+
+def _resolve_recommended_model(avail_gb: float) -> str:
+    if avail_gb < 4.0:
+        return "tiny"
+    if avail_gb < 6.0:
+        return "small"
+    if avail_gb < 10.0:
+        return "medium"
+    return "large"
+
+
+def _resolve_current_model_size(model_size: str) -> str:
+    current = model_size.lower()
+    if current != "auto":
+        return current
+    from voiceforge.stt.transcriber import resolve_stt_model_size
+
+    return resolve_stt_model_size("auto")
+
+
+def _model_order_index(model: str) -> int:
+    order = ("tiny", "base", "small", "medium", "large-v2", "large-v3", "large-v3-turbo", "large")
+    return order.index(model) if model in order else order.index("small")
+
+
+def _append_model_recommendation(
+    out: list[tuple[bool, str, str]],
+    model_size: str,
+    available_gb: float | None,
+    t: Any,
+) -> None:
+    if available_gb is None:
+        out.append((True, "Model recommendation: check skipped", _KEY_DOCTOR_MODEL_RECOMMENDATION))
+        return
+    recommended = _resolve_recommended_model(available_gb)
+    current = _resolve_current_model_size(model_size)
+    may_oom = _model_order_index(current) > _model_order_index(recommended)
+    key = "doctor.model_recommendation_oom" if may_oom else "doctor.model_recommendation_ok"
+    out.append(
+        (
+            not may_oom,
+            t(key, recommended=recommended, available_gb=round(available_gb, 1), current=current),
+            _KEY_DOCTOR_MODEL_RECOMMENDATION,
+        )
+    )
+
+
 def _doctor_check_models(cfg: Any, t: Any) -> list[tuple[bool, str, str]]:
     """E8 (#131): Models cached? (Whisper, ONNX, pyannote), disk usage ~/.cache/huggingface, RAM vs recommended."""
 
     out: list[tuple[bool, str, str]] = []
     model_size = getattr(cfg, "model_size", "small")
-
-    # Disk usage: ~/.cache/huggingface (Whisper/ctranslate2 and pyannote use it)
-    hf_path = Path(get_cache_home()) / "huggingface"
-    if not hf_path.exists():
-        hf_path = Path(get_cache_home())
-    if hf_path.exists():
-        try:
-            total = sum(f.stat().st_size for f in hf_path.rglob("*") if f.is_file())
-            size_mb = total // (1024 * 1024)
-            out.append((True, t("doctor.models_disk_usage", path=str(hf_path), size_mb=size_mb), "doctor.models_disk"))
-        except OSError:
-            pass
-
-    # Whisper: we don't load the model in doctor; report config and whether hub has content
-    try:
-        hub = Path(get_cache_home()) / "huggingface" / "hub"
-        has_whisper = False
-        if hub.exists():
-            has_whisper = any("whisper" in p.name.lower() or "ctranslate" in p.name.lower() for p in hub.iterdir())
-        if has_whisper:
-            out.append((True, t(_KEY_DOCTOR_WHISPER, size=model_size), _KEY_DOCTOR_WHISPER))
-        else:
-            out.append((True, t(_KEY_DOCTOR_WHISPER_MISSING, size=model_size), _KEY_DOCTOR_WHISPER_MISSING))
-    except Exception:
-        out.append((True, t(_KEY_DOCTOR_WHISPER_MISSING, size=model_size), _KEY_DOCTOR_WHISPER_MISSING))
-
-    # ONNX embedder
-    try:
-        from voiceforge.rag.embedder import get_default_model_dir
-
-        base = Path(get_default_model_dir())
-        if (base / "model.onnx").exists() or (base / "onnx" / "model.onnx").exists():
-            out.append((True, t(_KEY_DOCTOR_ONNX), _KEY_DOCTOR_ONNX))
-        else:
-            out.append((True, t(_KEY_DOCTOR_ONNX_MISSING), _KEY_DOCTOR_ONNX_MISSING))
-    except Exception:
-        out.append((True, t(_KEY_DOCTOR_ONNX_MISSING), _KEY_DOCTOR_ONNX_MISSING))
-
-    # pyannote: HF token set (cache is under same HF dir)
-    try:
-        import keyring
-
-        hf_token = (keyring.get_password("voiceforge", "huggingface") or "").strip()
-        if hf_token:
-            out.append((True, t(_KEY_DOCTOR_PYANNOTE), _KEY_DOCTOR_PYANNOTE))
-        else:
-            out.append((True, t(_KEY_DOCTOR_PYANNOTE_MISSING), _KEY_DOCTOR_PYANNOTE_MISSING))
-    except Exception:
-        out.append((True, t(_KEY_DOCTOR_PYANNOTE_MISSING), _KEY_DOCTOR_PYANNOTE_MISSING))
-
-    # RAM available vs recommended (4 GB)
-    try:
-        import psutil
-
-        avail_gb = psutil.virtual_memory().available / 1024**3
-        out.append((avail_gb >= 4.0, t(_KEY_DOCTOR_RAM_RECOMMENDED, available_gb=avail_gb), _KEY_DOCTOR_RAM_RECOMMENDED))
-    except Exception:
-        out.append((True, "RAM: check skipped", _KEY_DOCTOR_RAM_RECOMMENDED))
-
-    # E18 (#141): model size recommendation by available RAM; warn if current may cause OOM
-    try:
-        import psutil
-
-        avail_gb = psutil.virtual_memory().available / 1024**3
-        if avail_gb < 4.0:
-            recommended = "tiny"
-        elif avail_gb < 6.0:
-            recommended = "small"
-        elif avail_gb < 10.0:
-            recommended = "medium"
-        else:
-            recommended = "large"
-        current = model_size.lower()
-        if current == "auto":
-            from voiceforge.stt.transcriber import resolve_stt_model_size
-
-            current = resolve_stt_model_size("auto")
-        # Order: tiny < base < small < medium < large-v2 < large-v3 < large-v3-turbo < large
-        _order = ("tiny", "base", "small", "medium", "large-v2", "large-v3", "large-v3-turbo", "large")
-        try:
-            cur_idx = _order.index(current) if current in _order else _order.index("small")
-        except ValueError:
-            cur_idx = 2
-        rec_idx = _order.index(recommended) if recommended in _order else 2
-        may_oom = cur_idx > rec_idx
-        if may_oom:
-            out.append(
-                (
-                    False,
-                    t(
-                        "doctor.model_recommendation_oom",
-                        recommended=recommended,
-                        available_gb=round(avail_gb, 1),
-                        current=current,
-                    ),
-                    _KEY_DOCTOR_MODEL_RECOMMENDATION,
-                )
-            )
-        else:
-            out.append(
-                (
-                    True,
-                    t(
-                        "doctor.model_recommendation_ok",
-                        recommended=recommended,
-                        available_gb=round(avail_gb, 1),
-                        current=current,
-                    ),
-                    _KEY_DOCTOR_MODEL_RECOMMENDATION,
-                )
-            )
-    except Exception:
-        out.append((True, "Model recommendation: check skipped", _KEY_DOCTOR_MODEL_RECOMMENDATION))
+    _append_model_cache_size(out, t)
+    _append_whisper_cache_status(out, model_size, t)
+    _append_onnx_embedder_status(out, t)
+    _append_pyannote_status(out, t)
+    available_gb = _append_ram_recommendation(out, t)
+    _append_model_recommendation(out, model_size, available_gb, t)
     return out
 
 

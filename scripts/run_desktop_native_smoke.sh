@@ -11,6 +11,7 @@ Options:
   --headless   Run under xvfb-run for toolbox/CI-like Linux environments.
   --help       Show this help.
 EOF
+  return 0
 }
 
 HEADLESS=0
@@ -36,7 +37,11 @@ REPO_ROOT=$(cd -- "$SCRIPT_DIR/.." && pwd)
 DESKTOP_DIR="$REPO_ROOT/desktop"
 ARTIFACT_ROOT="$DESKTOP_DIR/e2e-native/artifacts"
 TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
-MODE_NAME=$([ "$HEADLESS" -eq 1 ] && echo "headless" || echo "headed")
+if [[ "$HEADLESS" -eq 1 ]]; then
+  MODE_NAME="headless"
+else
+  MODE_NAME="headed"
+fi
 ARTIFACT_DIR=${VOICEFORGE_NATIVE_SMOKE_ARTIFACT_DIR:-"$ARTIFACT_ROOT/${TIMESTAMP}-${MODE_NAME}"}
 SUMMARY_FILE="$ARTIFACT_DIR/summary.txt"
 RUN_LOG="$ARTIFACT_DIR/native-smoke.log"
@@ -49,6 +54,7 @@ ln -s "$(basename "$ARTIFACT_DIR")" "$LATEST_LINK" 2>/dev/null || true
 
 log() {
   printf '%s\n' "$*" | tee -a "$SUMMARY_FILE"
+  return 0
 }
 
 fail() {
@@ -60,16 +66,16 @@ fail() {
 command -v npm >/dev/null 2>&1 || fail "npm is required"
 command -v cargo >/dev/null 2>&1 || fail "cargo is required"
 
-if ! command -v tauri-driver >/dev/null 2>&1 && [ ! -x "${TAURI_DRIVER_PATH:-$HOME/.cargo/bin/tauri-driver}" ]; then
+if ! command -v tauri-driver >/dev/null 2>&1 && [[ ! -x "${TAURI_DRIVER_PATH:-$HOME/.cargo/bin/tauri-driver}" ]]; then
   fail "tauri-driver not found. Install with: cargo install tauri-driver --locked"
 fi
 
-if [ "$HEADLESS" -eq 1 ] && ! command -v xvfb-run >/dev/null 2>&1; then
+if [[ "$HEADLESS" -eq 1 ]] && ! command -v xvfb-run >/dev/null 2>&1; then
   fail "xvfb-run not found. Install xvfb in toolbox/system."
 fi
 
 TOOLBOX_HINT="host"
-if [ -f /run/.containerenv ]; then
+if [[ -f /run/.containerenv ]]; then
   TOOLBOX_HINT="toolbox"
 fi
 
@@ -89,7 +95,7 @@ fi
 log "[INFO] VoiceForge desktop native smoke ($MODE_NAME)"
 log "[INFO] environment: $TOOLBOX_HINT"
 log "[INFO] artifacts: $ARTIFACT_DIR"
-if [ "$TOOLBOX_HINT" != "toolbox" ]; then
+if [[ "$TOOLBOX_HINT" != "toolbox" ]]; then
   log "[WARN] native smoke is most reproducible inside toolbox"
 fi
 
@@ -100,7 +106,7 @@ log "[INFO] installing native e2e dependencies"
 npm --prefix "$DESKTOP_DIR/e2e-native" ci >>"$SUMMARY_FILE" 2>&1
 
 RUN_CMD=(npm --prefix "$DESKTOP_DIR/e2e-native" run test)
-if [ "$HEADLESS" -eq 1 ]; then
+if [[ "$HEADLESS" -eq 1 ]]; then
   RUN_CMD=(npm --prefix "$DESKTOP_DIR/e2e-native" run test:headless)
 fi
 
@@ -110,13 +116,13 @@ timeout "${TIMEOUT_SEC}s" "${RUN_CMD[@]}" 2>&1 | tee "$RUN_LOG"
 RC=${PIPESTATUS[0]}
 set -e
 
-if [ "$RC" -eq 0 ]; then
+if [[ "$RC" -eq 0 ]]; then
   log "[PASS] native smoke completed"
   log "[INFO] artifacts: $ARTIFACT_DIR"
   exit 0
 fi
 
-if [ "$RC" -eq 124 ]; then
+if [[ "$RC" -eq 124 ]]; then
   fail "native smoke timed out after ${TIMEOUT_SEC}s"
 fi
 
