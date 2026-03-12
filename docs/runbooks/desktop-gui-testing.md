@@ -24,16 +24,18 @@
 
 ### 2.0. Один обязательный запуск
 
-Чтобы не держать в голове несколько разрозненных команд, в `desktop/package.json` закреплены две canonical entrypoints:
+Чтобы не держать в голове несколько разрозненных команд, в `desktop/package.json` закреплены canonical entrypoints:
 
 - `npm run e2e:gate` — **обязательный бесплатный desktop regression gate** для каждой итерации
-- `npm run e2e:release-gate` — **минимальный бесплатный desktop release-gate**, сначала пересобирает свежий `dist`, затем гоняет `e2e:gate`
+- `npm run e2e:release-gate` — **канонический blocking desktop UI gate**, сначала пересобирает свежий `dist`, затем гоняет `e2e:gate`
+- `npm run e2e:native:headless` — **канонический advisory native smoke** для Linux/toolbox; пишет evidence в `desktop/e2e-native/artifacts/`
 
 Policy:
 
 - CI и обычная разработка опираются на `npm run e2e:gate`
 - перед desktop release или заметным desktop-first изменением прогоняется `npm run e2e:release-gate`
-- `npm run e2e:native` и `npm run e2e:native:headless` пока остаются advisory Linux-native smoke, а не частью обязательного gate
+- `npm run e2e:native:headless` остаётся advisory Linux-native smoke, а не частью обязательного gate
+- `npm run e2e:native` остаётся headed-вариантом для локального ручного smoke
 
 ### 2.1. Запуск локально
 
@@ -42,6 +44,7 @@ cd desktop
 npm ci
 npm run e2e:gate
 npm run e2e:release-gate
+npm run e2e:native:headless
 npm run e2e:ui
 npm run e2e:report
 ```
@@ -198,25 +201,40 @@ desktop/
 
 ### 4.6. Запуск native smoke
 
-Базовый Linux-native smoke:
+Канонический advisory native smoke для reproducible Linux/toolbox evidence:
+
+```bash
+cd desktop
+npm run e2e:native:headless
+```
+
+Он запускает `../scripts/run_desktop_native_smoke.sh --headless`, пишет preflight/context и собирает артефакты в:
+
+```text
+desktop/e2e-native/artifacts/latest/
+```
+
+Если smoke падает или уходит в timeout, первым делом смотреть:
+
+```text
+desktop/e2e-native/artifacts/latest/summary.txt
+desktop/e2e-native/artifacts/latest/wdio.log
+desktop/e2e-native/artifacts/latest/tauri-driver.log
+desktop/e2e-native/artifacts/latest/tauri-driver.stderr.log
+```
+
+Headed-вариант для локального smoke с видимым окном:
 
 ```bash
 cd desktop
 npm run e2e:native
 ```
 
-Полный локальный release-gate одной командой:
+Полный локальный blocking desktop UI gate одной командой:
 
 ```bash
 cd desktop
 npm run e2e:release-gate
-```
-
-Если дисплея нет:
-
-```bash
-cd desktop
-npm run e2e:native:headless
 ```
 
 Если нужен smoke с реальным daemon, запускайте `uv run voiceforge daemon` в отдельном терминале до native suite. Базовый smoke path в репо намеренно не зависит от живого backend и проверяет shell в daemon-off режиме.
@@ -224,7 +242,7 @@ npm run e2e:native:headless
 ### 4.7. CI policy
 
 - mocked Playwright suite остаётся основным CI regression signal
-- native smoke через `tauri-driver` пока считается **toolbox/local release gate**, а не обязательным CI job
+- native smoke через `tauri-driver` пока считается **toolbox/local advisory Linux shell smoke**, а не обязательным CI job
 - причина: runner должен иметь `tauri-driver`, `WebKitWebDriver`, GUI-capable environment и поддержку Linux desktop stack
 - если появится стабильный Linux GUI runner, native smoke можно вынести в отдельный blocking job
 
@@ -243,8 +261,9 @@ npm run e2e:native:headless
 Краткая policy:
 
 - **обязательный бесплатный gate:** `cd desktop && npm run e2e:gate`
-- **минимальный desktop release-gate:** `cd desktop && npm run e2e:release-gate`
-- **advisory native smoke:** `cd desktop && npm run e2e:native` или `npm run e2e:native:headless`
+- **blocking desktop UI gate:** `cd desktop && npm run e2e:release-gate`
+- **advisory native smoke:** `cd desktop && npm run e2e:native:headless`
+- **если advisory smoke падает:** triage вести по `desktop/e2e-native/artifacts/latest/`
 
 ---
 

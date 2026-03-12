@@ -53,6 +53,7 @@ cd desktop
 npm ci
 npm run e2e:gate
 npm run e2e:release-gate
+npm run e2e:native:headless
 npm run e2e:native
 npm run e2e:ui
 npm run e2e:update-snapshots
@@ -62,8 +63,9 @@ npm run e2e:report
 Минимальная policy:
 
 - обязательный бесплатный regression gate для каждой итерации: `npm run e2e:gate`
-- минимальный бесплатный desktop release-gate: `npm run e2e:release-gate` (пересобирает свежий `dist` перед тестами)
-- native shell smoke пока остаётся отдельной дополнительной проверкой: `npm run e2e:native`
+- канонический blocking desktop UI gate: `npm run e2e:release-gate` (пересобирает свежий `dist` перед тестами)
+- канонический advisory native smoke: `npm run e2e:native:headless`
+- headed native smoke остаётся отдельной локальной проверкой: `npm run e2e:native`
 
 Что покрывается:
 
@@ -79,7 +81,7 @@ npm run e2e:report
 Ограничения:
 
 - этот слой тестирует реальный frontend и mocked Tauri runtime, но не заменяет отдельные native-shell smoke tests для tray, updater install, глобальных hotkeys, notifications UX и Wayland/X11 quirks
-- native-shell smoke вынесен отдельно: `npm run e2e:native` (если `WebKitWebDriver` не находится автоматически, задать `TAURI_NATIVE_DRIVER=/path/to/WebKitWebDriver`; см. `docs/runbooks/desktop-gui-testing.md` и `docs/runbooks/desktop-release-gate-matrix.md`)
+- native-shell smoke вынесен отдельно: `npm run e2e:native:headless` (если `WebKitWebDriver` не находится автоматически, задать `TAURI_NATIVE_DRIVER=/path/to/WebKitWebDriver`; артефакты пишутся в `desktop/e2e-native/artifacts/`; см. `docs/runbooks/desktop-gui-testing.md` и `docs/runbooks/desktop-release-gate-matrix.md`)
 
 ## После альфа2
 

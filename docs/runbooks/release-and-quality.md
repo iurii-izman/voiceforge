@@ -60,22 +60,22 @@ git push origin v0.2.0-alpha.2
 
 - **Blocking для релиза:** только `check_release_metadata.py` (включая packaging/updater contract). Он вызывается в CI job `quality` и должен проходить перед тегом.
 - **Advisory в CI:** jobs `desktop-audit` (npm audit, cargo audit) и `desktop-a11y` (pa11y) выполняются с `continue-on-error: true` из-за принятых рисков (известные CVE без фикса) и нестабильности окружения a11y. Они не блокируют merge и релиз. Политика: при появлении критичных уязвимостей — исправить или задокументировать allowlist в [security-and-dependencies.md](security-and-dependencies.md).
-- **Local release gate для desktop UI:** `cd desktop && npm run e2e:release-gate` считается минимальным обязательным бесплатным release gate перед desktop релизом. Сейчас он закреплён как надёжный Playwright gate (`functional + a11y + visual`). Native часть (`npm run e2e:native`, `npm run e2e:native:headless`) остаётся advisory Linux smoke до стабилизации WebDriver handshake. Полная матрица automated/native/manual checks: [desktop-release-gate-matrix.md](desktop-release-gate-matrix.md).
+- **Local release gate для desktop UI:** `cd desktop && npm run e2e:release-gate` считается каноническим blocking desktop UI gate перед desktop релизом. Сейчас он закреплён как надёжный Playwright gate (`functional + a11y + visual`). Native часть (`cd desktop && npm run e2e:native:headless`) остаётся advisory Linux smoke с evidence в `desktop/e2e-native/artifacts/`. Полная матрица automated/native/manual checks: [desktop-release-gate-matrix.md](desktop-release-gate-matrix.md).
 
 Практический порядок для release proof:
 
 1. `uv run python scripts/check_release_metadata.py`
 2. `uv run python scripts/check_release_proof.py`
 3. `cd desktop && npm run e2e:release-gate`
-4. (Advisory) `cd desktop && npm run e2e:native`
-4. `cargo install cargo-audit && cd desktop/src-tauri && cargo audit`
+4. (Advisory) `cd desktop && npm run e2e:native:headless`
+5. `cargo install cargo-audit && cd desktop/src-tauri && cargo audit`
 
 Интерпретация:
 
 - шаги 1-2 фиксируют repo-level contract и honest boundary;
 - шаг 3 остаётся локальным desktop release gate и соответствует CI policy;
 - шаг 4 даёт дополнительное native evidence, но пока не блокирует релиз;
-- шаг 4 остаётся advisory dependency proof: полезен для evidence и triage, но не блокирует релиз, пока CI policy держит `continue-on-error`.
+- шаг 5 остаётся advisory dependency proof: полезен для evidence и triage, но не блокирует релиз, пока CI policy держит `continue-on-error`.
 
 ---
 
@@ -86,7 +86,7 @@ git push origin v0.2.0-alpha.2
 **Ручные шаги (proof beyond metadata):** выполняет человек; агент не собирает артефакты и не подписывает.
 
 1. **Зафиксировать baseline:** `uv run python scripts/check_release_metadata.py && uv run python scripts/check_release_proof.py`. Во второй команде должны явно читаться `blocking=release_metadata`, `native_gate=desktop_native_smoke` и текущее updater state.
-2. **Нативный smoke:** `cd desktop && npm run e2e:native` на Linux с GUI (см. [desktop-release-gate-matrix.md](desktop-release-gate-matrix.md)). Это обязательный local gate для desktop release, но не CI-blocking.
+2. **Нативный smoke:** `cd desktop && npm run e2e:native:headless` как канонический advisory Linux/toolbox smoke (см. [desktop-release-gate-matrix.md](desktop-release-gate-matrix.md)). Headed-вариант `cd desktop && npm run e2e:native` остаётся удобным локальным дополнением, но не является канонической release evidence командой.
 3. **Аудит зависимостей (advisory):** `cd desktop && npm audit --audit-level=high`; `cargo install cargo-audit && cd desktop/src-tauri && cargo audit`. Если `cargo-audit` не установлен локально, `check_release_proof.py` пометит это как `missing-tool`, а не как blocking failure.
 4. **Сборка десктопа:** `cd desktop && npm run build && cargo tauri build`; проверить артефакты в `target/release/bundle/` (deb/rpm/AppImage).
 5. **Updater boundary:** пока `check_release_proof.py` показывает `updater=disabled`, signed updater proof не требуется. Если state станет `ready`, тогда обязательны ключи подписи, update endpoint и install-flow proof по [desktop-updater.md](desktop-updater.md).

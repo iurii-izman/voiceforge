@@ -38,7 +38,9 @@ def collect_release_proof_report(
     tauri_conf = _load_json(repo_root / "desktop/src-tauri/tauri.conf.json")
     package_json = _load_json(repo_root / "desktop/package.json")
     updater_state, updater_detail = classify_updater_state(tauri_conf)
-    native_script_present = "e2e:native" in package_json.get("scripts", {})
+    scripts = package_json.get("scripts", {})
+    native_script_present = "e2e:native:headless" in scripts
+    blocking_desktop_gate_present = "e2e:release-gate" in scripts
 
     cargo_available = bool(command_lookup("cargo"))
     cargo_audit_available = bool(command_lookup("cargo-audit"))
@@ -52,9 +54,6 @@ def collect_release_proof_report(
     )
 
     native_status = "ready" if native_script_present else "missing-script"
-    native_detail = (
-        "desktop/package.json defines `e2e:native`" if native_script_present else "desktop/package.json is missing `e2e:native`"
-    )
 
     if updater_state == "disabled":
         manual_items = [
@@ -88,7 +87,17 @@ def collect_release_proof_report(
                 "status": "ready",
                 "command": "uv run python scripts/check_release_metadata.py",
                 "detail": "packaging versions and updater contract",
-            }
+            },
+            {
+                "name": "desktop_ui_release_gate",
+                "status": "ready" if blocking_desktop_gate_present else "missing-script",
+                "command": "cd desktop && npm run e2e:release-gate",
+                "detail": (
+                    "desktop/package.json defines the canonical blocking mocked desktop UI gate"
+                    if blocking_desktop_gate_present
+                    else "desktop/package.json is missing `e2e:release-gate`"
+                ),
+            },
         ],
         "advisory": [
             {
@@ -107,8 +116,12 @@ def collect_release_proof_report(
         "native_gate": {
             "name": "desktop_native_smoke",
             "status": native_status,
-            "command": "cd desktop && npm run e2e:native",
-            "detail": native_detail,
+            "command": "cd desktop && npm run e2e:native:headless",
+            "detail": (
+                "advisory Linux/toolbox native smoke; artifacts land in desktop/e2e-native/artifacts/"
+                if native_script_present
+                else "desktop/package.json is missing `e2e:native:headless`"
+            ),
         },
         "updater": {
             "state": updater_state,
@@ -163,7 +176,8 @@ def main(argv: list[str] | None = None) -> int:
     else:
         _print_text_report(report)
 
-    if report["updater"]["state"] == "invalid" or report["native_gate"]["status"] == "missing-script":
+    blocking_missing = any(item["status"] == "missing-script" for item in report["blocking"])
+    if report["updater"]["state"] == "invalid" or report["native_gate"]["status"] == "missing-script" or blocking_missing:
         return 1
     return 0
 

@@ -14,8 +14,8 @@
     "e2e:ui": "playwright test --ui",
     "e2e:report": "playwright show-report",
     "e2e:update-snapshots": "playwright test --update-snapshots",
-    "e2e:native": "npm --prefix e2e-native ci && npm --prefix e2e-native run test",
-    "e2e:native:headless": "npm --prefix e2e-native ci && npm --prefix e2e-native run test:headless",
+    "e2e:native": "bash ../scripts/run_desktop_native_smoke.sh",
+    "e2e:native:headless": "bash ../scripts/run_desktop_native_smoke.sh --headless",
     "e2e:release-gate": "npm run build && npm run e2e:gate",
     "tauri": "tauri",
     "tauri:build": "tauri build"

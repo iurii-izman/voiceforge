@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-13 (desktop UX stabilization #159 done; release gate green)
+**Обновлено:** 2026-03-13 (desktop test policy #160 done)
 
 ---
 
@@ -19,9 +19,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** закрыт `#159`: исправлены dismiss/persist onboarding modal, recoverability из compact mode, persistence-aware desktop harness, и добавлены regression-тесты на эти состояния. `cd desktop && npm run e2e:release-gate` снова зелёный (`22 passed`).
+**Сделано в сессии:** закрыт `#160`: введён единый advisory native smoke runner с таймаутом и артефактами (`desktop/e2e-native/artifacts/latest/`), `desktop/package.json` и `check_release_proof.py` теперь закрепляют две канонические команды: `cd desktop && npm run e2e:release-gate` (blocking) и `cd desktop && npm run e2e:native:headless` (advisory). `npm --prefix desktop run e2e:release-gate` зелёный, а native smoke теперь завершается предсказуемо и оставляет evidence вместо немого зависания.
 
-**Следующий шаг:** перейти к `#160` — стабилизировать native smoke / release evidence policy: разобраться с `tauri-driver` handshake, отделить blocking vs advisory Linux desktop evidence, и синхронизировать runbooks/CI policy.
+**Следующий шаг:** перейти к `#161` — расширить desktop regression matrix под реальные user-visible state bugs: persistence, navigation recovery, mode transitions и другие UX-regressions, которые теперь должны сразу превращаться в Playwright coverage.
 
 ---
 
@@ -35,7 +35,7 @@
 | **QA-A** | #152✓ → #153✓ | **Done** | Security + mypy закрыты |
 | **QA-B** | #154✓ → #156✓ | **Done** | DevOps/scripts Sonar закрыт |
 | **QA-C** | #155 ✓ → #157 ✓ | **Done** | Desktop/frontend Sonar закрыт |
-| **Desktop Stabilization** | #159✓ → #160 → #161 | **In progress** | UX bugs закрываются, дальше native evidence policy |
+| **Desktop Stabilization** | #159✓ → #160✓ → #161 | **In progress** | UX bugs и test policy закрыты, дальше regression matrix |
 | **Decision log** | #143✓, #144✓ | Resolved | Scope guard для автопилота; новых user decisions сейчас не нужно |
 | **External wait** | #65 | Waiting upstream | CVE остаётся tracked wait state до upstream fix |
 
@@ -52,7 +52,7 @@
 
 Среда: Fedora Atomic, toolbox 43, uv sync --extra all. Ключи в keyring (keyring-keys-reference.md). Тесты: targeted subset, не полный pytest (OOM risk). Для infra/docs/governance cleanup сначала прогонять `./scripts/preflight_repo.sh --with-tests`. Pre-commit в toolbox; на хосте git push --no-verify если нет Python 3.12.
 
-Задача: взять `#160` — стабилизировать native smoke / release evidence policy для desktop. Разобрать `tauri-driver` handshake, закрепить что именно blocking, а что advisory, синхронизировать runbooks/CI policy и оставить честный release evidence path. После закрытия `#160` перейти к `#161`.
+Задача: взять `#161` — расширить desktop regression matrix под реальные UX-regressions: persistence, navigation recovery, mode transitions, onboarding/state recovery. Каждый найденный руками desktop UI баг сразу превращать в regression test. Сохранять policy из `desktop-gui-testing.md`: blocking = `cd desktop && npm run e2e:release-gate`, advisory native evidence = `cd desktop && npm run e2e:native:headless`.
 ```
 
 ---

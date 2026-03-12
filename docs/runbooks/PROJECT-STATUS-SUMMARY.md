@@ -147,15 +147,15 @@ E11 (narrow CalDAV scope) ✓ → E16 ✓ → E17 ✓
 | DS | Issue | Блок | Priority | Effort | Area | Зачем |
 |---|---|---|---|---|---|---|
 | DS1 | [#159](https://github.com/iurii-izman/voiceforge/issues/159) ✓ | Desktop UX Stabilization · onboarding dismissal and mode recovery | P0 | M | Frontend | Убрать реальные stuck-state UX bugs из Tauri UI |
-| DS2 | [#160](https://github.com/iurii-izman/voiceforge/issues/160) | Desktop Test Policy · stabilize native smoke and release evidence | P1 | M | Testing | Закрепить честную policy для mocked gate vs native shell evidence |
+| DS2 | [#160](https://github.com/iurii-izman/voiceforge/issues/160) ✓ | Desktop Test Policy · stabilize native smoke and release evidence | P1 | M | Testing | Закреплены две канонические команды: blocking `e2e:release-gate` и advisory `e2e:native:headless` |
 | DS3 | [#161](https://github.com/iurii-izman/voiceforge/issues/161) | Desktop Regression Matrix · cover state persistence and navigation recovery | P1 | M | Testing | Закрыть user-visible regressions regression-тестами |
 
 **Рекомендуемый порядок:**
 ```
-#160 → #161
+#161
 ```
 
-**Почему так:** реальные stuck-state UX bugs уже закрыты в `#159`; теперь сначала стабилизируем policy/evidence вокруг native smoke, и только потом расширяем regression matrix.
+**Почему так:** реальные stuck-state UX bugs уже закрыты в `#159`, а policy/evidence вокруг native smoke теперь закрыта в `#160`; следующий логичный шаг — превращать оставшиеся user-visible desktop regressions в regression matrix в `#161`.
 
 ### Post-Phase-E: Quality Remediation Wave
 

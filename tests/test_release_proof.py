@@ -41,7 +41,14 @@ def test_release_proof_report_marks_missing_cargo_audit_as_advisory_only(tmp_pat
     src_tauri = desktop / "src-tauri"
     src_tauri.mkdir(parents=True)
     (desktop / "package.json").write_text(
-        json.dumps({"scripts": {"e2e:native": "npm --prefix e2e-native run test"}}),
+        json.dumps(
+            {
+                "scripts": {
+                    "e2e:native:headless": "bash ../scripts/run_desktop_native_smoke.sh --headless",
+                    "e2e:release-gate": "npm run build && npm run e2e:gate",
+                }
+            }
+        ),
         encoding="utf-8",
     )
     (src_tauri / "tauri.conf.json").write_text(
@@ -56,6 +63,7 @@ def test_release_proof_report_marks_missing_cargo_audit_as_advisory_only(tmp_pat
 
     assert report["updater"]["state"] == "disabled"
     assert report["native_gate"]["status"] == "ready"
+    assert report["blocking"][1]["status"] == "ready"
     assert report["advisory"][1]["status"] == "missing-tool"
     assert "cargo install cargo-audit" in report["advisory"][1]["detail"]
     assert report["manual"][0]["status"] == "manual-not-required"
@@ -66,7 +74,14 @@ def test_release_proof_report_requires_manual_updater_when_ready(tmp_path: Path)
     src_tauri = desktop / "src-tauri"
     src_tauri.mkdir(parents=True)
     (desktop / "package.json").write_text(
-        json.dumps({"scripts": {"e2e:native": "npm --prefix e2e-native run test"}}),
+        json.dumps(
+            {
+                "scripts": {
+                    "e2e:native:headless": "bash ../scripts/run_desktop_native_smoke.sh --headless",
+                    "e2e:release-gate": "npm run build && npm run e2e:gate",
+                }
+            }
+        ),
         encoding="utf-8",
     )
     (src_tauri / "tauri.conf.json").write_text(
@@ -93,3 +108,25 @@ def test_release_proof_report_requires_manual_updater_when_ready(tmp_path: Path)
     assert report["updater"]["state"] == "ready"
     assert report["advisory"][1]["status"] == "ready"
     assert report["manual"][0]["status"] == "manual-required"
+
+
+def test_release_proof_report_marks_missing_blocking_desktop_gate(tmp_path: Path) -> None:
+    desktop = tmp_path / "desktop"
+    src_tauri = desktop / "src-tauri"
+    src_tauri.mkdir(parents=True)
+    (desktop / "package.json").write_text(
+        json.dumps({"scripts": {"e2e:native:headless": "bash ../scripts/run_desktop_native_smoke.sh --headless"}}),
+        encoding="utf-8",
+    )
+    (src_tauri / "tauri.conf.json").write_text(
+        json.dumps({"plugins": {"updater": {"pubkey": "", "endpoints": []}}}),
+        encoding="utf-8",
+    )
+
+    report = collect_release_proof_report(
+        tmp_path,
+        which=lambda command: {"cargo": "/usr/bin/cargo", "npm": "/usr/bin/npm"}.get(command),
+    )
+
+    assert report["blocking"][1]["status"] == "missing-script"
+    assert report["native_gate"]["status"] == "ready"
