@@ -1,6 +1,7 @@
 export function buildDesktopScenario(overrides = {}) {
   return {
     language: "ru",
+    daemonAvailable: true,
     deepLinks: [],
     updateAvailable: false,
     updateVersion: "0.2.0-alpha.3",
@@ -99,6 +100,7 @@ export async function installDesktopMocks(page, scenarioOverrides = {}) {
     const state = {
       autostartEnabled: !!scenario.autostartEnabled,
       clipboard: "",
+      daemonAvailable: scenario.daemonAvailable !== false,
       detailRequests: [],
       invokes: [],
       listening: false,
@@ -238,6 +240,9 @@ export async function installDesktopMocks(page, scenarioOverrides = {}) {
         state.invokes.push({ cmd, args: clone(args) });
         switch (cmd) {
           case "ping":
+            if (!state.daemonAvailable) {
+              throw new Error("mock daemon unavailable");
+            }
             return "pong";
           case "set_tray_theme":
             return "ok";

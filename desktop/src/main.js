@@ -376,7 +376,7 @@ function setDaemonOff(msg) {
   statusBar.textContent = msg || t("status_daemon_off");
   statusBar.className = "status daemon-off";
   retryBtn.style.display = "block";
-  document.querySelectorAll(".content button").forEach((b) => (b.disabled = true));
+  setDaemonDependentControlsEnabled(false);
   const compactStatus = document.getElementById("compact-status");
   if (compactStatus) { compactStatus.textContent = t("compact_daemon_off"); compactStatus.className = "status daemon-off"; }
   const banner = document.getElementById("daemon-off-banner");
@@ -394,9 +394,23 @@ function setDaemonOk() {
   retryBtn.style.display = "none";
   const banner = document.getElementById("daemon-off-banner");
   if (banner) banner.style.display = "none";
-  document.querySelectorAll("#listen-toggle, #analyze-btn").forEach((b) => (b.disabled = false));
+  setDaemonDependentControlsEnabled(true);
   const compactStatus = document.getElementById("compact-status");
   if (compactStatus) { compactStatus.textContent = t("compact_daemon_ok"); compactStatus.className = "status daemon-ok"; }
+}
+
+function setDaemonDependentControlsEnabled(enabled) {
+  const selectors = [
+    "#listen-toggle",
+    "#analyze-btn",
+    "#quick-listen",
+    "#quick-analyze-60",
+    "#compact-listen",
+    "#compact-analyze",
+  ];
+  document.querySelectorAll(selectors.join(", ")).forEach((button) => {
+    button.disabled = !enabled;
+  });
 }
 
 function parseEnvelope(raw) {

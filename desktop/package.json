@@ -9,7 +9,7 @@
     "build": "vite build",
     "preview": "vite preview --port 4173",
     "e2e": "playwright test",
-    "e2e:gate": "playwright test e2e/nav.spec.js e2e/autopilot.spec.js e2e/a11y.spec.js e2e/visual.spec.js",
+    "e2e:gate": "playwright test e2e/nav.spec.js e2e/autopilot.spec.js e2e/regression.spec.js e2e/a11y.spec.js e2e/visual.spec.js",
     "e2e:headed": "playwright test --headed",
     "e2e:ui": "playwright test --ui",
     "e2e:report": "playwright show-report",

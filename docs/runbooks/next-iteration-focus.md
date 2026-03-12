@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-13 (desktop test policy #160 done)
+**Обновлено:** 2026-03-13 (desktop regression matrix #161 done)
 
 ---
 
@@ -19,9 +19,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** закрыт `#160`: введён единый advisory native smoke runner с таймаутом и артефактами (`desktop/e2e-native/artifacts/latest/`), `desktop/package.json` и `check_release_proof.py` теперь закрепляют две канонические команды: `cd desktop && npm run e2e:release-gate` (blocking) и `cd desktop && npm run e2e:native:headless` (advisory). `npm --prefix desktop run e2e:release-gate` зелёный, а native smoke теперь завершается предсказуемо и оставляет evidence вместо немого зависания.
+**Сделано в сессии:** закрыт `#161`: добавлен `desktop/e2e/regression.spec.js` и покрыты реальные desktop UX-regressions для daily-driver path: recent-session open/back recovery, settings panel close/reopen recovery, settings persistence + safe defaults, compact mode reload/recovery, daemon-off → retry recovery. `cd desktop && npm run e2e:release-gate` теперь зелёный с `27 passed`.
 
-**Следующий шаг:** перейти к `#161` — расширить desktop regression matrix под реальные user-visible state bugs: persistence, navigation recovery, mode transitions и другие UX-regressions, которые теперь должны сразу превращаться в Playwright coverage.
+**Следующий шаг:** активной инженерной очереди, кроме внешнего wait-state `#65`, сейчас нет. Следующий практический шаг зависит от новых реальных desktop UX bug reports: каждый найденный руками UI баг превращать в новую issue и сразу в regression test. Если новых багов нет, ограничиться периодическим re-check по `#65`.
 
 ---
 
@@ -35,7 +35,7 @@
 | **QA-A** | #152✓ → #153✓ | **Done** | Security + mypy закрыты |
 | **QA-B** | #154✓ → #156✓ | **Done** | DevOps/scripts Sonar закрыт |
 | **QA-C** | #155 ✓ → #157 ✓ | **Done** | Desktop/frontend Sonar закрыт |
-| **Desktop Stabilization** | #159✓ → #160✓ → #161 | **In progress** | UX bugs и test policy закрыты, дальше regression matrix |
+| **Desktop Stabilization** | #159✓ → #160✓ → #161✓ | **Done** | UX bugs, test policy и regression matrix закрыты |
 | **Decision log** | #143✓, #144✓ | Resolved | Scope guard для автопилота; новых user decisions сейчас не нужно |
 | **External wait** | #65 | Waiting upstream | CVE остаётся tracked wait state до upstream fix |
 
@@ -52,7 +52,7 @@
 
 Среда: Fedora Atomic, toolbox 43, uv sync --extra all. Ключи в keyring (keyring-keys-reference.md). Тесты: targeted subset, не полный pytest (OOM risk). Для infra/docs/governance cleanup сначала прогонять `./scripts/preflight_repo.sh --with-tests`. Pre-commit в toolbox; на хосте git push --no-verify если нет Python 3.12.
 
-Задача: взять `#161` — расширить desktop regression matrix под реальные UX-regressions: persistence, navigation recovery, mode transitions, onboarding/state recovery. Каждый найденный руками desktop UI баг сразу превращать в regression test. Сохранять policy из `desktop-gui-testing.md`: blocking = `cd desktop && npm run e2e:release-gate`, advisory native evidence = `cd desktop && npm run e2e:native:headless`.
+Задача: активной feature/testing очереди сейчас нет; все desktop stabilization issues (#159–#161) закрыты. Если появляется новый desktop UX bug, сначала оформить issue на доске, затем починить bug + добавить regression test в `desktop/e2e/regression.spec.js` или соседний релевантный spec. Если новых багов нет, ограничиться periodic re-check внешнего wait-state `#65`.
 ```
 
 ---

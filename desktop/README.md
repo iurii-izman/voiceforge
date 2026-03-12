@@ -70,6 +70,7 @@ npm run e2e:report
 Что покрывается:
 
 - functional/autopilot flows: daemon ok, listen/analyze, sessions/detail, settings/autostart/updater
+- stateful regression matrix: onboarding persistence, compact/full recovery, recent-session open/back, settings persistence, daemon retry recovery
 - a11y smoke: home, sessions, settings panel
 - visual baselines: home dashboard, sessions list, settings slide-out panel
 
