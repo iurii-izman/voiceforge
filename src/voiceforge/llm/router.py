@@ -13,6 +13,7 @@ from voiceforge.core.secrets import set_env_keys_from_keyring
 from voiceforge.llm.circuit_breaker import wrap_completion
 from voiceforge.llm.pii_filter import redact
 from voiceforge.llm.prompt_loader import load_prompt, load_template_prompts
+from voiceforge.llm.schemas import CopilotFastCards
 
 log = structlog.get_logger()
 TModel = TypeVar("TModel", bound=BaseModel)
@@ -413,6 +414,60 @@ def _analysis_prompt(
     ]
 
 
+# KC6 (#178): Copilot fast-track — short-token Answer / Do/Don't / Clarify cards
+
+
+_COPILOT_FAST_SYSTEM_FALLBACK = """You are a real-time copilot for live Q&A. Given a short transcript (often a question) and optional document context, produce glanceable cards.
+Output JSON: answer (1–2 short phrases to say aloud), dos (1–2 safe actions), donts (1–2 to avoid), clarify (0–2 questions if ambiguous), confidence (0–1). Be extremely concise. Same language as transcript. Output only valid JSON."""
+
+
+def _copilot_fast_prompt(
+    transcript: str,
+    context: str,
+    rag_groundedness: str | None = None,
+) -> list[dict[str, Any]]:
+    """Build messages for copilot fast-track (short token budget)."""
+    system_text = load_prompt("copilot_fast")
+    if not system_text or not system_text.strip():
+        log.warning("llm.copilot_fast_prompt_missing", message="Using fallback")
+        system_text = _COPILOT_FAST_SYSTEM_FALLBACK
+    hint = f" (RAG: {rag_groundedness})" if rag_groundedness else ""
+    user_content = f"Context (documents):\n{context[:2000] or '(none)'}\n\nTranscript:\n{transcript[:1500]}{hint}"
+    return [
+        {"role": "system", "content": system_text},
+        {"role": "user", "content": user_content},
+    ]
+
+
+def analyze_copilot_fast(
+    transcript: str,
+    context: str = "",
+    *,
+    model: str | None = None,
+    rag_groundedness: str | None = None,
+) -> tuple[CopilotFastCards, float]:
+    """KC6 (#178): One LLM call for Answer, Do/Don't, Clarify cards. Short token budget for live use.
+    Returns (CopilotFastCards, cost_usd)."""
+    from voiceforge.core.config import Settings
+
+    model_id = model or DEFAULT_MODEL
+    _complete_structured_check_budget(Settings())
+    set_env_keys_from_keyring()
+    from voiceforge.core.preflight import NetworkUnavailableError, check_network_for_llm
+
+    network_err = check_network_for_llm(model_id)
+    if network_err:
+        raise NetworkUnavailableError(network_err)
+    prompt = _copilot_fast_prompt(transcript, context, rag_groundedness)
+    result, cost = complete_structured(
+        prompt,
+        response_model=CopilotFastCards,
+        model=model_id,
+        max_tokens=384,
+    )
+    return (result, cost)
+
+
 def _content_from_llm_response(raw: Any, model_id: str) -> tuple[str, str]:
     """Extract content and raw_content from completion response. Raises if no choices."""
     choices = getattr(raw, "choices", None) or []
@@ -563,11 +618,13 @@ def complete_structured(
     prompt: list[dict[str, Any]],
     response_model: type[TModel],
     model: str | None = None,
+    max_tokens: int | None = None,
 ) -> tuple[TModel, float]:
     """Call LLM with fallbacks; return (validated Pydantic model, cost_usd).
     Uses Instructor retry (max_retries=3) with validation context on parse errors (#33).
     Pre-call budget check: reject if daily cost >= daily_budget_limit_usd (#38).
-    Response cache: content-hash key, TTL from config (#44)."""
+    Response cache: content-hash key, TTL from config (#44).
+    KC6 (#178): max_tokens limits output length (default 1024; copilot fast-track uses 384)."""
     from voiceforge.core.config import Settings
     from voiceforge.core.metrics import log_response_cache
     from voiceforge.llm.cache import cache_key
@@ -596,6 +653,7 @@ def complete_structured(
 
     # E6 (#129): when using Ollama fallback, do not fall back to API models (no keys).
     fallbacks = None if model_id.startswith(_OLLAMA_MODEL_PREFIX) else [m for m in FALLBACK_MODELS if m != model_id][:3]
+    token_limit = 1024 if max_tokens is None else max(256, min(max_tokens, 4096))
     client = instructor.from_litellm(wrap_completion(completion))
     try:
         parsed, raw_used = client.create_with_completion(
@@ -604,7 +662,7 @@ def complete_structured(
             max_retries=3,
             model=model_id,
             fallbacks=fallbacks if fallbacks else None,
-            max_tokens=1024,
+            max_tokens=token_limit,
         )
     except Exception as e:
         try:

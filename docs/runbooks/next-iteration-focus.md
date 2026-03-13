@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии**. Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-14 (KC5 done: evidence-first RAG, groundedness, citations; next = KC6; `#164/#165` remain background hardening)
+**Обновлено:** 2026-03-14 (KC6 done: fast-track cards Answer, Do/Don't, Clarify; next = KC7; `#164/#165` remain background hardening)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** KC5 · Evidence-first RAG, groundedness, citations (#177): rag/groundedness.py (confidence_from_results, format_evidence_citations, get_conflict_hint); short-capture query extraction (for_short_capture, SHORT_CAPTURE_MAX_CHARS); pipeline returns rag_results, rag_groundedness, rag_citations, rag_conflict_hint; analysis_for_log includes rag_*; daemon stores and get_copilot_capture_status returns rag_groundedness, rag_citations, rag_conflict_hint. Targeted tests: test_rag_groundedness_kc5, pipeline/daemon/query_keywords. Docs: voiceforge-copilot-architecture, copilot-program-map, PROJECT-STATUS-SUMMARY, next-iteration-focus.
+**Сделано в сессии:** KC6 · Fast-track cards: Answer, Do/Don't, Clarify (#178): CopilotFastCards schema + prompts/copilot_fast.txt; analyze_copilot_fast() в router (max_tokens=384); run_analyze_pipeline(for_copilot=True) + daemon storage/get_copilot_capture_status (copilot_answer, dos, donts, clarify, confidence); overlay render Evidence → Answer → Do/Don't → Clarify. Targeted tests: test_copilot_fast_cards_schema_kc6, test_get_copilot_capture_status_fast_track_cards_kc6. E2E release-gate passed. Docs: copilot-program-map, PROJECT-STATUS-SUMMARY, next-iteration-focus.
 
-**Следующий шаг:** взять [#178](https://github.com/iurii-izman/voiceforge/issues/178) `KC6 · Fast-track cards: Answer, Do/Don't, Clarify` как следующий исполняемый block.
+**Следующий шаг:** взять [#179](https://github.com/iurii-izman/voiceforge/issues/179) `KC7 · Deep track, session memory, card priority/overflow` как следующий исполняемый block.
 
 ---
 
@@ -31,8 +31,8 @@
 | --- | --- | --- | --- |
 | **KD** | #170✓ → #172✓ | Done | Decision-locked product / UX / architecture contracts |
 | **KC bootstrap** | #173✓ | Done | Program seeding, traceability, docs handoff |
-| **Wave 1 MVP Core** | #174✓ → #175✓ → #176✓ → #177✓ → #178 | Active | KC5 done; next: fast-track cards (KC6) |
-| **Wave 2 MVP Complete** | #179 → #180 | Todo | Deep track/session memory + main-window copilot integration |
+| **Wave 1 MVP Core** | #174✓ → #175✓ → #176✓ → #177✓ → #178✓ | Done | KC6 done; Wave 1 complete |
+| **Wave 2 MVP Complete** | #179 → #180 | Active | Next: KC7 deep track, session memory, card priority/overflow |
 | **Wave 2 V2 Surface** | #181 | Todo | Knowledge management + context packs |
 | **Wave 3 V2 Expansion** | #182 → #183 | Todo | Explicit mode system; offline/hybrid maturity; system audio + scenario presets |
 | **Wave 4 V3 / Frontier** | #184 → #185 → #186 | Todo | Pro cards, adaptive intelligence, copilot QA/release/perf |
@@ -52,7 +52,7 @@
 
 Перед началом крупного блока: `./scripts/preflight_repo.sh --with-tests`. Для desktop/UI изменений: `cd desktop && npm run e2e:release-gate`. Для native/Tauri/system-level изменений дополнительно: `cd desktop && npm run e2e:native:headless`.
 
-Текущий блок: KC6 · Fast-track cards: Answer, Do/Don't, Clarify (#178).
+Текущий блок: KC7 · Deep track, session memory, card priority/overflow (#179).
 ```
 
 ---

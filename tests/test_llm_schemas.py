@@ -1,10 +1,10 @@
-"""Tests for llm/schemas (ActionItem deadline coercion and related)."""
+"""Tests for llm/schemas (ActionItem deadline coercion, CopilotFastCards KC6)."""
 
 from __future__ import annotations
 
 from datetime import date
 
-from voiceforge.llm.schemas import ActionItem
+from voiceforge.llm.schemas import ActionItem, CopilotFastCards
 
 
 def test_action_item_deadline_valid_string_passes() -> None:
@@ -29,3 +29,26 @@ def test_action_item_deadline_coerce_none_and_unknown() -> None:
 
     ai5 = ActionItem(description="Task", assignee=None, deadline="   <UNKNOWN>   ")
     assert ai5.deadline is None
+
+
+def test_copilot_fast_cards_schema_kc6() -> None:
+    """KC6 (#178): CopilotFastCards schema validates and defaults empty lists."""
+    empty = CopilotFastCards()
+    assert empty.answer == []
+    assert empty.dos == []
+    assert empty.donts == []
+    assert empty.clarify == []
+    assert empty.confidence == 0.0
+
+    filled = CopilotFastCards(
+        answer=["Say the price is $45K/year."],
+        dos=["Mention SLA 99.9%"],
+        donts=["Don't promise discounts"],
+        clarify=["Which product tier?"],
+        confidence=0.85,
+    )
+    assert len(filled.answer) == 1
+    assert len(filled.dos) == 1
+    assert len(filled.donts) == 1
+    assert len(filled.clarify) == 1
+    assert filled.confidence == 0.85

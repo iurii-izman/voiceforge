@@ -107,3 +107,34 @@ class InterviewOutput(BaseModel):
     questions_asked: list[str] = Field(default_factory=list, description="Questions asked to candidate")
     assessment: list[str] = Field(default_factory=list, description="Assessment or evaluation points")
     decision: str = Field(default="", description="Hire / no hire / follow-up or empty if not decided")
+
+
+# KC6 (#178): Fast-track cards for Knowledge Copilot overlay (Answer, Do/Don't, Clarify)
+
+
+class CopilotFastCards(BaseModel):
+    """Structured output for copilot fast-track: glanceable cards for live Q&A.
+    Short token budget: 1–2 sentences per list, 0–2 clarify questions."""
+
+    answer: list[str] = Field(
+        default_factory=list,
+        description="1–2 short phrases: what to say aloud now (direct answer)",
+    )
+    dos: list[str] = Field(
+        default_factory=list,
+        description="1–2 safe phrases or actions to do",
+    )
+    donts: list[str] = Field(
+        default_factory=list,
+        description="1–2 phrases or actions to avoid",
+    )
+    clarify: list[str] = Field(
+        default_factory=list,
+        description="0–2 clarifying questions if the query is ambiguous or retrieval weak",
+    )
+    confidence: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=1.0,
+        description="Model confidence 0–1 for this answer given transcript and context",
+    )

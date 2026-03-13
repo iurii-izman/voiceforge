@@ -375,3 +375,20 @@ def test_get_copilot_capture_status_transcript_snippet_kc4() -> None:
     out = daemon.get_copilot_capture_status()
     data = json.loads(out)
     assert data.get("transcript_snippet") == "Hello world"
+
+
+def test_get_copilot_capture_status_fast_track_cards_kc6() -> None:
+    """KC6 (#178): get_copilot_capture_status includes copilot_answer, dos, donts, clarify, confidence."""
+    daemon = _make_daemon()
+    daemon._last_copilot_answer = ["Enterprise plan is $45K/year."]
+    daemon._last_copilot_dos = ["Mention SLA"]
+    daemon._last_copilot_donts = ["Don't promise discounts"]
+    daemon._last_copilot_clarify = ["Which tier?"]
+    daemon._last_copilot_confidence = 0.9
+    out = daemon.get_copilot_capture_status()
+    data = json.loads(out)
+    assert data.get("copilot_answer") == ["Enterprise plan is $45K/year."]
+    assert data.get("copilot_dos") == ["Mention SLA"]
+    assert data.get("copilot_donts") == ["Don't promise discounts"]
+    assert data.get("copilot_clarify") == ["Which tier?"]
+    assert data.get("copilot_confidence") == 0.9

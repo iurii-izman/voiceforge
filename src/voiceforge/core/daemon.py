@@ -129,6 +129,12 @@ class VoiceForgeDaemon:
         self._last_copilot_rag_groundedness: str | None = None
         self._last_copilot_rag_citations: list[Any] = []
         self._last_copilot_rag_conflict_hint: str | None = None
+        # KC6 (#178): fast-track cards Answer, Do/Don't, Clarify
+        self._last_copilot_answer: list[str] = []
+        self._last_copilot_dos: list[str] = []
+        self._last_copilot_donts: list[str] = []
+        self._last_copilot_clarify: list[str] = []
+        self._last_copilot_confidence: float = 0.0
 
     def _dbus_streaming_emitter_loop(self) -> None:
         """Worker to get transcript chunks from queue and emit them as D-Bus signals."""
@@ -175,6 +181,7 @@ class VoiceForgeDaemon:
                 template=template,
                 stream_callback=stream_cb,
                 out_transcript=out_transcript,
+                for_copilot=True,
             )
             try:
                 text, segments_for_log, analysis_for_log = future.result(timeout=timeout_sec)
@@ -195,6 +202,14 @@ class VoiceForgeDaemon:
             self._last_copilot_rag_groundedness = analysis_for_log.get("rag_groundedness") if analysis_for_log else None
             self._last_copilot_rag_citations = list(analysis_for_log.get("rag_citations") or []) if analysis_for_log else []
             self._last_copilot_rag_conflict_hint = analysis_for_log.get("rag_conflict_hint") if analysis_for_log else None
+            # KC6 (#178): fast-track cards
+            self._last_copilot_answer = list(analysis_for_log.get("copilot_answer") or []) if analysis_for_log else []
+            self._last_copilot_dos = list(analysis_for_log.get("copilot_dos") or []) if analysis_for_log else []
+            self._last_copilot_donts = list(analysis_for_log.get("copilot_donts") or []) if analysis_for_log else []
+            self._last_copilot_clarify = list(analysis_for_log.get("copilot_clarify") or []) if analysis_for_log else []
+            self._last_copilot_confidence = (
+                float(analysis_for_log.get("copilot_confidence", 0.0) or 0.0) if analysis_for_log else 0.0
+            )
         session_id = None
         if segments_for_log is not None and analysis_for_log is not None:
             try:
@@ -321,6 +336,12 @@ class VoiceForgeDaemon:
             self._copilot_capture_start_time = time.monotonic()
             self._copilot_warning_emitted = False
             self._last_copilot_stt_ambiguous = False
+            # KC6: clear fast-track cards so overlay does not show previous result during new recording
+            self._last_copilot_answer = []
+            self._last_copilot_dos = []
+            self._last_copilot_donts = []
+            self._last_copilot_clarify = []
+            self._last_copilot_confidence = 0.0
         self._copilot_watcher_stop.clear()
         self._copilot_watcher_thread = threading.Thread(target=self._copilot_watcher_loop, daemon=True)
         self._copilot_watcher_thread.start()
@@ -409,13 +430,18 @@ class VoiceForgeDaemon:
         log.info("daemon.copilot_capture_released", status=status, session_id=session_id, stt_ambiguous=stt_ambiguous)
 
     def get_copilot_capture_status(self) -> str:
-        """KC3/KC4/KC5: return JSON { stt_ambiguous, transcript_snippet, rag_groundedness, rag_citations, rag_conflict_hint } for overlay."""
+        """KC3/KC4/KC5/KC6: return JSON for overlay: stt_ambiguous, transcript_snippet, rag_*, copilot_answer, copilot_dos, copilot_donts, copilot_clarify, copilot_confidence."""
         with self._copilot_lock:
             ambiguous = self._last_copilot_stt_ambiguous
             snippet = self._last_copilot_transcript
             rag_groundedness = self._last_copilot_rag_groundedness
             rag_citations = self._last_copilot_rag_citations
             rag_conflict_hint = self._last_copilot_rag_conflict_hint
+            answer = list(self._last_copilot_answer)
+            dos = list(self._last_copilot_dos)
+            donts = list(self._last_copilot_donts)
+            clarify = list(self._last_copilot_clarify)
+            confidence = self._last_copilot_confidence
         payload: dict[str, Any] = {
             "stt_ambiguous": ambiguous,
             "transcript_snippet": snippet,
@@ -426,6 +452,15 @@ class VoiceForgeDaemon:
             payload["rag_citations"] = rag_citations
         if rag_conflict_hint:
             payload["rag_conflict_hint"] = rag_conflict_hint
+        if answer:
+            payload["copilot_answer"] = answer
+        if dos:
+            payload["copilot_dos"] = dos
+        if donts:
+            payload["copilot_donts"] = donts
+        if clarify:
+            payload["copilot_clarify"] = clarify
+        payload["copilot_confidence"] = confidence
         return json.dumps(payload, ensure_ascii=False)
 
     def is_listening(self) -> bool:

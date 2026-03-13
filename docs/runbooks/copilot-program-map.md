@@ -1,6 +1,6 @@
 # Knowledge Copilot Program Map
 
-**Updated:** 2026-03-14 (KC4 done: tiny-model streaming STT copilot path, transcript_snippet, copilot_stt_model_size)
+**Updated:** 2026-03-14 (KC6 done: fast-track cards Answer, Do/Don't, Clarify; next = KC7)
 **Primary source of truth:** [voiceforge-copilot-architecture.md](../voiceforge-copilot-architecture.md)
 **Execution queue:** [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md), [next-iteration-focus.md](next-iteration-focus.md)
 **Background hardening:** [#164](https://github.com/iurii-izman/voiceforge/issues/164), [#165](https://github.com/iurii-izman/voiceforge/issues/165)
@@ -13,7 +13,7 @@ This file is the operational map for the Knowledge Copilot program. Nothing in t
 
 - `KD1-KD3` are seeded and closed as `decision-locked` policy artefacts.
 - `KC1` is complete: the program is bootstrapped, the GitHub Project is seeded, and handoff is switched to the Copilot track.
-- **Current next executable block:** [#178](https://github.com/iurii-izman/voiceforge/issues/178) `KC6 · Fast-track cards: Answer, Do/Don't, Clarify`
+- **Current next executable block:** [#179](https://github.com/iurii-izman/voiceforge/issues/179) `KC7 · Deep track, session memory, card priority/overflow`
 - `#164` and `#165` remain open as background maintenance/security hardening and are not part of the main copilot execution order.
 
 ## Block Registry
@@ -35,7 +35,7 @@ This file is the operational map for the Knowledge Copilot program. Nothing in t
 | KC3 | [#175](https://github.com/iurii-izman/voiceforge/issues/175) | 1 | Done | Capture runtime, markers, pre-roll, 30s auto-stop, recording_warning, stt_ambiguous |
 | KC4 | [#176](https://github.com/iurii-izman/voiceforge/issues/176) | 1 | Done | Tiny-model streaming STT copilot path |
 | KC5 | [#177](https://github.com/iurii-izman/voiceforge/issues/177) | 1 | Done | Evidence-first RAG, groundedness, citations |
-| KC6 | [#178](https://github.com/iurii-izman/voiceforge/issues/178) | 1 | Todo | Fast-track cards: Answer, Do/Don't, Clarify |
+| KC6 | [#178](https://github.com/iurii-izman/voiceforge/issues/178) | 1 | Done | Fast-track cards: Answer, Do/Don't, Clarify |
 | KC7 | [#179](https://github.com/iurii-izman/voiceforge/issues/179) | 2 | Todo | Deep track, session memory, card priority/overflow |
 | KC8 | [#180](https://github.com/iurii-izman/voiceforge/issues/180) | 2 | Todo | Main-window copilot integration and settings |
 | KC9 | [#181](https://github.com/iurii-izman/voiceforge/issues/181) | 2 | Todo | Knowledge management UI and context packs |
