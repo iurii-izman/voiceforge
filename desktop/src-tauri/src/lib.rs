@@ -97,6 +97,9 @@ pub fn run() {
             commands::set_tray_theme,
             commands::export_session,
             commands::set_copilot_overlay_state,
+            commands::capture_start,
+            commands::capture_release,
+            commands::get_copilot_capture_status,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

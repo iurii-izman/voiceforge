@@ -19,6 +19,7 @@ import pytest
 from voiceforge.core.daemon import (
     PID_FILE_NAME,
     VoiceForgeDaemon,
+    _analyze_result_is_error_daemon,
     _env_flag,
     _event_description_from_detail,
     _event_start_in_window,
@@ -339,3 +340,27 @@ def test_daemon_env_flag_already_in_batch99() -> None:
     """_env_flag is covered in test_coverage_hotspots_batch99; smoke here for daemon module."""
     assert _env_flag("NONEXISTENT_VAR_XYZ", default=True) is True
     assert _env_flag("NONEXISTENT_VAR_XYZ", default=False) is False
+
+
+# --- KC3 copilot capture (issue #175) ---
+
+
+def test_analyze_result_is_error_daemon_prefix_and_json() -> None:
+    """_analyze_result_is_error_daemon True for Russian/English error prefix or JSON error key."""
+    assert _analyze_result_is_error_daemon("Ошибка: something") is True
+    assert _analyze_result_is_error_daemon("Error: failed") is True
+    assert _analyze_result_is_error_daemon('{"error": {"code": "X"}}') is True
+    assert _analyze_result_is_error_daemon("Normal text") is False
+    assert _analyze_result_is_error_daemon("") is False
+
+
+def test_get_copilot_capture_status_default_and_after_ambiguous() -> None:
+    """get_copilot_capture_status returns JSON with stt_ambiguous; default False (KC3)."""
+    daemon = _make_daemon()
+    out = daemon.get_copilot_capture_status()
+    data = json.loads(out)
+    assert data.get("stt_ambiguous") is False
+    daemon._last_copilot_stt_ambiguous = True
+    out2 = daemon.get_copilot_capture_status()
+    data2 = json.loads(out2)
+    assert data2.get("stt_ambiguous") is True

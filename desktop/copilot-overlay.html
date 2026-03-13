@@ -8,8 +8,12 @@
 </head>
 <body class="copilot-overlay-body">
   <div id="copilot-overlay-root" class="copilot-overlay-root" role="status" aria-live="polite">
-    <div id="copilot-recording-indicator" class="copilot-recording-indicator" aria-hidden="true"></div>
-    <div id="copilot-state-label" class="copilot-state-label">—</div>
+    <div class="copilot-overlay-row">
+      <div id="copilot-recording-indicator" class="copilot-recording-indicator" aria-hidden="true"></div>
+      <div id="copilot-state-label" class="copilot-state-label">—</div>
+    </div>
+    <div id="copilot-transcript-snippet" class="copilot-transcript-snippet" aria-hidden="true"></div>
+    <div id="copilot-ambiguity-hint" class="copilot-ambiguity-hint" aria-hidden="true"></div>
   </div>
   <script type="module" src="/src/copilot-overlay.js"></script>
 </body>

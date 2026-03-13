@@ -128,8 +128,8 @@ test.describe("Desktop QA autopilot", () => {
     expect(state.updateChecks).toBeGreaterThan(0);
   });
 
-  // KC2: copilot overlay — hotkey pressed/released invokes set_copilot_overlay_state (recording → analyzing); latest replaces previous.
-  test("copilot shortcut pressed and released invokes overlay state recording then analyzing", async ({ page }) => {
+  // KC2/KC3: copilot overlay — CaptureStart/CaptureRelease + set_copilot_overlay_state (recording → analyzing).
+  test("copilot shortcut pressed and released invokes capture_start, overlay state, capture_release, analyzing", async ({ page }) => {
     await page.evaluate(() => {
       const s = globalThis.__VOICEFORGE_TEST_STATE__;
       const shortcut = s.shortcuts && s.shortcuts.length >= 3 ? s.shortcuts[2] : "CommandOrControl+Shift+Space";
@@ -141,7 +141,11 @@ test.describe("Desktop QA autopilot", () => {
       if (s.shortcutHandler) s.shortcutHandler({ shortcut, state: "Released" });
     });
     const invokes = await page.evaluate(() => globalThis.__VOICEFORGE_TEST_STATE__.invokes);
+    const captureStarts = invokes.filter((i) => i.cmd === "capture_start");
+    const captureReleases = invokes.filter((i) => i.cmd === "capture_release");
     const copilotInvokes = invokes.filter((i) => i.cmd === "set_copilot_overlay_state");
+    expect(captureStarts.length).toBeGreaterThanOrEqual(1);
+    expect(captureReleases.length).toBeGreaterThanOrEqual(1);
     expect(copilotInvokes.length).toBeGreaterThanOrEqual(2);
     expect(copilotInvokes[copilotInvokes.length - 2].args).toMatchObject({ state: "recording", show: true });
     expect(copilotInvokes[copilotInvokes.length - 1].args).toMatchObject({ state: "analyzing", show: true });

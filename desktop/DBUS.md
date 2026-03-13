@@ -19,11 +19,15 @@
 | IsListening | — | bool (не envelope) |
 | ListenStart | — | void |
 | ListenStop | — | void |
+| CaptureStart | — | void (KC3: start copilot segment, 30s auto-stop) |
+| CaptureRelease | — | void (KC3: end segment, extract with pre-roll, run analyze; returns immediately) |
+| GetCopilotCaptureStatus | — | envelope `data.stt_ambiguous` (bool) |
 | Analyze | seconds: u32, template: str | envelope `data.text` при успехе или `error` |
 | GetStreamingTranscript | — | envelope `data.streaming_transcript` (partial, finals) |
 
 ## Сигналы
 
+- **CaptureStateChanged**(state: str) — KC3: recording | recording_warning (25s) | analyzing.
 - **ListenStateChanged**(is_listening: bool) — после Start/Stop записи.
 - **TranscriptUpdated**(session_id: u32) — обновление транскрипта/сессий (session_id может быть 0).
 - **AnalysisDone**(status: str) — завершение анализа, status = "ok" | "error".

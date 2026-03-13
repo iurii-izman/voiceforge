@@ -105,6 +105,18 @@ class Settings(BaseSettings):
         default=10.0,
         description="Interval (seconds) between full ring file writes in listen loop; reduces I/O (#100).",
     )
+    copilot_pre_roll_seconds: float = Field(
+        default=1.0,
+        ge=0.0,
+        le=5.0,
+        description="KC3: seconds of audio before capture start marker to include in segment (pre-roll).",
+    )
+    copilot_max_capture_seconds: float = Field(
+        default=30.0,
+        ge=5.0,
+        le=120.0,
+        description="KC3: max capture segment length; auto-release and warning at 25s.",
+    )
     ring_file_path: str | None = Field(
         default=None,
         description="Ring file path; default XDG_RUNTIME_DIR/voiceforge/ring.raw",

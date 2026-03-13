@@ -160,6 +160,44 @@ pub async fn listen_stop() -> Result<(), String> {
     Ok(())
 }
 
+/// KC3: Start copilot push-to-capture (ensure listen, set marker, 30s auto-stop).
+#[tauri::command]
+pub async fn capture_start() -> Result<(), String> {
+    let conn = connection().await?;
+    conn.call_method(
+        Some(crate::DBUS_NAME),
+        crate::DBUS_PATH,
+        Some(crate::DBUS_INTERFACE),
+        "CaptureStart",
+        &(),
+    )
+    .await
+    .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+/// KC3: End capture segment, extract with pre-roll, run analyze (returns immediately; AnalysisDone signal when done).
+#[tauri::command]
+pub async fn capture_release() -> Result<(), String> {
+    let conn = connection().await?;
+    conn.call_method(
+        Some(crate::DBUS_NAME),
+        crate::DBUS_PATH,
+        Some(crate::DBUS_INTERFACE),
+        "CaptureRelease",
+        &(),
+    )
+    .await
+    .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn get_copilot_capture_status() -> Result<String, String> {
+    let conn = connection().await?;
+    call_method0(&conn, "GetCopilotCaptureStatus").await
+}
+
 #[tauri::command]
 pub async fn analyze(seconds: u32, template: Option<String>) -> Result<String, String> {
     let conn = connection().await?;

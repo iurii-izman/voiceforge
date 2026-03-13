@@ -67,6 +67,19 @@ def _env_flag(name: str, default: bool = False) -> bool:
     return raw.strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _analyze_result_is_error_daemon(result: str) -> bool:
+    """True if analyze result string indicates error (KC3: copilot release)."""
+    if not result:
+        return False
+    if result.startswith("Ошибка:") or result.startswith("Error:"):
+        return True
+    try:
+        parsed = json.loads(result)
+        return isinstance(parsed, dict) and "error" in parsed
+    except (json.JSONDecodeError, TypeError):
+        return False
+
+
 def _pid_path() -> Path:
     xdg = os.environ.get("XDG_RUNTIME_DIR") or os.path.expanduser("~/.cache")
     return Path(xdg) / PID_FILE_NAME
@@ -100,6 +113,15 @@ class VoiceForgeDaemon:
         self._streaming_stop = threading.Event()
         self._streaming_thread: threading.Thread | None = None
         self._streaming_capture: object = None
+
+        # KC3: copilot push-to-capture markers, pre-roll, 30s auto-stop
+        self._copilot_lock = threading.Lock()
+        self._listen_capture: Any = None  # AudioCapture while listen_loop is running
+        self._copilot_capture_start_time: float | None = None
+        self._copilot_warning_emitted = False
+        self._copilot_watcher_stop = threading.Event()
+        self._copilot_watcher_thread: threading.Thread | None = None
+        self._last_copilot_stt_ambiguous = False
 
     def _dbus_streaming_emitter_loop(self) -> None:
         """Worker to get transcript chunks from queue and emit them as D-Bus signals."""
@@ -240,6 +262,125 @@ class VoiceForgeDaemon:
                 {"partial": self._streaming_partial, "finals": list(self._streaming_finals)},
                 ensure_ascii=False,
             )
+
+    def _copilot_watcher_loop(self) -> None:
+        """KC3: every 1s check elapsed; at 25s emit recording_warning, at 30s auto-release."""
+        max_cap = getattr(self._cfg, "copilot_max_capture_seconds", 30.0)
+        warn_at = 25.0
+        while not self._copilot_watcher_stop.wait(timeout=1.0):
+            with self._copilot_lock:
+                start = self._copilot_capture_start_time
+                if start is None:
+                    break
+            elapsed = time.monotonic() - start
+            if elapsed >= max_cap:
+                if self._iface:
+                    with contextlib.suppress(Exception):
+                        self._iface.CaptureStateChanged("analyzing")
+                self._do_capture_release_sync()
+                break
+            if elapsed >= warn_at:
+                with self._copilot_lock:
+                    if self._copilot_warning_emitted:
+                        continue
+                    self._copilot_warning_emitted = True
+                if self._iface:
+                    with contextlib.suppress(Exception):
+                        self._iface.CaptureStateChanged("recording_warning")
+        log.debug("daemon.copilot_watcher_stopped")
+
+    def capture_start(self) -> None:
+        """KC3: start copilot capture segment (ensure listen, set start marker, start 30s watcher)."""
+        self.listen_start()
+        pre_roll = getattr(self._cfg, "copilot_pre_roll_seconds", 1.0)
+        max_cap = getattr(self._cfg, "copilot_max_capture_seconds", 30.0)
+        with self._copilot_lock:
+            self._copilot_capture_start_time = time.monotonic()
+            self._copilot_warning_emitted = False
+            self._last_copilot_stt_ambiguous = False
+        self._copilot_watcher_stop.clear()
+        self._copilot_watcher_thread = threading.Thread(target=self._copilot_watcher_loop, daemon=True)
+        self._copilot_watcher_thread.start()
+        if self._iface:
+            with contextlib.suppress(Exception):
+                self._iface.CaptureStateChanged("recording")
+        log.info("daemon.copilot_capture_started", pre_roll=pre_roll, max_capture_seconds=max_cap)
+
+    def _do_capture_release_sync(self) -> tuple[str, int | None, bool]:
+        """KC3: get segment from ring, write to ring file, run analyze; return (status, session_id, stt_ambiguous)."""
+        with self._copilot_lock:
+            start = self._copilot_capture_start_time
+            capture = self._listen_capture
+            self._copilot_capture_start_time = None
+            self._copilot_warning_emitted = False
+        if self._copilot_watcher_thread:
+            self._copilot_watcher_stop.set()
+            self._copilot_watcher_thread.join(timeout=2.0)
+            self._copilot_watcher_thread = None
+        if start is None and capture is None:
+            return ("error", None, False)
+        if capture is None:
+            log.warning("daemon.copilot_release_no_capture")
+            return ("error", None, False)
+        elapsed = time.monotonic() - start if start is not None else 0.0
+        pre_roll = getattr(self._cfg, "copilot_pre_roll_seconds", 1.0)
+        max_cap = getattr(self._cfg, "copilot_max_capture_seconds", 30.0)
+        segment_sec = min(elapsed + pre_roll, max_cap)
+        segment_sec = max(1.0, segment_sec)
+        try:
+            mic, _ = capture.get_chunk(segment_sec)
+        except Exception as e:
+            log.warning("daemon.copilot_release_get_chunk_failed", error=str(e))
+            return ("error", None, False)
+        ring_path = Path(self._cfg.get_ring_file_path())
+        ring_path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            tmp = ring_path.with_suffix(".tmp")
+            tmp.write_bytes(mic.tobytes())
+            os.replace(tmp, ring_path)
+        except Exception as e:
+            log.warning("daemon.copilot_release_write_ring_failed", error=str(e))
+            return ("error", None, False)
+        seconds_for_analyze = max(1, round(segment_sec))
+        try:
+            text, session_id = self.analyze(seconds_for_analyze, template=None)
+        except Exception as e:
+            log.warning("daemon.copilot_release_analyze_failed", error=str(e))
+            return ("error", None, False)
+        is_error = bool(
+            (text or "").startswith("Ошибка:") or (text or "").startswith("Error:") or (_analyze_result_is_error_daemon(text))
+        )
+        from voiceforge.i18n import t
+
+        silence_label = t("pipeline.silence")
+        stt_ambiguous = silence_label in (text or "") or (len((text or "").strip()) < 20) or (text or "").strip() == ""
+        with self._copilot_lock:
+            self._last_copilot_stt_ambiguous = stt_ambiguous
+        status = "error" if is_error else "ok"
+        return (status, session_id, stt_ambiguous)
+
+    def capture_release(self) -> None:
+        """KC3: end capture segment, extract audio, run analyze (async from D-Bus: signals emitted by caller)."""
+        if self._iface:
+            with contextlib.suppress(Exception):
+                self._iface.CaptureStateChanged("analyzing")
+        result = self._do_capture_release_sync()
+        status, session_id, stt_ambiguous = result
+        if self._iface:
+            try:
+                self._iface.AnalysisDone(status)
+                if session_id is not None:
+                    self._iface.SessionCreated(session_id)
+                self._iface.TranscriptUpdated(0)
+            except Exception:
+                pass
+        log.info("daemon.copilot_capture_released", status=status, session_id=session_id, stt_ambiguous=stt_ambiguous)
+
+    def get_copilot_capture_status(self) -> str:
+        """KC3: return JSON { stt_ambiguous } for overlay after analyze."""
+        with self._copilot_lock:
+            ambiguous = self._last_copilot_stt_ambiguous
+        return json.dumps({"stt_ambiguous": ambiguous}, ensure_ascii=False)
 
     def is_listening(self) -> bool:
         with self._listen_lock:
@@ -591,6 +732,8 @@ class VoiceForgeDaemon:
             monitor_source=self._cfg.monitor_source,
         )
         capture.start()
+        with self._copilot_lock:
+            self._listen_capture = capture
         if self._cfg.streaming_stt:
             with self._streaming_lock:
                 self._streaming_partial = ""
@@ -619,6 +762,8 @@ class VoiceForgeDaemon:
                 self._streaming_thread.join(timeout=4.0)
                 self._streaming_thread = None
             self._streaming_capture = None
+            with self._copilot_lock:
+                self._listen_capture = None
             capture.stop()
 
     def _trigger_loop(self) -> None:
@@ -713,6 +858,9 @@ def _wire_daemon_iface(iface: DaemonVoiceForgeInterface, daemon: VoiceForgeDaemo
     iface._get_api_version = daemon.get_api_version
     iface._get_version = daemon.get_version
     iface._get_capabilities = daemon.get_capabilities
+    iface._capture_start = daemon.capture_start
+    iface._capture_release = daemon.capture_release
+    iface._get_copilot_capture_status = daemon.get_copilot_capture_status
 
 
 async def _run_one_retention_purge(daemon: VoiceForgeDaemon) -> tuple[int, date | None]:

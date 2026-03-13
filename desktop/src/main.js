@@ -1119,11 +1119,13 @@ async function setupGlobalShortcuts() {
   if (currentShortcuts.length === 0) return;
   try {
     await registerShortcut(currentShortcuts, (event) => {
-      // KC2: copilot overlay — pressed = recording, released = analyzing (latest capture replaces previous).
+      // KC2/KC3: copilot overlay — CaptureStart/CaptureRelease + overlay state; 30s auto-stop emits recording_warning.
       if (event.shortcut === shortcutCopilot) {
         if (event.state === "Pressed") {
+          invoke("capture_start").catch(() => {});
           invoke("set_copilot_overlay_state", { state: "recording", show: true }).catch(() => {});
         } else if (event.state === "Released") {
+          invoke("capture_release").catch(() => {});
           invoke("set_copilot_overlay_state", { state: "analyzing", show: true }).catch(() => {});
         }
         return;
@@ -1196,6 +1198,11 @@ listen("analysis-done", (e) => {
     if (daemonOk) loadSessions();
     notify("VoiceForge", t("notify_analysis_error"));
   }
+});
+// KC3: daemon emits CaptureStateChanged (e.g. recording_warning at 25s); forward to overlay
+listen("capture-state-changed", (e) => {
+  const state = e.payload?.state;
+  if (state) invoke("set_copilot_overlay_state", { state, show: true }).catch(() => {});
 });
 listen("transcript-chunk", (e) => {
   const text = e.payload?.text ?? "";

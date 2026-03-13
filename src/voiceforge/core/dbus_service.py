@@ -61,6 +61,11 @@ def _uses_ipc_envelope() -> bool:
     return _env_flag("VOICEFORGE_IPC_ENVELOPE", default=True)
 
 
+async def _run_capture_release(fn: Callable[[], None]) -> None:
+    """Run capture_release in thread so D-Bus method returns immediately (KC3)."""
+    await asyncio.to_thread(fn)
+
+
 def _analyze_result_is_error(result: str) -> bool:
     """True if result is error (Russian prefix or JSON with 'error')."""
     try:
@@ -162,6 +167,9 @@ class _DaemonOptionalCallbacks(TypedDict, total=False):
     get_api_version_fn: Callable[[], str]
     get_version_fn: Callable[[], str]
     get_capabilities_fn: Callable[[], str]
+    capture_start_fn: Callable[[], None]
+    capture_release_fn: Callable[[], None]
+    get_copilot_capture_status_fn: Callable[[], str]
 
 
 class DaemonVoiceForgeInterface(ServiceInterface):
@@ -199,6 +207,9 @@ class DaemonVoiceForgeInterface(ServiceInterface):
         self._get_api_version = o.get("get_api_version_fn")
         self._get_version = o.get("get_version_fn")
         self._get_capabilities = o.get("get_capabilities_fn")
+        self._capture_start = o.get("capture_start_fn")
+        self._capture_release = o.get("capture_release_fn")
+        self._get_copilot_capture_status = o.get("get_copilot_capture_status_fn")
         self._analyze_sem = asyncio.Semaphore(1)
 
     ANALYZE_MAX_SECONDS = 3600
@@ -263,6 +274,27 @@ class DaemonVoiceForgeInterface(ServiceInterface):
     def IsListening(self) -> DBusBool:
         """Whether listen is active."""
         return self._is_listening()
+
+    @dbus_method()
+    def CaptureStart(self) -> None:
+        """KC3: start copilot push-to-capture segment (ensure listen, set marker, 30s auto-stop watcher)."""
+        if self._capture_start is None:
+            return
+        self._capture_start()
+
+    @dbus_method()
+    async def CaptureRelease(self) -> None:
+        """KC3: end capture segment, extract ring segment with pre-roll, run analyze. Returns immediately; signals emitted when done."""
+        if self._capture_release is None:
+            return
+        asyncio.create_task(_run_capture_release(self._capture_release))  # noqa: RUF006 fire-and-forget
+
+    @dbus_method()
+    def GetCopilotCaptureStatus(self) -> DBusStr:
+        """KC3: return JSON { stt_ambiguous } for overlay after analyze."""
+        if self._get_copilot_capture_status is None:
+            return '{"stt_ambiguous":false}'
+        return self._get_copilot_capture_status()
 
     @dbus_method()
     def GetSessions(self, last_n: DBusUint32) -> DBusStr:
@@ -440,6 +472,11 @@ class DaemonVoiceForgeInterface(ServiceInterface):
     def AnalysisDone(self, status: DBusStr) -> DBusStr:
         """Signal: analyze finished with status ('ok'|'error')."""
         return status
+
+    @dbus_signal()
+    def CaptureStateChanged(self, state: DBusStr) -> DBusStr:
+        """KC3: copilot capture state: recording | recording_warning (25s) | analyzing."""
+        return state
 
     @dbus_signal()
     def TranscriptChunk(

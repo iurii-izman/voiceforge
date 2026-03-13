@@ -13,6 +13,7 @@ const EVENT_SESSION_CREATED: &str = "session-created";
 const EVENT_TRANSCRIPT_CHUNK: &str = "transcript-chunk";
 const EVENT_TRANSCRIPT_UPDATED: &str = "transcript-updated";
 const EVENT_STREAMING_ANALYSIS_CHUNK: &str = "streaming-analysis-chunk";
+const EVENT_CAPTURE_STATE_CHANGED: &str = "capture-state-changed";
 
 fn rule_listen_state() -> Result<MatchRule<'static>, zbus::Error> {
     Ok(MatchRule::builder()
@@ -71,6 +72,16 @@ fn rule_streaming_analysis_chunk() -> Result<MatchRule<'static>, zbus::Error> {
         .path(DBUS_PATH)?
         .interface(DBUS_INTERFACE)?
         .member("StreamingAnalysisChunk")?
+        .build())
+}
+
+fn rule_capture_state_changed() -> Result<MatchRule<'static>, zbus::Error> {
+    Ok(MatchRule::builder()
+        .msg_type(Type::Signal)
+        .sender(DBUS_NAME)?
+        .path(DBUS_PATH)?
+        .interface(DBUS_INTERFACE)?
+        .member("CaptureStateChanged")?
         .build())
 }
 
@@ -168,6 +179,20 @@ pub fn spawn_signal_listener(app: AppHandle) {
             }
         };
 
+        let stream_capture_state = match MessageStream::for_match_rule(
+            rule_capture_state_changed().expect("CaptureStateChanged rule"),
+            &conn,
+            Some(8),
+        )
+        .await
+        {
+            Ok(s) => s,
+            Err(e) => {
+                eprintln!("dbus_signals: CaptureStateChanged stream: {}", e);
+                return;
+            }
+        };
+
         let app_listen = app.clone();
         let app_analysis = app.clone();
         let app_session_created = app.clone();
@@ -254,6 +279,20 @@ pub fn spawn_signal_listener(app: AppHandle) {
                         let _ = app_streaming_analysis.emit(
                             EVENT_STREAMING_ANALYSIS_CHUNK,
                             serde_json::json!({ "delta": delta }),
+                        );
+                    }
+                }
+            }
+        });
+
+        tauri::async_runtime::spawn(async move {
+            let mut stream = stream_capture_state;
+            while let Some(res) = stream.next().await {
+                if let Ok(msg) = res {
+                    if let Ok((state,)) = msg.body().deserialize::<(String,)>() {
+                        let _ = app_capture_state.emit(
+                            EVENT_CAPTURE_STATE_CHANGED,
+                            serde_json::json!({ "state": state }),
                         );
                     }
                 }

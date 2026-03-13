@@ -292,6 +292,12 @@ export async function installDesktopMocks(page, scenarioOverrides = {}) {
             return `exported:${args.format}:${args.sessionId}`;
           case "set_copilot_overlay_state":
             return undefined;
+          case "capture_start":
+            return undefined;
+          case "capture_release":
+            return undefined;
+          case "get_copilot_capture_status":
+            return envelope({ stt_ambiguous: false });
           case "create_event_from_session":
             return envelope({ event_uid: "vf-event-101" });
           case "analyze": {

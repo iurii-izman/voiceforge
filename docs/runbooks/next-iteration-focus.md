@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии**. Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-13 (KC2 done: overlay shell, hotkey pressed/released, recording indicator; next active block = `KC3`; `#164/#165` remain background hardening)
+**Обновлено:** 2026-03-14 (KC3 done: capture runtime, pre-roll, 30s auto-stop, recording_warning, stt_ambiguous; next = KC4; `#164/#165` remain background hardening)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** KC2 · Overlay Shell & Input Model (#174) реализован: второе окно (copilot-overlay), always-on-top/skip-taskbar/no-focus, hotkey Ctrl+Shift+Space pressed → recording / released → analyzing, recording indicator и состояния armed/recording/analyzing/error в overlay, latest-capture replacement, команда `set_copilot_overlay_state`, e2e-тест на copilot shortcut. Docs: copilot-program-map, PROJECT-STATUS-SUMMARY, desktop-qa-plan обновлены.
+**Сделано в сессии:** KC3 · Capture Runtime & Ring Buffer UX (#175): маркеры захвата, pre-roll (config: copilot_pre_roll_seconds, copilot_max_capture_seconds), извлечение сегмента при CaptureRelease, 30s auto-stop с предупреждением recording_warning на 25s, D-Bus CaptureStart/CaptureRelease/CaptureStateChanged/GetCopilotCaptureStatus, overlay состояние recording_warning и подсказка stt_ambiguous, транскрипт-сниппет во время записи. Targeted tests (daemon helpers, e2e copilot shortcut). Docs: copilot-program-map, PROJECT-STATUS-SUMMARY, DBUS.md, next-iteration-focus.
 
-**Следующий шаг:** взять [#175](https://github.com/iurii-izman/voiceforge/issues/175) `KC3 · Capture Runtime & Ring Buffer UX` как следующий исполняемый block. Цель: markers, pre-roll, ring buffer UX для push-to-capture.
+**Следующий шаг:** взять [#176](https://github.com/iurii-izman/voiceforge/issues/176) `KC4 · Tiny-model streaming STT copilot path` как следующий исполняемый block.
 
 ---
 
@@ -31,7 +31,7 @@
 | --- | --- | --- | --- |
 | **KD** | #170✓ → #172✓ | Done | Decision-locked product / UX / architecture contracts |
 | **KC bootstrap** | #173✓ | Done | Program seeding, traceability, docs handoff |
-| **Wave 1 MVP Core** | #174✓ → #175 → #176 → #177 → #178 | Active | KC2 done; next: capture runtime, streaming STT, evidence-first RAG, fast-track cards |
+| **Wave 1 MVP Core** | #174✓ → #175✓ → #176 → #177 → #178 | Active | KC3 done; next: streaming STT (KC4), evidence-first RAG, fast-track cards |
 | **Wave 2 MVP Complete** | #179 → #180 | Todo | Deep track/session memory + main-window copilot integration |
 | **Wave 2 V2 Surface** | #181 | Todo | Knowledge management + context packs |
 | **Wave 3 V2 Expansion** | #182 → #183 | Todo | Explicit mode system; offline/hybrid maturity; system audio + scenario presets |
@@ -52,7 +52,7 @@
 
 Перед началом крупного блока: `./scripts/preflight_repo.sh --with-tests`. Для desktop/UI изменений: `cd desktop && npm run e2e:release-gate`. Для native/Tauri/system-level изменений дополнительно: `cd desktop && npm run e2e:native:headless`.
 
-Текущий блок: KC3 · Capture Runtime & Ring Buffer UX (#175).
+Текущий блок: KC4 · Tiny-model streaming STT copilot path (#176).
 ```
 
 ---
