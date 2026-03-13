@@ -12,6 +12,7 @@ import {
   isPermissionGranted,
   listen,
   onOpenUrl,
+  exit,
   registerShortcut,
   relaunch,
   requestPermission,
@@ -127,7 +128,9 @@ const I18N = {
     updater_check_now_btn: "Проверить сейчас",
     autostart_label: "Запускать VoiceForge при входе в систему",
     sound_on_record_label: "Звук при старте/стопе записи",
-    close_to_tray_label: "Свернуть в трей при закрытии (крестик)",
+    close_to_tray_label: "Скрывать в трей при закрытии окна или Alt+F4",
+    close_to_tray_hint: "Когда опция включена, крестик и Alt+F4 не завершают приложение, а только скрывают окно.",
+    quit_app_btn: "Выйти из VoiceForge",
     compact_mode_label: "Компактный режим (только запись и анализ)",
     tags_label: "Теги:",
     tags_placeholder: "тег1, тег2",
@@ -327,7 +330,9 @@ const I18N = {
     updater_check_now_btn: "Check now",
     autostart_label: "Launch VoiceForge on login",
     sound_on_record_label: "Sound on record start/stop",
-    close_to_tray_label: "Minimize to tray on close",
+    close_to_tray_label: "Hide to tray on window close or Alt+F4",
+    close_to_tray_hint: "When enabled, the close button and Alt+F4 hide the window instead of quitting the app.",
+    quit_app_btn: "Quit VoiceForge",
     compact_mode_label: "Compact mode (record and analysis only)",
     tags_label: "Tags:",
     tags_placeholder: "tag1, tag2",
@@ -2267,6 +2272,23 @@ async function setupCloseToTray() {
   });
 }
 
+async function quitApplication() {
+  try {
+    await exit(0);
+  } catch (e) {
+    console.debug("quitApplication", e);
+    try {
+      const win = getCurrentWindow();
+      if (typeof win.destroy === "function") {
+        await win.destroy();
+        return;
+      }
+    } catch (inner) {
+      console.debug("quitApplication destroy", inner);
+    }
+  }
+}
+
 /** Returns whether the effective theme is dark (for tray icon). */
 function getEffectiveIsDark(themeValue) {
   const v = themeValue ?? localStorage.getItem(THEME_KEY) ?? "dark";
@@ -2630,10 +2652,15 @@ async function initAutostartCard() {
 
 function initCloseToTrayCard() {
   const cb = document.getElementById("close-to-tray");
-  if (!cb) return;
-  cb.checked = localStorage.getItem(CLOSE_TO_TRAY_KEY) === "true";
-  cb.addEventListener("change", () => {
-    setStored(CLOSE_TO_TRAY_KEY, cb.checked ? "true" : "false");
+  const quitBtn = document.getElementById("quit-app-btn");
+  if (cb) {
+    cb.checked = localStorage.getItem(CLOSE_TO_TRAY_KEY) === "true";
+    cb.addEventListener("change", () => {
+      setStored(CLOSE_TO_TRAY_KEY, cb.checked ? "true" : "false");
+    });
+  }
+  quitBtn?.addEventListener("click", async () => {
+    await quitApplication();
   });
 }
 

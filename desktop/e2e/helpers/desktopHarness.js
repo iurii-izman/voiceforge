@@ -208,8 +208,12 @@ export async function installDesktopMocks(page, scenarioOverrides = {}) {
       async onCloseRequested(callback) {
         state.onCloseRequested = callback;
       },
-      async show() {},
-      async hide() {},
+      async show() {
+        state.windowHidden = false;
+      },
+      async hide() {
+        state.windowHidden = true;
+      },
       async setFocus() {},
     };
 
@@ -392,6 +396,10 @@ export async function installDesktopMocks(page, scenarioOverrides = {}) {
         },
       },
       process: {
+        async exit(code = 0) {
+          state.exitCode = Number(code);
+          state.destroyed = true;
+        },
         async relaunch() {
           state.relaunches += 1;
         },

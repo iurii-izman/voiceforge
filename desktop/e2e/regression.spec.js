@@ -104,6 +104,34 @@ test.describe("Desktop regression matrix", () => {
     await expect(page.locator("#tab-home")).toHaveClass(/active/);
   });
 
+  test("close-to-tray can hide the window, but explicit quit still exits the app", async ({ page }) => {
+    await bootDesktop(page);
+
+    await page.getByRole("navigation").locator("[data-tab='settings']").click();
+    await page.locator("#close-to-tray").check();
+    await expect(page.locator("#quit-app-btn")).toBeVisible();
+
+    await page.evaluate(async () => {
+      const state = globalThis.__VOICEFORGE_TEST_STATE__;
+      const closeHandler = state.onCloseRequested;
+      let prevented = false;
+      await closeHandler?.({
+        preventDefault() {
+          prevented = true;
+        },
+      });
+      state.closePrevented = prevented;
+    });
+
+    await expect.poll(async () => page.evaluate(() => globalThis.__VOICEFORGE_TEST_STATE__.closePrevented)).toBe(true);
+    await expect.poll(async () => page.evaluate(() => globalThis.__VOICEFORGE_TEST_STATE__.windowHidden)).toBe(true);
+
+    await page.locator("#quit-app-btn").click();
+
+    await expect.poll(async () => page.evaluate(() => globalThis.__VOICEFORGE_TEST_STATE__.destroyed)).toBe(true);
+    await expect.poll(async () => page.evaluate(() => globalThis.__VOICEFORGE_TEST_STATE__.exitCode)).toBe(0);
+  });
+
   test("daemon unavailable state recovers cleanly after retry without trapping the user", async ({ page }) => {
     await bootDesktop(page, { daemonAvailable: false, onboardingDismissed: true });
 

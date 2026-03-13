@@ -19,7 +19,7 @@ import {
 } from "@tauri-apps/plugin-autostart";
 import { Store as TauriStore } from "@tauri-apps/plugin-store";
 import { check as updaterCheckReal } from "@tauri-apps/plugin-updater";
-import { relaunch as relaunchReal } from "@tauri-apps/plugin-process";
+import { exit as exitReal, relaunch as relaunchReal } from "@tauri-apps/plugin-process";
 
 function getTestHooks() {
   return globalThis.__VOICEFORGE_TEST_HOOKS__ || null;
@@ -117,4 +117,9 @@ export function updaterCheck() {
 export function relaunch() {
   const hooks = getTestHooks();
   return hooks?.process?.relaunch ? hooks.process.relaunch() : relaunchReal();
+}
+
+export function exit(code = 0) {
+  const hooks = getTestHooks();
+  return hooks?.process?.exit ? hooks.process.exit(code) : exitReal(code);
 }

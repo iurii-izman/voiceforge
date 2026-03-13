@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-13 (desktop GUI audit closed; remaining follow-up is remote Sonar recheck plus GTK/glib alert)
+**Обновлено:** 2026-03-13 (desktop exit UX fixed; remaining follow-up is remote Sonar recheck plus GTK/glib alert)
 
 ---
 
@@ -19,7 +19,7 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** закрыт desktop GUI audit `#166`: runtime i18n добит для живых empty/error/notification/update states, home/dashboard refresh унифицирован после daemon recovery и analyze, regression matrix расширена на English runtime и widget recovery consistency. Локальные проверки зелёные: `npm --prefix desktop run e2e:release-gate` (`28 passed`), `check_docs_consistency.py`. Desktop stabilization wave теперь закрыта полностью.
+**Сделано в сессии:** закрыт targeted desktop bug `#167`: добавлен явный `Выйти из VoiceForge`, close-to-tray copy теперь честно объясняет поведение крестика и `Alt+F4`, regression matrix расширена на сценарий `hide to tray -> explicit quit`. Локальные проверки зелёные: `npm --prefix desktop run e2e:release-gate` (`29 passed`), `check_docs_consistency.py`.
 
 **Следующий шаг:** завершить `#165`: дождаться re-analysis SonarCloud после уже запушенного low-risk cleanup и снять новый issue snapshot. Если low-risk findings реально ушли, закрыть `#165` и только потом возвращаться к `#164` как узкому Linux GTK/Tauri refresh для remaining `glib` alert.
 
