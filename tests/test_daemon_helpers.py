@@ -360,7 +360,18 @@ def test_get_copilot_capture_status_default_and_after_ambiguous() -> None:
     out = daemon.get_copilot_capture_status()
     data = json.loads(out)
     assert data.get("stt_ambiguous") is False
+    assert "transcript_snippet" in data  # KC4
+    assert data.get("transcript_snippet") == ""
     daemon._last_copilot_stt_ambiguous = True
     out2 = daemon.get_copilot_capture_status()
     data2 = json.loads(out2)
     assert data2.get("stt_ambiguous") is True
+
+
+def test_get_copilot_capture_status_transcript_snippet_kc4() -> None:
+    """get_copilot_capture_status returns transcript_snippet (KC4) for downstream/UI."""
+    daemon = _make_daemon()
+    daemon._last_copilot_transcript = "Hello world"
+    out = daemon.get_copilot_capture_status()
+    data = json.loads(out)
+    assert data.get("transcript_snippet") == "Hello world"

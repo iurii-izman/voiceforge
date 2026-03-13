@@ -1,6 +1,6 @@
 # VoiceForge: Project Status & Productization Roadmap
 
-**Обновлено:** 2026-03-14 (KC3 done: capture runtime, pre-roll, 30s auto-stop; next = KC4; `#164/#165` remain background hardening). **Версия:** 0.2.0-alpha.2. **Стадия:** Knowledge Copilot program active / maintenance hardening in background.
+**Обновлено:** 2026-03-14 (KC4 done: tiny-model streaming STT copilot path; next = KC5; `#164/#165` remain background hardening). **Версия:** 0.2.0-alpha.2. **Стадия:** Knowledge Copilot program active / maintenance hardening in background.
 **Предыдущий цикл (#97-#123):** закрыт полностью; архив: [history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
 
 ---
@@ -88,11 +88,11 @@
 
 ### Main Execution Order
 
-**Следующий executable block:** [#176](https://github.com/iurii-izman/voiceforge/issues/176) `KC4 · Tiny-model streaming STT copilot path`
+**Следующий executable block:** [#177](https://github.com/iurii-izman/voiceforge/issues/177) `KC5 · Evidence-first RAG, groundedness, citations`
 
 | Wave | Issues | Статус | Что реализуем |
 | --- | --- | --- | --- |
-| Wave 1 MVP Core | [#174](https://github.com/iurii-izman/voiceforge/issues/174) ✓ → [#175](https://github.com/iurii-izman/voiceforge/issues/175) ✓ → [#176](https://github.com/iurii-izman/voiceforge/issues/176) → [#177](https://github.com/iurii-izman/voiceforge/issues/177) → [#178](https://github.com/iurii-izman/voiceforge/issues/178) | Active | KC3 done: capture markers, pre-roll, 30s auto-stop, stt_ambiguous; next: streaming STT, evidence RAG, fast-track cards |
+| Wave 1 MVP Core | [#174](https://github.com/iurii-izman/voiceforge/issues/174) ✓ → [#175](https://github.com/iurii-izman/voiceforge/issues/175) ✓ → [#176](https://github.com/iurii-izman/voiceforge/issues/176) ✓ → [#177](https://github.com/iurii-izman/voiceforge/issues/177) → [#178](https://github.com/iurii-izman/voiceforge/issues/178) | Active | KC4 done: tiny STT path, transcript_snippet; next: evidence RAG, fast-track cards |
 | Wave 2 MVP Complete | [#179](https://github.com/iurii-izman/voiceforge/issues/179) → [#180](https://github.com/iurii-izman/voiceforge/issues/180) | Todo | Deep track/session memory, main-window copilot integration |
 | Wave 2 V2 Surface | [#181](https://github.com/iurii-izman/voiceforge/issues/181) | Todo | Knowledge management and context packs |
 | Wave 3 V2 Expansion | [#182](https://github.com/iurii-izman/voiceforge/issues/182) → [#183](https://github.com/iurii-izman/voiceforge/issues/183) | Todo | Explicit mode system, offline/hybrid maturity, system audio and scenario presets |

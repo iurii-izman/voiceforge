@@ -83,8 +83,10 @@ def test_daemon_analyze_success_logs_session_and_emits_chunks(monkeypatch) -> No
     )
     daemon = _make_daemon(iface=iface)
 
-    def fake_run_analyze_pipeline(seconds, template=None, stream_callback=None):
+    def fake_run_analyze_pipeline(seconds, template=None, stream_callback=None, out_transcript=None, **kwargs):
         assert template == "standup"
+        if out_transcript is not None and len(out_transcript) >= 1:
+            out_transcript[0] = "fake transcript"
         stream_callback("part-1")
         stream_callback(None)
         return (
@@ -374,7 +376,7 @@ def test_daemon_streaming_loop_processes_chunk_and_logs_failure(monkeypatch) -> 
     with patch.dict(
         sys.modules,
         {
-            "voiceforge.stt": SimpleNamespace(get_transcriber_for_config=lambda cfg: "tx"),
+            "voiceforge.stt": SimpleNamespace(get_transcriber_for_config=lambda cfg, model_size_override=None: "tx"),
             "voiceforge.stt.streaming": SimpleNamespace(StreamingTranscriber=lambda *args, **kwargs: fake_stream),
         },
     ):
@@ -389,7 +391,7 @@ def test_daemon_streaming_loop_processes_chunk_and_logs_failure(monkeypatch) -> 
     with patch.dict(
         sys.modules,
         {
-            "voiceforge.stt": SimpleNamespace(get_transcriber_for_config=lambda cfg: "tx"),
+            "voiceforge.stt": SimpleNamespace(get_transcriber_for_config=lambda cfg, model_size_override=None: "tx"),
             "voiceforge.stt.streaming": SimpleNamespace(StreamingTranscriber=lambda *args, **kwargs: fake_stream),
         },
     ):

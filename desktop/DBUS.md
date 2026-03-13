@@ -21,7 +21,7 @@
 | ListenStop | — | void |
 | CaptureStart | — | void (KC3: start copilot segment, 30s auto-stop) |
 | CaptureRelease | — | void (KC3: end segment, extract with pre-roll, run analyze; returns immediately) |
-| GetCopilotCaptureStatus | — | envelope `data.stt_ambiguous` (bool) |
+| GetCopilotCaptureStatus | — | envelope `data.stt_ambiguous` (bool), `data.transcript_snippet` (str, KC4) |
 | Analyze | seconds: u32, template: str | envelope `data.text` при успехе или `error` |
 | GetStreamingTranscript | — | envelope `data.streaming_transcript` (partial, finals) |
 

@@ -117,6 +117,10 @@ class Settings(BaseSettings):
         le=120.0,
         description="KC3: max capture segment length; auto-release and warning at 25s.",
     )
+    copilot_stt_model_size: str = Field(
+        default="tiny",
+        description="KC4: STT model size for copilot path (short captures, low latency). Use 'tiny' for latency budget.",
+    )
     ring_file_path: str | None = Field(
         default=None,
         description="Ring file path; default XDG_RUNTIME_DIR/voiceforge/ring.raw",
@@ -215,6 +219,14 @@ class Settings(BaseSettings):
         allowed = ("tiny", "base", "small", "medium", "large-v2", "large-v3", "large-v3-turbo", "large", "auto")
         if v.lower() not in allowed:
             raise ValueError(f"model_size must be one of: {', '.join(allowed)}")
+        return v.lower()
+
+    @field_validator("copilot_stt_model_size")
+    @classmethod
+    def _copilot_stt_model_size_allowed(cls, v: str) -> str:
+        allowed = ("tiny", "base", "small", "medium", "large-v2", "large-v3", "large-v3-turbo", "large", "auto")
+        if v.lower() not in allowed:
+            raise ValueError(f"copilot_stt_model_size must be one of: {', '.join(allowed)}")
         return v.lower()
 
     @field_validator("default_llm")

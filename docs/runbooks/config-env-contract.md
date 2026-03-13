@@ -35,6 +35,7 @@ Priority order:
 | `pipeline_step2_timeout_sec` | `VOICEFORGE_PIPELINE_STEP2_TIMEOUT_SEC` | `25.0` | Timeout for parallel stage |
 | `analyze_timeout_sec` | `VOICEFORGE_ANALYZE_TIMEOUT_SEC` | `120.0` | Max seconds for a single analyze() call; on timeout returns ANALYZE_TIMEOUT (#39) |
 | `streaming_stt` | `VOICEFORGE_STREAMING_STT` | `false` | Live transcript in listen mode |
+| `copilot_stt_model_size` | `VOICEFORGE_COPILOT_STT_MODEL_SIZE` | `tiny` | KC4: STT model for copilot path (short captures, low latency); same allowed values as `model_size` |
 | `live_summary_interval_sec` | `VOICEFORGE_LIVE_SUMMARY_INTERVAL_SEC` | `90` | Interval (and window) in seconds for `listen --live-summary` (e.g. every 90s for last 90s) |
 | `language` | `VOICEFORGE_LANGUAGE` | `auto` | UI language; when `ru`/`en` also passed to Whisper as STT hint |
 | `ollama_model` | `VOICEFORGE_OLLAMA_MODEL` | `phi3:mini` | Ollama model for local classify/simple_answer |
@@ -54,7 +55,7 @@ Priority order:
 | `VOICEFORGE_OTEL_ENABLED` | unset | Set to `1` to enable OTel tracing (requires `voiceforge[otel]`). Spans: pipeline.run, prepare_audio, step1_stt, step2_parallel. |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | `http://localhost:4318` | OTLP HTTP endpoint (e.g. Jaeger collector). When set, OTel is enabled even without VOICEFORGE_OTEL_ENABLED. |
 
-**Validation:** Settings validates `model_size` (allowed: tiny, base, small, medium, large-v2, large-v3, large-v3-turbo, large, auto), `sample_rate` (1..192000), `default_llm` (non-empty), `budget_limit_usd` (≥ 0), `daily_budget_limit_usd` (≥ 0 when set), `cost_anomaly_multiplier` (> 0, E15 #138), `pipeline_step2_timeout_sec` (positive), `analyze_timeout_sec` (positive), `ollama_model` (non-empty), `ring_seconds` (positive), `ring_persist_interval_sec` (≥ 1), `pyannote_restart_hours` (≥ 1), `live_summary_interval_sec` (≥ 1), `retention_days` (≥ 0), `response_cache_ttl_seconds` (≥ 0). Invalid values raise at load.
+**Validation:** Settings validates `model_size` and `copilot_stt_model_size` (allowed: tiny, base, small, medium, large-v2, large-v3, large-v3-turbo, large, auto), `sample_rate` (1..192000), `default_llm` (non-empty), `budget_limit_usd` (≥ 0), `daily_budget_limit_usd` (≥ 0 when set), `cost_anomaly_multiplier` (> 0, E15 #138), `pipeline_step2_timeout_sec` (positive), `analyze_timeout_sec` (positive), `ollama_model` (non-empty), `ring_seconds` (positive), `ring_persist_interval_sec` (≥ 1), `pyannote_restart_hours` (≥ 1), `live_summary_interval_sec` (≥ 1), `retention_days` (≥ 0), `response_cache_ttl_seconds` (≥ 0). Invalid values raise at load.
 
 ## Runtime / Non-Settings Environment
 

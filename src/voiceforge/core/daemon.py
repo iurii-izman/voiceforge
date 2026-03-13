@@ -113,6 +113,8 @@ class VoiceForgeDaemon:
         self._streaming_stop = threading.Event()
         self._streaming_thread: threading.Thread | None = None
         self._streaming_capture: object = None
+        # KC4: cache transcribers by size (tiny for copilot capture, default otherwise)
+        self._streaming_transcriber_cache: dict[str, Any] = {}
 
         # KC3: copilot push-to-capture markers, pre-roll, 30s auto-stop
         self._copilot_lock = threading.Lock()
@@ -122,6 +124,7 @@ class VoiceForgeDaemon:
         self._copilot_watcher_stop = threading.Event()
         self._copilot_watcher_thread: threading.Thread | None = None
         self._last_copilot_stt_ambiguous = False
+        self._last_copilot_transcript: str = ""  # KC4: transcript snippet for downstream/UI
 
     def _dbus_streaming_emitter_loop(self) -> None:
         """Worker to get transcript chunks from queue and emit them as D-Bus signals."""
@@ -143,9 +146,15 @@ class VoiceForgeDaemon:
                 log.error("dbus.emitter.failed", error=str(e))
         log.info("dbus.emitter.stopped")
 
-    def analyze(self, seconds: int, template: str | None = None) -> tuple[str, int | None]:
+    def analyze(
+        self,
+        seconds: int,
+        template: str | None = None,
+        out_transcript: list[str] | None = None,
+    ) -> tuple[str, int | None]:
         """Run full pipeline, save session, return (formatted text, session_id). Block 62: session_id for SessionCreated.
-        template: optional meeting template. Respects analyze_timeout_sec (#39)."""
+        template: optional meeting template. Respects analyze_timeout_sec (#39).
+        KC4: if out_transcript is a list, it is filled with the raw STT transcript."""
         from voiceforge.core.transcript_log import TranscriptLog
         from voiceforge.main import run_analyze_pipeline
 
@@ -156,7 +165,13 @@ class VoiceForgeDaemon:
                 self._iface.StreamingAnalysisChunk(delta if delta is not None else "")
 
         with ThreadPoolExecutor(max_workers=1) as ex:
-            future = ex.submit(run_analyze_pipeline, seconds, template=template, stream_callback=stream_cb)
+            future = ex.submit(
+                run_analyze_pipeline,
+                seconds,
+                template=template,
+                stream_callback=stream_cb,
+                out_transcript=out_transcript,
+            )
             try:
                 text, segments_for_log, analysis_for_log = future.result(timeout=timeout_sec)
             except FuturesTimeoutError:
@@ -342,11 +357,20 @@ class VoiceForgeDaemon:
             log.warning("daemon.copilot_release_write_ring_failed", error=str(e))
             return ("error", None, False)
         seconds_for_analyze = max(1, round(segment_sec))
+        out_transcript: list[str] = [""]
+        copilot_size = getattr(self._cfg, "copilot_stt_model_size", "tiny")
+        saved_stt_size = self._model_manager.get_stt_model_size()
         try:
-            text, session_id = self.analyze(seconds_for_analyze, template=None)
+            self._model_manager.swap_stt(copilot_size)
+            try:
+                text, session_id = self.analyze(seconds_for_analyze, template=None, out_transcript=out_transcript)
+            finally:
+                self._model_manager.swap_stt(saved_stt_size)
         except Exception as e:
             log.warning("daemon.copilot_release_analyze_failed", error=str(e))
             return ("error", None, False)
+        with self._copilot_lock:
+            self._last_copilot_transcript = out_transcript[0] if out_transcript else ""
         is_error = bool(
             (text or "").startswith("Ошибка:") or (text or "").startswith("Error:") or (_analyze_result_is_error_daemon(text))
         )
@@ -377,10 +401,11 @@ class VoiceForgeDaemon:
         log.info("daemon.copilot_capture_released", status=status, session_id=session_id, stt_ambiguous=stt_ambiguous)
 
     def get_copilot_capture_status(self) -> str:
-        """KC3: return JSON { stt_ambiguous } for overlay after analyze."""
+        """KC3/KC4: return JSON { stt_ambiguous, transcript_snippet } for overlay after analyze."""
         with self._copilot_lock:
             ambiguous = self._last_copilot_stt_ambiguous
-        return json.dumps({"stt_ambiguous": ambiguous}, ensure_ascii=False)
+            snippet = self._last_copilot_transcript
+        return json.dumps({"stt_ambiguous": ambiguous, "transcript_snippet": snippet}, ensure_ascii=False)
 
     def is_listening(self) -> bool:
         with self._listen_lock:
@@ -684,7 +709,8 @@ class VoiceForgeDaemon:
             self._streaming_finals.append({"text": t, "start": start, "end": end})
 
     def _streaming_loop(self) -> None:
-        """Block 10.1: every 1.5s get 2s chunk, transcribe, update _streaming_partial/_streaming_finals."""
+        """Block 10.1: every 1.5s get 2s chunk, transcribe, update _streaming_partial/_streaming_finals.
+        KC4: during copilot capture use copilot_stt_model_size (tiny) for latency budget."""
         capture = self._streaming_capture
         get_chunk = getattr(capture, "get_chunk", None) if capture else None
         if not get_chunk:
@@ -694,21 +720,28 @@ class VoiceForgeDaemon:
             from voiceforge.stt.streaming import StreamingTranscriber
         except ImportError:
             return
-        transcriber = get_transcriber_for_config(self._cfg)
         language_hint = _streaming_language_hint(self._cfg)
-        stream = StreamingTranscriber(
-            transcriber,
-            sample_rate=self._cfg.sample_rate,
-            language=language_hint,
-            on_partial=self._streaming_on_partial,
-            on_final=self._streaming_on_final,
-        )
         chunk_sec, interval_sec = 2.0, 1.5
         min_samples = int(self._cfg.sample_rate * chunk_sec * 0.5)
 
         while not self._streaming_stop.is_set():
             if self._streaming_stop.wait(timeout=interval_sec):
                 break
+            with self._copilot_lock:
+                in_copilot = self._copilot_capture_start_time is not None
+            size = (
+                getattr(self._cfg, "copilot_stt_model_size", "tiny") if in_copilot else getattr(self._cfg, "model_size", "small")
+            )
+            if size not in self._streaming_transcriber_cache:
+                self._streaming_transcriber_cache[size] = get_transcriber_for_config(self._cfg, model_size_override=size)
+            transcriber = self._streaming_transcriber_cache[size]
+            stream = StreamingTranscriber(
+                transcriber,
+                sample_rate=self._cfg.sample_rate,
+                language=language_hint,
+                on_partial=self._streaming_on_partial,
+                on_final=self._streaming_on_final,
+            )
             try:
                 mic, _ = get_chunk(chunk_sec)
                 if mic.size >= min_samples:

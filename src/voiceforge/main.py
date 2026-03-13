@@ -564,9 +564,11 @@ def run_analyze_pipeline(
     template: str | None = None,
     dry_run: bool = False,
     stream_callback: Any = None,
+    out_transcript: list[str] | None = None,
 ) -> tuple[str, list[dict[str, Any]], dict[str, Any]]:
     """Run core analyze pipeline and return (display_text, segments_for_log, analysis_for_log).
-    If stream_callback is set, LLM output is streamed via stream_callback(delta) (#91)."""
+    If stream_callback is set, LLM output is streamed via stream_callback(delta) (#91).
+    KC4: if out_transcript is a list, out_transcript[0] is set to the raw STT transcript."""
     bind_trace_id()  # one trace_id per pipeline run (CLI or daemon worker)
     cfg = _get_config()
     auto_index_warnings = _ensure_rag_auto_index(cfg)
@@ -585,6 +587,8 @@ def run_analyze_pipeline(
 
     segments = result.segments
     transcript = result.transcript
+    if out_transcript is not None and len(out_transcript) >= 1:
+        out_transcript[0] = transcript or ""
     diar_segments = result.diar_segments
     context = result.context
     transcript_redacted = result.transcript_redacted

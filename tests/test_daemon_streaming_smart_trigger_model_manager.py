@@ -25,6 +25,7 @@ def test_daemon_get_settings_returns_json_with_expected_keys(tmp_path, monkeypat
         mock_cfg.language = "auto"
         mock_cfg.calendar_autostart_enabled = False
         mock_cfg.calendar_autostart_minutes = 5
+        mock_cfg.calendar_auto_listen = False
         mock_cfg.stt_backend = "local"
         mock_settings.return_value = mock_cfg
 
@@ -621,6 +622,18 @@ def test_get_transcriber_for_config_openai_returns_openai_facade() -> None:
     t = get_transcriber_for_config(cfg)
     assert hasattr(t, "transcribe")
     assert getattr(t, "_model_size", None) == "openai"
+
+
+def test_get_transcriber_for_config_model_size_override_kc4() -> None:
+    """get_transcriber_for_config with model_size_override uses that size (KC4 copilot path)."""
+    from voiceforge.stt import get_transcriber_for_config
+
+    cfg = MagicMock()
+    cfg.stt_backend = "local"
+    cfg.model_size = "small"
+    t = get_transcriber_for_config(cfg, model_size_override="tiny")
+    assert hasattr(t, "transcribe")
+    assert getattr(t, "_model_size", None) == "tiny"
 
 
 def test_daemon_env_flag_default_and_true() -> None:

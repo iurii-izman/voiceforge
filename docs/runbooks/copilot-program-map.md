@@ -1,6 +1,6 @@
 # Knowledge Copilot Program Map
 
-**Updated:** 2026-03-14 (KC3 done: capture markers, pre-roll, segment extraction, 30s auto-stop, recording_warning, GetCopilotCaptureStatus)
+**Updated:** 2026-03-14 (KC4 done: tiny-model streaming STT copilot path, transcript_snippet, copilot_stt_model_size)
 **Primary source of truth:** [voiceforge-copilot-architecture.md](../voiceforge-copilot-architecture.md)
 **Execution queue:** [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md), [next-iteration-focus.md](next-iteration-focus.md)
 **Background hardening:** [#164](https://github.com/iurii-izman/voiceforge/issues/164), [#165](https://github.com/iurii-izman/voiceforge/issues/165)
@@ -13,7 +13,7 @@ This file is the operational map for the Knowledge Copilot program. Nothing in t
 
 - `KD1-KD3` are seeded and closed as `decision-locked` policy artefacts.
 - `KC1` is complete: the program is bootstrapped, the GitHub Project is seeded, and handoff is switched to the Copilot track.
-- **Current next executable block:** [#176](https://github.com/iurii-izman/voiceforge/issues/176) `KC4 · Tiny-model streaming STT copilot path`
+- **Current next executable block:** [#177](https://github.com/iurii-izman/voiceforge/issues/177) `KC5 · Evidence-first RAG, groundedness, citations`
 - `#164` and `#165` remain open as background maintenance/security hardening and are not part of the main copilot execution order.
 
 ## Block Registry
@@ -33,7 +33,7 @@ This file is the operational map for the Knowledge Copilot program. Nothing in t
 | KC1 | [#173](https://github.com/iurii-izman/voiceforge/issues/173) | 0 | Done | Program bootstrap, traceability, project seeding, docs sync |
 | KC2 | [#174](https://github.com/iurii-izman/voiceforge/issues/174) | 1 | Done | Overlay shell, second window, hotkey down/up, recording indicator, armed/recording/analyzing/error, no focus steal |
 | KC3 | [#175](https://github.com/iurii-izman/voiceforge/issues/175) | 1 | Done | Capture runtime, markers, pre-roll, 30s auto-stop, recording_warning, stt_ambiguous |
-| KC4 | [#176](https://github.com/iurii-izman/voiceforge/issues/176) | 1 | Todo | Tiny-model streaming STT copilot path |
+| KC4 | [#176](https://github.com/iurii-izman/voiceforge/issues/176) | 1 | Done | Tiny-model streaming STT copilot path |
 | KC5 | [#177](https://github.com/iurii-izman/voiceforge/issues/177) | 1 | Todo | Evidence-first RAG, groundedness, citations |
 | KC6 | [#178](https://github.com/iurii-izman/voiceforge/issues/178) | 1 | Todo | Fast-track cards: Answer, Do/Don't, Clarify |
 | KC7 | [#179](https://github.com/iurii-izman/voiceforge/issues/179) | 2 | Todo | Deep track, session memory, card priority/overflow |

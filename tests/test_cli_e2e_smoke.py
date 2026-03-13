@@ -52,7 +52,7 @@ def test_cli_pipeline_listen_analyze_history(monkeypatch, tmp_path) -> None:
     assert listen_result.exit_code == 0, listen_result.stdout
 
     def fake_pipeline(
-        seconds: int, template: str | None = None, dry_run: bool = False
+        seconds: int, template: str | None = None, dry_run: bool = False, **kwargs: object
     ) -> tuple[str, list[dict[str, object]], dict[str, object]]:
         return (
             f"analysis-ok-{seconds}",
@@ -319,7 +319,7 @@ def test_cli_export_md_smoke(monkeypatch, tmp_path) -> None:
     monkeypatch.setenv("VOICEFORGE_LANGUAGE", "ru")  # asserts Russian headings in export md
 
     def fake_pipeline(
-        seconds: int, template: str | None = None, dry_run: bool = False
+        seconds: int, template: str | None = None, dry_run: bool = False, **kwargs: object
     ) -> tuple[str, list[dict[str, object]], dict[str, object]]:
         return (
             "ok",
@@ -359,7 +359,7 @@ def test_cli_analyze_template_standup_smoke(monkeypatch, tmp_path) -> None:
     monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "runtime"))
 
     def fake_pipeline(
-        seconds: int, template: str | None = None, dry_run: bool = False
+        seconds: int, template: str | None = None, dry_run: bool = False, **kwargs: object
     ) -> tuple[str, list[dict[str, object]], dict[str, object]]:
         return (
             "--- Сделано ---\n  • x\n--- Планы ---\n  • y\n--- Блокеры ---\n  • z",
@@ -392,7 +392,7 @@ def test_cli_analyze_dry_run_smoke(monkeypatch, tmp_path) -> None:
     monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "runtime"))
 
     def fake_pipeline(
-        seconds: int, template: str | None = None, dry_run: bool = False
+        seconds: int, template: str | None = None, dry_run: bool = False, **kwargs: object
     ) -> tuple[str, list[dict[str, object]], dict[str, object]]:
         if dry_run:
             return (
@@ -433,7 +433,7 @@ def test_cli_action_items_update_smoke(monkeypatch, tmp_path) -> None:
     monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "runtime"))
 
     def fake_pipeline(
-        seconds: int, template: str | None = None, dry_run: bool = False
+        seconds: int, template: str | None = None, dry_run: bool = False, **kwargs: object
     ) -> tuple[str, list[dict[str, object]], dict[str, object]]:
         return (
             "ok",
@@ -482,7 +482,7 @@ def test_cli_history_output_md_smoke(monkeypatch, tmp_path) -> None:
     monkeypatch.setenv("VOICEFORGE_LANGUAGE", "ru")  # asserts Russian section headings
 
     def fake_pipeline(
-        seconds: int, template: str | None = None, dry_run: bool = False
+        seconds: int, template: str | None = None, dry_run: bool = False, **kwargs: object
     ) -> tuple[str, list[dict[str, object]], dict[str, object]]:
         return (
             "ok",
