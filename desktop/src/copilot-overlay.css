@@ -1,0 +1,60 @@
+/* KC2: Copilot overlay shell — always-on-top, no focus, recording indicator + states */
+
+.copilot-overlay-body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: rgba(26, 26, 26, 0.92);
+  color: #e0e0e0;
+  min-height: 100%;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.copilot-overlay-root {
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 60px;
+}
+
+.copilot-recording-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #e57373;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.1s ease;
+}
+
+.copilot-recording-indicator.visible {
+  opacity: 1;
+  animation: copilot-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes copilot-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+.copilot-state-label {
+  font-size: 14px;
+  color: #a8a8a8;
+}
+
+.copilot-state-label.recording {
+  color: #e57373;
+}
+
+.copilot-state-label.analyzing {
+  color: #64b5f6;
+}
+
+.copilot-state-label.error {
+  color: #e57373;
+}
+
+.copilot-state-label.armed {
+  color: #81c784;
+}

@@ -1,5 +1,7 @@
 //! Tauri commands (D-Bus bridge).
 
+use tauri::{Emitter, Manager};
+
 use crate::{call_method0, connection};
 
 #[tauri::command]
@@ -228,4 +230,34 @@ pub async fn export_session(session_id: u32, format: String) -> Result<String, S
     }
     let stdout = String::from_utf8_lossy(&output.stdout);
     Ok(stdout.trim().to_string())
+}
+
+/// KC2: Show copilot overlay and set state (armed | recording | analyzing | error). No focus steal.
+#[tauri::command]
+pub async fn set_copilot_overlay_state(
+    app: tauri::AppHandle,
+    state: String,
+    show: bool,
+) -> Result<(), String> {
+    let Some(win) = app.get_webview_window("copilot-overlay") else {
+        return Err("copilot-overlay window not found".to_string());
+    };
+    if show {
+        // Position bottom-right of primary monitor (no focus).
+        if let Ok(Some(monitor)) = win.current_monitor() {
+            let size = monitor.size();
+            let scale = monitor.scale_factor();
+            let width = 400.0_f64;
+            let height = 300.0_f64;
+            let margin = 24.0_f64;
+            let x = (size.width as f64 / scale) - width - margin;
+            let y = (size.height as f64 / scale) - height - margin;
+            let _ = win.set_position(tauri::Position::Logical(tauri::LogicalPosition { x, y }));
+        }
+        let _ = win.show();
+        // Do not call set_focus() — overlay must not steal focus (KC2 contract).
+    }
+    let payload = serde_json::json!({ "state": state });
+    win.emit("copilot-state-changed", payload).map_err(|e: tauri::Error| e.to_string())?;
+    Ok(())
 }

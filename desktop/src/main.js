@@ -36,6 +36,7 @@ const STORE_KEYS = [
   "voiceforge_favorites",
   "voiceforge_shortcut_record",
   "voiceforge_shortcut_analyze",
+  "voiceforge_shortcut_copilot",
   "voiceforge_session_tags",
   "voiceforge_sound_on_record",
   "voiceforge_settings_as_panel",
@@ -1113,10 +1114,20 @@ async function setupGlobalShortcuts() {
   const enabled = localStorage.getItem(HOTKEYS_ENABLED_KEY) !== "false";
   if (!enabled) return;
   const [shortcutRecord, shortcutAnalyze] = getShortcuts();
-  currentShortcuts = [shortcutRecord, shortcutAnalyze].filter(Boolean);
+  const shortcutCopilot = getCopilotShortcut();
+  currentShortcuts = [shortcutRecord, shortcutAnalyze, shortcutCopilot].filter(Boolean);
   if (currentShortcuts.length === 0) return;
   try {
     await registerShortcut(currentShortcuts, (event) => {
+      // KC2: copilot overlay — pressed = recording, released = analyzing (latest capture replaces previous).
+      if (event.shortcut === shortcutCopilot) {
+        if (event.state === "Pressed") {
+          invoke("set_copilot_overlay_state", { state: "recording", show: true }).catch(() => {});
+        } else if (event.state === "Released") {
+          invoke("set_copilot_overlay_state", { state: "analyzing", show: true }).catch(() => {});
+        }
+        return;
+      }
       if (event.state !== "Pressed") return;
       if (event.shortcut === shortcutRecord && daemonOk) toggleListen();
       else if (event.shortcut === shortcutAnalyze) runDefaultAnalyze();
@@ -2202,11 +2213,18 @@ function handleDeepLinkUrls(urls) {
 }
 const SHORTCUT_RECORD_DEFAULT = "CommandOrControl+Shift+R";
 const SHORTCUT_ANALYZE_DEFAULT = "CommandOrControl+Shift+A";
+/** KC2: push-to-capture overlay (Pressed = recording, Released = analyzing). */
+const SHORTCUT_COPILOT_DEFAULT = "CommandOrControl+Shift+Space";
 
 function getShortcuts() {
   const r = localStorage.getItem("voiceforge_shortcut_record") || SHORTCUT_RECORD_DEFAULT;
   const a = localStorage.getItem("voiceforge_shortcut_analyze") || SHORTCUT_ANALYZE_DEFAULT;
   return [r.trim() || SHORTCUT_RECORD_DEFAULT, a.trim() || SHORTCUT_ANALYZE_DEFAULT];
+}
+
+function getCopilotShortcut() {
+  const c = localStorage.getItem("voiceforge_shortcut_copilot") || SHORTCUT_COPILOT_DEFAULT;
+  return (c && c.trim()) ? c.trim() : SHORTCUT_COPILOT_DEFAULT;
 }
 
 let currentShortcuts = [];

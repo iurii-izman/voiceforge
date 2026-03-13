@@ -88,11 +88,11 @@
 
 ### Main Execution Order
 
-**Следующий executable block:** [#174](https://github.com/iurii-izman/voiceforge/issues/174) `KC2 · Overlay Shell & Input Model`
+**Следующий executable block:** [#175](https://github.com/iurii-izman/voiceforge/issues/175) `KC3 · Capture Runtime & Ring Buffer UX`
 
 | Wave | Issues | Статус | Что реализуем |
 | --- | --- | --- | --- |
-| Wave 1 MVP Core | [#174](https://github.com/iurii-izman/voiceforge/issues/174) → [#175](https://github.com/iurii-izman/voiceforge/issues/175) → [#176](https://github.com/iurii-izman/voiceforge/issues/176) → [#177](https://github.com/iurii-izman/voiceforge/issues/177) → [#178](https://github.com/iurii-izman/voiceforge/issues/178) | Active | Overlay shell, capture runtime, streaming STT, evidence-first RAG, fast-track cards |
+| Wave 1 MVP Core | [#174](https://github.com/iurii-izman/voiceforge/issues/174) ✓ → [#175](https://github.com/iurii-izman/voiceforge/issues/175) → [#176](https://github.com/iurii-izman/voiceforge/issues/176) → [#177](https://github.com/iurii-izman/voiceforge/issues/177) → [#178](https://github.com/iurii-izman/voiceforge/issues/178) | Active | KC2 done; overlay shell, hotkey pressed/released, recording indicator; next: capture runtime, streaming STT, evidence RAG, fast-track cards |
 | Wave 2 MVP Complete | [#179](https://github.com/iurii-izman/voiceforge/issues/179) → [#180](https://github.com/iurii-izman/voiceforge/issues/180) | Todo | Deep track/session memory, main-window copilot integration |
 | Wave 2 V2 Surface | [#181](https://github.com/iurii-izman/voiceforge/issues/181) | Todo | Knowledge management and context packs |
 | Wave 3 V2 Expansion | [#182](https://github.com/iurii-izman/voiceforge/issues/182) → [#183](https://github.com/iurii-izman/voiceforge/issues/183) | Todo | Explicit mode system, offline/hybrid maturity, system audio and scenario presets |

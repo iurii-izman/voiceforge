@@ -2,14 +2,14 @@
 
 Файл обновляется **агентом в конце каждой сессии**. Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-13 (Knowledge Copilot program bootstrapped; `KD1-KD3` and `KC1` seeded/closed; next active block = `KC2`; `#164/#165` remain background hardening)
+**Обновлено:** 2026-03-13 (KC2 done: overlay shell, hotkey pressed/released, recording indicator; next active block = `KC3`; `#164/#165` remain background hardening)
 
 ---
 
 ## Что требуется от вас (подтверждения и решения)
 
 - **KV1 / legal-consent:** пока дополнительных ручных действий не требуется, но до `KC11` нужно будет отдельное подтверждение по system-audio consent и retention wording.
-- **KV2 / overlay UX sign-off:** до завершения `KC2` потребуется живой просмотр overlay UX и короткое подтверждение направления.
+- **KV2 / overlay UX sign-off:** KC2 реализован; до финального sign-off желателен живой просмотр overlay UX (опционально).
 - **Security hardening:** `#164/#165` остаются открытыми, но не задают основной execution order, пока не появится blocking regression.
 - **Legacy scope guard:** [phase-e-decision-log.md](phase-e-decision-log.md) остаётся ограничителем для старых surfaces (Web UI / Telegram / RAG watcher / calendar narrow path) и не должен silently переопределяться в copilot треке.
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Knowledge Copilot program оформлен как новый главный track. Добавлены `scripts/create_copilot_program_issues.sh` и [copilot-program-map.md](copilot-program-map.md); `docs/voiceforge-copilot-architecture.md` зафиксирован как source of truth; в GitHub Project созданы `KD1-KD3`, `KC1-KC14`, `KV1-KV5`; `KD1-KD3` и `KC1` закрыты как выполненные policy/bootstrap blocks. `PROJECT-STATUS-SUMMARY.md` и `DOCS-INDEX.md` переключены на новый program track.
+**Сделано в сессии:** KC2 · Overlay Shell & Input Model (#174) реализован: второе окно (copilot-overlay), always-on-top/skip-taskbar/no-focus, hotkey Ctrl+Shift+Space pressed → recording / released → analyzing, recording indicator и состояния armed/recording/analyzing/error в overlay, latest-capture replacement, команда `set_copilot_overlay_state`, e2e-тест на copilot shortcut. Docs: copilot-program-map, PROJECT-STATUS-SUMMARY, desktop-qa-plan обновлены.
 
-**Следующий шаг:** взять [#174](https://github.com/iurii-izman/voiceforge/issues/174) `KC2 · Overlay Shell & Input Model` как первый исполняемый copilot block. Цель блока: второе overlay-окно, always-on-top/no-focus contract, hotkey pressed/released flow, recording indicator, armed/recording/analyzing/error states и latest-capture replacement policy. До финального закрытия `KC2` потребуется `KV2` sign-off на visual direction и intrusiveness.
+**Следующий шаг:** взять [#175](https://github.com/iurii-izman/voiceforge/issues/175) `KC3 · Capture Runtime & Ring Buffer UX` как следующий исполняемый block. Цель: markers, pre-roll, ring buffer UX для push-to-capture.
 
 ---
 
@@ -31,7 +31,7 @@
 | --- | --- | --- | --- |
 | **KD** | #170✓ → #172✓ | Done | Decision-locked product / UX / architecture contracts |
 | **KC bootstrap** | #173✓ | Done | Program seeding, traceability, docs handoff |
-| **Wave 1 MVP Core** | #174 → #175 → #176 → #177 → #178 | Active | Overlay shell, capture runtime, streaming STT, evidence-first RAG, fast-track cards |
+| **Wave 1 MVP Core** | #174✓ → #175 → #176 → #177 → #178 | Active | KC2 done; next: capture runtime, streaming STT, evidence-first RAG, fast-track cards |
 | **Wave 2 MVP Complete** | #179 → #180 | Todo | Deep track/session memory + main-window copilot integration |
 | **Wave 2 V2 Surface** | #181 | Todo | Knowledge management + context packs |
 | **Wave 3 V2 Expansion** | #182 → #183 | Todo | Explicit mode system; offline/hybrid maturity; system audio + scenario presets |
@@ -52,7 +52,7 @@
 
 Перед началом крупного блока: `./scripts/preflight_repo.sh --with-tests`. Для desktop/UI изменений: `cd desktop && npm run e2e:release-gate`. Для native/Tauri/system-level изменений дополнительно: `cd desktop && npm run e2e:native:headless`.
 
-Текущий блок: KC2 · Overlay Shell & Input Model (#174).
+Текущий блок: KC3 · Capture Runtime & Ring Buffer UX (#175).
 ```
 
 ---

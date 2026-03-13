@@ -38,6 +38,7 @@
 - onboarding, compact/full recovery, settings persistence;
 - session flows: open detail, close, back, export-related states;
 - desktop-first flow `Record -> Analyze -> View -> Export`;
+- copilot overlay shell: hotkey pressed/released → overlay state (KC2);
 - daemon-off / retry recovery;
 - accessibility smoke на ключевых экранах;
 - visual baselines на ключевых экранах.

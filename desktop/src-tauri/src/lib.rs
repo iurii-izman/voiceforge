@@ -67,6 +67,14 @@ pub fn run() {
             if let Err(e) = tray::setup_tray(app) {
                 eprintln!("tray setup failed: {}", e);
             }
+            // Create copilot overlay window from config (KC2: second window, always-on-top, no focus).
+            if let Some(overlay_cfg) = app.config().app.windows.get(1) {
+                if let Ok(builder) = tauri::WebviewWindowBuilder::from_config(app.handle(), overlay_cfg) {
+                    if let Err(e) = builder.build() {
+                        eprintln!("copilot overlay window create failed: {}", e);
+                    }
+                }
+            }
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -88,6 +96,7 @@ pub fn run() {
             commands::create_event_from_session,
             commands::set_tray_theme,
             commands::export_session,
+            commands::set_copilot_overlay_state,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -290,6 +290,8 @@ export async function installDesktopMocks(page, scenarioOverrides = {}) {
             return envelope({ rag_hits: scenario.ragHits });
           case "export_session":
             return `exported:${args.format}:${args.sessionId}`;
+          case "set_copilot_overlay_state":
+            return undefined;
           case "create_event_from_session":
             return envelope({ event_uid: "vf-event-101" });
           case "analyze": {
