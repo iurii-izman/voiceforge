@@ -13,7 +13,7 @@ This file is the operational map for the Knowledge Copilot program. Nothing in t
 
 - `KD1-KD3` are seeded and closed as `decision-locked` policy artefacts.
 - `KC1` is complete: the program is bootstrapped, the GitHub Project is seeded, and handoff is switched to the Copilot track.
-- **Current next executable block:** [#177](https://github.com/iurii-izman/voiceforge/issues/177) `KC5 · Evidence-first RAG, groundedness, citations`
+- **Current next executable block:** [#178](https://github.com/iurii-izman/voiceforge/issues/178) `KC6 · Fast-track cards: Answer, Do/Don't, Clarify`
 - `#164` and `#165` remain open as background maintenance/security hardening and are not part of the main copilot execution order.
 
 ## Block Registry
@@ -34,7 +34,7 @@ This file is the operational map for the Knowledge Copilot program. Nothing in t
 | KC2 | [#174](https://github.com/iurii-izman/voiceforge/issues/174) | 1 | Done | Overlay shell, second window, hotkey down/up, recording indicator, armed/recording/analyzing/error, no focus steal |
 | KC3 | [#175](https://github.com/iurii-izman/voiceforge/issues/175) | 1 | Done | Capture runtime, markers, pre-roll, 30s auto-stop, recording_warning, stt_ambiguous |
 | KC4 | [#176](https://github.com/iurii-izman/voiceforge/issues/176) | 1 | Done | Tiny-model streaming STT copilot path |
-| KC5 | [#177](https://github.com/iurii-izman/voiceforge/issues/177) | 1 | Todo | Evidence-first RAG, groundedness, citations |
+| KC5 | [#177](https://github.com/iurii-izman/voiceforge/issues/177) | 1 | Done | Evidence-first RAG, groundedness, citations |
 | KC6 | [#178](https://github.com/iurii-izman/voiceforge/issues/178) | 1 | Todo | Fast-track cards: Answer, Do/Don't, Clarify |
 | KC7 | [#179](https://github.com/iurii-izman/voiceforge/issues/179) | 2 | Todo | Deep track, session memory, card priority/overflow |
 | KC8 | [#180](https://github.com/iurii-izman/voiceforge/issues/180) | 2 | Todo | Main-window copilot integration and settings |

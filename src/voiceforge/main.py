@@ -517,6 +517,18 @@ def _build_analysis_for_log_default(llm_result: Any, cfg: Any, cost_usd: float, 
     }
 
 
+def _rag_evidence_from_result(result: Any) -> dict[str, Any]:
+    """KC5 (#177): Extract rag_groundedness, rag_citations, rag_conflict_hint from PipelineResult for analysis_for_log."""
+    out: dict[str, Any] = {}
+    if hasattr(result, "rag_groundedness") and result.rag_groundedness is not None:
+        out["rag_groundedness"] = result.rag_groundedness
+    if hasattr(result, "rag_citations"):
+        out["rag_citations"] = getattr(result, "rag_citations", []) or []
+    if hasattr(result, "rag_conflict_hint") and result.rag_conflict_hint:
+        out["rag_conflict_hint"] = result.rag_conflict_hint
+    return out
+
+
 def _ensure_rag_auto_index(cfg: Any) -> list[str]:
     """E13 #136: If rag_auto_index_path is set, run one-time index; return list of warnings."""
     warnings: list[str] = []
@@ -615,19 +627,17 @@ def run_analyze_pipeline(
         display_lines = list(pipeline_warnings)
         display_lines.append(transcript or t("pipeline.silence"))
         display_lines.append(t("feedback.no_speech_skip"))
-        return (
-            "\n".join(display_lines),
-            segments_for_log,
-            {
-                "model": "",
-                "cost_usd": 0.0,
-                "questions": [],
-                "answers": [],
-                "recommendations": [],
-                "action_items": [],
-                "template": template,
-            },
-        )
+        no_speech_log: dict[str, Any] = {
+            "model": "",
+            "cost_usd": 0.0,
+            "questions": [],
+            "answers": [],
+            "recommendations": [],
+            "action_items": [],
+            "template": template,
+        }
+        no_speech_log.update(_rag_evidence_from_result(result))
+        return ("\n".join(display_lines), segments_for_log, no_speech_log)
 
     effective_model, is_ollama_fallback = cfg.get_effective_llm()
     if effective_model is None:
@@ -683,10 +693,12 @@ def run_analyze_pipeline(
         lines, analysis_for_log = _format_template_result(template, llm_result)
         analysis_for_log["model"] = effective_model
         analysis_for_log["cost_usd"] = cost_usd
+        analysis_for_log.update(_rag_evidence_from_result(result))
         return ("\n".join(header_lines + lines), segments_for_log, analysis_for_log)
 
     lines = _format_meeting_analysis_lines(llm_result)
     analysis_for_log = _build_analysis_for_log_default(llm_result, cfg, cost_usd, effective_model)
+    analysis_for_log.update(_rag_evidence_from_result(result))
     return ("\n".join(header_lines + lines), segments_for_log, analysis_for_log)
 
 

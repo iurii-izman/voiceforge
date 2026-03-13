@@ -82,11 +82,12 @@ def test_step2_diarization_returns_warning_when_no_hf_token(monkeypatch: pytest.
 
 
 def test_step2_rag_returns_warning_when_no_db(tmp_path: Path) -> None:
-    """_step2_rag returns (context, warnings) with index message when RAG DB does not exist."""
+    """_step2_rag returns (context, warnings, results); warns when RAG DB does not exist (KC5)."""
     rag_path = tmp_path / "nonexistent.db"
-    context, warnings = _step2_rag("hello world", str(rag_path))
+    context, warnings, results = _step2_rag("hello world", str(rag_path))
 
     assert context == ""
+    assert results == []
     assert len(warnings) == 1
     assert "index" in warnings[0].lower() or "voiceforge" in warnings[0].lower()
 

@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии**. Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-14 (KC4 done: tiny-model streaming STT copilot path; next = KC5; `#164/#165` remain background hardening)
+**Обновлено:** 2026-03-14 (KC5 done: evidence-first RAG, groundedness, citations; next = KC6; `#164/#165` remain background hardening)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** KC4 · Tiny-model streaming STT copilot path (#176): copilot_stt_model_size (default tiny), swap to tiny on capture release and restore after; streaming loop uses tiny during copilot capture; run_analyze_pipeline out_transcript; get_copilot_capture_status returns transcript_snippet; get_transcriber_for_config(model_size_override). Targeted tests: daemon_helpers (transcript_snippet, status), get_transcriber_for_config_model_size_override_kc4, batch116/dbus fixes. Docs: DBUS.md, config-env-contract, copilot-program-map, PROJECT-STATUS-SUMMARY, next-iteration-focus.
+**Сделано в сессии:** KC5 · Evidence-first RAG, groundedness, citations (#177): rag/groundedness.py (confidence_from_results, format_evidence_citations, get_conflict_hint); short-capture query extraction (for_short_capture, SHORT_CAPTURE_MAX_CHARS); pipeline returns rag_results, rag_groundedness, rag_citations, rag_conflict_hint; analysis_for_log includes rag_*; daemon stores and get_copilot_capture_status returns rag_groundedness, rag_citations, rag_conflict_hint. Targeted tests: test_rag_groundedness_kc5, pipeline/daemon/query_keywords. Docs: voiceforge-copilot-architecture, copilot-program-map, PROJECT-STATUS-SUMMARY, next-iteration-focus.
 
-**Следующий шаг:** взять [#177](https://github.com/iurii-izman/voiceforge/issues/177) `KC5 · Evidence-first RAG, groundedness, citations` как следующий исполняемый block.
+**Следующий шаг:** взять [#178](https://github.com/iurii-izman/voiceforge/issues/178) `KC6 · Fast-track cards: Answer, Do/Don't, Clarify` как следующий исполняемый block.
 
 ---
 
@@ -31,7 +31,7 @@
 | --- | --- | --- | --- |
 | **KD** | #170✓ → #172✓ | Done | Decision-locked product / UX / architecture contracts |
 | **KC bootstrap** | #173✓ | Done | Program seeding, traceability, docs handoff |
-| **Wave 1 MVP Core** | #174✓ → #175✓ → #176✓ → #177 → #178 | Active | KC4 done; next: evidence-first RAG (KC5), fast-track cards |
+| **Wave 1 MVP Core** | #174✓ → #175✓ → #176✓ → #177✓ → #178 | Active | KC5 done; next: fast-track cards (KC6) |
 | **Wave 2 MVP Complete** | #179 → #180 | Todo | Deep track/session memory + main-window copilot integration |
 | **Wave 2 V2 Surface** | #181 | Todo | Knowledge management + context packs |
 | **Wave 3 V2 Expansion** | #182 → #183 | Todo | Explicit mode system; offline/hybrid maturity; system audio + scenario presets |
@@ -52,7 +52,7 @@
 
 Перед началом крупного блока: `./scripts/preflight_repo.sh --with-tests`. Для desktop/UI изменений: `cd desktop && npm run e2e:release-gate`. Для native/Tauri/system-level изменений дополнительно: `cd desktop && npm run e2e:native:headless`.
 
-Текущий блок: KC5 · Evidence-first RAG, groundedness, citations (#177).
+Текущий блок: KC6 · Fast-track cards: Answer, Do/Don't, Clarify (#178).
 ```
 
 ---

@@ -56,7 +56,8 @@ def _resample_to_16k(audio: np.ndarray, from_rate: int) -> np.ndarray:
 @dataclass
 class PipelineResult:
     """Result of steps 1–2 (STT + parallel diarization, RAG, PII). Step 3 (LLM) in main.
-    E4 (#127): warnings — user-facing messages for diarization skip, RAG empty, etc."""
+    E4 (#127): warnings — user-facing messages for diarization skip, RAG empty, etc.
+    KC5 (#177): rag_groundedness, rag_citations, rag_conflict_hint for Evidence Card."""
 
     segments: list[Any]  # Transcriber.Segment
     transcript: str
@@ -64,6 +65,9 @@ class PipelineResult:
     context: str
     transcript_redacted: str | None  # None = use redact(transcript) in router
     warnings: list[str] = field(default_factory=list)  # E4 (#127): diarization skip, RAG empty, etc.
+    rag_groundedness: str | None = None  # KC5: grounded | semi_grounded | ungrounded | no_kb
+    rag_citations: list[Any] = field(default_factory=list)  # KC5: [{source_basename, page, snippet}]
+    rag_conflict_hint: str | None = None  # KC5: user-visible when sources may conflict
 
 
 def _step1_stt(
@@ -187,6 +191,12 @@ def _step2_diarization(
 
 def _rag_merge_results(queries: list[str], searcher: Any) -> str:
     """Run multi-query RAG search, merge by chunk_id (keep higher score), return context string."""
+    _, merged = _rag_merge_results_with_results(queries, searcher)
+    return "\n".join(r.content[:300] for r in merged)
+
+
+def _rag_merge_results_with_results(queries: list[str], searcher: Any) -> tuple[str, list[Any]]:
+    """Run multi-query RAG search, merge by chunk_id; return (context_str, merged SearchResult list). KC5."""
     by_id: dict[int, Any] = {}
     for q in queries:
         if not (q and q.strip()):
@@ -195,27 +205,37 @@ def _rag_merge_results(queries: list[str], searcher: Any) -> str:
             if r.chunk_id not in by_id or r.score > by_id[r.chunk_id].score:
                 by_id[r.chunk_id] = r
     merged = sorted(by_id.values(), key=lambda x: -x.score)[:5]
-    return "\n".join(r.content[:300] for r in merged)
+    context = "\n".join(r.content[:300] for r in merged)
+    return (context, merged)
 
 
-def _step2_rag(transcript: str, rag_db_path: str) -> tuple[str, list[str]]:
-    """RAG search. Returns (context, warnings). E4 (#127): warn when no DB or 0 results."""
+def _step2_rag(
+    transcript: str,
+    rag_db_path: str,
+    for_short_capture: bool = False,
+) -> tuple[str, list[str], list[Any]]:
+    """RAG search. Returns (context, warnings, results). E4 (#127): warn when no DB or 0 results.
+    KC5 (#177): for_short_capture=True uses single-query extraction for short transcripts; results for groundedness/citations."""
     t0 = time.monotonic()
     context = ""
     warnings: list[str] = []
+    results: list[Any] = []
     try:
         if not Path(rag_db_path).is_file():
             warnings.append(t(_T_FEEDBACK_RAG_NO_INDEX))
             duration_sec = time.monotonic() - t0
             log.info("pipeline.step2_rag", context_len=0, duration_sec=round(duration_sec, 2))
-            return (context, warnings)
+            return (context, warnings, results)
         from voiceforge.rag.query_keywords import extract_keyword_queries
 
-        queries = extract_keyword_queries(transcript)
+        queries = extract_keyword_queries(
+            transcript,
+            for_short_capture=for_short_capture or len(transcript) < 400,
+        )
         if not queries:
             queries = [transcript[:RAG_QUERY_MAX_CHARS] or "meeting"]
         searcher = _get_cached_searcher(rag_db_path)
-        context = _rag_merge_results(queries, searcher)
+        context, results = _rag_merge_results_with_results(queries, searcher)
         if not context.strip():
             warnings.append(t(_T_FEEDBACK_RAG_NO_INDEX))
     except ImportError:
@@ -230,7 +250,7 @@ def _step2_rag(transcript: str, rag_db_path: str) -> tuple[str, list[str]]:
         record_rag_duration(duration_sec)
     except ImportError:
         pass
-    return (context, warnings)
+    return (context, warnings, results)
 
 
 def _get_language_hint(cfg: Any) -> str | None:
@@ -322,7 +342,12 @@ def _gather_step2(
     timeout_sec = max(1.0, float(getattr(cfg, "pipeline_step2_timeout_sec", 25.0)))
     futures: dict[str, Future[Any]] = {
         "diarization": executor.submit(_step2_diarization, audio_f, effective_rate, cfg.pyannote_restart_hours),
-        "rag": executor.submit(_step2_rag, transcript, cfg.get_rag_db_path()),
+        "rag": executor.submit(
+            _step2_rag,
+            transcript,
+            cfg.get_rag_db_path(),
+            for_short_capture=len(transcript) < 400,
+        ),
         "pii": executor.submit(_step2_pii, transcript, getattr(cfg, "pii_mode", "ON")),
     }
     done, not_done = wait(futures.values(), timeout=timeout_sec)
@@ -332,14 +357,15 @@ def _gather_step2(
     if timed_out:
         log.warning("pipeline.step2_timeout", timeout_sec=timeout_sec, timed_out=timed_out)
     diar_res = futures["diarization"].result() if futures["diarization"] in done else ([], [])
-    rag_res = futures["rag"].result() if futures["rag"] in done else ("", [])
+    rag_res = futures["rag"].result() if futures["rag"] in done else ("", [], [])
     transcript_redacted = futures["pii"].result() if futures["pii"] in done else transcript
     diar_segments = diar_res[0] if isinstance(diar_res, tuple) else diar_res
     diar_warnings = diar_res[1] if isinstance(diar_res, tuple) and len(diar_res) > 1 else []
     context = rag_res[0] if isinstance(rag_res, tuple) else rag_res
     rag_warnings = rag_res[1] if isinstance(rag_res, tuple) and len(rag_res) > 1 else []
+    rag_results = rag_res[2] if isinstance(rag_res, tuple) and len(rag_res) > 2 else []
     warnings: list[str] = list(diar_warnings) + list(rag_warnings)
-    return (diar_segments, context, transcript_redacted, warnings)
+    return (diar_segments, context, transcript_redacted, warnings, rag_results)
 
 
 def _with_calendar_context(context: str, cfg: Any) -> str:
@@ -405,7 +431,7 @@ class AnalysisPipeline:
             step2_start = time.monotonic()
             audio_f = audio.astype(np.float32) / 32768.0
             with span("pipeline.step2_parallel"):
-                diar_segments, context, transcript_redacted, step2_warnings = _gather_step2(
+                diar_segments, context, transcript_redacted, step2_warnings, rag_results = _gather_step2(
                     self._executor, self._cfg, audio_f, transcript, effective_rate
                 )
             step2_duration = time.monotonic() - step2_start
@@ -418,6 +444,22 @@ class AnalysisPipeline:
                 pass
             context = _with_calendar_context(context, self._cfg)
             all_warnings = step1_warnings + step2_warnings
+            rag_groundedness = None
+            rag_citations = []
+            rag_conflict_hint = None
+            try:
+                from voiceforge.rag.groundedness import (
+                    confidence_from_results,
+                    format_evidence_citations,
+                    get_conflict_hint,
+                )
+
+                has_rag_db = Path(self._cfg.get_rag_db_path()).is_file()
+                rag_groundedness, _ = confidence_from_results(rag_results, has_rag_db)
+                rag_citations = format_evidence_citations(rag_results, max_sources=3)
+                rag_conflict_hint = get_conflict_hint(rag_results)
+            except ImportError:
+                pass
             return (
                 PipelineResult(
                     segments=segments,
@@ -426,6 +468,9 @@ class AnalysisPipeline:
                     context=context,
                     transcript_redacted=transcript_redacted,
                     warnings=all_warnings,
+                    rag_groundedness=rag_groundedness,
+                    rag_citations=rag_citations,
+                    rag_conflict_hint=rag_conflict_hint,
                 ),
                 None,
             )

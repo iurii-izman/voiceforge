@@ -88,11 +88,11 @@
 
 ### Main Execution Order
 
-**Следующий executable block:** [#177](https://github.com/iurii-izman/voiceforge/issues/177) `KC5 · Evidence-first RAG, groundedness, citations`
+**Следующий executable block:** [#178](https://github.com/iurii-izman/voiceforge/issues/178) `KC6 · Fast-track cards: Answer, Do/Don't, Clarify`
 
 | Wave | Issues | Статус | Что реализуем |
 | --- | --- | --- | --- |
-| Wave 1 MVP Core | [#174](https://github.com/iurii-izman/voiceforge/issues/174) ✓ → [#175](https://github.com/iurii-izman/voiceforge/issues/175) ✓ → [#176](https://github.com/iurii-izman/voiceforge/issues/176) ✓ → [#177](https://github.com/iurii-izman/voiceforge/issues/177) → [#178](https://github.com/iurii-izman/voiceforge/issues/178) | Active | KC4 done: tiny STT path, transcript_snippet; next: evidence RAG, fast-track cards |
+| Wave 1 MVP Core | [#174](https://github.com/iurii-izman/voiceforge/issues/174) ✓ → [#175](https://github.com/iurii-izman/voiceforge/issues/175) ✓ → [#176](https://github.com/iurii-izman/voiceforge/issues/176) ✓ → [#177](https://github.com/iurii-izman/voiceforge/issues/177) ✓ → [#178](https://github.com/iurii-izman/voiceforge/issues/178) | Active | KC5 done: evidence RAG, groundedness, citations; next: fast-track cards |
 | Wave 2 MVP Complete | [#179](https://github.com/iurii-izman/voiceforge/issues/179) → [#180](https://github.com/iurii-izman/voiceforge/issues/180) | Todo | Deep track/session memory, main-window copilot integration |
 | Wave 2 V2 Surface | [#181](https://github.com/iurii-izman/voiceforge/issues/181) | Todo | Knowledge management and context packs |
 | Wave 3 V2 Expansion | [#182](https://github.com/iurii-izman/voiceforge/issues/182) → [#183](https://github.com/iurii-izman/voiceforge/issues/183) | Todo | Explicit mode system, offline/hybrid maturity, system audio and scenario presets |

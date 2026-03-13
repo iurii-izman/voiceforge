@@ -328,12 +328,12 @@ RAG уже работает: HybridSearcher (BM25 + vector + RRF fusion) в `rag
    → Только Evidence Card (RAG results as-is), без генерации
 ```
 
-### Что добавить к текущей реализации
+### Что добавлено (KC5 #177)
 
-1. `confidence_from_results()` — нормализация RRF score в 0-1.
-2. Timestamp в metadata при индексации — сортировка по свежести.
-3. Query от STT → адаптировать `extract_keyword_queries()` для коротких фрагментов (5-15s).
-4. Citation format — basename файла + page number в Evidence Card.
+1. **`confidence_from_results()`** — в `rag/groundedness.py`: нормализация RRF score, уровни grounded / semi_grounded / ungrounded / no_kb.
+2. Timestamp в metadata при индексации — сортировка по свежести (остаётся на будущее).
+3. **Query от STT** — `extract_keyword_queries(..., for_short_capture=True)` и порог `SHORT_CAPTURE_MAX_CHARS` для коротких фрагментов (5–15s).
+4. **Citation format** — `format_evidence_citations()`: basename файла + page + snippet в Evidence Card; конфликты источников — `get_conflict_hint()`.
 
 ---
 

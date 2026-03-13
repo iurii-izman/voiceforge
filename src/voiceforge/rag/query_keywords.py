@@ -108,6 +108,8 @@ _MIN_WORD_LEN = 2
 _DEFAULT_TOP_N = 12
 # Min transcript length to use multi-segment queries (first half + second half)
 _MULTI_QUERY_MIN_LEN = 300
+# KC5: short capture (5–15s) typically < 400 chars; use single full-transcript query
+SHORT_CAPTURE_MAX_CHARS = 400
 
 
 def extract_keywords(transcript: str, top_n: int = _DEFAULT_TOP_N) -> str:
@@ -136,14 +138,20 @@ def extract_keyword_queries(
     num_parts: int = 2,
     top_n: int = _DEFAULT_TOP_N,
     min_len_for_multi: int = _MULTI_QUERY_MIN_LEN,
+    for_short_capture: bool = False,
 ) -> list[str]:
     """C2 (#42) extension: multiple queries from transcript segments for better RAG recall.
     Splits transcript into num_parts by position, extracts keywords from each; returns
-    list of non-empty query strings. If transcript is short, returns single full-doc query."""
+    list of non-empty query strings. If transcript is short, returns single full-doc query.
+    KC5 (#177): when for_short_capture=True or transcript len < SHORT_CAPTURE_MAX_CHARS,
+    use single query from full transcript (tuned for 5–15s copilot captures)."""
     if not (transcript and transcript.strip()):
         return []
-    if len(transcript) < min_len_for_multi or num_parts <= 1:
-        q = extract_keywords(transcript, top_n=top_n)
+    effective_min_multi = min_len_for_multi
+    if for_short_capture or len(transcript) < SHORT_CAPTURE_MAX_CHARS:
+        effective_min_multi = max(min_len_for_multi, len(transcript) + 1)
+    if len(transcript) < effective_min_multi or num_parts <= 1:
+        q = extract_keywords(transcript, top_n=min(top_n, 10))
         return [q] if q else []
     part_len = len(transcript) // num_parts
     queries: list[str] = []

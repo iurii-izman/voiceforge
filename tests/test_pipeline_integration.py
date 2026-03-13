@@ -271,7 +271,7 @@ def test_pipeline_run_returns_result_with_mocked_stt(
     """With mocked STT and step2 (no diarizer/RAG load), pipeline returns PipelineResult.
     Step2 is mocked to avoid loading pyannote/torch in CI/constrained environments (OOM).
     """
-    mock_gather.return_value = ([], "", "mocked transcript", [])
+    mock_gather.return_value = ([], "", "mocked transcript", [], [])  # + rag_results (KC5)
     num_samples = TARGET_SAMPLE_RATE  # 1 s of audio — minimal to avoid large buffers
     ring = tmp_path / "ring.raw"
     ring.write_bytes(np.zeros(num_samples, dtype=np.int16).tobytes())
