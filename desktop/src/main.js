@@ -667,6 +667,7 @@ async function checkDaemon() {
 }
 
 function switchTab(tabId) {
+  hideSessionDetail();
   document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
   document.querySelectorAll(".nav-item").forEach((n) => {
     n.classList.remove("active");
@@ -1723,7 +1724,8 @@ function showSessionDetail(id, opts) {
   const bodyEl = document.getElementById("session-detail-body");
   const idEl = document.getElementById("detail-id");
   idEl.textContent = id;
-  if (detailBlock.showModal) detailBlock.showModal();
+  if (detailBlock.show) detailBlock.show();
+  else detailBlock.setAttribute("open", "true");
   bodyEl.innerHTML = "<p class=\"muted\">" + t("loading") + "</p>";
   document.getElementById("export-md").onclick = () => exportSession(id, "md");
   document.getElementById("export-pdf").onclick = () => exportSession(id, "pdf");
