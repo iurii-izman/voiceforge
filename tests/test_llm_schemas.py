@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import date
 
-from voiceforge.llm.schemas import ActionItem, CopilotFastCards
+from voiceforge.llm.schemas import ActionItem, CopilotDeepCards, CopilotFastCards
 
 
 def test_action_item_deadline_valid_string_passes() -> None:
@@ -52,3 +52,20 @@ def test_copilot_fast_cards_schema_kc6() -> None:
     assert len(filled.donts) == 1
     assert len(filled.clarify) == 1
     assert filled.confidence == 0.85
+
+
+def test_copilot_deep_cards_schema_kc7() -> None:
+    """KC7 (#179): CopilotDeepCards schema validates and defaults empty."""
+    empty = CopilotDeepCards()
+    assert empty.risks == []
+    assert empty.strategy == ""
+    assert empty.emotion is None
+
+    filled = CopilotDeepCards(
+        risks=["No discount without approval.", "SLA 99.9% only on Enterprise."],
+        strategy="Steer to pricing page and offer a demo.",
+        emotion="Client seems cautious; keep tone factual.",
+    )
+    assert len(filled.risks) == 2
+    assert "pricing" in filled.strategy
+    assert filled.emotion is not None

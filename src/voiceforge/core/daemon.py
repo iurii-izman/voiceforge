@@ -135,6 +135,13 @@ class VoiceForgeDaemon:
         self._last_copilot_donts: list[str] = []
         self._last_copilot_clarify: list[str] = []
         self._last_copilot_confidence: float = 0.0
+        # KC7 (#179): session memory — recent turns for conversation continuity (cleared on listen_stop)
+        self._copilot_session_turns: list[str] = []
+        self._COPILOT_SESSION_MAX_TURNS = 5
+        # KC7: deep-track cards (Risk, Strategy, Emotion)
+        self._last_copilot_risk: list[str] = []
+        self._last_copilot_strategy: str = ""
+        self._last_copilot_emotion: str | None = None
 
     def _dbus_streaming_emitter_loop(self) -> None:
         """Worker to get transcript chunks from queue and emit them as D-Bus signals."""
@@ -174,6 +181,8 @@ class VoiceForgeDaemon:
             if self._iface:
                 self._iface.StreamingAnalysisChunk(delta if delta is not None else "")
 
+        with self._copilot_lock:
+            session_ctx = list(self._copilot_session_turns[-self._COPILOT_SESSION_MAX_TURNS :])
         with ThreadPoolExecutor(max_workers=1) as ex:
             future = ex.submit(
                 run_analyze_pipeline,
@@ -182,6 +191,7 @@ class VoiceForgeDaemon:
                 stream_callback=stream_cb,
                 out_transcript=out_transcript,
                 for_copilot=True,
+                session_context=session_ctx if session_ctx else None,
             )
             try:
                 text, segments_for_log, analysis_for_log = future.result(timeout=timeout_sec)
@@ -210,6 +220,16 @@ class VoiceForgeDaemon:
             self._last_copilot_confidence = (
                 float(analysis_for_log.get("copilot_confidence", 0.0) or 0.0) if analysis_for_log else 0.0
             )
+            # KC7: deep-track cards
+            self._last_copilot_risk = list(analysis_for_log.get("copilot_risk") or []) if analysis_for_log else []
+            self._last_copilot_strategy = (analysis_for_log.get("copilot_strategy") or "") if analysis_for_log else ""
+            self._last_copilot_emotion = analysis_for_log.get("copilot_emotion") if analysis_for_log else None
+            # KC7: append this turn to session memory for next capture (max N turns)
+            if out_transcript and len(out_transcript) > 0 and (out_transcript[0] or "").strip():
+                turn = (out_transcript[0] or "").strip()[:500]
+                self._copilot_session_turns.append(turn)
+                if len(self._copilot_session_turns) > self._COPILOT_SESSION_MAX_TURNS:
+                    self._copilot_session_turns = self._copilot_session_turns[-self._COPILOT_SESSION_MAX_TURNS :]
         session_id = None
         if segments_for_log is not None and analysis_for_log is not None:
             try:
@@ -287,6 +307,8 @@ class VoiceForgeDaemon:
             self._streaming_thread = None
             self._streaming_capture = None
             self._listen_active = False
+            with self._copilot_lock:
+                self._copilot_session_turns = []  # KC7: new conversation on listen_stop
             log.info("daemon.listen_stopped")
 
     def swap_model(self, model_type: str, model_name: str) -> str:
@@ -336,12 +358,15 @@ class VoiceForgeDaemon:
             self._copilot_capture_start_time = time.monotonic()
             self._copilot_warning_emitted = False
             self._last_copilot_stt_ambiguous = False
-            # KC6: clear fast-track cards so overlay does not show previous result during new recording
+            # KC6/KC7: clear fast-track and deep-track cards for new recording
             self._last_copilot_answer = []
             self._last_copilot_dos = []
             self._last_copilot_donts = []
             self._last_copilot_clarify = []
             self._last_copilot_confidence = 0.0
+            self._last_copilot_risk = []
+            self._last_copilot_strategy = ""
+            self._last_copilot_emotion = None
         self._copilot_watcher_stop.clear()
         self._copilot_watcher_thread = threading.Thread(target=self._copilot_watcher_loop, daemon=True)
         self._copilot_watcher_thread.start()
@@ -430,7 +455,7 @@ class VoiceForgeDaemon:
         log.info("daemon.copilot_capture_released", status=status, session_id=session_id, stt_ambiguous=stt_ambiguous)
 
     def get_copilot_capture_status(self) -> str:
-        """KC3/KC4/KC5/KC6: return JSON for overlay: stt_ambiguous, transcript_snippet, rag_*, copilot_answer, copilot_dos, copilot_donts, copilot_clarify, copilot_confidence."""
+        """KC3–KC7: return JSON for overlay: stt_ambiguous, transcript_snippet, rag_*, fast-track and deep-track cards."""
         with self._copilot_lock:
             ambiguous = self._last_copilot_stt_ambiguous
             snippet = self._last_copilot_transcript
@@ -442,6 +467,9 @@ class VoiceForgeDaemon:
             donts = list(self._last_copilot_donts)
             clarify = list(self._last_copilot_clarify)
             confidence = self._last_copilot_confidence
+            risk = list(self._last_copilot_risk)
+            strategy = self._last_copilot_strategy
+            emotion = self._last_copilot_emotion
         payload: dict[str, Any] = {
             "stt_ambiguous": ambiguous,
             "transcript_snippet": snippet,
@@ -461,6 +489,12 @@ class VoiceForgeDaemon:
         if clarify:
             payload["copilot_clarify"] = clarify
         payload["copilot_confidence"] = confidence
+        if risk:
+            payload["copilot_risk"] = risk
+        if strategy:
+            payload["copilot_strategy"] = strategy
+        if emotion:
+            payload["copilot_emotion"] = emotion
         return json.dumps(payload, ensure_ascii=False)
 
     def is_listening(self) -> bool:

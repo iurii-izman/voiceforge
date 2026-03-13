@@ -121,6 +121,28 @@
   border-left-color: #757575;
 }
 
+.copilot-card--risk {
+  border-left-color: #c62828;
+}
+
+.copilot-card--strategy {
+  border-left-color: #6a1b9a;
+}
+
+.copilot-card--emotion {
+  border-left-color: #00838f;
+}
+
+.copilot-cards-overflow {
+  font-size: 11px;
+  color: #9e9e9e;
+  padding: 0.25rem 0.5rem;
+}
+
+.copilot-cards-overflow[hidden] {
+  display: none;
+}
+
 .copilot-card__title {
   font-size: 10px;
   text-transform: uppercase;

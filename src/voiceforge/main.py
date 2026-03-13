@@ -578,11 +578,13 @@ def run_analyze_pipeline(
     stream_callback: Any = None,
     out_transcript: list[str] | None = None,
     for_copilot: bool = False,
+    session_context: list[str] | None = None,
 ) -> tuple[str, list[dict[str, Any]], dict[str, Any]]:
     """Run core analyze pipeline and return (display_text, segments_for_log, analysis_for_log).
     If stream_callback is set, LLM output is streamed via stream_callback(delta) (#91).
     KC4: if out_transcript is a list, out_transcript[0] is set to the raw STT transcript.
-    KC6 (#178): when for_copilot=True, also run fast-track LLM and add Answer/Do/Don't/Clarify to analysis_for_log."""
+    KC6 (#178): when for_copilot=True, also run fast-track LLM and add Answer/Do/Don't/Clarify to analysis_for_log.
+    KC7 (#179): session_context = previous turns in this conversation (prepended to RAG context for LLM)."""
     bind_trace_id()  # one trace_id per pipeline run (CLI or daemon worker)
     cfg = _get_config()
     auto_index_warnings = _ensure_rag_auto_index(cfg)
@@ -605,6 +607,8 @@ def run_analyze_pipeline(
         out_transcript[0] = transcript or ""
     diar_segments = result.diar_segments
     context = result.context
+    if session_context:
+        context = "Previous conversation (recent turns):\n" + "\n".join(session_context[-5:]) + "\n\n" + (context or "")
     transcript_redacted = result.transcript_redacted
     pipeline_warnings: list[str] = (getattr(result, "warnings", None) or []) + auto_index_warnings
 
@@ -719,6 +723,20 @@ def run_analyze_pipeline(
                 analysis_for_log["copilot_donts"] = []
                 analysis_for_log["copilot_clarify"] = []
                 analysis_for_log["copilot_confidence"] = 0.0
+        if for_copilot:
+            try:
+                from voiceforge.llm.router import analyze_copilot_deep
+
+                deep_cards, deep_cost = analyze_copilot_deep(transcript, context=context, model=effective_model)
+                analysis_for_log["copilot_risk"] = list(deep_cards.risks) if deep_cards.risks else []
+                analysis_for_log["copilot_strategy"] = (deep_cards.strategy or "").strip()
+                analysis_for_log["copilot_emotion"] = (deep_cards.emotion or "").strip() or None
+                analysis_for_log["cost_usd"] = analysis_for_log.get("cost_usd", 0.0) + deep_cost
+            except Exception as e:
+                log.warning("analyze.copilot_deep_failed", error=str(e))
+                analysis_for_log["copilot_risk"] = []
+                analysis_for_log["copilot_strategy"] = ""
+                analysis_for_log["copilot_emotion"] = None
         return ("\n".join(header_lines + lines), segments_for_log, analysis_for_log)
 
     lines = _format_meeting_analysis_lines(llm_result)
@@ -747,6 +765,20 @@ def run_analyze_pipeline(
             analysis_for_log["copilot_donts"] = []
             analysis_for_log["copilot_clarify"] = []
             analysis_for_log["copilot_confidence"] = 0.0
+        if for_copilot:
+            try:
+                from voiceforge.llm.router import analyze_copilot_deep
+
+                deep_cards, deep_cost = analyze_copilot_deep(transcript, context=context, model=effective_model)
+                analysis_for_log["copilot_risk"] = list(deep_cards.risks) if deep_cards.risks else []
+                analysis_for_log["copilot_strategy"] = (deep_cards.strategy or "").strip()
+                analysis_for_log["copilot_emotion"] = (deep_cards.emotion or "").strip() or None
+                analysis_for_log["cost_usd"] = analysis_for_log.get("cost_usd", 0.0) + deep_cost
+            except Exception as e:
+                log.warning("analyze.copilot_deep_failed", error=str(e))
+                analysis_for_log["copilot_risk"] = []
+                analysis_for_log["copilot_strategy"] = ""
+                analysis_for_log["copilot_emotion"] = None
     return ("\n".join(header_lines + lines), segments_for_log, analysis_for_log)
 
 

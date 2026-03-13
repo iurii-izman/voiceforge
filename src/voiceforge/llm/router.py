@@ -13,7 +13,7 @@ from voiceforge.core.secrets import set_env_keys_from_keyring
 from voiceforge.llm.circuit_breaker import wrap_completion
 from voiceforge.llm.pii_filter import redact
 from voiceforge.llm.prompt_loader import load_prompt, load_template_prompts
-from voiceforge.llm.schemas import CopilotFastCards
+from voiceforge.llm.schemas import CopilotDeepCards, CopilotFastCards
 
 log = structlog.get_logger()
 TModel = TypeVar("TModel", bound=BaseModel)
@@ -464,6 +464,52 @@ def analyze_copilot_fast(
         response_model=CopilotFastCards,
         model=model_id,
         max_tokens=384,
+    )
+    return (result, cost)
+
+
+# KC7 (#179): Deep-track — Risk, Strategy, Emotion (non-blocking after fast-track)
+
+
+_COPILOT_DEEP_SYSTEM_FALLBACK = """You are a copilot for live conversations. Produce JSON: risks (0–3 bullets, ≤90 chars each), strategy (1–2 sentences), emotion (optional or null). Be concise. Same language as transcript. Output only valid JSON."""
+
+
+def _copilot_deep_prompt(transcript: str, context: str) -> list[dict[str, Any]]:
+    """Build messages for copilot deep-track (short token budget)."""
+    system_text = load_prompt("copilot_deep")
+    if not system_text or not system_text.strip():
+        log.warning("llm.copilot_deep_prompt_missing", message="Using fallback")
+        system_text = _COPILOT_DEEP_SYSTEM_FALLBACK
+    user_content = f"Context:\n{context[:2000] or '(none)'}\n\nTranscript:\n{transcript[:1500]}"
+    return [
+        {"role": "system", "content": system_text},
+        {"role": "user", "content": user_content},
+    ]
+
+
+def analyze_copilot_deep(
+    transcript: str,
+    context: str = "",
+    *,
+    model: str | None = None,
+) -> tuple[CopilotDeepCards, float]:
+    """KC7 (#179): One LLM call for Risk, Strategy, Emotion cards. Runs after fast-track; does not block it."""
+    from voiceforge.core.config import Settings
+
+    model_id = model or DEFAULT_MODEL
+    _complete_structured_check_budget(Settings())
+    set_env_keys_from_keyring()
+    from voiceforge.core.preflight import NetworkUnavailableError, check_network_for_llm
+
+    network_err = check_network_for_llm(model_id)
+    if network_err:
+        raise NetworkUnavailableError(network_err)
+    prompt = _copilot_deep_prompt(transcript, context)
+    result, cost = complete_structured(
+        prompt,
+        response_model=CopilotDeepCards,
+        model=model_id,
+        max_tokens=256,
     )
     return (result, cost)
 

@@ -392,3 +392,29 @@ def test_get_copilot_capture_status_fast_track_cards_kc6() -> None:
     assert data.get("copilot_donts") == ["Don't promise discounts"]
     assert data.get("copilot_clarify") == ["Which tier?"]
     assert data.get("copilot_confidence") == 0.9
+
+
+def test_get_copilot_capture_status_deep_track_cards_kc7() -> None:
+    """KC7 (#179): get_copilot_capture_status includes copilot_risk, copilot_strategy, copilot_emotion."""
+    daemon = _make_daemon()
+    daemon._last_copilot_risk = ["No commitment without legal review."]
+    daemon._last_copilot_strategy = "Suggest a follow-up call."
+    daemon._last_copilot_emotion = "Neutral tone recommended."
+    out = daemon.get_copilot_capture_status()
+    data = json.loads(out)
+    assert data.get("copilot_risk") == ["No commitment without legal review."]
+    assert data.get("copilot_strategy") == "Suggest a follow-up call."
+    assert data.get("copilot_emotion") == "Neutral tone recommended."
+
+
+def test_copilot_session_memory_clears_on_listen_stop_kc7() -> None:
+    """KC7 (#179): _copilot_session_turns is cleared when listen_stop runs (new conversation)."""
+    daemon = _make_daemon()
+    with daemon._copilot_lock:
+        daemon._copilot_session_turns = ["turn1", "turn2"]
+    with daemon._listen_lock:
+        daemon._listen_active = True
+    daemon.listen_stop()
+    with daemon._copilot_lock:
+        turns = list(daemon._copilot_session_turns)
+    assert turns == []

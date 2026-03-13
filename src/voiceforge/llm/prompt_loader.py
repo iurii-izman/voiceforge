@@ -8,7 +8,7 @@ from pathlib import Path
 
 _PROMPTS_DIR = Path(__file__).resolve().parent / "prompts"
 _TEMPLATE_NAMES = ("standup", "sprint_review", "one_on_one", "brainstorm", "interview")
-_SINGLE_PROMPTS = ("analysis", "live_summary", "status_update", "copilot_fast")
+_SINGLE_PROMPTS = ("analysis", "live_summary", "status_update", "copilot_fast", "copilot_deep")
 
 
 def _user_templates_dir() -> Path:

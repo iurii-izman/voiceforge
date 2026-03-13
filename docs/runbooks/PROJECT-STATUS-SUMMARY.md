@@ -1,6 +1,6 @@
 # VoiceForge: Project Status & Productization Roadmap
 
-**Обновлено:** 2026-03-14 (KC6 done: fast-track cards Answer, Do/Don't, Clarify; next = KC7; `#164/#165` remain background hardening). **Версия:** 0.2.0-alpha.2. **Стадия:** Knowledge Copilot program active / maintenance hardening in background.
+**Обновлено:** 2026-03-14 (KC7 done: deep track, session memory, card priority/overflow; next = KC8; `#164/#165` remain background hardening). **Версия:** 0.2.0-alpha.2. **Стадия:** Knowledge Copilot program active / maintenance hardening in background.
 **Предыдущий цикл (#97-#123):** закрыт полностью; архив: [history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
 
 ---
@@ -88,12 +88,12 @@
 
 ### Main Execution Order
 
-**Следующий executable block:** [#179](https://github.com/iurii-izman/voiceforge/issues/179) `KC7 · Deep track, session memory, card priority/overflow`
+**Следующий executable block:** [#180](https://github.com/iurii-izman/voiceforge/issues/180) `KC8 · Main-window copilot integration and settings`
 
 | Wave | Issues | Статус | Что реализуем |
 | --- | --- | --- | --- |
-| Wave 1 MVP Core | [#174](https://github.com/iurii-izman/voiceforge/issues/174) ✓ → [#175](https://github.com/iurii-izman/voiceforge/issues/175) ✓ → [#176](https://github.com/iurii-izman/voiceforge/issues/176) ✓ → [#177](https://github.com/iurii-izman/voiceforge/issues/177) ✓ → [#178](https://github.com/iurii-izman/voiceforge/issues/178) ✓ | Done | KC6 done: fast-track cards; next: KC7 deep track |
-| Wave 2 MVP Complete | [#179](https://github.com/iurii-izman/voiceforge/issues/179) → [#180](https://github.com/iurii-izman/voiceforge/issues/180) | Todo | Deep track/session memory, main-window copilot integration |
+| Wave 1 MVP Core | [#174](https://github.com/iurii-izman/voiceforge/issues/174) ✓ → [#178](https://github.com/iurii-izman/voiceforge/issues/178) ✓ | Done | Wave 1 complete |
+| Wave 2 MVP Complete | [#179](https://github.com/iurii-izman/voiceforge/issues/179) ✓ → [#180](https://github.com/iurii-izman/voiceforge/issues/180) | Active | KC7 done; next: KC8 main-window copilot |
 | Wave 2 V2 Surface | [#181](https://github.com/iurii-izman/voiceforge/issues/181) | Todo | Knowledge management and context packs |
 | Wave 3 V2 Expansion | [#182](https://github.com/iurii-izman/voiceforge/issues/182) → [#183](https://github.com/iurii-izman/voiceforge/issues/183) | Todo | Explicit mode system, offline/hybrid maturity, system audio and scenario presets |
 | Wave 4 V3 / Pro / Frontier | [#184](https://github.com/iurii-izman/voiceforge/issues/184) → [#185](https://github.com/iurii-izman/voiceforge/issues/185) → [#186](https://github.com/iurii-izman/voiceforge/issues/186) | Todo | Pro cards, adaptive intelligence, copilot QA/reliability/release evidence |

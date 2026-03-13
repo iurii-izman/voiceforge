@@ -138,3 +138,23 @@ class CopilotFastCards(BaseModel):
         le=1.0,
         description="Model confidence 0–1 for this answer given transcript and context",
     )
+
+
+# KC7 (#179): Deep-track cards (Risk, Strategy, Emotion) — V2 essentials, non-blocking after fast-track
+
+
+class CopilotDeepCards(BaseModel):
+    """Structured output for copilot deep-track: Risk, Strategy, Emotion. Rendered when available."""
+
+    risks: list[str] = Field(
+        default_factory=list,
+        description="0–3 short bullets: limitations, conditions, legal/cost risks (each ≤90 chars)",
+    )
+    strategy: str = Field(
+        default="",
+        description="1–2 sentences: where to steer the conversation next",
+    )
+    emotion: str | None = Field(
+        default=None,
+        description="Optional: tone/emotional context and recommended tone",
+    )

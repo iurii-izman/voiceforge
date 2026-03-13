@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии**. Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-14 (KC6 done: fast-track cards Answer, Do/Don't, Clarify; next = KC7; `#164/#165` remain background hardening)
+**Обновлено:** 2026-03-14 (KC7 done: deep track, session memory, card priority/overflow; next = KC8; `#164/#165` remain background hardening)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** KC6 · Fast-track cards: Answer, Do/Don't, Clarify (#178): CopilotFastCards schema + prompts/copilot_fast.txt; analyze_copilot_fast() в router (max_tokens=384); run_analyze_pipeline(for_copilot=True) + daemon storage/get_copilot_capture_status (copilot_answer, dos, donts, clarify, confidence); overlay render Evidence → Answer → Do/Don't → Clarify. Targeted tests: test_copilot_fast_cards_schema_kc6, test_get_copilot_capture_status_fast_track_cards_kc6. E2E release-gate passed. Docs: copilot-program-map, PROJECT-STATUS-SUMMARY, next-iteration-focus.
+**Сделано в сессии:** KC7 · Deep track, session memory, card priority/overflow (#179): session_context в run_analyze_pipeline + _copilot_session_turns в daemon (clear on listen_stop); CopilotDeepCards + analyze_copilot_deep() + copilot_risk/strategy/emotion в status; overlay max 3 cards by priority + overflow pill, Risk/Strategy/Emotion slots; fetchStatusAndRenderCards в analyzing. Tests: test_copilot_deep_cards_schema_kc7, test_get_copilot_capture_status_deep_track_cards_kc7, test_copilot_session_memory_clears_on_listen_stop_kc7. E2E passed. Docs: copilot-program-map, PROJECT-STATUS-SUMMARY, next-iteration-focus.
 
-**Следующий шаг:** взять [#179](https://github.com/iurii-izman/voiceforge/issues/179) `KC7 · Deep track, session memory, card priority/overflow` как следующий исполняемый block.
+**Следующий шаг:** взять [#180](https://github.com/iurii-izman/voiceforge/issues/180) `KC8 · Main-window copilot integration and settings` как следующий исполняемый block.
 
 ---
 
@@ -32,7 +32,7 @@
 | **KD** | #170✓ → #172✓ | Done | Decision-locked product / UX / architecture contracts |
 | **KC bootstrap** | #173✓ | Done | Program seeding, traceability, docs handoff |
 | **Wave 1 MVP Core** | #174✓ → #175✓ → #176✓ → #177✓ → #178✓ | Done | KC6 done; Wave 1 complete |
-| **Wave 2 MVP Complete** | #179 → #180 | Active | Next: KC7 deep track, session memory, card priority/overflow |
+| **Wave 2 MVP Complete** | #179✓ → #180 | Active | KC7 done; next: KC8 main-window copilot |
 | **Wave 2 V2 Surface** | #181 | Todo | Knowledge management + context packs |
 | **Wave 3 V2 Expansion** | #182 → #183 | Todo | Explicit mode system; offline/hybrid maturity; system audio + scenario presets |
 | **Wave 4 V3 / Frontier** | #184 → #185 → #186 | Todo | Pro cards, adaptive intelligence, copilot QA/release/perf |
@@ -52,7 +52,7 @@
 
 Перед началом крупного блока: `./scripts/preflight_repo.sh --with-tests`. Для desktop/UI изменений: `cd desktop && npm run e2e:release-gate`. Для native/Tauri/system-level изменений дополнительно: `cd desktop && npm run e2e:native:headless`.
 
-Текущий блок: KC7 · Deep track, session memory, card priority/overflow (#179).
+Текущий блок: KC8 · Main-window copilot integration and settings (#180).
 ```
 
 ---
