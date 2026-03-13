@@ -10,6 +10,8 @@
 - **Единый бэклог (ваши решения и ручные шаги):** [backlog-and-actions.md](../plans/backlog-and-actions.md) — блоки A–E; issues #82–86 на доске.
 - **Задачи Phase A–D (issues #55–73):** [audit/audit.md](../audit/audit.md) — статус W1–W20, маппинг на issues.
 - **Следующий шаг и фокус итерации:** [next-iteration-focus.md](next-iteration-focus.md) — обновляет агент в конце сессии.
+- **Knowledge Copilot program map:** [copilot-program-map.md](copilot-program-map.md) — главный operational map для трека `KD/KC/KV`.
+- **Knowledge Copilot product/architecture source of truth:** [../voiceforge-copilot-architecture.md](../voiceforge-copilot-architecture.md).
 - **Границы scope для Phase E:** [phase-e-decision-log.md](phase-e-decision-log.md) — зафиксированные решения по E19-E21.
 - **Следующая remediation wave:** [quality-audit-2026-03.md](quality-audit-2026-03.md) — QA1-QA6, GitHub Security, Sonar, mypy.
 - **История (что сделано):** [history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
@@ -64,6 +66,7 @@ gh auth refresh -s project
 
 Дополнительные labels, которые задают policy-слой поверх issue backlog:
 
+- `copilot-program` — новый главный program track для Knowledge Copilot
 - `decision-locked` — решение пользователя/проекта уже принято, повторно не обсуждать без нового explicit decision
 - `primary-track` — основной route для активной разработки
 - `maintenance-only` — surface поддерживается, но не расширяется
@@ -72,6 +75,8 @@ gh auth refresh -s project
 - `accept-later` — направление принято как будущее, но не активируется в текущей фазе
 
 Эти labels должны совпадать с [phase-e-decision-log.md](phase-e-decision-log.md). Если GitHub API не позволяет создать project views программно, canonical filters хранятся в Project README и в этом runbook. Для E-блоков пользоваться уже созданными issues; новые E-issues не заводить без явного нового scope.
+
+Для Knowledge Copilot program пользоваться [copilot-program-map.md](copilot-program-map.md): там зафиксированы `KD/KC/KV` issue registry, wave order, traceability matrix и текущий autopilot prompt. `#164/#165` остаются background hardening backlog и не задают active focus, пока не блокируют основной copilot track.
 
 ### Рекомендуемые ручные views
 

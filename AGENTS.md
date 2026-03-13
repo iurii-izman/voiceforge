@@ -10,12 +10,15 @@
 
 - **Ключи и доступы — только keyring.** Сервис `voiceforge`. Имена: `anthropic`, `openai`, `huggingface` и др. Список: `docs/runbooks/keyring-keys-reference.md`. Не хардкодить, не коммитить.
 - **Среда:** Fedora Atomic Cosmic, toolbox/uv. Команды: `uv sync --extra all`, `./scripts/bootstrap.sh`, `./scripts/doctor.sh`.
-- **Приоритет фич:** по порядку 1→20 из `docs/plans.md`. Для Phase E дополнительно соблюдать `docs/runbooks/phase-e-decision-log.md`. Не предлагать фичи вне этого порядка без запроса.
+- **Главный active track:** Knowledge Copilot program. Источники правды: `docs/voiceforge-copilot-architecture.md`, `docs/runbooks/copilot-program-map.md`, `docs/runbooks/next-iteration-focus.md`, `docs/runbooks/PROJECT-STATUS-SUMMARY.md`.
+- **Старый roadmap / Phase E:** `docs/plans.md` и `docs/runbooks/phase-e-decision-log.md` остаются историческим контекстом и scope guard для legacy surfaces. Не возвращаться к maintenance backlog как к главному execution order, пока copilot track не блокирован.
 
 ## Контекст и продолжение
 
 - **Полный контекст и чеклист конца сессии:** `docs/runbooks/agent-context.md` — приложить в новый чат (`@docs/runbooks/agent-context.md`).
 - **Следующий шаг и промпт для нового чата:** `docs/runbooks/next-iteration-focus.md` — при продолжении работы (`@docs/runbooks/next-iteration-focus.md`).
+- **Program map для автопилота:** `docs/runbooks/copilot-program-map.md`.
+- **Product/architecture source of truth для Copilot:** `docs/voiceforge-copilot-architecture.md`.
 - **Scope guard для автопилота:** `docs/runbooks/phase-e-decision-log.md`.
 - **AI tooling / Cursor / Codex / Claude / Sonar:** `docs/runbooks/ai-tooling-setup.md`.
 - **Индекс документации:** `docs/DOCS-INDEX.md`.
@@ -26,5 +29,5 @@
 
 ## Эффективность
 
-- Точечный поиск (grep/codebase_search по символам), без лишних шагов. План развития — сверять с кодом перед реализацией (`docs/plans.md`, `docs/runbooks/PROJECT-STATUS-SUMMARY.md`, правило plan-verify-before-implement).
+- Точечный поиск (grep/codebase_search по символам), без лишних шагов. План развития — сверять с кодом перед реализацией (`docs/voiceforge-copilot-architecture.md`, `docs/runbooks/copilot-program-map.md`, `docs/runbooks/PROJECT-STATUS-SUMMARY.md`, правило plan-verify-before-implement).
 - Одна задача в сообщении — быстрее и предсказуемее результат.

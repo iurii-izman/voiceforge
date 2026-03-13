@@ -1,6 +1,6 @@
 # VoiceForge: Project Status & Productization Roadmap
 
-**Обновлено:** 2026-03-13 (desktop QA plan added; desktop exit UX and session-detail navigation recovery fixed; remaining hardening queue = Sonar recheck + `glib`). **Версия:** 0.2.0-alpha.2. **Стадия:** Post-Phase-E maintenance / targeted hardening mode.
+**Обновлено:** 2026-03-13 (Knowledge Copilot program bootstrapped; `KD1-KD3` and `KC1` seeded/closed; next active block = `KC2`; `#164/#165` remain background hardening). **Версия:** 0.2.0-alpha.2. **Стадия:** Knowledge Copilot program active / maintenance hardening in background.
 **Предыдущий цикл (#97-#123):** закрыт полностью; архив: [history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
 
 ---
@@ -62,7 +62,62 @@
 
 ---
 
-## 2. Phase E: Productization Roadmap (21 блок)
+## 2. Knowledge Copilot Program
+
+**Главный source of truth:** [voiceforge-copilot-architecture.md](../voiceforge-copilot-architecture.md)
+**Операционная карта:** [copilot-program-map.md](copilot-program-map.md)
+**Доска:** [GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1)
+**Labels:** `copilot-program`, `decision-locked`, `autopilot`, `primary-track`, `user-decision`
+
+### Program Shape
+
+Новый главный трек поверх maintenance режима:
+
+- `KD` — decision-locked policy issues; создаются и закрываются сразу
+- `KC` — большие autopilot implementation blocks; это основной execution track
+- `KV` — user/external gates; в проекте существуют сразу, но не реализуются кодом до явного решения
+
+### Decision / Bootstrap Blocks
+
+| Prefix | Issue | Статус | Роль |
+| --- | --- | --- | --- |
+| KD1 | [#170](https://github.com/iurii-izman/voiceforge/issues/170) | Done | Product charter: Knowledge Copilot positioning, personas, scenarios |
+| KD2 | [#171](https://github.com/iurii-izman/voiceforge/issues/171) | Done | UX contract: push-to-capture, calm technology, max 3 cards |
+| KD3 | [#172](https://github.com/iurii-izman/voiceforge/issues/172) | Done | Architecture contract: RAG-first, hybrid default, single orchestrator |
+| KC1 | [#173](https://github.com/iurii-izman/voiceforge/issues/173) | Done | Program bootstrap & traceability |
+
+### Main Execution Order
+
+**Следующий executable block:** [#174](https://github.com/iurii-izman/voiceforge/issues/174) `KC2 · Overlay Shell & Input Model`
+
+| Wave | Issues | Статус | Что реализуем |
+| --- | --- | --- | --- |
+| Wave 1 MVP Core | [#174](https://github.com/iurii-izman/voiceforge/issues/174) → [#175](https://github.com/iurii-izman/voiceforge/issues/175) → [#176](https://github.com/iurii-izman/voiceforge/issues/176) → [#177](https://github.com/iurii-izman/voiceforge/issues/177) → [#178](https://github.com/iurii-izman/voiceforge/issues/178) | Active | Overlay shell, capture runtime, streaming STT, evidence-first RAG, fast-track cards |
+| Wave 2 MVP Complete | [#179](https://github.com/iurii-izman/voiceforge/issues/179) → [#180](https://github.com/iurii-izman/voiceforge/issues/180) | Todo | Deep track/session memory, main-window copilot integration |
+| Wave 2 V2 Surface | [#181](https://github.com/iurii-izman/voiceforge/issues/181) | Todo | Knowledge management and context packs |
+| Wave 3 V2 Expansion | [#182](https://github.com/iurii-izman/voiceforge/issues/182) → [#183](https://github.com/iurii-izman/voiceforge/issues/183) | Todo | Explicit mode system, offline/hybrid maturity, system audio and scenario presets |
+| Wave 4 V3 / Pro / Frontier | [#184](https://github.com/iurii-izman/voiceforge/issues/184) → [#185](https://github.com/iurii-izman/voiceforge/issues/185) → [#186](https://github.com/iurii-izman/voiceforge/issues/186) | Todo | Pro cards, adaptive intelligence, copilot QA/reliability/release evidence |
+
+### Manual / External Gates
+
+| Gate | Issue | Timing | Why it cannot be auto-completed |
+| --- | --- | --- | --- |
+| KV1 | [#187](https://github.com/iurii-izman/voiceforge/issues/187) | Before KC11 | Legal/consent wording for system audio and retention |
+| KV2 | [#188](https://github.com/iurii-izman/voiceforge/issues/188) | Before KC2 completion | Overlay visual sign-off and intrusiveness review |
+| KV3 | [#189](https://github.com/iurii-izman/voiceforge/issues/189) | After KC6 | Real pilot validation with the primary persona |
+| KV4 | [#190](https://github.com/iurii-izman/voiceforge/issues/190) | Before commercial packaging | Business/pricing/packaging direction |
+| KV5 | [#191](https://github.com/iurii-izman/voiceforge/issues/191) | Before KC13 | Explicit platform expansion go/no-go |
+
+### Maintenance Backlog (Background Only)
+
+- [#165](https://github.com/iurii-izman/voiceforge/issues/165) — Sonar sweep residual triage
+- [#164](https://github.com/iurii-izman/voiceforge/issues/164) — remaining Linux desktop `glib` alert
+
+Они остаются открытыми, но больше не определяют основной execution order, пока не появится blocking regression.
+
+---
+
+## 3. Phase E: Productization Roadmap (21 блок)
 
 **Доска:** [GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1)
 **Phase:** E · Daily Driver | **Labels:** `productization`, `autopilot` / `user-decision`
@@ -199,7 +254,7 @@ Wave QA-C: #155 → #157
 
 ---
 
-## 3. Confidence Checklist
+## 4. Confidence Checklist
 
 | Функция | Работает? | Без ручных шагов? | При сбоях? | С хорошим UX? | Verdict |
 |---|---|---|---|---|---|
@@ -221,7 +276,7 @@ Wave QA-C: #155 → #157
 
 ---
 
-## 4. Friction Map (12 точек трения)
+## 5. Friction Map (12 точек трения)
 
 | # | Friction | Severity | Решается блоком |
 |---|----------|----------|-----------------|
@@ -240,7 +295,7 @@ Wave QA-C: #155 → #157
 
 ---
 
-## 5. Риски «кажется готовее, чем есть»
+## 6. Риски «кажется готовее, чем есть»
 
 1. **🟢 Desktop UI:** E2E meeting flow (Record→Analyze→View→Export), tray, hotkeys, packaging verification (E19 #142)
 2. **🔴 Diarization:** Тихо пропускается у 70% пользователей (нет HF token)
@@ -250,7 +305,7 @@ Wave QA-C: #155 → #157
 
 ---
 
-## 6. Прогноз
+## 7. Прогноз
 
 | Сценарий | Daily Driver Score | Время | Что получаем |
 |---|---|---|---|
@@ -263,7 +318,7 @@ Wave QA-C: #155 → #157
 
 ---
 
-## 7. External Risks & Wait States
+## 8. External Risks & Wait States
 
 | Item | Статус | Действие |
 |---|---|---|
@@ -277,7 +332,7 @@ Wave QA-C: #155 → #157
 
 ---
 
-## 8. Maintenance Mode: как работать после закрытия очереди
+## 9. Maintenance Mode: как работать после закрытия очереди
 
 **Формат:** feature-track Phase E закрыт. QA wave `#152-#157` завершена. Desktop stabilization `#159-#161` завершена. Репо находится в maintenance mode без активного open blocker.
 

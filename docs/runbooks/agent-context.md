@@ -2,7 +2,7 @@
 
 Единый контекст для Cursor-агента. Новый чат: приложи этот файл (@docs/runbooks/agent-context.md) — не ищи по проекту, работай по этому документу. Для продолжения — @docs/runbooks/next-iteration-focus.md (обновляет агент в конце сессии).
 
-**Индекс документации (актуальность):** `docs/DOCS-INDEX.md`. **Порядок в доках (архив, источники правды):** [doc-governance.md](doc-governance.md). **AI tooling и source of truth:** [ai-tooling-setup.md](ai-tooling-setup.md). **Quality remediation snapshot:** [quality-audit-2026-03.md](quality-audit-2026-03.md). **Автопилот конца сессии:** `.cursor/rules/agent-session-handoff.mdc` (копия в репо: [agent-session-handoff-rule.md](agent-session-handoff-rule.md)). **Max-autopilot и batching:** [cursor.md](cursor.md), [planning.md](planning.md), [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md).
+**Индекс документации (актуальность):** `docs/DOCS-INDEX.md`. **Порядок в доках (архив, источники правды):** [doc-governance.md](doc-governance.md). **AI tooling и source of truth:** [ai-tooling-setup.md](ai-tooling-setup.md). **Knowledge Copilot source of truth:** [../voiceforge-copilot-architecture.md](../voiceforge-copilot-architecture.md), [copilot-program-map.md](copilot-program-map.md). **Quality remediation snapshot:** [quality-audit-2026-03.md](quality-audit-2026-03.md). **Автопилот конца сессии:** `.cursor/rules/agent-session-handoff.mdc` (копия в репо: [agent-session-handoff-rule.md](agent-session-handoff-rule.md)). **Max-autopilot и batching:** [cursor.md](cursor.md), [planning.md](planning.md), [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md).
 
 ---
 
@@ -23,35 +23,22 @@
 
 ---
 
-## Приоритет фич (roadmap)
+## Приоритет программы
 
-Источник: `docs/plans.md` (roadmap 1–19, Phase A–D Steps 1–19, оставшееся до 100%). При предложении фич — по порядку 1→19.
+Главный active track теперь задают:
 
-| Приоритет | Направление |
-|-----------|-------------|
-| 1 | Шаблоны встреч в `analyze` |
-| 2 | Обновление статусов action items по следующей встрече |
-| 3 | Экспорт сессии (Markdown/PDF) |
-| 4 | Выбор модели Ollama в конфиге |
-| 5 | Документация «Первая встреча за 5 минут» |
-| 6 | Отчёты по затратам (cost report) |
-| 7 | Явный язык для STT |
-| 8 | Расширенные e2e-тесты |
-| 9 | Стриминговый STT в CLI (listen) |
-| 10 | Live summary во время listen |
-| 11 | Управление PII (вкл/выкл, только email) |
-| 12 | Простой локальный Web UI |
-| 13 | Десктопный UI (Tauri) |
-| 14 | Офлайн-пакет (Flatpak/AppImage) |
-| 15–19 | Smart trigger, бот, календарь, RAG-форматы, prompt caching |
+1. [../voiceforge-copilot-architecture.md](../voiceforge-copilot-architecture.md)
+2. [copilot-program-map.md](copilot-program-map.md)
+3. [next-iteration-focus.md](next-iteration-focus.md)
+4. [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md)
 
-Блоки: 1–4 быстрые победы; 5–7 доки/отчёты/STT; 8 e2e; 9–10 стриминг и live summary; 11–12 настройки и Web UI; 13–14 десктоп и упаковка; 15–20 опционально.
+Старый roadmap в `docs/plans.md` и policy-слой `phase-e-decision-log.md` остаются историческим контекстом и scope guard для legacy surfaces, но не определяют основной execution order, пока Copilot track не заблокирован.
 
 ---
 
 ## Режим max autopilot (Cursor)
 
-- **Порядок источников правды:** `agent-context` → `next-iteration-focus` → `PROJECT-STATUS-SUMMARY` → `planning` → `plans` / `audit`.
+- **Порядок источников правды:** `agent-context` → `next-iteration-focus` → `copilot-program-map` → `voiceforge-copilot-architecture` → `PROJECT-STATUS-SUMMARY` → `planning` → legacy `plans` / `audit`.
 - **Брать 1 главный P0/P1 блок** и максимум **2 соседних подблока** только если это тот же subsystem, те же файлы или тот же тестовый набор.
 - **Не смешивать unrelated surfaces** в одной итерации: например desktop packaging + RAG parsers + calendar.
 - **Цель итерации:** код → targeted tests → docs/контракты → GitHub Project card → commit/push → обновление `next-iteration-focus`.
@@ -88,7 +75,7 @@
 В начале **каждого** нового чата вставлять этот блок (и при необходимости дописать задачу). Агент по нему знает: контекст, keyring, что в конце сессии делать коммит/пуш и обновлять next-iteration-focus.
 
 ```
-Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Режим Cursor и batching: @docs/runbooks/cursor.md. При работе по доске и issues: @docs/runbooks/planning.md. Сводный статус и приоритеты: @docs/runbooks/PROJECT-STATUS-SUMMARY.md. Quality remediation snapshot: @docs/runbooks/quality-audit-2026-03.md. Scope guard: @docs/runbooks/phase-e-decision-log.md. AI/tooling source of truth: @docs/runbooks/ai-tooling-setup.md.
+Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Product/architecture source of truth: @docs/voiceforge-copilot-architecture.md. Program map: @docs/runbooks/copilot-program-map.md. Режим Cursor и batching: @docs/runbooks/cursor.md. При работе по доске и issues: @docs/runbooks/planning.md. Сводный статус и приоритеты: @docs/runbooks/PROJECT-STATUS-SUMMARY.md. Scope guard для legacy surfaces: @docs/runbooks/phase-e-decision-log.md. AI/tooling source of truth: @docs/runbooks/ai-tooling-setup.md.
 
 Режим: максимальный автопилот и максимум согласованных блоков за итерацию. Выбирай 1 главный P0/P1 блок и до 2 соседних подблоков только если это тот же subsystem, те же файлы или те же проверки. Не смешивай unrelated surfaces. Работай по существующим issue и policy-артефактам проекта; не создавай новые feature issues без отдельной причины. Делай полный цикл: код, targeted tests, docs/контракты, GitHub Project status, commit/push, обновление next-iteration-focus.
 

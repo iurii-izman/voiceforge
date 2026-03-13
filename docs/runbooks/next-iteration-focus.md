@@ -1,89 +1,69 @@
 # Фокус следующей итерации
 
-Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
+Файл обновляется **агентом в конце каждой сессии**. Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-13 (desktop QA plan added; desktop exit UX and session-detail navigation recovery fixed; remaining follow-up is remote Sonar recheck plus GTK/glib alert)
+**Обновлено:** 2026-03-13 (Knowledge Copilot program bootstrapped; `KD1-KD3` and `KC1` seeded/closed; next active block = `KC2`; `#164/#165` remain background hardening)
 
 ---
 
 ## Что требуется от вас (подтверждения и решения)
 
-- **Security/CVE:** дополнительных ручных действий сейчас **не требуется**. `pip-audit` снова чист; источник правды по remaining remote alerts — [security-decision-log.md](security-decision-log.md).
-- **E19-E21:** дополнительных решений сейчас **не требуется**. Политика зафиксирована в [phase-e-decision-log.md](phase-e-decision-log.md):
-  - `#142`: **Invest in Tauri**
-  - `#143`: **Freeze Web UI / Telegram / RAG watcher; Invest narrow in Calendar**
-  - `#144`: **Accept later = managed packaging; Defer = macOS/Windows, browser extension, GPU, Whisper.cpp/MLX; Reject current phase = SaaS, Web-only main UI, collaborative notes, PostgreSQL, fine-tuning**
-- **Keyring (HuggingFace):** Проверка: `uv run python -c "from voiceforge.core.secrets import get_api_key; print('huggingface:', 'present' if get_api_key('huggingface') else 'absent')"`. **Проверено:** ключ присутствует.
+- **KV1 / legal-consent:** пока дополнительных ручных действий не требуется, но до `KC11` нужно будет отдельное подтверждение по system-audio consent и retention wording.
+- **KV2 / overlay UX sign-off:** до завершения `KC2` потребуется живой просмотр overlay UX и короткое подтверждение направления.
+- **Security hardening:** `#164/#165` остаются открытыми, но не задают основной execution order, пока не появится blocking regression.
+- **Legacy scope guard:** [phase-e-decision-log.md](phase-e-decision-log.md) остаётся ограничителем для старых surfaces (Web UI / Telegram / RAG watcher / calendar narrow path) и не должен silently переопределяться в copilot треке.
 
 ---
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** закрыты targeted desktop bugs `#167` и `#168`, а также добавлен единый [desktop-qa-plan.md](desktop-qa-plan.md): теперь есть один operational source of truth для blocking `e2e:release-gate`, advisory `e2e:native:headless`, ручного UX checklist и bug intake → regression loop. Локальные проверки зелёные: `npm --prefix desktop run e2e:release-gate` (`29 passed`), `check_docs_consistency.py`.
+**Сделано в сессии:** Knowledge Copilot program оформлен как новый главный track. Добавлены `scripts/create_copilot_program_issues.sh` и [copilot-program-map.md](copilot-program-map.md); `docs/voiceforge-copilot-architecture.md` зафиксирован как source of truth; в GitHub Project созданы `KD1-KD3`, `KC1-KC14`, `KV1-KV5`; `KD1-KD3` и `KC1` закрыты как выполненные policy/bootstrap blocks. `PROJECT-STATUS-SUMMARY.md` и `DOCS-INDEX.md` переключены на новый program track.
 
-**Следующий шаг:** завершить `#165`: дождаться re-analysis SonarCloud после уже запушенного low-risk cleanup и снять новый issue snapshot. Если low-risk findings реально ушли, закрыть `#165` и только потом возвращаться к `#164` как узкому Linux GTK/Tauri refresh для remaining `glib` alert.
+**Следующий шаг:** взять [#174](https://github.com/iurii-izman/voiceforge/issues/174) `KC2 · Overlay Shell & Input Model` как первый исполняемый copilot block. Цель блока: второе overlay-окно, always-on-top/no-focus contract, hotkey pressed/released flow, recording indicator, armed/recording/analyzing/error states и latest-capture replacement policy. До финального закрытия `KC2` потребуется `KV2` sign-off на visual direction и intrusiveness.
 
 ---
 
 ## Текущий practical queue
 
-**Единый источник:** [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md) разд. 2. Доска: [GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1).
+**Единый источник:** [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md) разд. 2 и [copilot-program-map.md](copilot-program-map.md). Доска: [GitHub Project VoiceForge](https://github.com/users/iurii-izman/projects/1).
 
-| Wave | Issues | Статус | Что делать |
-|------|--------|--------|------------|
-| **Phase E** | #124✓→#142✓ | **Done** | Feature-track закрыт |
-| **QA-A** | #152✓ → #153✓ | **Done** | Security + mypy закрыты |
-| **QA-B** | #154✓ → #156✓ | **Done** | DevOps/scripts Sonar закрыт |
-| **QA-C** | #155 ✓ → #157 ✓ | **Done** | Desktop/frontend Sonar закрыт |
-| **Desktop Stabilization** | #159✓ → #160✓ → #161✓ | **Done** | UX bugs, test policy и regression matrix закрыты |
-| **Decision log** | #143✓, #144✓ | Resolved | Scope guard для автопилота; новых user decisions сейчас не нужно |
-| **Maintenance** | #162✓ | Done | Weekly re-check добавлен |
-| **Security Hardening** | #163✓ → #164 | Active | npm native-e2e alert закрыт; `time` alert закрыт; remaining coordinated block = `glib` in Linux desktop stack |
-| **Sonar Sweep** | #165 | Active | Low-risk local cleanup готов; нужен remote Sonar recheck и residual triage |
-
----
-
-## Промпт для следующего чата (desktop stabilization autopilot)
-
-**Скопируй блок ниже в начало нового чата.** Агент работает в maintenance mode: если нет новой issue-задачи или нового bug report, ограничивается periodic re-check и не разворачивает новый feature-track.
-
-```
-Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Статус: @docs/runbooks/PROJECT-STATUS-SUMMARY.md. Desktop QA policy: @docs/runbooks/desktop-gui-testing.md. Desktop release gate: @docs/runbooks/desktop-release-gate-matrix.md. Scope guard: @docs/runbooks/phase-e-decision-log.md. AI/tooling source of truth: @docs/runbooks/ai-tooling-setup.md.
-
-Режим: максимальный автопилот, maintenance/hardening mode. Feature-track закрыт. Работать только по существующим targeted hardening issues или по новым подтверждённым bug reports. Новые feature issues не создавать без отдельной задачи. Если появляется новый bug report, сначала оформить issue на доске, затем работать по полному циклу: код → targeted tests → docs sync → GitHub Project status → commit + push → next-iteration-focus.
-
-Среда: Fedora Atomic, toolbox 43, uv sync --extra all. Ключи в keyring (keyring-keys-reference.md). Тесты: targeted subset, не полный pytest (OOM risk). Для infra/docs/governance cleanup сначала прогонять `./scripts/preflight_repo.sh --with-tests`. Pre-commit в toolbox; на хосте git push --no-verify если нет Python 3.12.
-
-Задача: взять `#165` как следующий targeted hardening block. Сначала выполнить `uv run python scripts/check_maintenance_state.py`, затем запушить текущий low-risk Sonar cleanup, дождаться SonarCloud re-analysis и снять новый snapshot через `uv run python scripts/sonar_fetch_issues.py --json`. Если low-risk findings ушли, закрыть `#165`, обновить docs и только потом возвращаться к `#164` как отдельному Rust/GTK refresh для remaining `glib` alert.
-```
+| Track | Issues | Статус | Что делать |
+| --- | --- | --- | --- |
+| **KD** | #170✓ → #172✓ | Done | Decision-locked product / UX / architecture contracts |
+| **KC bootstrap** | #173✓ | Done | Program seeding, traceability, docs handoff |
+| **Wave 1 MVP Core** | #174 → #175 → #176 → #177 → #178 | Active | Overlay shell, capture runtime, streaming STT, evidence-first RAG, fast-track cards |
+| **Wave 2 MVP Complete** | #179 → #180 | Todo | Deep track/session memory + main-window copilot integration |
+| **Wave 2 V2 Surface** | #181 | Todo | Knowledge management + context packs |
+| **Wave 3 V2 Expansion** | #182 → #183 | Todo | Explicit mode system; offline/hybrid maturity; system audio + scenario presets |
+| **Wave 4 V3 / Frontier** | #184 → #185 → #186 | Todo | Pro cards, adaptive intelligence, copilot QA/release/perf |
+| **Manual gates** | #187 → #191 | Todo | Legal, UX sign-off, pilot validation, business gate, platform gate |
+| **Background hardening** | #165, #164 | Open | Keep below copilot program unless blocking |
 
 ---
 
-## Промпт: aggressive quality autopilot
+## Промпт для следующего чата (copilot autopilot)
 
-**Скопируй блок ниже если хочешь агрессивный темп (2-3 блока за сессию).**
+```text
+Проект VoiceForge. Главный source of truth по новому треку: @docs/voiceforge-copilot-architecture.md и @docs/runbooks/copilot-program-map.md. Статус и active queue: @docs/runbooks/PROJECT-STATUS-SUMMARY.md и @docs/runbooks/next-iteration-focus.md. Planning/process: @docs/runbooks/planning.md. Existing desktop QA policy: @docs/runbooks/desktop-qa-plan.md. Legacy scope guard for old surfaces: @docs/runbooks/phase-e-decision-log.md.
 
-```
-Проект VoiceForge. Контекст: @docs/runbooks/agent-context.md. Фокус: @docs/runbooks/next-iteration-focus.md. Статус: @docs/runbooks/PROJECT-STATUS-SUMMARY.md. Quality audit: @docs/runbooks/quality-audit-2026-03.md. Scope guard: @docs/runbooks/phase-e-decision-log.md.
+Режим: максимальный автопилот, главный active track = Knowledge Copilot program. Работать только по блокам KC/KV/KD из GitHub Project. KD блоки считать decision-locked. KV блоки не реализовывать кодом, если в issue явно указан внешний/manual gate. Брать один верхний открытый KC-блок, переводить в In Progress, доводить до конца: код -> targeted tests -> docs sync -> GitHub Project -> commit + push -> обновить next-iteration-focus.
 
-Режим: AGGRESSIVE автопилот, quality remediation wave. Максимум согласованных QA-блоков за сессию. Брать блоки строго по порядку `#152 → #153 → #154 → #156 → #155 → #157`, но объединять только соседние блоки одного subsystem и одного verification loop.
+Не расширять scope блока за пределы его acceptance criteria. Любой найденный UI/UX баг сразу превращать в отдельный issue только если он не помещается в текущий KC-блок и имеет собственный verification loop.
 
-Среда: Fedora Atomic, toolbox 43, uv sync --extra all. Ключи в keyring. Тесты: targeted, не полный pytest. Не создавать новые feature issues без явной необходимости; работать по существующим QA issues и не активировать placeholders #148-#151.
+Перед началом крупного блока: `./scripts/preflight_repo.sh --with-tests`. Для desktop/UI изменений: `cd desktop && npm run e2e:release-gate`. Для native/Tauri/system-level изменений дополнительно: `cd desktop && npm run e2e:native:headless`.
 
-Задача: начать с верхнего открытого QA-блока. Если блок завершён раньше ожидания и следующий лежит в том же subsystem, сразу брать следующий. При каждом закрытии: commit + push, update docs, сразу следующий блок. В конце сессии: финальный docs sync + prompt для следующего чата.
+Текущий блок: KC2 · Overlay Shell & Input Model (#174).
 ```
 
 ---
 
 ## Актуальные напоминания
 
-- **OOM / зависание при тестах:** запускать **только лёгкие** тесты по изменённому surface. Не запускать полный `pytest tests/` в Cursor (pyannote/torch/pipeline) — риск OOM.
-- **Pre-commit (Fedora Atomic):** Python 3.12 в toolbox 43. Pre-commit: `toolbox run -c fedora-toolbox-43 bash -c 'cd /var/home/user/Projects/voiceforge && uv run pre-commit run --all-files'`. Вне toolbox: `git commit --no-verify`.
+- **OOM / зависание при тестах:** запускать только targeted tests по изменённому surface. Не гонять полный `pytest tests/`, если нет отдельной причины.
+- **Pre-commit / toolbox:** основной рабочий контур — toolbox + `uv sync --extra all`; перед крупной итерацией запускать `./scripts/preflight_repo.sh --with-tests`.
 - **Ключи:** только keyring ([keyring-keys-reference.md](keyring-keys-reference.md)).
-- **Новые CLI-команды:** через ADR (ADR-0001). `voiceforge meeting` и `voiceforge setup` — новые команды, потребуют ADR update.
-- **Scope guard:** UI-расширения делать в Tauri; Web UI, Telegram и RAG watcher не расширять beyond maintenance без нового решения. Calendar — только current CalDAV narrow path.
-- **Доска:** при работе по issue In Progress → Done. Команды: [planning.md](planning.md).
-- **Repo preflight:** перед cleanup / infra / governance-сессией запускать `./scripts/preflight_repo.sh --with-tests`.
+- **Project hygiene:** любой новый copilot bug, не помещающийся в текущий `KC` block, оформлять отдельным issue на доске и закрывать только с regression coverage.
+- **Background hardening:** `#164/#165` не закрывать и не удалять; возвращаться к ним только если Copilot track не блокирован.
 
 ---
 
@@ -91,4 +71,4 @@
 
 Всё закрытое: [docs/history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
 
-Вкратце: Roadmap 1-18 реализован. Phase A-D (#55-#73) закрыт. Score-to-100 (#97-#123) закрыт. Phase E Daily Driver (#124-#144) закрыт. QA wave #152–#157 завершена. Desktop stabilization `#159-#161` завершена. Репо в maintenance mode; активных open blockers сейчас нет.
+Вкратце: Roadmap 1-18 реализован. Phase A-D (#55-#73) закрыт. Score-to-100 (#97-#123) закрыт. Phase E Daily Driver (#124-#144) закрыт. QA wave #152–#157 завершена. Desktop stabilization `#159-#169` завершена. Новый активный трек: Knowledge Copilot program `#170-#191`.
