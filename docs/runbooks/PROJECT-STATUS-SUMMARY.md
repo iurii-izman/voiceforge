@@ -1,6 +1,6 @@
 # VoiceForge: Project Status & Productization Roadmap
 
-**Обновлено:** 2026-03-13 (desktop exit UX and session-detail navigation recovery fixed; remaining hardening queue = Sonar recheck + `glib`). **Версия:** 0.2.0-alpha.2. **Стадия:** Post-Phase-E maintenance / targeted hardening mode.
+**Обновлено:** 2026-03-13 (desktop QA plan added; desktop exit UX and session-detail navigation recovery fixed; remaining hardening queue = Sonar recheck + `glib`). **Версия:** 0.2.0-alpha.2. **Стадия:** Post-Phase-E maintenance / targeted hardening mode.
 **Предыдущий цикл (#97-#123):** закрыт полностью; архив: [history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
 
 ---
@@ -152,6 +152,7 @@ E11 (narrow CalDAV scope) ✓ → E16 ✓ → E17 ✓
 | DS4 | [#166](https://github.com/iurii-izman/voiceforge/issues/166) ✓ | Desktop GUI Audit · i18n polish and recovery consistency | P1 | M | Frontend | Runtime i18n и dashboard refresh после recovery/analyze закреплены кодом и regression coverage |
 | DS5 | [#167](https://github.com/iurii-izman/voiceforge/issues/167) ✓ | Desktop Exit UX · explicit quit path and close-to-tray clarity | P1 | S | Frontend | Добавлен явный выход из приложения и regression coverage для сценария `hide to tray -> quit` |
 | DS6 | [#168](https://github.com/iurii-izman/voiceforge/issues/168) ✓ | Desktop Session Detail UX · modeless detail and navigation recovery | P1 | S | Frontend | Detail view больше не блокирует навигацию после quick analyze; release gate снова стабилен |
+| DS7 | [#169](https://github.com/iurii-izman/voiceforge/issues/169) ✓ | Desktop QA Plan · operationalize GUI quality loop | P1 | S | Testing | Единый operational plan для blocking gate, advisory native smoke, manual UX checklist и bug intake policy |
 
 **Рекомендуемый порядок:**
 ```

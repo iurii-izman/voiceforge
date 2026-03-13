@@ -72,6 +72,8 @@ npm run e2e:report
 - канонический advisory native smoke: `npm run e2e:native:headless`
 - headed native smoke остаётся отдельной локальной проверкой: `npm run e2e:native`
 
+Один документ, который связывает automated gate, native smoke и ручной UX checklist: [docs/runbooks/desktop-qa-plan.md](../docs/runbooks/desktop-qa-plan.md).
+
 Что покрывается:
 
 - functional/autopilot flows: daemon ok, listen/analyze, sessions/detail, settings/autostart/updater

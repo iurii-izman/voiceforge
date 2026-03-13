@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии** (см. `agent-context.md`, `.cursor/rules/agent-session-handoff.mdc`). Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-13 (desktop exit UX and session-detail navigation recovery fixed; remaining follow-up is remote Sonar recheck plus GTK/glib alert)
+**Обновлено:** 2026-03-13 (desktop QA plan added; desktop exit UX and session-detail navigation recovery fixed; remaining follow-up is remote Sonar recheck plus GTK/glib alert)
 
 ---
 
@@ -19,7 +19,7 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** закрыты targeted desktop bugs `#167` и `#168`: добавлен явный `Выйти из VoiceForge`, close-to-tray copy теперь честно объясняет поведение крестика и `Alt+F4`, а session detail больше не блокирует навигацию после quick analyze. Локальные проверки зелёные: `npm --prefix desktop run e2e:release-gate` (`29 passed`), `check_docs_consistency.py`.
+**Сделано в сессии:** закрыты targeted desktop bugs `#167` и `#168`, а также добавлен единый [desktop-qa-plan.md](desktop-qa-plan.md): теперь есть один operational source of truth для blocking `e2e:release-gate`, advisory `e2e:native:headless`, ручного UX checklist и bug intake → regression loop. Локальные проверки зелёные: `npm --prefix desktop run e2e:release-gate` (`29 passed`), `check_docs_consistency.py`.
 
 **Следующий шаг:** завершить `#165`: дождаться re-analysis SonarCloud после уже запушенного low-risk cleanup и снять новый issue snapshot. Если low-risk findings реально ушли, закрыть `#165` и только потом возвращаться к `#164` как узкому Linux GTK/Tauri refresh для remaining `glib` alert.
 

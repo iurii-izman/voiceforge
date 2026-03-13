@@ -116,6 +116,7 @@
 | config-env-contract.md, keyring-keys-reference.md             | Конфиг и ключи                                                                          | Актуален                         |
 | installation-guide.md, desktop-build-deps.md, bootstrap.md    | Установка и сборка                                                                      | Актуален                         |
 | desktop-gui-testing.md                                        | Тестирование GUI десктопа: mocked autopilot, native smoke, a11y, visual regression      | Актуален                         |
+| desktop-qa-plan.md                                            | Единый desktop QA plan: blocking gate, advisory native smoke, ручной UX checklist       | Актуален                         |
 | desktop-release-gate-matrix.md                                | Release gate matrix для desktop: automated vs native vs manual proof                    | Актуален                         |
 | quickstart.md                                                 | Краткий сценарий; полная версия — first-meeting-5min                                    | Актуален                         |
 | cli-commands-and-run.md                                       | Все CLI-команды, когда пересобирать, как запускать демон и полный стек (toolbox)        | Актуален                         |

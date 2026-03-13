@@ -8,6 +8,8 @@
 
 Playwright/autopilot и visual/a11y suite дают сильный regression signal, но они не доказывают все свойства реального Tauri shell. Этот runbook фиксирует минимальный набор evidence перед desktop release и убирает двусмысленность между `tests green` и `desktop ready`.
 
+Единый operational plan для этого контура: [desktop-qa-plan.md](desktop-qa-plan.md).
+
 ---
 
 ## 2. Матрица покрытия

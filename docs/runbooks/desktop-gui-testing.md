@@ -3,6 +3,7 @@
 Практический runbook для desktop QA без платных сервисов: как автоматизировать проверку кнопок, состояний, вёрстки и доступности, и что оставить отдельным release-gate/manual audit.
 
 **Среда:** Fedora Atomic Cosmic; разработка и тяжёлые тесты — в **toolbox**. См. также [desktop-build-deps.md](desktop-build-deps.md), [test-operations.md](test-operations.md).
+Операционный источник правды по всему quality loop: [desktop-qa-plan.md](desktop-qa-plan.md).
 
 ---
 
