@@ -144,6 +144,8 @@ class VoiceForgeDaemon:
         self._last_copilot_emotion: str | None = None
         self._last_copilot_objections: list[str] = []
         self._last_copilot_follow_up_suggestions: list[str] = []
+        # KC14: idle-unload — time.monotonic() when last capture_release finished (for STT unload after idle)
+        self._last_copilot_release_monotonic: float | None = None
 
     def _dbus_streaming_emitter_loop(self) -> None:
         """Worker to get transcript chunks from queue and emit them as D-Bus signals."""
@@ -356,7 +358,17 @@ class VoiceForgeDaemon:
         log.debug("daemon.copilot_watcher_stopped")
 
     def capture_start(self) -> None:
-        """KC3: start copilot capture segment (ensure listen, set start marker, start 30s watcher)."""
+        """KC3: start copilot capture segment (ensure listen, set start marker, start 30s watcher). KC14: unload STT after idle."""
+        # KC14: if idle past threshold, unload STT to save RAM/CPU before loading tiny for this capture
+        idle_sec = getattr(self._cfg, "copilot_stt_idle_unload_seconds", 300.0) or 0
+        if idle_sec > 0:
+            with self._copilot_lock:
+                last = self._last_copilot_release_monotonic
+            if last is not None and (time.monotonic() - last) >= idle_sec:
+                try:
+                    self._model_manager.unload_stt()
+                except Exception as e:
+                    log.warning("daemon.copilot_idle_unload_failed", error=str(e))
         self.listen_start()
         pre_roll = getattr(self._cfg, "copilot_pre_roll_seconds", 1.0)
         max_cap = getattr(self._cfg, "copilot_max_capture_seconds", 30.0)
@@ -442,6 +454,7 @@ class VoiceForgeDaemon:
         stt_ambiguous = silence_label in (text or "") or (len((text or "").strip()) < 20) or (text or "").strip() == ""
         with self._copilot_lock:
             self._last_copilot_stt_ambiguous = stt_ambiguous
+            self._last_copilot_release_monotonic = time.monotonic()
         status = "error" if is_error else "ok"
         return (status, session_id, stt_ambiguous)
 
@@ -660,6 +673,7 @@ class VoiceForgeDaemon:
                 "copilot_stt_model_size": getattr(c, "copilot_stt_model_size", "tiny"),
                 "copilot_pre_roll_seconds": getattr(c, "copilot_pre_roll_seconds", 1.0),
                 "copilot_max_capture_seconds": getattr(c, "copilot_max_capture_seconds", 30.0),
+                "copilot_stt_idle_unload_seconds": getattr(c, "copilot_stt_idle_unload_seconds", 300.0),
             },
             ensure_ascii=False,
         )

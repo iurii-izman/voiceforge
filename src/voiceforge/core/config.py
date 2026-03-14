@@ -131,6 +131,11 @@ class Settings(BaseSettings):
         le=7,
         description="KC8: Max cards shown in overlay at once (architecture: 3).",
     )
+    copilot_stt_idle_unload_seconds: float = Field(
+        default=300.0,
+        ge=0,
+        description="KC14: Seconds of copilot idle after which STT model is unloaded to save RAM/CPU (0=disabled).",
+    )
     ring_file_path: str | None = Field(
         default=None,
         description="Ring file path; default XDG_RUNTIME_DIR/voiceforge/ring.raw",

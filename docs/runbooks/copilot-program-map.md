@@ -1,6 +1,6 @@
 # Knowledge Copilot Program Map
 
-**Updated:** 2026-03-14 (KC12 done: Pro cards and answer refinement; next = KC13)
+**Updated:** 2026-03-14 (KC14 done: Copilot QA, release, performance & reliability; program wave complete)
 **Primary source of truth:** [voiceforge-copilot-architecture.md](../voiceforge-copilot-architecture.md)
 **Execution queue:** [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md), [next-iteration-focus.md](next-iteration-focus.md)
 **Background hardening:** [#164](https://github.com/iurii-izman/voiceforge/issues/164), [#165](https://github.com/iurii-izman/voiceforge/issues/165)
@@ -13,7 +13,7 @@ This file is the operational map for the Knowledge Copilot program. Nothing in t
 
 - `KD1-KD3` are seeded and closed as `decision-locked` policy artefacts.
 - `KC1` is complete: the program is bootstrapped, the GitHub Project is seeded, and handoff is switched to the Copilot track.
-- **Current next executable block:** none unblocked — KC11 blocked by KV1 (#187), KC13 blocked by KV5 (#191)
+- **Current next executable block:** none — KC11 blocked by KV1, KC13 blocked by KV5; KC14 done (program wave complete)
 - `#164` and `#165` remain open as background maintenance/security hardening and are not part of the main copilot execution order.
 
 ## Block Registry
@@ -42,8 +42,8 @@ This file is the operational map for the Knowledge Copilot program. Nothing in t
 | KC10 | [#182](https://github.com/iurii-izman/voiceforge/issues/182) | 3 | Done | Explicit mode system, hybrid/offline maturity |
 | KC11 | [#183](https://github.com/iurii-izman/voiceforge/issues/183) | 3 | Blocked (KV1) | System audio and scenario presets |
 | KC12 | [#184](https://github.com/iurii-izman/voiceforge/issues/184) | 4 | Done | Pro cards and answer refinement |
-| KC13 | [#185](https://github.com/iurii-izman/voiceforge/issues/185) | 4 | Todo | Adaptive intelligence and extensibility |
-| KC14 | [#186](https://github.com/iurii-izman/voiceforge/issues/186) | 4 | Todo | Copilot QA, perf/reliability, release evidence |
+| KC13 | [#185](https://github.com/iurii-izman/voiceforge/issues/185) | 4 | Blocked (KV5) | Adaptive intelligence and extensibility |
+| KC14 | [#186](https://github.com/iurii-izman/voiceforge/issues/186) | 4 | Done | Copilot QA, perf/reliability, release evidence |
 
 ### KV · User / External Intervention Blocks
 

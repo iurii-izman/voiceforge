@@ -16,6 +16,7 @@ Playwright/autopilot и visual/a11y suite дают сильный regression sig
 
 | Surface | Automated mocked | Native smoke | Manual / environment-specific | Evidence |
 |---------|------------------|--------------|-------------------------------|----------|
+| **Copilot overlay, capture flow, cards, refine (KC14)** | Yes | Partial | Shortcuts/hotkey manual | `e2e:release-gate` (autopilot, copilot shortcut, overlay); native smoke overlay launch |
 | Main navigation, widgets, session flows | Yes | Yes | No | Playwright HTML report + native smoke log |
 | Accessibility regressions on key screens | Yes | No | Optional spot-check | `desktop/e2e/a11y.spec.js`, Playwright report |
 | Visual regressions on key screens | Yes | No | Optional human review on changed baselines | screenshot baselines + Playwright report |

@@ -152,6 +152,7 @@ def _make_daemon(
     cfg.copilot_stt_model_size = "tiny"
     cfg.copilot_pre_roll_seconds = 1.0
     cfg.copilot_max_capture_seconds = 30.0
+    cfg.copilot_stt_idle_unload_seconds = 300.0
     cfg.get_rag_db_path = MagicMock(return_value="/nonexistent/rag.db")
     if settings_overrides:
         for k, v in settings_overrides.items():
@@ -185,6 +186,7 @@ def test_daemon_get_settings_includes_copilot_keys_kc8() -> None:
     assert "copilot_stt_model_size" in data
     assert "copilot_pre_roll_seconds" in data
     assert "copilot_max_capture_seconds" in data
+    assert "copilot_stt_idle_unload_seconds" in data  # KC14
 
 
 def test_daemon_get_streaming_transcript_default() -> None:

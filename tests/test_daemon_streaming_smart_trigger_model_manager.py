@@ -32,6 +32,7 @@ def test_daemon_get_settings_returns_json_with_expected_keys(tmp_path, monkeypat
         mock_cfg.copilot_stt_model_size = "tiny"
         mock_cfg.copilot_pre_roll_seconds = 1.0
         mock_cfg.copilot_max_capture_seconds = 30.0
+        mock_cfg.copilot_stt_idle_unload_seconds = 300.0
         mock_settings.return_value = mock_cfg
 
         from voiceforge.core.daemon import VoiceForgeDaemon

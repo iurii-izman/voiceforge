@@ -36,6 +36,7 @@ Priority order:
 | `analyze_timeout_sec` | `VOICEFORGE_ANALYZE_TIMEOUT_SEC` | `120.0` | Max seconds for a single analyze() call; on timeout returns ANALYZE_TIMEOUT (#39) |
 | `streaming_stt` | `VOICEFORGE_STREAMING_STT` | `false` | Live transcript in listen mode |
 | `copilot_stt_model_size` | `VOICEFORGE_COPILOT_STT_MODEL_SIZE` | `tiny` | KC4: STT model for copilot path (short captures, low latency); same allowed values as `model_size` |
+| `copilot_stt_idle_unload_seconds` | `VOICEFORGE_COPILOT_STT_IDLE_UNLOAD_SECONDS` | `300.0` | KC14: Seconds of copilot idle after which STT is unloaded (0=disabled); saves RAM/CPU |
 | `live_summary_interval_sec` | `VOICEFORGE_LIVE_SUMMARY_INTERVAL_SEC` | `90` | Interval (and window) in seconds for `listen --live-summary` (e.g. every 90s for last 90s) |
 | `language` | `VOICEFORGE_LANGUAGE` | `auto` | UI language; when `ru`/`en` also passed to Whisper as STT hint |
 | `ollama_model` | `VOICEFORGE_OLLAMA_MODEL` | `phi3:mini` | Ollama model for local classify/simple_answer |

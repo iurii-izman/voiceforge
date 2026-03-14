@@ -1,6 +1,6 @@
 # VoiceForge: Project Status & Productization Roadmap
 
-**Обновлено:** 2026-03-14 (KC12 done: Pro cards and answer refinement; next = KC13 or KC11 after KV1; `#164/#165` remain background hardening). **Версия:** 0.2.0-alpha.2. **Стадия:** Knowledge Copilot program active / maintenance hardening in background.
+**Обновлено:** 2026-03-14 (KC14 done: Copilot QA, release, perf & reliability; KC-волна программы закрыта; `#164/#165` remain background). **Версия:** 0.2.0-alpha.2. **Стадия:** Knowledge Copilot program wave complete; KC11/KC13 blocked by KV1/KV5.
 **Предыдущий цикл (#97-#123):** закрыт полностью; архив: [history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
 
 ---
@@ -96,7 +96,7 @@
 | Wave 2 MVP Complete | [#179](https://github.com/iurii-izman/voiceforge/issues/179) ✓ → [#180](https://github.com/iurii-izman/voiceforge/issues/180) ✓ | Done | KC8 done |
 | Wave 2 V2 Surface | [#181](https://github.com/iurii-izman/voiceforge/issues/181) ✓ | Done | KC9 done |
 | Wave 3 V2 Expansion | [#182](https://github.com/iurii-izman/voiceforge/issues/182) ✓ → [#183](https://github.com/iurii-izman/voiceforge/issues/183) (blocked) | Active | KC10 done; KC11 ждёт KV1; KC12 done |
-| Wave 4 V3 / Pro / Frontier | [#184](https://github.com/iurii-izman/voiceforge/issues/184) ✓ → [#185](https://github.com/iurii-izman/voiceforge/issues/185) → [#186](https://github.com/iurii-izman/voiceforge/issues/186) | Active | KC12 done; next: KC13 adaptive intelligence |
+| Wave 4 V3 / Pro / Frontier | [#184](https://github.com/iurii-izman/voiceforge/issues/184) ✓ → [#185](https://github.com/iurii-izman/voiceforge/issues/185) (blocked) → [#186](https://github.com/iurii-izman/voiceforge/issues/186) ✓ | Done | KC12, KC14 done; KC13 blocked by KV5 |
 
 ### Manual / External Gates
 
