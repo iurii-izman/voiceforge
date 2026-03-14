@@ -122,6 +122,19 @@ def test_config_rag_db_path_explicit(monkeypatch, tmp_path) -> None:
     assert cfg.get_rag_db_path() == "/custom/rag.db"
 
 
+def test_settings_copilot_mode_literal_kc10() -> None:
+    """KC10: copilot_mode only accepts cloud, hybrid, offline."""
+    from pydantic import ValidationError
+
+    from voiceforge.core.config import Settings
+
+    for mode in ("cloud", "hybrid", "offline"):
+        cfg = Settings(copilot_mode=mode)
+        assert cfg.copilot_mode == mode
+    with pytest.raises(ValidationError):
+        Settings(copilot_mode="invalid")
+
+
 def test_settings_ring_persist_interval_default_and_validation() -> None:
     """ring_persist_interval_sec defaults to 10.0 and must be >= 1 (#100)."""
     from voiceforge.core.config import Settings

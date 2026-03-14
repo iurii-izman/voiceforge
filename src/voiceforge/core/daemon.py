@@ -471,6 +471,7 @@ class VoiceForgeDaemon:
             strategy = self._last_copilot_strategy
             emotion = self._last_copilot_emotion
         payload: dict[str, Any] = {
+            "copilot_mode": getattr(self._cfg, "copilot_mode", "hybrid"),
             "stt_ambiguous": ambiguous,
             "transcript_snippet": snippet,
         }

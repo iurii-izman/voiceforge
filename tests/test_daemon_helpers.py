@@ -412,6 +412,15 @@ def test_get_copilot_capture_status_transcript_snippet_kc4() -> None:
     assert data.get("transcript_snippet") == "Hello world"
 
 
+def test_get_copilot_capture_status_includes_copilot_mode_kc10() -> None:
+    """KC10 (#182): get_copilot_capture_status includes copilot_mode for overlay/main window indicator."""
+    daemon = _make_daemon()
+    out = daemon.get_copilot_capture_status()
+    data = json.loads(out)
+    assert "copilot_mode" in data
+    assert data["copilot_mode"] in ("cloud", "hybrid", "offline")
+
+
 def test_get_copilot_capture_status_fast_track_cards_kc6() -> None:
     """KC6 (#178): get_copilot_capture_status includes copilot_answer, dos, donts, clarify, confidence."""
     daemon = _make_daemon()

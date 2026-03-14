@@ -519,6 +519,8 @@ t+5000ms   Step 4b: Deep-track → Risk + Strategy
 copilot_mode: "hybrid"  # "cloud" | "hybrid" | "offline"
 ```
 
+**KC10 scope guard:** Stealth mode (reduced overlay) и card history scrollback явно вынесены за пределы KC10 и будут реализованы в последующих блоках.
+
 ---
 
 ## 11. UX/UI концепция

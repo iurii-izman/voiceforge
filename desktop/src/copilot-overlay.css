@@ -24,6 +24,18 @@
   gap: 0.75rem;
 }
 
+/* KC10: mode badge (cloud / hybrid / offline) */
+.copilot-mode-badge {
+  font-size: 10px;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #9e9e9e;
+}
+.copilot-mode-badge.cloud { background: rgba(33, 150, 243, 0.3); color: #64b5f6; }
+.copilot-mode-badge.hybrid { background: rgba(76, 175, 80, 0.3); color: #81c784; }
+.copilot-mode-badge.offline { background: rgba(158, 158, 158, 0.3); color: #bdbdbd; }
+
 .copilot-transcript-snippet {
   font-size: 12px;
   color: #9e9e9e;

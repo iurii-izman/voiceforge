@@ -121,9 +121,9 @@ class Settings(BaseSettings):
         default="tiny",
         description="KC4: STT model size for copilot path (short captures, low latency). Use 'tiny' for latency budget.",
     )
-    copilot_mode: str = Field(
+    copilot_mode: Literal["cloud", "hybrid", "offline"] = Field(
         default="hybrid",
-        description="KC8: Copilot mode: cloud | hybrid | offline (architecture §10).",
+        description="KC8/KC10: Copilot mode: cloud (API only) | hybrid (API + Ollama fallback) | offline (Ollama only).",
     )
     copilot_max_visible_cards: int = Field(
         default=3,
@@ -378,14 +378,32 @@ class Settings(BaseSettings):
         return os.path.join(self.get_data_dir(), "rag.db")
 
     def get_effective_llm(self) -> tuple[str | None, bool]:
-        """E6 (#129): Effective LLM model id and whether using Ollama fallback (no API keys).
+        """E6 (#129), KC10: Effective LLM model and whether using Ollama fallback.
 
-        Returns (model_id, is_ollama_fallback). model_id is for LiteLLM (e.g. anthropic/...
-        or ollama/phi3:mini). When no API keys and Ollama not running, model_id is None.
+        Respects copilot_mode: offline → Ollama only; cloud → API only; hybrid → API with Ollama fallback.
+        Returns (model_id, is_ollama_fallback). model_id is for LiteLLM (anthropic/... or ollama/...).
         """
         from voiceforge.core.secrets import get_api_key
 
+        mode = getattr(self, "copilot_mode", "hybrid") or "hybrid"
         has_api_key = any(get_api_key(name) for name in ("anthropic", "openai", "google"))
+
+        if mode == "offline":
+            try:
+                from voiceforge.llm.local_llm import is_available
+            except ImportError:
+                return (None, False)
+            if not is_available():
+                return (None, False)
+            model = (self.ollama_model or _DEFAULT_OLLAMA_MODEL).strip() or _DEFAULT_OLLAMA_MODEL
+            return (f"ollama/{model}", True)
+
+        if mode == "cloud":
+            if has_api_key:
+                return (self.default_llm, False)
+            return (None, False)
+
+        # hybrid: API primary, Ollama fallback when no keys
         if has_api_key:
             return (self.default_llm, False)
         try:

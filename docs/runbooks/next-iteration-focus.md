@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии**. Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-14 (KC9 done: Knowledge management UI and context packs; next = KC10; `#164/#165` remain background hardening)
+**Обновлено:** 2026-03-14 (KC10 done: Explicit mode system, hybrid/offline maturity; next = KC11; `#164/#165` remain background hardening)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** KC9 · Knowledge management UI and context packs (#181): вкладка «База знаний», get_rag_stats + get_indexed_paths + index_paths (daemon/D-Bus/Tauri); список документов, метаданные (sources/chunks), drop zone для индексации; контекстные наборы (localStorage: сохранение текущего, выбор, закрепление). Tests: test_daemon_get_rag_stats_no_db_kc9, test_daemon_index_paths_empty_array_kc9; E2E knowledge tab test. Docs: copilot-program-map, PROJECT-STATUS-SUMMARY, next-iteration-focus.
+**Сделано в сессии:** KC10 · Explicit mode system, hybrid/offline maturity (#182): config.get_effective_llm() учитывает copilot_mode (offline → только Ollama; cloud → только API; hybrid → API + fallback Ollama); Literal["cloud","hybrid","offline"] в Settings; daemon.get_copilot_capture_status() возвращает copilot_mode; индикатор режима в overlay (badge) и в главном окне (status bar); в архитектуре — явный scope guard для stealth mode и card history (отложены). Tests: test_config_get_effective_llm_offline/cloud_kc10, test_settings_copilot_mode_literal_kc10, test_get_copilot_capture_status_includes_copilot_mode_kc10. Docs: copilot-program-map, PROJECT-STATUS-SUMMARY, next-iteration-focus, voiceforge-copilot-architecture.
 
-**Следующий шаг:** взять [#182](https://github.com/iurii-izman/voiceforge/issues/182) `KC10 · Explicit mode system, hybrid/offline maturity` как следующий исполняемый block.
+**Следующий шаг:** взять [#183](https://github.com/iurii-izman/voiceforge/issues/183) `KC11 · System audio and scenario presets` как следующий исполняемый block.
 
 ---
 
@@ -34,7 +34,7 @@
 | **Wave 1 MVP Core** | #174✓ → #175✓ → #176✓ → #177✓ → #178✓ | Done | KC6 done; Wave 1 complete |
 | **Wave 2 MVP Complete** | #179✓ → #180✓ | Done | KC8 done |
 | **Wave 2 V2 Surface** | #181✓ | Done | KC9 done |
-| **Wave 3 V2 Expansion** | #182 → #183 | Active | Next: KC10 explicit mode system | Explicit mode system; offline/hybrid maturity; system audio + scenario presets |
+| **Wave 3 V2 Expansion** | #182✓ → #183 | Active | KC10 done; next: KC11 system audio + scenario presets |
 | **Wave 4 V3 / Frontier** | #184 → #185 → #186 | Todo | Pro cards, adaptive intelligence, copilot QA/release/perf |
 | **Manual gates** | #187 → #191 | Todo | Legal, UX sign-off, pilot validation, business gate, platform gate |
 | **Background hardening** | #165, #164 | Open | Keep below copilot program unless blocking |
@@ -52,7 +52,7 @@
 
 Перед началом крупного блока: `./scripts/preflight_repo.sh --with-tests`. Для desktop/UI изменений: `cd desktop && npm run e2e:release-gate`. Для native/Tauri/system-level изменений дополнительно: `cd desktop && npm run e2e:native:headless`.
 
-Текущий блок: KC10 · Explicit mode system, hybrid/offline maturity (#182).
+Текущий блок: KC11 · System audio and scenario presets (#183).
 ```
 
 ---

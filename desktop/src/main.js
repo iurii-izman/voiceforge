@@ -594,12 +594,23 @@ function setDaemonOff(msg) {
   if (bannerText) bannerText.textContent = msg || t("status_daemon_off");
 }
 
+const COPILOT_MODE_LABELS = { cloud: "☁ Cloud", hybrid: "⚡ Hybrid", offline: "🔒 Offline" };
+
 function setDaemonOk() {
   daemonOk = true;
   const statusBar = document.getElementById("status-bar");
   const retryBtn = document.getElementById("retry");
   statusBar.textContent = t("status_daemon_ok");
   statusBar.className = "status daemon-ok";
+  invoke("get_settings")
+    .then((raw) => {
+      const env = parseEnvelope(raw);
+      const data = env?.data ?? env?.settings ?? env ?? {};
+      const mode = (data.copilot_mode || "hybrid").toLowerCase();
+      const label = COPILOT_MODE_LABELS[mode] || mode;
+      if (statusBar) statusBar.textContent = t("status_daemon_ok") + " · " + label;
+    })
+    .catch(() => {});
   retryBtn.style.display = "none";
   const banner = document.getElementById("daemon-off-banner");
   if (banner) banner.style.display = "none";

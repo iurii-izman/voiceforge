@@ -162,12 +162,24 @@ function startTranscriptPoll() {
   }, 1500);
 }
 
+const MODE_LABELS = { cloud: "☁ Cloud", hybrid: "⚡ Hybrid", offline: "🔒 Offline" };
+
+function updateModeBadge(mode) {
+  const el = document.getElementById("copilot-mode-badge");
+  if (!el) return;
+  const m = (mode && String(mode).toLowerCase()) || "hybrid";
+  const label = MODE_LABELS[m] ?? m;
+  el.textContent = label;
+  el.className = "copilot-mode-badge " + (["cloud", "hybrid", "offline"].includes(m) ? m : "hybrid");
+}
+
 async function fetchStatusAndRenderCards() {
   try {
     const raw = await invoke("get_copilot_capture_status");
     const data = typeof raw === "string" ? JSON.parse(raw) : raw;
     const envelope = data?.data ?? data;
     if (!envelope) return;
+    if (envelope.copilot_mode) updateModeBadge(envelope.copilot_mode);
     const hintEl = document.getElementById("copilot-ambiguity-hint");
     if (hintEl) {
       const sttAmbiguous = envelope.stt_ambiguous === true;
@@ -226,3 +238,5 @@ listen("copilot-state-changed", (event) => {
 
 // Initial state
 applyState("armed");
+// KC10: fetch once to show current copilot_mode in overlay
+fetchStatusAndRenderCards().catch(() => updateModeBadge("hybrid"));

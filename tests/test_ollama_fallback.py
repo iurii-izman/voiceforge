@@ -35,12 +35,45 @@ def test_config_get_effective_llm_returns_ollama_when_no_keys_and_ollama_availab
 
 
 def test_config_get_effective_llm_returns_none_when_no_keys_and_ollama_unavailable(monkeypatch) -> None:
-    """When no API keys and Ollama not running, effective_llm is None."""
+    """When no API keys and Ollama not running, effective_llm is None (hybrid mode)."""
     monkeypatch.setattr("voiceforge.core.secrets.get_api_key", lambda name: None)
     monkeypatch.setattr("voiceforge.llm.local_llm.is_available", lambda timeout=2.0: False)
     cfg = Settings()
     model, is_fallback = cfg.get_effective_llm()
     assert model is None
+    assert is_fallback is False
+
+
+def test_config_get_effective_llm_offline_mode_uses_ollama_only_kc10(monkeypatch) -> None:
+    """KC10: copilot_mode=offline uses Ollama when available; no API keys used."""
+    monkeypatch.setattr("voiceforge.core.secrets.get_api_key", lambda name: "key")
+    monkeypatch.setattr("voiceforge.llm.local_llm.is_available", lambda timeout=2.0: True)
+    cfg = Settings(copilot_mode="offline")
+    model, is_fallback = cfg.get_effective_llm()
+    assert model is not None
+    assert model.startswith("ollama/")
+    assert is_fallback is True
+
+
+def test_config_get_effective_llm_cloud_mode_no_ollama_fallback_kc10(monkeypatch) -> None:
+    """KC10: copilot_mode=cloud with no API keys returns None (no Ollama fallback)."""
+    monkeypatch.setattr("voiceforge.core.secrets.get_api_key", lambda name: None)
+    monkeypatch.setattr("voiceforge.llm.local_llm.is_available", lambda timeout=2.0: True)
+    cfg = Settings(copilot_mode="cloud")
+    model, is_fallback = cfg.get_effective_llm()
+    assert model is None
+    assert is_fallback is False
+
+
+def test_config_get_effective_llm_cloud_mode_uses_api_when_keys_present_kc10(monkeypatch) -> None:
+    """KC10: copilot_mode=cloud with API key returns default_llm."""
+    monkeypatch.setattr(
+        "voiceforge.core.secrets.get_api_key",
+        lambda name: "key" if name == "anthropic" else None,
+    )
+    cfg = Settings(copilot_mode="cloud")
+    model, is_fallback = cfg.get_effective_llm()
+    assert model == cfg.default_llm
     assert is_fallback is False
 
 
