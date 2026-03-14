@@ -10,13 +10,13 @@
 
 | Gate | Issue | Что нужно от вас | Чтобы разблокировать |
 |------|-------|-------------------|----------------------|
-| **KV1** | [#187](https://github.com/iurii-izman/voiceforge/issues/187) | Сформулировать и зафиксировать legal/consent wording для **system audio** (запись звука с системы, не только микрофона) и retention. Принять решение: включать ли KC11 в scope. | KC11 · System audio and scenario presets (#183) |
-| **KV5** | [#191](https://github.com/iurii-izman/voiceforge/issues/191) | Решение по **platform expansion**: идти ли в Windows/macOS для десктопа, или оставаться Linux-only. Зафиксировать go/no-go. | KC13 · Adaptive intelligence and extensibility (#185) |
+| **KV1** | [#187](https://github.com/iurii-izman/voiceforge/issues/187) ✓ | Разрешён (2026-03-14): wording утверждён, KC11 в scope. См. [legal-consent-kv1.md](legal-consent-kv1.md). | KC11 (#183) разблокирован |
+| **KV5** | [#191](https://github.com/iurii-izman/voiceforge/issues/191) ✓ | Разрешён: Linux-only; KC13 разблокирован. | KC13 (#185) разблокирован |
 | **KV2** | [#188](https://github.com/iurii-izman/voiceforge/issues/188) | (Опционально) Визуальный sign-off overlay UX: интрузивность, позиция, размер. | Улучшение UX overlay |
 | **KV3** | [#189](https://github.com/iurii-izman/voiceforge/issues/189) | Валидация с **primary persona**: живой пилот, обратная связь по сценарию использования. | Продуктовая валидация |
 | **KV4** | [#190](https://github.com/iurii-izman/voiceforge/issues/190) | Решение по бизнесу/упаковке перед коммерческим распространением. | Коммерческий путь |
 
-Пока KV1 и KV5 не разрешены, агент **не стартует** KC11 и KC13 по правилам (KV с external gate не реализуются кодом до явного решения).
+KV1 и KV5 разрешены; KC11 и KC13 доступны для автопилота. Остальные KV (KV2–KV4) по-прежнему требуют явного решения перед связанными задачами.
 
 ---
 

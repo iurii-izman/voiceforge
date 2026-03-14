@@ -13,7 +13,7 @@ This file is the operational map for the Knowledge Copilot program. Nothing in t
 
 - `KD1-KD3` are seeded and closed as `decision-locked` policy artefacts.
 - `KC1` is complete: the program is bootstrapped, the GitHub Project is seeded, and handoff is switched to the Copilot track.
-- **Current next executable block:** KC13 (#185) — KV5 resolved (Linux-only); KC11 still blocked by KV1
+- **Current next executable block:** KC11 (#183) или KC13 (#185) — KV1 и KV5 разрешены; оба KC доступны для автопилота.
 - `#164` and `#165` remain open as background maintenance/security hardening and are not part of the main copilot execution order.
 
 ## Block Registry
@@ -40,7 +40,7 @@ This file is the operational map for the Knowledge Copilot program. Nothing in t
 | KC8 | [#180](https://github.com/iurii-izman/voiceforge/issues/180) | 2 | Done | Main-window copilot integration and settings |
 | KC9 | [#181](https://github.com/iurii-izman/voiceforge/issues/181) | 2 | Done | Knowledge management UI and context packs |
 | KC10 | [#182](https://github.com/iurii-izman/voiceforge/issues/182) | 3 | Done | Explicit mode system, hybrid/offline maturity |
-| KC11 | [#183](https://github.com/iurii-izman/voiceforge/issues/183) | 3 | Blocked (KV1) | System audio and scenario presets |
+| KC11 | [#183](https://github.com/iurii-izman/voiceforge/issues/183) | 3 | Todo | System audio and scenario presets (KV1 resolved) |
 | KC12 | [#184](https://github.com/iurii-izman/voiceforge/issues/184) | 4 | Done | Pro cards and answer refinement |
 | KC13 | [#185](https://github.com/iurii-izman/voiceforge/issues/185) | 4 | Todo | Adaptive intelligence and extensibility (KV5 resolved: Linux-only) |
 | KC14 | [#186](https://github.com/iurii-izman/voiceforge/issues/186) | 4 | Done | Copilot QA, perf/reliability, release evidence |
@@ -49,7 +49,7 @@ This file is the operational map for the Knowledge Copilot program. Nothing in t
 
 | Prefix | Issue | Timing | Status | Gate |
 | --- | --- | --- | --- | --- |
-| KV1 | [#187](https://github.com/iurii-izman/voiceforge/issues/187) | Before KC11 | Todo | Legal, consent, privacy/retention wording |
+| KV1 | [#187](https://github.com/iurii-izman/voiceforge/issues/187) | Before KC11 | Resolved | Legal/consent wording approved; KC11 in scope. See [legal-consent-kv1.md](legal-consent-kv1.md) |
 | KV2 | [#188](https://github.com/iurii-izman/voiceforge/issues/188) | Before KC2 completion | Todo | Overlay UX sign-off |
 | KV3 | [#189](https://github.com/iurii-izman/voiceforge/issues/189) | After KC6 | Todo | Pilot validation with primary persona |
 | KV4 | [#190](https://github.com/iurii-izman/voiceforge/issues/190) | Before commercial packaging | Todo | Business/packaging decision |

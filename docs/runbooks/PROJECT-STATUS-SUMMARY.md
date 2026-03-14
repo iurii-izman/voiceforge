@@ -1,6 +1,6 @@
 # VoiceForge: Project Status & Productization Roadmap
 
-**Обновлено:** 2026-03-14 (KC14 done: Copilot QA, release, perf & reliability; KC-волна программы закрыта; `#164/#165` remain background). **Версия:** 1.0.0-beta.1. **Стадия:** KC13 разблокирован (KV5 resolved: Linux-only); KC11 blocked by KV1.
+**Обновлено:** 2026-03-14 (KV1 разрешён: wording утверждён, KC11 в scope). **Версия:** 1.0.0-beta.1. **Стадия:** KC11 и KC13 разблокированы (KV1 и KV5 resolved).
 **Предыдущий цикл (#97-#123):** закрыт полностью; архив: [history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
 
 ---
@@ -88,21 +88,21 @@
 
 ### Main Execution Order
 
-**Следующий executable block:** KC13 (#185) — KV5 resolved (Linux-only); KC11 (#183) blocked by KV1
+**Следующий executable block:** KC11 (#183) или KC13 (#185) — KV1 и KV5 разрешены.
 
 | Wave | Issues | Статус | Что реализуем |
 | --- | --- | --- | --- |
 | Wave 1 MVP Core | [#174](https://github.com/iurii-izman/voiceforge/issues/174) ✓ → [#178](https://github.com/iurii-izman/voiceforge/issues/178) ✓ | Done | Wave 1 complete |
 | Wave 2 MVP Complete | [#179](https://github.com/iurii-izman/voiceforge/issues/179) ✓ → [#180](https://github.com/iurii-izman/voiceforge/issues/180) ✓ | Done | KC8 done |
 | Wave 2 V2 Surface | [#181](https://github.com/iurii-izman/voiceforge/issues/181) ✓ | Done | KC9 done |
-| Wave 3 V2 Expansion | [#182](https://github.com/iurii-izman/voiceforge/issues/182) ✓ → [#183](https://github.com/iurii-izman/voiceforge/issues/183) (blocked) | Active | KC10 done; KC11 ждёт KV1; KC12 done |
+| Wave 3 V2 Expansion | [#182](https://github.com/iurii-izman/voiceforge/issues/182) ✓ → [#183](https://github.com/iurii-izman/voiceforge/issues/183) | Active | KC10 done; KC11 разблокирован (KV1 resolved); KC12 done |
 | Wave 4 V3 / Pro / Frontier | [#184](https://github.com/iurii-izman/voiceforge/issues/184) ✓ → [#185](https://github.com/iurii-izman/voiceforge/issues/185) → [#186](https://github.com/iurii-izman/voiceforge/issues/186) ✓ | Active | KC12, KC14 done; KC13 unblocked (KV5 resolved) |
 
 ### Manual / External Gates
 
 | Gate | Issue | Timing | Why it cannot be auto-completed |
 | --- | --- | --- | --- |
-| KV1 | [#187](https://github.com/iurii-izman/voiceforge/issues/187) | Before KC11 | Legal/consent wording for system audio and retention |
+| KV1 | [#187](https://github.com/iurii-izman/voiceforge/issues/187) ✓ | Resolved | Legal/consent wording approved; KC11 unblocked. See [legal-consent-kv1.md](legal-consent-kv1.md) |
 | KV2 | [#188](https://github.com/iurii-izman/voiceforge/issues/188) | Before KC2 completion | Overlay visual sign-off and intrusiveness review |
 | KV3 | [#189](https://github.com/iurii-izman/voiceforge/issues/189) | After KC6 | Real pilot validation with the primary persona |
 | KV4 | [#190](https://github.com/iurii-izman/voiceforge/issues/190) | Before commercial packaging | Business/pricing/packaging direction |
