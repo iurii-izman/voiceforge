@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии**. Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-14 (RCP-M1 #195: D-Bus Doctor() и расширенный Status())
+**Обновлено:** 2026-03-14 (RCP queue: следующая задача #196, заблокирована #206)
 
 ---
 
@@ -19,7 +19,9 @@
 
 **Сделано в сессии:** **RCP-M1 (#195):** D-Bus метод Doctor() в dbus_service.py, _run_doctor() в daemon.py с 12 проверками (python_env, dbus, pipewire, stt_model, config, disk_space, api_keys, rag_index, pid_file, transcript_db, audio_perms, dbus_name), таймаут 2s на проверку, расширен Status() (uptime_seconds, daemon_version, listen_state, copilot_active, memory_mb), IPC envelope для Doctor(), unit-тесты.
 
-**Следующий шаг:** Реализовать **БЛОК 2 (#196)** — Tauri Daemon Lifecycle Commands: daemon_status, daemon_start, daemon_stop, daemon_restart, run_doctor(), install_service(), is_service_installed(), get_daemon_logs() в commands.rs. Перед БЛОКОМ 2 подсветить #206 (Distrobox ExecStart) при необходимости решения разработчика.
+**Следующий шаг:** RCP epic #193. Следующий открытый sub-issue: **#196** (Tauri daemon lifecycle commands). **Заблокирован #206** — требуется решение разработчика (см. блок «RCP: блокировка #196» ниже). После закрытия #206 запустить агента с промптом из `.cursor/rules/rcp-queue.mdc`.
+
+**RCP: блокировка #196.** Задача #196 (Tauri daemon lifecycle: systemctl start/stop, D-Bus status/doctor) зависит от #206. В #206 нужно выбрать стратегию параметризации ExecStart в `voiceforge.service` (варианты A–D в issue). Рекомендация в issue: вариант B — `install-service` подставляет реальный путь из `which voiceforge` в unit. После выбора и реализации в #206 можно снимать блок и выполнять #196.
 
 ---
 
