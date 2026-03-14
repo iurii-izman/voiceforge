@@ -19,7 +19,7 @@
 
 **Сделано в сессии:** **KC11** (#183): system audio opt-in (config + state file), consent UX в настройках десктопа, D-Bus SetSystemAudioOptIn, scenario preset в конфиге, тесты и доки. **KC13** (#185): контракты расширяемости в [copilot-extensibility-kc13.md](copilot-extensibility-kc13.md), Linux-only, без регрессии MVP/V2.
 
-**Следующий шаг:** Все KC (1–14) закрыты. Варианты: (1) hardening #164/#165, Sonar, Dependabot; (2) KV2/KV3/KV4 по желанию; (3) релиз/продуктовая доводка.
+**Следующий шаг:** Все KC (1–14) закрыты. Подготовлены: таблица вариантов по мануальным задачам в [what-user-must-do.md](what-user-must-do.md); чеклист KV2 ([kv2-overlay-signoff-checklist.md](kv2-overlay-signoff-checklist.md)) и шаблон пилота KV3 ([kv3-pilot-scenario-template.md](kv3-pilot-scenario-template.md)); в #188 и #189 оставлены комментарии со ссылками. Дальше: пройти KV2/KV3 по чеклисту/шаблону или hardening/Sonar/релиз.
 
 ---
 

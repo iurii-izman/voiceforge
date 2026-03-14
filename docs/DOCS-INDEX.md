@@ -125,6 +125,8 @@
 | copilot-extensibility-kc13.md                                 | KC13: контракты расширяемости, adaptive model, plugin/contradiction/speaker/jargon      | Актуален                         |
 | what-user-must-do.md                                          | Что нужно от пользователя: решения и действия вне автопилота (KV, релиз, Sonar)        | Актуален                         |
 | legal-consent-kv1.md                                          | KV1: черновик формулировок system audio, retention, юрисдикции; решение по scope KC11   | Актуален                         |
+| kv2-overlay-signoff-checklist.md                             | KV2: чеклист для визуального sign-off overlay (позиция, размер, интрузивность)         | Актуален                         |
+| kv3-pilot-scenario-template.md                               | KV3: шаблон сценария пилотной сессии с primary persona                                  | Актуален                         |
 | reflective-summary-2026-03.md                                 | Рефлексия по проекту и совместной работе (сильные/слабые стороны, улучшения)             | Актуален                         |
 | quickstart.md                                                 | Краткий сценарий; полная версия — first-meeting-5min                                    | Актуален                         |
 | cli-commands-and-run.md                                       | Все CLI-команды, когда пересобирать, как запускать демон и полный стек (toolbox)        | Актуален                         |
