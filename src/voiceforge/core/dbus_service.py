@@ -172,6 +172,7 @@ class _DaemonOptionalCallbacks(TypedDict, total=False):
     capture_start_fn: Callable[[], None]
     capture_release_fn: Callable[[], None]
     get_copilot_capture_status_fn: Callable[[], str]
+    refine_copilot_answer_fn: Callable[[str, str, str, str, str | None], str]
 
 
 class DaemonVoiceForgeInterface(ServiceInterface):
@@ -214,6 +215,7 @@ class DaemonVoiceForgeInterface(ServiceInterface):
         self._capture_start = o.get("capture_start_fn")
         self._capture_release = o.get("capture_release_fn")
         self._get_copilot_capture_status = o.get("get_copilot_capture_status_fn")
+        self._refine_copilot_answer = o.get("refine_copilot_answer_fn")
         self._analyze_sem = asyncio.Semaphore(1)
 
     ANALYZE_MAX_SECONDS = 3600
@@ -381,6 +383,21 @@ class DaemonVoiceForgeInterface(ServiceInterface):
         if self._index_paths is None:
             return '{"ok":false,"errors":["not available"]}'
         return self._index_paths(paths_json or "[]")
+
+    @dbus_method()
+    def RefineCopilotAnswer(
+        self, transcript: DBusStr, context: DBusStr, answer_text: DBusStr, mode: DBusStr, tone: DBusStr
+    ) -> DBusStr:
+        """KC12: On-demand answer refinement (deep/rewrite/tone). Returns JSON { refined, cost_usd } or { error }."""
+        if self._refine_copilot_answer is None:
+            return '{"error":"not available"}'
+        return self._refine_copilot_answer(
+            transcript or "",
+            context or "",
+            answer_text or "",
+            mode or "deep",
+            (tone or "").strip() or None,
+        )
 
     @dbus_method()
     def GetSessionIdsWithActionItems(self) -> DBusStr:

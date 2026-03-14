@@ -38,6 +38,8 @@ const CARD_IDS = [
   "copilot-card-risk",
   "copilot-card-strategy",
   "copilot-card-emotion",
+  "copilot-card-objections",
+  "copilot-card-followup",
 ];
 const MAX_VISIBLE_CARDS = 3;
 
@@ -94,11 +96,54 @@ function buildCardList(envelope) {
   if (envelope.copilot_emotion && String(envelope.copilot_emotion).trim()) {
     list.push({ priority: 7, id: "copilot-card-emotion", title: "Emotion", body: escapeHtml(String(envelope.copilot_emotion).trim()) });
   }
+  if (Array.isArray(envelope.copilot_objections) && envelope.copilot_objections.length > 0) {
+    const text = envelope.copilot_objections.join("\n").trim();
+    if (text) list.push({ priority: 8, id: "copilot-card-objections", title: "Objections", body: escapeHtml(text) });
+  }
+  if (Array.isArray(envelope.copilot_follow_up_suggestions) && envelope.copilot_follow_up_suggestions.length > 0) {
+    const text = envelope.copilot_follow_up_suggestions.join("\n").trim();
+    if (text) list.push({ priority: 9, id: "copilot-card-followup", title: "Follow-up", body: escapeHtml(text) });
+  }
   return list.sort((a, b) => a.priority - b.priority);
+}
+
+let lastEnvelope = null;
+
+function buildContextFromEnvelope(envelope) {
+  if (!envelope || !Array.isArray(envelope.rag_citations)) return "";
+  return envelope.rag_citations.map((c) => (c.snippet || c.source_basename || "").trim()).filter(Boolean).join("\n");
+}
+
+async function onRefine(mode, tone) {
+  if (!lastEnvelope) return;
+  const transcript = lastEnvelope.transcript_snippet || "";
+  const context = buildContextFromEnvelope(lastEnvelope);
+  const answerList = Array.isArray(lastEnvelope.copilot_answer) ? lastEnvelope.copilot_answer : [];
+  const answer_text = answerList.join(" ").trim();
+  if (!answer_text) return;
+  try {
+    const raw = await invoke("refine_copilot_answer", {
+      transcript,
+      context,
+      answer_text,
+      mode: mode || "deep",
+      tone: tone || null,
+    });
+    const data = typeof raw === "string" ? JSON.parse(raw) : raw;
+    const refined = data?.refined ?? data?.data?.refined ?? "";
+    if (refined) {
+      const el = document.getElementById("copilot-card-answer");
+      if (el) {
+        const body = el.querySelector(".copilot-card__body");
+        if (body) body.innerHTML = escapeHtml(refined);
+      }
+    }
+  } catch (_) {}
 }
 
 function renderCards(data) {
   const envelope = data?.data ?? data;
+  lastEnvelope = envelope;
   const container = document.getElementById("copilot-cards");
   if (!container) return;
   if (!envelope) {
@@ -114,7 +159,16 @@ function renderCards(data) {
   visible.forEach((card) => {
     const el = document.getElementById(card.id);
     if (el) {
-      el.innerHTML = `<span class="copilot-card__title">${escapeHtml(card.title)}</span><div class="copilot-card__body">${card.body}</div>`;
+      const isAnswer = card.id === "copilot-card-answer";
+      const refineHtml = isAnswer
+        ? `<div class="copilot-card__refine"><button type="button" class="copilot-refine-btn" data-mode="deep" data-i18n="refine_expand">Подробнее</button><button type="button" class="copilot-refine-btn" data-mode="rewrite" data-i18n="refine_shorter">Короче</button></div>`
+        : "";
+      el.innerHTML = `<span class="copilot-card__title">${escapeHtml(card.title)}</span><div class="copilot-card__body">${card.body}</div>${refineHtml}`;
+      if (isAnswer) {
+        el.querySelectorAll(".copilot-refine-btn").forEach((btn) => {
+          btn.addEventListener("click", () => onRefine(btn.dataset.mode, null));
+        });
+      }
       el.hidden = false;
     }
   });

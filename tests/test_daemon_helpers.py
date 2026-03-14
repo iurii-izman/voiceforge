@@ -412,6 +412,15 @@ def test_get_copilot_capture_status_transcript_snippet_kc4() -> None:
     assert data.get("transcript_snippet") == "Hello world"
 
 
+def test_refine_copilot_answer_empty_returns_error_kc12() -> None:
+    """KC12 (#184): refine_copilot_answer with empty answer_text returns JSON error."""
+    daemon = _make_daemon()
+    out = daemon.refine_copilot_answer("transcript", "context", "", "deep", None)
+    data = json.loads(out)
+    assert "error" in data
+    assert "empty" in data["error"].lower() or "empty" in str(data.get("error", "")).lower()
+
+
 def test_get_copilot_capture_status_includes_copilot_mode_kc10() -> None:
     """KC10 (#182): get_copilot_capture_status includes copilot_mode for overlay/main window indicator."""
     daemon = _make_daemon()

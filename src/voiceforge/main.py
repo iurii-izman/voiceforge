@@ -731,12 +731,20 @@ def run_analyze_pipeline(
                 analysis_for_log["copilot_risk"] = list(deep_cards.risks) if deep_cards.risks else []
                 analysis_for_log["copilot_strategy"] = (deep_cards.strategy or "").strip()
                 analysis_for_log["copilot_emotion"] = (deep_cards.emotion or "").strip() or None
+                analysis_for_log["copilot_objections"] = (
+                    list(deep_cards.objections) if getattr(deep_cards, "objections", None) else []
+                )
+                analysis_for_log["copilot_follow_up_suggestions"] = (
+                    list(deep_cards.follow_up_suggestions) if getattr(deep_cards, "follow_up_suggestions", None) else []
+                )
                 analysis_for_log["cost_usd"] = analysis_for_log.get("cost_usd", 0.0) + deep_cost
             except Exception as e:
                 log.warning("analyze.copilot_deep_failed", error=str(e))
                 analysis_for_log["copilot_risk"] = []
                 analysis_for_log["copilot_strategy"] = ""
                 analysis_for_log["copilot_emotion"] = None
+                analysis_for_log["copilot_objections"] = []
+                analysis_for_log["copilot_follow_up_suggestions"] = []
         return ("\n".join(header_lines + lines), segments_for_log, analysis_for_log)
 
     lines = _format_meeting_analysis_lines(llm_result)
@@ -773,12 +781,20 @@ def run_analyze_pipeline(
                 analysis_for_log["copilot_risk"] = list(deep_cards.risks) if deep_cards.risks else []
                 analysis_for_log["copilot_strategy"] = (deep_cards.strategy or "").strip()
                 analysis_for_log["copilot_emotion"] = (deep_cards.emotion or "").strip() or None
+                analysis_for_log["copilot_objections"] = (
+                    list(deep_cards.objections) if getattr(deep_cards, "objections", None) else []
+                )
+                analysis_for_log["copilot_follow_up_suggestions"] = (
+                    list(deep_cards.follow_up_suggestions) if getattr(deep_cards, "follow_up_suggestions", None) else []
+                )
                 analysis_for_log["cost_usd"] = analysis_for_log.get("cost_usd", 0.0) + deep_cost
             except Exception as e:
                 log.warning("analyze.copilot_deep_failed", error=str(e))
                 analysis_for_log["copilot_risk"] = []
                 analysis_for_log["copilot_strategy"] = ""
                 analysis_for_log["copilot_emotion"] = None
+                analysis_for_log["copilot_objections"] = []
+                analysis_for_log["copilot_follow_up_suggestions"] = []
     return ("\n".join(header_lines + lines), segments_for_log, analysis_for_log)
 
 

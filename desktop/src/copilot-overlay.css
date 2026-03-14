@@ -123,6 +123,7 @@
 
 .copilot-card--answer {
   border-left-color: #1565c0;
+  max-height: none; /* KC12: allow refine row to show */
 }
 
 .copilot-card--dodont {
@@ -143,6 +144,35 @@
 
 .copilot-card--emotion {
   border-left-color: #00838f;
+}
+
+.copilot-card--objections {
+  border-left-color: #bf360c;
+}
+
+.copilot-card--followup {
+  border-left-color: #455a64;
+}
+
+/* KC12: on-demand refine buttons (calm UI, secondary) */
+.copilot-card__refine {
+  margin-top: 0.25rem;
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+.copilot-refine-btn {
+  font-size: 10px;
+  padding: 0.15rem 0.35rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  color: #9e9e9e;
+  cursor: pointer;
+}
+.copilot-refine-btn:hover {
+  color: #e0e0e0;
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .copilot-cards-overflow {

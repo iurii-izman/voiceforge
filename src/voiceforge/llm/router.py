@@ -13,7 +13,7 @@ from voiceforge.core.secrets import set_env_keys_from_keyring
 from voiceforge.llm.circuit_breaker import wrap_completion
 from voiceforge.llm.pii_filter import redact
 from voiceforge.llm.prompt_loader import load_prompt, load_template_prompts
-from voiceforge.llm.schemas import CopilotDeepCards, CopilotFastCards
+from voiceforge.llm.schemas import CopilotDeepCards, CopilotFastCards, CopilotRefineOutput
 
 log = structlog.get_logger()
 TModel = TypeVar("TModel", bound=BaseModel)
@@ -493,7 +493,7 @@ def analyze_copilot_deep(
     *,
     model: str | None = None,
 ) -> tuple[CopilotDeepCards, float]:
-    """KC7 (#179): One LLM call for Risk, Strategy, Emotion cards. Runs after fast-track; does not block it."""
+    """KC7 (#179): One LLM call for Risk, Strategy, Emotion cards. KC12: objections, follow_up_suggestions."""
     from voiceforge.core.config import Settings
 
     model_id = model or DEFAULT_MODEL
@@ -509,9 +509,69 @@ def analyze_copilot_deep(
         prompt,
         response_model=CopilotDeepCards,
         model=model_id,
-        max_tokens=256,
+        max_tokens=320,
     )
     return (result, cost)
+
+
+# KC12 (#184): On-demand answer refinement (deep / rewrite / tone) — preserves grounding
+
+
+_COPILOT_REFINE_FALLBACK = """You refine an existing short answer for a live conversation. Preserve the same facts and sources. Output JSON: {"refined": "the refined answer text"}."""
+
+
+def _copilot_refine_prompt(
+    transcript: str,
+    context: str,
+    current_answer: str,
+    mode: str,
+    tone: str | None = None,
+) -> list[dict[str, Any]]:
+    """Build messages for KC12 on-demand refinement (deep / rewrite / tone)."""
+    system_text = load_prompt("copilot_refine")
+    if not system_text or not system_text.strip():
+        log.warning("llm.copilot_refine_prompt_missing", message="Using fallback")
+        system_text = _COPILOT_REFINE_FALLBACK
+    mode_instruction = {
+        "deep": "Expand the answer with more detail while keeping the same facts and sources.",
+        "rewrite": "Rewrite the answer more concisely (shorter), preserving the same facts and sources.",
+        "tone": f"Rewrite in a {tone or 'neutral'} tone. Preserve the same facts and sources.",
+    }.get(mode, "Refine the answer preserving the same facts and sources.")
+    user_content = f'Context:\n{(context or "(none)")[:2000]}\n\nTranscript:\n{transcript[:1500]}\n\nCurrent answer:\n{current_answer[:1000]}\n\nRequest: {mode_instruction}\nOutput only the refined answer in JSON: {{"refined": "..."}}.'
+    return [
+        {"role": "system", "content": system_text},
+        {"role": "user", "content": user_content},
+    ]
+
+
+def refine_copilot_answer(
+    transcript: str,
+    context: str,
+    current_answer: str,
+    mode: str = "deep",
+    tone: str | None = None,
+    *,
+    model: str | None = None,
+) -> tuple[str, float]:
+    """KC12 (#184): On-demand refinement (deep / rewrite / tone). Returns (refined_text, cost_usd). Preserves grounding."""
+    from voiceforge.core.config import Settings
+
+    model_id = model or DEFAULT_MODEL
+    _complete_structured_check_budget(Settings())
+    set_env_keys_from_keyring()
+    from voiceforge.core.preflight import NetworkUnavailableError, check_network_for_llm
+
+    network_err = check_network_for_llm(model_id)
+    if network_err:
+        raise NetworkUnavailableError(network_err)
+    prompt = _copilot_refine_prompt(transcript, context, current_answer, mode, tone)
+    result, cost = complete_structured(
+        prompt,
+        response_model=CopilotRefineOutput,
+        model=model_id,
+        max_tokens=512,
+    )
+    return ((result.refined or "").strip(), cost)
 
 
 def _content_from_llm_response(raw: Any, model_id: str) -> tuple[str, str]:

@@ -4,5 +4,7 @@ Output JSON:
 - risks: 0–3 short bullets (limitations, conditions, legal or cost risks; each ≤90 chars). Same language as transcript.
 - strategy: 1–2 sentences on where to steer the conversation next.
 - emotion: optional one sentence on tone/emotional context and recommended tone, or null.
+- objections: 0–2 possible objections or pushbacks the other side might raise (KC12 pro card; omit if none relevant).
+- follow_up_suggestions: 0–2 suggested follow-up questions or prompts the user could ask next (KC12 pro card; omit if none).
 
 Be concise. If nothing relevant, return empty risks and empty strategy. Output only valid JSON.

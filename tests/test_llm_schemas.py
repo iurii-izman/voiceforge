@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import date
 
-from voiceforge.llm.schemas import ActionItem, CopilotDeepCards, CopilotFastCards
+from voiceforge.llm.schemas import ActionItem, CopilotDeepCards, CopilotFastCards, CopilotRefineOutput
 
 
 def test_action_item_deadline_valid_string_passes() -> None:
@@ -69,3 +69,28 @@ def test_copilot_deep_cards_schema_kc7() -> None:
     assert len(filled.risks) == 2
     assert "pricing" in filled.strategy
     assert filled.emotion is not None
+
+
+def test_copilot_deep_cards_objections_followup_kc12() -> None:
+    """KC12 (#184): CopilotDeepCards has optional objections and follow_up_suggestions."""
+    empty = CopilotDeepCards()
+    assert empty.objections == []
+    assert empty.follow_up_suggestions == []
+
+    filled = CopilotDeepCards(
+        risks=[],
+        strategy="",
+        objections=["They may ask for a discount.", "Legal might delay."],
+        follow_up_suggestions=["What is the payment terms?", "Can we get a trial?"],
+    )
+    assert len(filled.objections) == 2
+    assert len(filled.follow_up_suggestions) == 2
+
+
+def test_copilot_refine_output_kc12() -> None:
+    """KC12 (#184): CopilotRefineOutput has refined text field."""
+    empty = CopilotRefineOutput()
+    assert empty.refined == ""
+
+    filled = CopilotRefineOutput(refined="This is the expanded answer with more detail.")
+    assert "expanded" in filled.refined

@@ -230,6 +230,37 @@ pub async fn index_paths(paths_json: String) -> Result<String, String> {
     Ok(body)
 }
 
+/// KC12: On-demand answer refinement (deep/rewrite/tone). Returns JSON { refined, cost_usd } or { error }.
+#[tauri::command]
+pub async fn refine_copilot_answer(
+    transcript: String,
+    context: String,
+    answer_text: String,
+    mode: String,
+    tone: Option<String>,
+) -> Result<String, String> {
+    let conn = connection().await?;
+    let tone_str = tone.unwrap_or_default();
+    let reply = conn
+        .call_method(
+            Some(crate::DBUS_NAME),
+            crate::DBUS_PATH,
+            Some(crate::DBUS_INTERFACE),
+            "RefineCopilotAnswer",
+            &(
+                transcript.as_str(),
+                context.as_str(),
+                answer_text.as_str(),
+                mode.as_str(),
+                tone_str.as_str(),
+            ),
+        )
+        .await
+        .map_err(|e| e.to_string())?;
+    let body: String = reply.body().deserialize().map_err(|e| e.to_string())?;
+    Ok(body)
+}
+
 #[tauri::command]
 pub async fn analyze(seconds: u32, template: Option<String>) -> Result<String, String> {
     let conn = connection().await?;

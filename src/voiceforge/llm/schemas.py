@@ -144,7 +144,7 @@ class CopilotFastCards(BaseModel):
 
 
 class CopilotDeepCards(BaseModel):
-    """Structured output for copilot deep-track: Risk, Strategy, Emotion. Rendered when available."""
+    """Structured output for copilot deep-track: Risk, Strategy, Emotion. KC12: optional objections, follow_up_suggestions."""
 
     risks: list[str] = Field(
         default_factory=list,
@@ -158,3 +158,20 @@ class CopilotDeepCards(BaseModel):
         default=None,
         description="Optional: tone/emotional context and recommended tone",
     )
+    objections: list[str] = Field(
+        default_factory=list,
+        description="KC12: 0–2 possible objections or pushbacks (pro card, optional)",
+    )
+    follow_up_suggestions: list[str] = Field(
+        default_factory=list,
+        description="KC12: 0–2 suggested follow-up questions or prompts (pro card, optional)",
+    )
+
+
+# KC12 (#184): On-demand answer refinement (deep/rewrite/tone) — preserves source grounding
+
+
+class CopilotRefineOutput(BaseModel):
+    """Single refined answer text; preserves facts and source grounding."""
+
+    refined: str = Field(default="", description="Refined answer text, same facts/sources")

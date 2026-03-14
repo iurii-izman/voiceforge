@@ -138,10 +138,12 @@ class VoiceForgeDaemon:
         # KC7 (#179): session memory — recent turns for conversation continuity (cleared on listen_stop)
         self._copilot_session_turns: list[str] = []
         self._COPILOT_SESSION_MAX_TURNS = 5
-        # KC7: deep-track cards (Risk, Strategy, Emotion)
+        # KC7: deep-track cards (Risk, Strategy, Emotion). KC12: pro cards (objections, follow_up_suggestions)
         self._last_copilot_risk: list[str] = []
         self._last_copilot_strategy: str = ""
         self._last_copilot_emotion: str | None = None
+        self._last_copilot_objections: list[str] = []
+        self._last_copilot_follow_up_suggestions: list[str] = []
 
     def _dbus_streaming_emitter_loop(self) -> None:
         """Worker to get transcript chunks from queue and emit them as D-Bus signals."""
@@ -220,10 +222,14 @@ class VoiceForgeDaemon:
             self._last_copilot_confidence = (
                 float(analysis_for_log.get("copilot_confidence", 0.0) or 0.0) if analysis_for_log else 0.0
             )
-            # KC7: deep-track cards
+            # KC7: deep-track cards. KC12: pro cards
             self._last_copilot_risk = list(analysis_for_log.get("copilot_risk") or []) if analysis_for_log else []
             self._last_copilot_strategy = (analysis_for_log.get("copilot_strategy") or "") if analysis_for_log else ""
             self._last_copilot_emotion = analysis_for_log.get("copilot_emotion") if analysis_for_log else None
+            self._last_copilot_objections = list(analysis_for_log.get("copilot_objections") or []) if analysis_for_log else []
+            self._last_copilot_follow_up_suggestions = (
+                list(analysis_for_log.get("copilot_follow_up_suggestions") or []) if analysis_for_log else []
+            )
             # KC7: append this turn to session memory for next capture (max N turns)
             if out_transcript and len(out_transcript) > 0 and (out_transcript[0] or "").strip():
                 turn = (out_transcript[0] or "").strip()[:500]
@@ -367,6 +373,8 @@ class VoiceForgeDaemon:
             self._last_copilot_risk = []
             self._last_copilot_strategy = ""
             self._last_copilot_emotion = None
+            self._last_copilot_objections = []
+            self._last_copilot_follow_up_suggestions = []
         self._copilot_watcher_stop.clear()
         self._copilot_watcher_thread = threading.Thread(target=self._copilot_watcher_loop, daemon=True)
         self._copilot_watcher_thread.start()
@@ -470,6 +478,8 @@ class VoiceForgeDaemon:
             risk = list(self._last_copilot_risk)
             strategy = self._last_copilot_strategy
             emotion = self._last_copilot_emotion
+            objections = list(self._last_copilot_objections)
+            follow_up_suggestions = list(self._last_copilot_follow_up_suggestions)
         payload: dict[str, Any] = {
             "copilot_mode": getattr(self._cfg, "copilot_mode", "hybrid"),
             "stt_ambiguous": ambiguous,
@@ -496,7 +506,42 @@ class VoiceForgeDaemon:
             payload["copilot_strategy"] = strategy
         if emotion:
             payload["copilot_emotion"] = emotion
+        if objections:
+            payload["copilot_objections"] = objections
+        if follow_up_suggestions:
+            payload["copilot_follow_up_suggestions"] = follow_up_suggestions
         return json.dumps(payload, ensure_ascii=False)
+
+    def refine_copilot_answer(
+        self,
+        transcript: str,
+        context: str,
+        answer_text: str,
+        mode: str = "deep",
+        tone: str | None = None,
+    ) -> str:
+        """KC12 (#184): On-demand refinement (deep/rewrite/tone). Returns JSON { refined, cost_usd } or { error }."""
+        if not (answer_text or "").strip():
+            return json.dumps({"error": "empty answer"}, ensure_ascii=False)
+        try:
+            from voiceforge.llm.router import refine_copilot_answer as router_refine
+
+            cfg = self._cfg
+            effective_model, _ = cfg.get_effective_llm()
+            if effective_model is None:
+                return json.dumps({"error": "no_llm_backend"}, ensure_ascii=False)
+            refined, cost_usd = router_refine(
+                transcript or "",
+                context or "",
+                (answer_text or "").strip(),
+                mode=(mode or "deep").lower(),
+                tone=tone,
+                model=effective_model,
+            )
+            return json.dumps({"refined": refined, "cost_usd": cost_usd}, ensure_ascii=False)
+        except Exception as e:
+            log.warning("daemon.refine_copilot_answer_failed", error=str(e))
+            return json.dumps({"error": str(e)}, ensure_ascii=False)
 
     def is_listening(self) -> bool:
         with self._listen_lock:
@@ -1052,6 +1097,7 @@ def _wire_daemon_iface(iface: DaemonVoiceForgeInterface, daemon: VoiceForgeDaemo
     iface._capture_start = daemon.capture_start
     iface._capture_release = daemon.capture_release
     iface._get_copilot_capture_status = daemon.get_copilot_capture_status
+    iface._refine_copilot_answer = daemon.refine_copilot_answer
 
 
 async def _run_one_retention_purge(daemon: VoiceForgeDaemon) -> tuple[int, date | None]:

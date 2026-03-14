@@ -103,6 +103,7 @@ pub fn run() {
             commands::get_indexed_paths,
             commands::get_rag_stats,
             commands::index_paths,
+            commands::refine_copilot_answer,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
