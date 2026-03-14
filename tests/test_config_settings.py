@@ -135,6 +135,28 @@ def test_settings_copilot_mode_literal_kc10() -> None:
         Settings(copilot_mode="invalid")
 
 
+def test_settings_copilot_scenario_preset_kc11() -> None:
+    """KC11: copilot_scenario_preset accepts default, demo, negotiation, support."""
+    from pydantic import ValidationError
+
+    from voiceforge.core.config import Settings
+
+    for preset in ("default", "demo", "negotiation", "support"):
+        cfg = Settings(copilot_scenario_preset=preset)
+        assert cfg.copilot_scenario_preset == preset
+    with pytest.raises(ValidationError):
+        Settings(copilot_scenario_preset="invalid")
+
+
+def test_settings_system_audio_consent_default_kc11() -> None:
+    """KC11: system_audio_consent_given defaults to False."""
+    from voiceforge.core.config import Settings
+
+    cfg = Settings()
+    assert cfg.system_audio_consent_given is False
+    assert cfg.monitor_source is None
+
+
 def test_settings_ring_persist_interval_default_and_validation() -> None:
     """ring_persist_interval_sec defaults to 10.0 and must be >= 1 (#100)."""
     from voiceforge.core.config import Settings

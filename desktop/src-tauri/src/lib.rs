@@ -104,6 +104,7 @@ pub fn run() {
             commands::get_rag_stats,
             commands::index_paths,
             commands::refine_copilot_answer,
+            commands::set_system_audio_opt_in,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

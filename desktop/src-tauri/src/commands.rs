@@ -230,6 +230,25 @@ pub async fn index_paths(paths_json: String) -> Result<String, String> {
     Ok(body)
 }
 
+/// KC11: Set system audio opt-in (consent + optional PipeWire monitor source). Persisted on daemon.
+#[tauri::command]
+pub async fn set_system_audio_opt_in(consent_given: bool, monitor_source: Option<String>) -> Result<String, String> {
+    let conn = connection().await?;
+    let src = monitor_source.unwrap_or_default();
+    let reply = conn
+        .call_method(
+            Some(crate::DBUS_NAME),
+            crate::DBUS_PATH,
+            Some(crate::DBUS_INTERFACE),
+            "SetSystemAudioOptIn",
+            &(consent_given, src.as_str()),
+        )
+        .await
+        .map_err(|e| e.to_string())?;
+    let body: String = reply.body().deserialize().map_err(|e| e.to_string())?;
+    Ok(body)
+}
+
 /// KC12: On-demand answer refinement (deep/rewrite/tone). Returns JSON { refined, cost_usd } or { error }.
 #[tauri::command]
 pub async fn refine_copilot_answer(

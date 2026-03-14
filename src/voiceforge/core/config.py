@@ -159,7 +159,15 @@ class Settings(BaseSettings):
     )
     monitor_source: str | None = Field(
         default=None,
-        description="Block 6.3: PipeWire source name for app capture (e.g. VoiceForge_Monitor.monitor).",
+        description="Block 6.3 / KC11: PipeWire source for system audio. Used only when system_audio_consent_given=True.",
+    )
+    system_audio_consent_given: bool = Field(
+        default=False,
+        description="KC11: User has confirmed system audio disclaimer. Required for monitor capture (legal-consent-kv1).",
+    )
+    copilot_scenario_preset: Literal["default", "demo", "negotiation", "support"] = Field(
+        default="default",
+        description="KC11: Scenario preset for copilot cards: default | demo | negotiation | support.",
     )
     aggressive_memory: bool = Field(
         default=False,

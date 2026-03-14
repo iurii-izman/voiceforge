@@ -154,6 +154,9 @@ def _make_daemon(
     cfg.copilot_max_capture_seconds = 30.0
     cfg.copilot_stt_idle_unload_seconds = 300.0
     cfg.get_rag_db_path = MagicMock(return_value="/nonexistent/rag.db")
+    cfg.system_audio_consent_given = False
+    cfg.monitor_source = None
+    cfg.copilot_scenario_preset = "default"
     if settings_overrides:
         for k, v in settings_overrides.items():
             setattr(cfg, k, v)
@@ -187,6 +190,34 @@ def test_daemon_get_settings_includes_copilot_keys_kc8() -> None:
     assert "copilot_pre_roll_seconds" in data
     assert "copilot_max_capture_seconds" in data
     assert "copilot_stt_idle_unload_seconds" in data  # KC14
+
+
+def test_daemon_get_settings_includes_system_audio_and_scenario_kc11() -> None:
+    """KC11: get_settings includes system_audio_consent_given, monitor_source, copilot_scenario_preset."""
+    daemon = _make_daemon()
+    out = daemon.get_settings()
+    data = json.loads(out)
+    assert "system_audio_consent_given" in data
+    assert "monitor_source" in data
+    assert "copilot_scenario_preset" in data
+    assert data["copilot_scenario_preset"] == "default"
+
+
+def test_daemon_set_system_audio_opt_in_updates_effective_kc11() -> None:
+    """KC11: set_system_audio_opt_in updates state; get_settings returns effective consent and source."""
+    daemon = _make_daemon()
+    with patch.object(daemon, "_save_system_audio_state"):
+        daemon.set_system_audio_opt_in(True, "VoiceForge_Monitor.monitor")
+    out = daemon.get_settings()
+    data = json.loads(out)
+    assert data["system_audio_consent_given"] is True
+    assert data["monitor_source"] == "VoiceForge_Monitor.monitor"
+    with patch.object(daemon, "_save_system_audio_state"):
+        daemon.set_system_audio_opt_in(False, None)
+    out2 = daemon.get_settings()
+    data2 = json.loads(out2)
+    assert data2["system_audio_consent_given"] is False
+    assert data2["monitor_source"] is None or data2["monitor_source"] == ""
 
 
 def test_daemon_get_streaming_transcript_default() -> None:

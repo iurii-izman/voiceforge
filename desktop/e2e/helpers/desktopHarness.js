@@ -63,6 +63,9 @@ export function buildDesktopScenario(overrides = {}) {
       pii_mode: "ON",
       privacy_mode: "ON",
       language: "ru",
+      system_audio_consent_given: false,
+      monitor_source: null,
+      copilot_scenario_preset: "default",
     },
     upcomingEvents: [
       { summary: "Sprint Review", start_iso: "2026-03-09T11:00:00Z" },
@@ -296,6 +299,10 @@ export async function installDesktopMocks(page, scenarioOverrides = {}) {
             return JSON.stringify({ ok: true, errors: [] });
           case "refine_copilot_answer":
             return JSON.stringify({ refined: (args.answer_text || "").trim() + " (refined)", cost_usd: 0.001 });
+          case "set_system_audio_opt_in":
+            state.settings.system_audio_consent_given = !!args.consent_given;
+            state.settings.monitor_source = args.monitor_source || null;
+            return envelope({ ok: true });
           case "export_session":
             return `exported:${args.format}:${args.sessionId}`;
           case "set_copilot_overlay_state":

@@ -13,7 +13,7 @@ This file is the operational map for the Knowledge Copilot program. Nothing in t
 
 - `KD1-KD3` are seeded and closed as `decision-locked` policy artefacts.
 - `KC1` is complete: the program is bootstrapped, the GitHub Project is seeded, and handoff is switched to the Copilot track.
-- **Current next executable block:** KC11 (#183) или KC13 (#185) — KV1 и KV5 разрешены; оба KC доступны для автопилота.
+- **Current next executable block:** Все KC программы (KC1–KC14) закрыты. Дальше: hardening (#164, #165), KV2/KV3/KV4 по желанию.
 - `#164` and `#165` remain open as background maintenance/security hardening and are not part of the main copilot execution order.
 
 ## Block Registry
@@ -40,9 +40,9 @@ This file is the operational map for the Knowledge Copilot program. Nothing in t
 | KC8 | [#180](https://github.com/iurii-izman/voiceforge/issues/180) | 2 | Done | Main-window copilot integration and settings |
 | KC9 | [#181](https://github.com/iurii-izman/voiceforge/issues/181) | 2 | Done | Knowledge management UI and context packs |
 | KC10 | [#182](https://github.com/iurii-izman/voiceforge/issues/182) | 3 | Done | Explicit mode system, hybrid/offline maturity |
-| KC11 | [#183](https://github.com/iurii-izman/voiceforge/issues/183) | 3 | Todo | System audio and scenario presets (KV1 resolved) |
+| KC11 | [#183](https://github.com/iurii-izman/voiceforge/issues/183) | 3 | Done | System audio opt-in, consent UX, scenario presets (KV1 resolved) |
 | KC12 | [#184](https://github.com/iurii-izman/voiceforge/issues/184) | 4 | Done | Pro cards and answer refinement |
-| KC13 | [#185](https://github.com/iurii-izman/voiceforge/issues/185) | 4 | Todo | Adaptive intelligence and extensibility (KV5 resolved: Linux-only) |
+| KC13 | [#185](https://github.com/iurii-izman/voiceforge/issues/185) | 4 | Done | Adaptive/extensibility contracts (KV5: Linux-only). See [copilot-extensibility-kc13.md](copilot-extensibility-kc13.md) |
 | KC14 | [#186](https://github.com/iurii-izman/voiceforge/issues/186) | 4 | Done | Copilot QA, perf/reliability, release evidence |
 
 ### KV · User / External Intervention Blocks

@@ -88,15 +88,15 @@
 
 ### Main Execution Order
 
-**Следующий executable block:** KC11 (#183) или KC13 (#185) — KV1 и KV5 разрешены.
+**Следующий executable block:** KC11 и KC13 выполнены. Все KC (1–14) закрыты.
 
 | Wave | Issues | Статус | Что реализуем |
 | --- | --- | --- | --- |
 | Wave 1 MVP Core | [#174](https://github.com/iurii-izman/voiceforge/issues/174) ✓ → [#178](https://github.com/iurii-izman/voiceforge/issues/178) ✓ | Done | Wave 1 complete |
 | Wave 2 MVP Complete | [#179](https://github.com/iurii-izman/voiceforge/issues/179) ✓ → [#180](https://github.com/iurii-izman/voiceforge/issues/180) ✓ | Done | KC8 done |
 | Wave 2 V2 Surface | [#181](https://github.com/iurii-izman/voiceforge/issues/181) ✓ | Done | KC9 done |
-| Wave 3 V2 Expansion | [#182](https://github.com/iurii-izman/voiceforge/issues/182) ✓ → [#183](https://github.com/iurii-izman/voiceforge/issues/183) | Active | KC10 done; KC11 разблокирован (KV1 resolved); KC12 done |
-| Wave 4 V3 / Pro / Frontier | [#184](https://github.com/iurii-izman/voiceforge/issues/184) ✓ → [#185](https://github.com/iurii-izman/voiceforge/issues/185) → [#186](https://github.com/iurii-izman/voiceforge/issues/186) ✓ | Active | KC12, KC14 done; KC13 unblocked (KV5 resolved) |
+| Wave 3 V2 Expansion | [#182](https://github.com/iurii-izman/voiceforge/issues/182) ✓ → [#183](https://github.com/iurii-izman/voiceforge/issues/183) ✓ | Done | KC10, KC11 done |
+| Wave 4 V3 / Pro / Frontier | [#184](https://github.com/iurii-izman/voiceforge/issues/184) ✓ → [#185](https://github.com/iurii-izman/voiceforge/issues/185) ✓ → [#186](https://github.com/iurii-izman/voiceforge/issues/186) ✓ | Done | KC12, KC13, KC14 done |
 
 ### Manual / External Gates
 

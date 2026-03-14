@@ -228,6 +228,10 @@ const I18N = {
     quickstart_link: "Быстрый старт в репозитории",
     settings_daemon_hint: "Настройки загружаются с демона.",
     settings_none: "Нет настроек.",
+    system_audio_disclaimer: "Системный звук записывает звук приложений и браузера. Включайте только если вы имеете право на запись.",
+    system_audio_consent_label: "Я понимаю, что системный звук может содержать сторонний контент, и использую эту функцию на свою ответственность.",
+    system_audio_save: "Сохранить",
+    system_audio_section_title: "Системный звук",
     settings_daemon_version: "Версия демона: {version}",
     settings_daemon_version_unavailable: "Версия демона: недоступна",
     analytics_no_data: "Нет данных.",
@@ -443,6 +447,10 @@ const I18N = {
     quickstart_link: "Quick start in the repository",
     settings_daemon_hint: "Settings are loaded from the daemon.",
     settings_none: "No settings available.",
+    system_audio_disclaimer: "System audio captures application and browser sound. Use only when you have the right to record.",
+    system_audio_consent_label: "I understand that system audio may include third-party content and I use this feature at my own responsibility.",
+    system_audio_save: "Save",
+    system_audio_section_title: "System audio",
     settings_daemon_version: "Daemon version: {version}",
     settings_daemon_version_unavailable: "Daemon version: unavailable",
     analytics_no_data: "No data.",
@@ -2059,6 +2067,9 @@ const SETTINGS_LABELS = {
     copilot_stt_model_size: "STT для Copilot",
     copilot_pre_roll_seconds: "Pre-roll (сек)",
     copilot_max_capture_seconds: "Макс. длина захвата (сек)",
+    system_audio_consent_given: "Согласие на системный звук",
+    monitor_source: "Источник PipeWire (monitor)",
+    copilot_scenario_preset: "Сценарий Copilot",
   },
   en: {
     model_size: "Model size (diarization)",
@@ -2075,6 +2086,9 @@ const SETTINGS_LABELS = {
     copilot_stt_model_size: "Copilot STT model",
     copilot_pre_roll_seconds: "Pre-roll (sec)",
     copilot_max_capture_seconds: "Max capture length (sec)",
+    system_audio_consent_given: "System audio consent",
+    monitor_source: "PipeWire monitor source",
+    copilot_scenario_preset: "Copilot scenario",
   },
 };
 
@@ -2095,6 +2109,35 @@ function renderSettings(data) {
     html += "<div class=\"settings-item\"><span class=\"settings-key\">" + escapeHtml(label) + "</span><span class=\"settings-val\">" + escapeHtml(val) + "</span></div>";
   });
   return html;
+}
+
+function renderSystemAudioBlock(data) {
+  const consent = !!data?.system_audio_consent_given;
+  const source = (data?.monitor_source ?? "") || "";
+  return (
+    '<div id="settings-system-audio-block" class="settings-system-audio">' +
+    '<h4 class="settings-subtitle">' + escapeHtml(t("system_audio_section_title")) + '</h4>' +
+    '<p class="muted settings-hint">' + escapeHtml(t("system_audio_disclaimer")) + '</p>' +
+    '<label class="settings-consent-label"><input type="checkbox" id="system-audio-consent-cb" ' + (consent ? " checked" : "") + ' /> ' + escapeHtml(t("system_audio_consent_label")) + '</label>' +
+    '<div class="settings-item"><span class="settings-key">' + escapeHtml(t("monitor_source")) + '</span><input type="text" id="system-audio-source-input" class="settings-input" value="' + escapeHtml(source) + '" placeholder="VoiceForge_Monitor.monitor" /></div>' +
+    '<button type="button" class="btn small" id="system-audio-save-btn">' + escapeHtml(t("system_audio_save")) + '</button>' +
+    "</div>"
+  );
+}
+
+function initSystemAudioBlock(container, data) {
+  if (!container) return;
+  const btn = container.querySelector("#system-audio-save-btn");
+  const cb = container.querySelector("#system-audio-consent-cb");
+  const input = container.querySelector("#system-audio-source-input");
+  if (!btn || !cb || !input) return;
+  btn.addEventListener("click", () => {
+    const consent = !!cb?.checked;
+    const source = (input?.value ?? "").trim() || null;
+    invoke("set_system_audio_opt_in", { consent_given: consent, monitor_source: source })
+      .then(() => loadSettings())
+      .catch((e) => console.error("set_system_audio_opt_in failed", e));
+  });
 }
 
 const KNOWLEDGE_PACKS_KEY = "voiceforge_context_packs";
@@ -2212,7 +2255,8 @@ function loadSettings() {
           return;
         }
       }
-      container.innerHTML = renderSettings(data) + `<p class="muted settings-hint" id="daemon-version-line">${escapeHtml(tf("settings_daemon_version", { version: "…" }))}</p>`;
+      container.innerHTML = renderSettings(data) + renderSystemAudioBlock(data) + `<p class="muted settings-hint" id="daemon-version-line">${escapeHtml(tf("settings_daemon_version", { version: "…" }))}</p>`;
+      initSystemAudioBlock(container, data);
       invoke("get_daemon_version")
         .then((v) => {
           const el = document.getElementById("daemon-version-line");

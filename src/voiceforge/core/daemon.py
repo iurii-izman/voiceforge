@@ -32,6 +32,9 @@ if TYPE_CHECKING:
 log = structlog.get_logger()
 
 PID_FILE_NAME = "voiceforge.pid"
+# Sonar S1192: analyze result error prefixes (i18n)
+_ANALYZE_ERROR_PREFIX_RU = "Ошибка:"
+_ANALYZE_ERROR_PREFIX_EN = "Error:"
 
 # E5 #128: systemd watchdog — send status via NOTIFY_SOCKET (no extra dependency)
 _WATCHDOG_INTERVAL_SEC = 30
@@ -71,7 +74,7 @@ def _analyze_result_is_error_daemon(result: str) -> bool:
     """True if analyze result string indicates error (KC3: copilot release)."""
     if not result:
         return False
-    if result.startswith("Ошибка:") or result.startswith("Error:"):
+    if result.startswith(_ANALYZE_ERROR_PREFIX_RU) or result.startswith(_ANALYZE_ERROR_PREFIX_EN):
         return True
     try:
         parsed = json.loads(result)
@@ -85,13 +88,24 @@ def _pid_path() -> Path:
     return Path(xdg) / PID_FILE_NAME
 
 
+def _system_audio_state_path() -> Path:
+    """KC11: Path to persisted system audio consent/source (overlay from desktop)."""
+    from voiceforge.core.config import get_default_config_yaml_path
+
+    return get_default_config_yaml_path().parent / "system_audio_state.json"
+
+
 class VoiceForgeDaemon:
     """Backend for D-Bus: analyze, status, listen_start/stop, is_listening. Lazy pipeline.
     Block 4.4: smart_trigger loop when listening."""
 
+    # KC11: system audio opt-in state (overlay from UI; persisted to state file)
+    _SYSTEM_AUDIO_STATE_FILENAME = "system_audio_state.json"
+
     def __init__(self, iface: DaemonVoiceForgeInterface | None = None) -> None:
         self._iface = iface
         self._cfg = Settings()
+        self._system_audio_state: dict[str, Any] = self._load_system_audio_state()
         self._model_manager = ModelManager(self._cfg)
         set_model_manager(self._model_manager)
         self._listen_stop = threading.Event()
@@ -265,6 +279,51 @@ class VoiceForgeDaemon:
         from voiceforge.main import get_status_text
 
         return get_status_text()
+
+    def _load_system_audio_state(self) -> dict[str, Any]:
+        """KC11: Load consent + monitor_source overlay from state file."""
+        path = _system_audio_state_path()
+        if not path.is_file():
+            return {}
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            if isinstance(data, dict) and "consent_given" in data:
+                return {
+                    "consent_given": bool(data.get("consent_given")),
+                    "monitor_source": (data.get("monitor_source") or "").strip() or None,
+                }
+        except Exception as e:
+            log.warning("daemon.system_audio_state_load_failed", path=str(path), error=str(e))
+        return {}
+
+    def _save_system_audio_state(self) -> None:
+        """KC11: Persist system audio state for desktop overlay."""
+        path = _system_audio_state_path()
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(
+            json.dumps(self._system_audio_state, indent=2),
+            encoding="utf-8",
+        )
+
+    def _effective_system_audio(self) -> tuple[bool, str | None]:
+        """KC11: (consent_given, monitor_source) from state overlay or config."""
+        if self._system_audio_state:
+            return (
+                bool(self._system_audio_state.get("consent_given")),
+                self._system_audio_state.get("monitor_source") or None,
+            )
+        return (
+            getattr(self._cfg, "system_audio_consent_given", False),
+            getattr(self._cfg, "monitor_source", None),
+        )
+
+    def set_system_audio_opt_in(self, consent_given: bool, monitor_source: str | None = None) -> None:
+        """KC11: Set system audio consent and optional PipeWire source (from desktop). Persists to state file."""
+        self._system_audio_state = {
+            "consent_given": consent_given,
+            "monitor_source": (monitor_source or "").strip() or None,
+        }
+        self._save_system_audio_state()
 
     def listen_start(self) -> None:
         """Start ring-buffer recording in background thread.
@@ -446,7 +505,9 @@ class VoiceForgeDaemon:
         with self._copilot_lock:
             self._last_copilot_transcript = out_transcript[0] if out_transcript else ""
         is_error = bool(
-            (text or "").startswith("Ошибка:") or (text or "").startswith("Error:") or (_analyze_result_is_error_daemon(text))
+            (text or "").startswith(_ANALYZE_ERROR_PREFIX_RU)
+        or (text or "").startswith(_ANALYZE_ERROR_PREFIX_EN)
+        or (_analyze_result_is_error_daemon(text))
         )
         from voiceforge.i18n import t
 
@@ -650,9 +711,10 @@ class VoiceForgeDaemon:
             return "[]"
 
     def get_settings(self) -> str:
-        """Return JSON with current settings for UI. privacy_mode is alias for pii_mode (W4)."""
+        """Return JSON with current settings for UI. privacy_mode is alias for pii_mode (W4). KC11: system_audio_* effective."""
         c = self._cfg
         pii = getattr(c, "pii_mode", "ON")
+        consent_eff, monitor_eff = self._effective_system_audio()
         return json.dumps(
             {
                 "model_size": c.model_size,
@@ -674,6 +736,9 @@ class VoiceForgeDaemon:
                 "copilot_pre_roll_seconds": getattr(c, "copilot_pre_roll_seconds", 1.0),
                 "copilot_max_capture_seconds": getattr(c, "copilot_max_capture_seconds", 30.0),
                 "copilot_stt_idle_unload_seconds": getattr(c, "copilot_stt_idle_unload_seconds", 300.0),
+                "system_audio_consent_given": consent_eff,
+                "monitor_source": monitor_eff,
+                "copilot_scenario_preset": getattr(c, "copilot_scenario_preset", "default"),
             },
             ensure_ascii=False,
         )
@@ -974,10 +1039,12 @@ class VoiceForgeDaemon:
             return
         ring_path = self._cfg.get_ring_file_path()
         Path(ring_path).parent.mkdir(parents=True, exist_ok=True)
+        consent, source = self._effective_system_audio()
+        effective_monitor = source if consent else None
         capture = AudioCapture(
             sample_rate=self._cfg.sample_rate,
             buffer_seconds=self._cfg.ring_seconds,
-            monitor_source=self._cfg.monitor_source,
+            monitor_source=effective_monitor,
         )
         capture.start()
         with self._copilot_lock:
@@ -1036,7 +1103,7 @@ class VoiceForgeDaemon:
 
                 template = getattr(self._cfg, "smart_trigger_template", None)
                 text, segments_for_log, analysis_for_log = run_analyze_pipeline(trigger.analyze_seconds, template=template)
-                if text.startswith("Ошибка:") or text.startswith("Error:"):
+                if text.startswith(_ANALYZE_ERROR_PREFIX_RU) or text.startswith(_ANALYZE_ERROR_PREFIX_EN):
                     log.warning("smart_trigger.analyze_failed", message=text[:100])
                     continue
                 from voiceforge.core.transcript_log import TranscriptLog
@@ -1112,6 +1179,7 @@ def _wire_daemon_iface(iface: DaemonVoiceForgeInterface, daemon: VoiceForgeDaemo
     iface._capture_release = daemon.capture_release
     iface._get_copilot_capture_status = daemon.get_copilot_capture_status
     iface._refine_copilot_answer = daemon.refine_copilot_answer
+    iface._set_system_audio_opt_in = daemon.set_system_audio_opt_in
 
 
 async def _run_one_retention_purge(daemon: VoiceForgeDaemon) -> tuple[int, date | None]:
@@ -1269,7 +1337,7 @@ def _calendar_auto_listen_try_analyze(daemon: VoiceForgeDaemon, last_processed_e
         analyze_seconds = 60
         template = getattr(daemon._cfg, "smart_trigger_template", None)
         text, session_id = daemon.analyze(analyze_seconds, template=template)
-        if (text or "").startswith("Ошибка:") or (text or "").startswith("Error:"):
+        if (text or "").startswith(_ANALYZE_ERROR_PREFIX_RU) or (text or "").startswith(_ANALYZE_ERROR_PREFIX_EN):
             log.warning("calendar_auto_listen.analyze_failed", message=(text or "")[:100])
             return
         _notify_analyze_done(session_id, text or "")

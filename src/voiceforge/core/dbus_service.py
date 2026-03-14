@@ -173,6 +173,7 @@ class _DaemonOptionalCallbacks(TypedDict, total=False):
     capture_release_fn: Callable[[], None]
     get_copilot_capture_status_fn: Callable[[], str]
     refine_copilot_answer_fn: Callable[[str, str, str, str, str | None], str]
+    set_system_audio_opt_in_fn: Callable[[bool, str | None], None]
 
 
 class DaemonVoiceForgeInterface(ServiceInterface):
@@ -216,6 +217,7 @@ class DaemonVoiceForgeInterface(ServiceInterface):
         self._capture_release = o.get("capture_release_fn")
         self._get_copilot_capture_status = o.get("get_copilot_capture_status_fn")
         self._refine_copilot_answer = o.get("refine_copilot_answer_fn")
+        self._set_system_audio_opt_in = o.get("set_system_audio_opt_in_fn")
         self._analyze_sem = asyncio.Semaphore(1)
 
     ANALYZE_MAX_SECONDS = 3600
@@ -398,6 +400,14 @@ class DaemonVoiceForgeInterface(ServiceInterface):
             mode or "deep",
             (tone or "").strip() or None,
         )
+
+    @dbus_method()
+    def SetSystemAudioOptIn(self, consent_given: DBusBool, monitor_source: DBusStr) -> DBusStr:
+        """KC11: Set system audio consent and optional PipeWire source. Persists to state file; next listen uses it."""
+        if self._set_system_audio_opt_in is None:
+            return _make_ipc_error("NOT_AVAILABLE", "SetSystemAudioOptIn not available") if _uses_ipc_envelope() else "error"
+        self._set_system_audio_opt_in(bool(consent_given), (monitor_source or "").strip() or None)
+        return _make_ipc_success({"ok": True}) if _uses_ipc_envelope() else "ok"
 
     @dbus_method()
     def GetSessionIdsWithActionItems(self) -> DBusStr:

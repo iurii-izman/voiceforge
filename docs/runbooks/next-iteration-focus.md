@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии**. Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-14 (KV1 разрешён: wording утверждён, KC11 в scope)
+**Обновлено:** 2026-03-14 (KC11, KC13 выполнены; программа KC 1–14 закрыта)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Updater подготовлен к включению: `createUpdaterArtifacts: true`, скрипт `scripts/enable_updater.py` (генерация ключа и подстановка pubkey/endpoints), манифест `updates/update.json` и скрипт `scripts/write_update_json.py` для релиза; runbook [desktop-updater.md](desktop-updater.md) обновлён (включение, манифест при релизе, проверка install flow). Включение: выполнить `enable_updater.py` и закоммитить изменённый tauri.conf.json. Ранее: Sonar BLOCKER, релиз 1.0.0-beta.1, audit/what-user-must-do/reflective-summary.
+**Сделано в сессии:** **KC11** (#183): system audio opt-in (config + state file), consent UX в настройках десктопа, D-Bus SetSystemAudioOptIn, scenario preset в конфиге, тесты и доки. **KC13** (#185): контракты расширяемости в [copilot-extensibility-kc13.md](copilot-extensibility-kc13.md), Linux-only, без регрессии MVP/V2.
 
-**Следующий шаг:** KV1 и KV5 разрешены. **KC11 (#183)** и **KC13 (#185)** доступны для автопилота. Варианты: (1) взять KC11 · System audio and scenario presets; (2) взять KC13 · Adaptive intelligence and extensibility; (3) Sonar/hardening, Dependabot.
+**Следующий шаг:** Все KC (1–14) закрыты. Варианты: (1) hardening #164/#165, Sonar, Dependabot; (2) KV2/KV3/KV4 по желанию; (3) релиз/продуктовая доводка.
 
 ---
 
@@ -34,8 +34,8 @@
 | **Wave 1 MVP Core** | #174✓ → #175✓ → #176✓ → #177✓ → #178✓ | Done | KC6 done; Wave 1 complete |
 | **Wave 2 MVP Complete** | #179✓ → #180✓ | Done | KC8 done |
 | **Wave 2 V2 Surface** | #181✓ | Done | KC9 done |
-| **Wave 3 V2 Expansion** | #182✓ → #183 | Active | KC10 done; KC11 разблокирован (KV1 resolved) |
-| **Wave 4 V3 / Frontier** | #184✓ → #185 → #186✓ | Active | KC12, KC14 done; KC13 разблокирован (KV5 resolved) |
+| **Wave 3 V2 Expansion** | #182✓ → #183✓ | Done | KC10, KC11 done |
+| **Wave 4 V3 / Frontier** | #184✓ → #185✓ → #186✓ | Done | KC12, KC13, KC14 done |
 | **Manual gates** | #187✓ → #191✓ | KV1, KV5 done | KV2/KV3/KV4 остаются |
 | **Background hardening** | #165, #164 | Open | Keep below copilot program unless blocking |
 
@@ -52,7 +52,7 @@
 
 Перед началом крупного блока: `./scripts/preflight_repo.sh --with-tests`. Для desktop/UI изменений: `cd desktop && npm run e2e:release-gate`. Для native/Tauri/system-level изменений дополнительно: `cd desktop && npm run e2e:native:headless`.
 
-KV1 и KV5 разрешены. KC11 (#183) и KC13 (#185) доступны. Варианты: (1) брать KC11; (2) брать KC13; (3) Sonar/hardening/Dependabot.
+KC11 и KC13 выполнены; все KC программы закрыты. Дальше: hardening, KV2/KV3/KV4, Sonar/Dependabot, релиз.
 ```
 
 ---

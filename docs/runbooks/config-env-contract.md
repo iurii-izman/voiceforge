@@ -29,7 +29,9 @@ Priority order:
 | `rag_auto_index_path` | `VOICEFORGE_RAG_AUTO_INDEX_PATH` | `null` | E13 #136: path to auto-index on first analyze (e.g. ~/Documents); warning if path missing |
 | `smart_trigger` | `VOICEFORGE_SMART_TRIGGER` | `true` | Auto-analyze on semantic pause (E1: sensible default). Set to `false` to disable. |
 | `smart_trigger_template` | `VOICEFORGE_SMART_TRIGGER_TEMPLATE` | `null` | Optional template for smart-trigger analyze (e.g. `standup`, `one_on_one`). Only when `smart_trigger` is true. |
-| `monitor_source` | `VOICEFORGE_MONITOR_SOURCE` | `null` | PipeWire monitor source |
+| `monitor_source` | `VOICEFORGE_MONITOR_SOURCE` | `null` | KC11: PipeWire source for system audio; used only when consent given (see `system_audio_consent_given` or desktop state file) |
+| `system_audio_consent_given` | `VOICEFORGE_SYSTEM_AUDIO_CONSENT_GIVEN` | `false` | KC11: User has confirmed system audio disclaimer; required for monitor capture (legal-consent-kv1) |
+| `copilot_scenario_preset` | `VOICEFORGE_COPILOT_SCENARIO_PRESET` | `default` | KC11: Scenario preset: `default`, `demo`, `negotiation`, `support` |
 | `aggressive_memory` | `VOICEFORGE_AGGRESSIVE_MEMORY` | `false` | Unload models after analyze |
 | `pyannote_restart_hours` | `VOICEFORGE_PYANNOTE_RESTART_HOURS` | `2` | Periodic pyannote restart |
 | `pipeline_step2_timeout_sec` | `VOICEFORGE_PIPELINE_STEP2_TIMEOUT_SEC` | `25.0` | Timeout for parallel stage |

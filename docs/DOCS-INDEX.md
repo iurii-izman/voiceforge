@@ -122,6 +122,7 @@
 | desktop-qa-plan.md                                            | Единый desktop QA plan: blocking gate, advisory native smoke, ручной UX checklist       | Актуален                         |
 | desktop-release-gate-matrix.md                                | Release gate matrix для desktop: automated vs native vs manual proof                    | Актуален                         |
 | copilot-qa-and-release.md                                     | KC14: copilot release gate, latency budgets, failure UX, idle-unload policy             | Актуален                         |
+| copilot-extensibility-kc13.md                                 | KC13: контракты расширяемости, adaptive model, plugin/contradiction/speaker/jargon      | Актуален                         |
 | what-user-must-do.md                                          | Что нужно от пользователя: решения и действия вне автопилота (KV, релиз, Sonar)        | Актуален                         |
 | legal-consent-kv1.md                                          | KV1: черновик формулировок system audio, retention, юрисдикции; решение по scope KC11   | Актуален                         |
 | reflective-summary-2026-03.md                                 | Рефлексия по проекту и совместной работе (сильные/слабые стороны, улучшения)             | Актуален                         |
