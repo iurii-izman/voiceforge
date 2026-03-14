@@ -137,7 +137,8 @@
 | lifecycle-smoke.md                                            | Smoke-шаги для audio/STT и RAG lifecycle (#105, #106)                                  | Актуален                         |
 | pre-beta-sonar-github.md                                      | Чеклист Sonar и GitHub перед бета-релизом (PR, issues, порядок)                         | Актуален                         |
 | PROJECT-STATUS-SUMMARY.md                                     | Итог по проекту (12 разделов): планы↔код, audit delta, critical path, риски, приоритеты | Актуален                         |
-| phase-e-decision-log.md                                       | Зафиксированные решения по E19-E21; scope guard для автопилота                          | Актуален                         |
+| phase-e-decision-log.md                                       | Зафиксированные решения по E19-E21, KV5; scope guard для автопилота                     | Актуален                         |
+| platform-gate-kv5.md                                          | KV5: решение Linux-only, no platform expansion; KC13 разблокирован                      | Актуален                         |
 | web-api.md, observability-alerts.md                           | API, мониторинг, трассировка Jaeger (#71)                                               | Актуален                         |
 | test-operations.md                                            | Тесты и CI                                                                              | Актуален                         |
 | sonar-pr-cleanup.md                                           | Заглушка → [archive/runbooks/sonar-pr-cleanup.md](archive/runbooks/sonar-pr-cleanup.md) | Заглушка / архив                 |

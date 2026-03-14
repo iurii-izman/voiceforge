@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии**. Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-14 (Beta 1.0: Sonar BLOCKER fix, audit vs code doc, what-user-must-do, reflective summary; версия 1.0.0-beta.1)
+**Обновлено:** 2026-03-14 (KV5 разрешён: Linux-only, KC13 разблокирован)
 
 ---
 
@@ -19,7 +19,7 @@
 
 **Сделано в сессии:** Sonar: исправлен BLOCKER S3516 в `audio/capture.py` (_handle_stream_closed возвращает False, когда процесс ещё не завершён). Релиз: версия 1.0.0-beta.1 уже синхронизирована (pyproject, desktop, Flatpak); CHANGELOG дополнен. Документы: [audit/audit-vs-code-reality-2026-03.md](../audit/audit-vs-code-reality-2026-03.md) (аудит vs код, % сделанного/несделанного), [what-user-must-do.md](what-user-must-do.md) (что нужно от пользователя — решения и действия вне автопилота), [reflective-summary-2026-03.md](reflective-summary-2026-03.md) (рефлексия по проекту и совместной работе). PROJECT-STATUS-SUMMARY: версия 1.0.0-beta.1.
 
-**Следующий шаг:** Разблокированных KC нет. Варианты: (1) разрешить KV1 → KC11 (#183); (2) разрешить KV5 → KC13 (#185); (3) Sonar/hardening (#165, #164), Dependabot, или другая приоритетная задача. Для релиза беты: после проверки артефактов выполнить `git tag -a v1.0.0-beta.1 -m "VoiceForge beta 1.0: Copilot wave complete"` и `git push origin v1.0.0-beta.1`.
+**Следующий шаг:** KV5 разрешён (Linux-only, зафиксировано в #191 и [platform-gate-kv5.md](platform-gate-kv5.md)). **KC13 (#185) разблокирован** — можно брать на автопилот. Варианты: (1) взять KC13 · Adaptive intelligence and extensibility; (2) разрешить KV1 → KC11; (3) Sonar/hardening, Dependabot.
 
 ---
 
@@ -35,8 +35,8 @@
 | **Wave 2 MVP Complete** | #179✓ → #180✓ | Done | KC8 done |
 | **Wave 2 V2 Surface** | #181✓ | Done | KC9 done |
 | **Wave 3 V2 Expansion** | #182✓ → #183 (blocked) | Active | KC10 done; KC11 ждёт KV1 |
-| **Wave 4 V3 / Frontier** | #184✓ → #185 (blocked) → #186✓ | Done | KC12, KC14 done; KC13 ждёт KV5 |
-| **Manual gates** | #187 → #191 | Todo | Legal, UX sign-off, pilot validation, business gate, platform gate |
+| **Wave 4 V3 / Frontier** | #184✓ → #185 → #186✓ | Active | KC12, KC14 done; KC13 разблокирован (KV5 resolved) |
+| **Manual gates** | #187 → #191✓ | KV5 done | KV1/KV2/KV3/KV4 остаются; KV5 закрыт (Linux-only) |
 | **Background hardening** | #165, #164 | Open | Keep below copilot program unless blocking |
 
 ---
@@ -52,7 +52,7 @@
 
 Перед началом крупного блока: `./scripts/preflight_repo.sh --with-tests`. Для desktop/UI изменений: `cd desktop && npm run e2e:release-gate`. Для native/Tauri/system-level изменений дополнительно: `cd desktop && npm run e2e:native:headless`.
 
-Версия 1.0.0-beta.1. KC14 выполнен; KC-волна закрыта. Разблокированных KC нет. Новые доки: audit-vs-code-reality-2026-03, what-user-must-do, reflective-summary-2026-03. Варианты: (1) KV1 → KC11; (2) KV5 → KC13; (3) Sonar/hardening/Dependabot; (4) пушить тег v1.0.0-beta.1 после проверки.
+KV5 разрешён (Linux-only). KC13 (#185) разблокирован — можно брать KC13 на автопилот. Варианты: (1) брать KC13; (2) KV1 → KC11; (3) Sonar/hardening/Dependabot.
 ```
 
 ---

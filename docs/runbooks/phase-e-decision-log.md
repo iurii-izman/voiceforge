@@ -1,6 +1,6 @@
 # Phase E Decision Log (E19-E21)
 
-**Обновлено:** 2026-03-09.
+**Обновлено:** 2026-03-14.
 
 Этот документ фиксирует решения по блокам **E19-E21** и убирает двусмысленность для автопилота. Если код, issue или prompt конфликтуют с этим документом, источником истины считаются:
 
@@ -40,6 +40,7 @@
 | E21 | [#144](https://github.com/iurii-izman/voiceforge/issues/144) | **Real-time collaborative notes = Reject for current phase** | Не делаем server/auth/team-product pivot. |
 | E21 | [#144](https://github.com/iurii-izman/voiceforge/issues/144) | **PostgreSQL + pgvector = Reject for current phase** | SQLite остаётся правильным default для zero-config local-first продукта. |
 | E21 | [#144](https://github.com/iurii-izman/voiceforge/issues/144) | **LLM fine-tuning = Reject for current phase** | Слишком высокий cost/privacy/ops burden для текущего этапа. |
+| KV5 | [#191](https://github.com/iurii-izman/voiceforge/issues/191) | **Linux-only** | Явный no-go на расширение на Windows/macOS; остаёмся Linux-only. KC13 разблокирован (adaptive/extensibility в рамках Linux). См. [platform-gate-kv5.md](platform-gate-kv5.md). |
 
 ---
 

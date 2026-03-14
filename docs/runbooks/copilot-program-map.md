@@ -13,7 +13,7 @@ This file is the operational map for the Knowledge Copilot program. Nothing in t
 
 - `KD1-KD3` are seeded and closed as `decision-locked` policy artefacts.
 - `KC1` is complete: the program is bootstrapped, the GitHub Project is seeded, and handoff is switched to the Copilot track.
-- **Current next executable block:** none — KC11 blocked by KV1, KC13 blocked by KV5; KC14 done (program wave complete)
+- **Current next executable block:** KC13 (#185) — KV5 resolved (Linux-only); KC11 still blocked by KV1
 - `#164` and `#165` remain open as background maintenance/security hardening and are not part of the main copilot execution order.
 
 ## Block Registry
@@ -42,7 +42,7 @@ This file is the operational map for the Knowledge Copilot program. Nothing in t
 | KC10 | [#182](https://github.com/iurii-izman/voiceforge/issues/182) | 3 | Done | Explicit mode system, hybrid/offline maturity |
 | KC11 | [#183](https://github.com/iurii-izman/voiceforge/issues/183) | 3 | Blocked (KV1) | System audio and scenario presets |
 | KC12 | [#184](https://github.com/iurii-izman/voiceforge/issues/184) | 4 | Done | Pro cards and answer refinement |
-| KC13 | [#185](https://github.com/iurii-izman/voiceforge/issues/185) | 4 | Blocked (KV5) | Adaptive intelligence and extensibility |
+| KC13 | [#185](https://github.com/iurii-izman/voiceforge/issues/185) | 4 | Todo | Adaptive intelligence and extensibility (KV5 resolved: Linux-only) |
 | KC14 | [#186](https://github.com/iurii-izman/voiceforge/issues/186) | 4 | Done | Copilot QA, perf/reliability, release evidence |
 
 ### KV · User / External Intervention Blocks
@@ -53,7 +53,7 @@ This file is the operational map for the Knowledge Copilot program. Nothing in t
 | KV2 | [#188](https://github.com/iurii-izman/voiceforge/issues/188) | Before KC2 completion | Todo | Overlay UX sign-off |
 | KV3 | [#189](https://github.com/iurii-izman/voiceforge/issues/189) | After KC6 | Todo | Pilot validation with primary persona |
 | KV4 | [#190](https://github.com/iurii-izman/voiceforge/issues/190) | Before commercial packaging | Todo | Business/packaging decision |
-| KV5 | [#191](https://github.com/iurii-izman/voiceforge/issues/191) | Before KC13 platform frontier | Todo | Explicit platform expansion gate |
+| KV5 | [#191](https://github.com/iurii-izman/voiceforge/issues/191) | Before KC13 platform frontier | Resolved (Linux-only) | Explicit platform expansion gate; no-go, KC13 unblocked |
 
 ## Execution Order
 
