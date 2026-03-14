@@ -52,7 +52,7 @@
 
 Перед началом крупного блока: `./scripts/preflight_repo.sh --with-tests`. Для desktop/UI изменений: `cd desktop && npm run e2e:release-gate`. Для native/Tauri/system-level изменений дополнительно: `cd desktop && npm run e2e:native:headless`.
 
-KC14 выполнен. Следующих разблокированных KC нет: KC11 ждёт KV1, KC13 ждёт KV5.
+KC14 выполнен; KC-волна программы закрыта. Следующих разблокированных KC нет. Варианты: (1) разрешить KV1 → взять KC11; (2) разрешить KV5 → взять KC13; (3) maintenance/ hardening/другая работа по приоритетам.
 ```
 
 ---
