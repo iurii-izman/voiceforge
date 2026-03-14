@@ -54,7 +54,7 @@
 
 | Вопрос | Кто | Описание |
 |--------|-----|----------|
-| **Updater: вкл/выкл** | Пользователь | Сейчас отключён; для включения нужны pubkey, endpoints и доказательство install flow. |
+| **Updater** | Готов к включению | В репо: `createUpdaterArtifacts: true`, скрипты `enable_updater.py` и `write_update_json.py`, манифест `updates/update.json`. Чтобы включить: выполнить `uv run python scripts/enable_updater.py`, закоммитить изменённый `tauri.conf.json`; добавить `TAURI_SIGNING_PRIVATE_KEY` в GitHub Secrets; при каждом релизе обновлять `updates/update.json` через `write_update_json.py` ([desktop-updater.md](desktop-updater.md)). |
 | **Приоритет: KC11 vs KC13 vs maintenance** | Пользователь | После разрешения KV1/KV5 — какой блок брать первым; или сфокусироваться на hardening (#164, #165). |
 | **Scope следующего релиза** | Пользователь | Что объявлять в 1.0.0 vs оставить в beta; changelog и release notes. |
 

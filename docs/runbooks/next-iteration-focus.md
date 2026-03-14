@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии**. Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-14 (KV5 разрешён: Linux-only, KC13 разблокирован)
+**Обновлено:** 2026-03-14 (Updater включён: pubkey, endpoints, install flow doc)
 
 ---
 
@@ -17,7 +17,7 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Sonar: исправлен BLOCKER S3516 в `audio/capture.py` (_handle_stream_closed возвращает False, когда процесс ещё не завершён). Релиз: версия 1.0.0-beta.1 уже синхронизирована (pyproject, desktop, Flatpak); CHANGELOG дополнен. Документы: [audit/audit-vs-code-reality-2026-03.md](../audit/audit-vs-code-reality-2026-03.md) (аудит vs код, % сделанного/несделанного), [what-user-must-do.md](what-user-must-do.md) (что нужно от пользователя — решения и действия вне автопилота), [reflective-summary-2026-03.md](reflective-summary-2026-03.md) (рефлексия по проекту и совместной работе). PROJECT-STATUS-SUMMARY: версия 1.0.0-beta.1.
+**Сделано в сессии:** Updater подготовлен к включению: `createUpdaterArtifacts: true`, скрипт `scripts/enable_updater.py` (генерация ключа и подстановка pubkey/endpoints), манифест `updates/update.json` и скрипт `scripts/write_update_json.py` для релиза; runbook [desktop-updater.md](desktop-updater.md) обновлён (включение, манифест при релизе, проверка install flow). Включение: выполнить `enable_updater.py` и закоммитить изменённый tauri.conf.json. Ранее: Sonar BLOCKER, релиз 1.0.0-beta.1, audit/what-user-must-do/reflective-summary.
 
 **Следующий шаг:** KV5 разрешён (Linux-only, зафиксировано в #191 и [platform-gate-kv5.md](platform-gate-kv5.md)). **KC13 (#185) разблокирован** — можно брать на автопилот. Варианты: (1) взять KC13 · Adaptive intelligence and extensibility; (2) разрешить KV1 → KC11; (3) Sonar/hardening, Dependabot.
 

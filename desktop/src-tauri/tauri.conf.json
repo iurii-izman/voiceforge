@@ -34,8 +34,15 @@
   },
   "bundle": {
     "active": true,
-    "icon": ["icons/icon.png"],
-    "targets": ["deb", "rpm", "appimage"]
+    "icon": [
+      "icons/icon.png"
+    ],
+    "targets": [
+      "deb",
+      "rpm",
+      "appimage"
+    ],
+    "createUpdaterArtifacts": true
   },
   "plugins": {
     "updater": {
@@ -44,7 +51,9 @@
     },
     "deep-link": {
       "desktop": {
-        "schemes": ["voiceforge"]
+        "schemes": [
+          "voiceforge"
+        ]
       }
     }
   }

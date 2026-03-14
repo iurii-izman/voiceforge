@@ -8,7 +8,7 @@
 
 ## 0. Текущее состояние (honest status)
 
-**Updater явно отключён.** В репозитории в `desktop/src-tauri/tauri.conf.json`: `pubkey: ""`, `endpoints: []`. Сборки не производят подписанные артефакты обновления; в приложении пользователь видит «Обновления отключены или недоступны». Это целевое состояние до появления ключей подписи и сервера обновлений (см. [Release validation](#release-validation) в release-and-quality.md).
+**Updater можно включить скриптом.** В репозитории: `bundle.createUpdaterArtifacts: true` уже установлен; `pubkey` и `endpoints` по умолчанию пустые (режим «обновления отключены»). Чтобы включить обновления: сгенерировать ключи и прописать pubkey/endpoints (вручную или скриптом `scripts/enable_updater.py`). Манифест обновлений — статический JSON в `updates/update.json` (обновляется при каждом релизе).
 
 Текущее состояние можно быстро проверить командой `uv run python scripts/check_release_proof.py --json`: поле `updater.state` должно быть либо `disabled`, либо `ready`; `invalid` означает смешанный и недопустимый repo state.
 
@@ -27,16 +27,24 @@
 
 ---
 
-## 2. Генерация ключей
+## 2. Включение updater (один раз)
 
-На машине разработчика (один раз):
+Из корня репозитория (нужны Node/npm и `npm ci` в `desktop/`):
+
+```bash
+uv run python scripts/enable_updater.py
+```
+
+Скрипт: при пустом `pubkey` генерирует ключ в `~/.tauri/voiceforge.key` и обновляет `tauri.conf.json` (pubkey + endpoints на статический URL `updates/update.json` в репо). Если `pubkey` уже задан — только дописывает `endpoints` и `createUpdaterArtifacts`. После первого запуска: сохраните **приватный** ключ, добавьте `TAURI_SIGNING_PRIVATE_KEY` в GitHub Secrets для CI и закоммитьте изменённый `tauri.conf.json` (pubkey и endpoints), чтобы updater был включён в репо.
+
+Ручная генерация ключей (альтернатива):
 
 ```bash
 cd desktop && npm run tauri signer generate -- -w ~/.tauri/voiceforge.key
 ```
 
 - Сохраните **приватный** ключ в безопасном месте (потеря = невозможность выпускать обновления для уже установленных копий).
-- **Публичный** ключ (содержимое `.pub` или вывод команды) нужно прописать в конфиге (см. ниже).
+- Публичный ключ (файл `~/.tauri/voiceforge.key.pub`) вставьте в `tauri.conf.json` и задайте `endpoints` (см. ниже).
 
 ---
 
@@ -61,6 +69,8 @@ cd desktop && npm run tauri signer generate -- -w ~/.tauri/voiceforge.key
 
 - `endpoints` — массив URL. Поддерживаются переменные: `{{target}}` (linux/windows/darwin), `{{arch}}` (x86_64, aarch64, …), `{{current_version}}` (текущая версия приложения).
 - Сервер должен отдавать **204 No Content**, если обновления нет, или **200 OK** с JSON (см. [Tauri Updater](https://v2.tauri.app/plugin/updater/)).
+
+**Endpoint по умолчанию (после `enable_updater.py`):** статический файл в репо — `https://raw.githubusercontent.com/<owner>/<repo>/main/updates/update.json`. При каждом релизе этот файл нужно обновлять (см. раздел «Манифест при релизе» ниже).
 
 ---
 
@@ -87,7 +97,21 @@ cd desktop && npm run tauri build
 }
 ```
 
-После сборки появятся файлы вида `*.sig` и обновляемые пакеты (например, `.AppImage` + `.AppImage.sig`).
+После сборки появятся файлы вида `*.sig` и обновляемые пакеты (например, `.AppImage` + `.AppImage.sig`, или `.deb` + `.deb.sig` в `bundle/deb/`).
+
+---
+
+## 4.1. Манифест при релизе (update.json)
+
+Файл `updates/update.json` должен содержать актуальные `version`, `url` и `signature` для каждой платформы. После подписанной сборки выполните (из корня репо):
+
+```bash
+uv run python scripts/write_update_json.py --version 1.0.0-beta.1 \
+  --url "https://github.com/<owner>/<repo>/releases/download/v1.0.0-beta.1/VoiceForge_1.0.0-beta.1_amd64.deb" \
+  --signature-file desktop/src-tauri/target/release/bundle/deb/VoiceForge_1.0.0-beta.1_amd64.deb.sig
+```
+
+Затем закоммитьте и запушьте `updates/update.json`. Либо настройте шаг в release workflow: собрать Tauri с ключом, вызвать `write_update_json.py`, закоммитить и пушнуть `updates/` в ветку по умолчанию (требует прав на запись в репо из CI).
 
 ---
 
@@ -126,7 +150,7 @@ cd desktop && npm run tauri build
 
 ---
 
-## 7. Проверка в приложении
+## 7. Проверка в приложении (install flow)
 
 В настройках десктопа уже есть:
 
@@ -135,13 +159,22 @@ cd desktop && npm run tauri build
 
 Если endpoints не настроены или сервер недоступен, пользователь увидит: «Обновления отключены или недоступны».
 
+**Проверка install flow после включения updater:**
+
+1. Собрать приложение с `TAURI_SIGNING_PRIVATE_KEY`, убедиться, что созданы артефакты `.sig`.
+2. Обновить `updates/update.json` через `write_update_json.py` (или вручную с реальной подписью и URL).
+3. Установить текущую (старую) сборку, запустить приложение.
+4. В настройках нажать «Проверить сейчас» — должно появиться предложение обновления (если версия в `update.json` выше текущей).
+5. Установить обновление и перезапустить — убедиться, что версия изменилась и приложение работает.
+
 ---
 
 ## 8. Чеклист перед первым релизом с updater
 
-- [ ] Ключи сгенерированы, приватный ключ сохранён в безопасном месте.
+- [ ] Запущен `scripts/enable_updater.py` (или вручную заданы ключи и endpoints).
+- [ ] Ключи сгенерированы, приватный ключ сохранён в безопасном месте; `TAURI_SIGNING_PRIVATE_KEY` добавлен в GitHub Secrets при сборке в CI.
 - [ ] В `tauri.conf.json` прописан `pubkey` и `endpoints`.
-- [ ] `createUpdaterArtifacts: true` в `bundle`.
+- [ ] `createUpdaterArtifacts: true` в `bundle` (уже включено в репо).
 - [ ] Сборка с `TAURI_SIGNING_PRIVATE_KEY` выполняется (локально или в CI).
-- [ ] Сервер обновлений отдаёт корректный JSON или 204.
-- [ ] Проверка обновления в установленном приложении (кнопка «Проверить сейчас») проходит без ошибок.
+- [ ] При релизе обновлён `updates/update.json` (скрипт `write_update_json.py` или вручную).
+- [ ] Проверка install flow в установленном приложении (кнопка «Проверить сейчас» → установка обновления) проходит без ошибок.

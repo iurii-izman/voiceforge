@@ -1,0 +1,11 @@
+{
+  "version": "1.0.0-beta.1",
+  "notes": "See CHANGELOG.md",
+  "pub_date": "2026-03-14T00:00:00Z",
+  "platforms": {
+    "linux-x86_64": {
+      "signature": "PLACEHOLDER_RUN_RELEASE_OR_WRITE_UPDATE_JSON_SCRIPT",
+      "url": "https://github.com/iurii-izman/voiceforge/releases/download/v1.0.0-beta.1/VoiceForge_1.0.0-beta.1_amd64.deb"
+    }
+  }
+}
