@@ -1,6 +1,6 @@
 {
   "productName": "VoiceForge",
-  "version": "0.2.0-alpha.2",
+  "version": "1.0.0-beta.1",
   "identifier": "com.voiceforge.app",
   "build": {
     "beforeDevCommand": "npm run dev",

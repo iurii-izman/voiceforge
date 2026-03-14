@@ -112,7 +112,7 @@ class AudioCapture:
         """Log a closed stream when the subprocess already exited. Returns True when loop should stop."""
         rc = proc.poll() if proc is not None else None
         if rc is None:
-            return True
+            return False  # process still running, do not stop the reader loop yet
         if name == "monitor":
             log.debug("capture.stream_closed", name=name, returncode=rc)
         else:

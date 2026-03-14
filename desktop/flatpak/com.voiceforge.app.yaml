@@ -24,7 +24,7 @@ modules:
     buildsystem: simple
     sources:
       - type: file
-        url: https://github.com/iurii-izman/voiceforge/releases/download/v0.2.0-alpha.2/VoiceForge_0.2.0-alpha.2_amd64.deb
+        url: https://github.com/iurii-izman/voiceforge/releases/download/v1.0.0-beta.1/VoiceForge_1.0.0-beta.1_amd64.deb
         sha256: PLACEHOLDER_REPLACE_WITH_ACTUAL_SHA256
         only-arches:
           - x86_64

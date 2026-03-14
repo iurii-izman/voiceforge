@@ -1,6 +1,6 @@
 [package]
 name = "voiceforge-desktop"
-version = "0.2.0-alpha.2"
+version = "1.0.0-beta.1"
 edition = "2021"
 description = "VoiceForge desktop UI (Tauri + D-Bus)"
 

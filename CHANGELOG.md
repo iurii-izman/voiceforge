@@ -11,6 +11,19 @@ The format is based on Keep a Changelog and this project follows SemVer pre-rele
 - **IPC envelope (#39):** D-Bus/daemon `envelope_v1` is **on by default** (was off). Set `VOICEFORGE_IPC_ENVELOPE=0` for legacy plain-string clients. GetCapabilities and all D-Bus string payloads use envelope when enabled.
 - **Analyze timeout (#39):** `analyze()` (D-Bus/CLI) now respects `analyze_timeout_sec` (default 120s). On timeout returns structured error `ANALYZE_TIMEOUT` (retryable). Config: `VOICEFORGE_ANALYZE_TIMEOUT_SEC` / `analyze_timeout_sec` in voiceforge.yaml.
 
+## [1.0.0-beta.1] - 2026-03-14
+
+First beta release. Knowledge Copilot program wave complete (KD1–KD3, KC1–KC14): overlay, push-to-capture, RAG-first cards, hybrid/offline modes, pro cards and answer refinement, QA/release gate, latency budgets, failure UX, idle-unload policy. KC11 (system audio) and KC13 (adaptive/extensibility) remain blocked by user gates (KV1, KV5).
+
+### Added
+
+- **KC14:** Runbook [copilot-qa-and-release.md](docs/runbooks/copilot-qa-and-release.md) (release gate, latency budgets, failure UX, battery/CPU idle-unload). Config `copilot_stt_idle_unload_seconds` (default 300). Copilot row in desktop release gate matrix.
+
+### Changed
+
+- **Sonar S1192:** Constants for duplicated string literals in `daemon.py` (`_ANALYZE_ERROR_PREFIX_RU`/`_EN`) and `router.py` (`_LLM_PROMPT_FALLBACK_MSG`). Version bump to 1.0.0-beta.1 across pyproject, desktop package.json, tauri.conf.json, Cargo.toml, Flatpak manifest.
+- **Sonar S3516 (BLOCKER):** `audio/capture.py` — `_handle_stream_closed` now returns `False` when process has not exited yet (avoids "always returns same value").
+
 ## [0.2.0-alpha.2] - 2026-03-07
 
 ### Added
@@ -65,7 +78,8 @@ The format is based on Keep a Changelog and this project follows SemVer pre-rele
 
 - Baseline alpha0.1 core CLI (9 commands), quality gates, and release/tag baseline.
 
-[Unreleased]: https://github.com/iurii-izman/voiceforge/compare/v0.2.0-alpha.2...HEAD
+[Unreleased]: https://github.com/iurii-izman/voiceforge/compare/v1.0.0-beta.1...HEAD
+[1.0.0-beta.1]: https://github.com/iurii-izman/voiceforge/compare/v0.2.0-alpha.2...v1.0.0-beta.1
 [0.2.0-alpha.2]: https://github.com/iurii-izman/voiceforge/compare/v0.2.0-alpha.1...v0.2.0-alpha.2
 [0.2.0-alpha.1]: https://github.com/iurii-izman/voiceforge/compare/v0.1.0-alpha.1...v0.2.0-alpha.1
 [0.1.0-alpha.1]: https://github.com/iurii-izman/voiceforge/releases/tag/v0.1.0-alpha.1

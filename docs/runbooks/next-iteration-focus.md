@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии**. Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-14 (KC14 done: Copilot QA, release, perf & reliability; KC-волна программы закрыта)
+**Обновлено:** 2026-03-14 (Beta 1.0: Sonar BLOCKER fix, audit vs code doc, what-user-must-do, reflective summary; версия 1.0.0-beta.1)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** KC14 · Copilot QA, release, performance & reliability (#186): честный copilot release gate в матрице и release-and-quality; runbook [copilot-qa-and-release.md](copilot-qa-and-release.md) (latency budgets, failure UX, idle-unload); config `copilot_stt_idle_unload_seconds` (default 300) и idle-unload в daemon capture_start; get_settings возвращает ключ; тесты и DOCS-INDEX обновлены. Docs: copilot-program-map, next-iteration-focus, config-env-contract, desktop-release-gate-matrix, release-and-quality.
+**Сделано в сессии:** Sonar: исправлен BLOCKER S3516 в `audio/capture.py` (_handle_stream_closed возвращает False, когда процесс ещё не завершён). Релиз: версия 1.0.0-beta.1 уже синхронизирована (pyproject, desktop, Flatpak); CHANGELOG дополнен. Документы: [audit/audit-vs-code-reality-2026-03.md](../audit/audit-vs-code-reality-2026-03.md) (аудит vs код, % сделанного/несделанного), [what-user-must-do.md](what-user-must-do.md) (что нужно от пользователя — решения и действия вне автопилота), [reflective-summary-2026-03.md](reflective-summary-2026-03.md) (рефлексия по проекту и совместной работе). PROJECT-STATUS-SUMMARY: версия 1.0.0-beta.1.
 
-**Следующий шаг:** Разблокированных KC нет. Варианты: (1) разрешить KV1 → KC11 (#183); (2) разрешить KV5 → KC13 (#185); (3) поддержка/другая работа по приоритетам.
+**Следующий шаг:** Разблокированных KC нет. Варианты: (1) разрешить KV1 → KC11 (#183); (2) разрешить KV5 → KC13 (#185); (3) Sonar/hardening (#165, #164), Dependabot, или другая приоритетная задача. Для релиза беты: после проверки артефактов выполнить `git tag -a v1.0.0-beta.1 -m "VoiceForge beta 1.0: Copilot wave complete"` и `git push origin v1.0.0-beta.1`.
 
 ---
 
@@ -52,7 +52,7 @@
 
 Перед началом крупного блока: `./scripts/preflight_repo.sh --with-tests`. Для desktop/UI изменений: `cd desktop && npm run e2e:release-gate`. Для native/Tauri/system-level изменений дополнительно: `cd desktop && npm run e2e:native:headless`.
 
-KC14 выполнен; KC-волна программы закрыта. Следующих разблокированных KC нет. Варианты: (1) разрешить KV1 → взять KC11; (2) разрешить KV5 → взять KC13; (3) maintenance/ hardening/другая работа по приоритетам.
+Версия 1.0.0-beta.1. KC14 выполнен; KC-волна закрыта. Разблокированных KC нет. Новые доки: audit-vs-code-reality-2026-03, what-user-must-do, reflective-summary-2026-03. Варианты: (1) KV1 → KC11; (2) KV5 → KC13; (3) Sonar/hardening/Dependabot; (4) пушить тег v1.0.0-beta.1 после проверки.
 ```
 
 ---

@@ -1,6 +1,6 @@
 # VoiceForge: Project Status & Productization Roadmap
 
-**Обновлено:** 2026-03-14 (KC14 done: Copilot QA, release, perf & reliability; KC-волна программы закрыта; `#164/#165` remain background). **Версия:** 0.2.0-alpha.2. **Стадия:** Knowledge Copilot program wave complete; KC11/KC13 blocked by KV1/KV5.
+**Обновлено:** 2026-03-14 (KC14 done: Copilot QA, release, perf & reliability; KC-волна программы закрыта; `#164/#165` remain background). **Версия:** 1.0.0-beta.1. **Стадия:** Knowledge Copilot program wave complete; KC11/KC13 blocked by KV1/KV5.
 **Предыдущий цикл (#97-#123):** закрыт полностью; архив: [history/closed-plans-and-roadmap.md](../history/closed-plans-and-roadmap.md).
 
 ---
