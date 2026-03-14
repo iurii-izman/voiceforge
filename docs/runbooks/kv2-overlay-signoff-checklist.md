@@ -1,6 +1,6 @@
 # KV2: Overlay UX Sign-Off — чеклист
 
-**Issue:** [#188](https://github.com/iurii-izman/voiceforge/issues/188).  
+**Issue:** [#188](https://github.com/iurii-izman/voiceforge/issues/188).
 После прохождения чеклиста можно закрыть KV2 с комментарием «Sign-off пройден по чеклисту».
 
 ---
