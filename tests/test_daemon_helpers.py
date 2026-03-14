@@ -147,6 +147,11 @@ def _make_daemon(
     cfg.calendar_autostart_enabled = False
     cfg.calendar_autostart_minutes = 5
     cfg.calendar_auto_listen = False
+    cfg.copilot_mode = "hybrid"
+    cfg.copilot_max_visible_cards = 3
+    cfg.copilot_stt_model_size = "tiny"
+    cfg.copilot_pre_roll_seconds = 1.0
+    cfg.copilot_max_capture_seconds = 30.0
     cfg.get_rag_db_path = MagicMock(return_value="/nonexistent/rag.db")
     if settings_overrides:
         for k, v in settings_overrides.items():
@@ -168,6 +173,18 @@ def test_daemon_get_settings_returns_json() -> None:
     assert data.get("stt_backend") == "local"
     assert "pii_mode" in data
     assert data.get("privacy_mode") == data.get("pii_mode")
+
+
+def test_daemon_get_settings_includes_copilot_keys_kc8() -> None:
+    """KC8: get_settings includes copilot_mode, copilot_max_visible_cards and related copilot keys."""
+    daemon = _make_daemon()
+    out = daemon.get_settings()
+    data = json.loads(out)
+    assert data.get("copilot_mode") == "hybrid"
+    assert data.get("copilot_max_visible_cards") == 3
+    assert "copilot_stt_model_size" in data
+    assert "copilot_pre_roll_seconds" in data
+    assert "copilot_max_capture_seconds" in data
 
 
 def test_daemon_get_streaming_transcript_default() -> None:

@@ -121,6 +121,16 @@ class Settings(BaseSettings):
         default="tiny",
         description="KC4: STT model size for copilot path (short captures, low latency). Use 'tiny' for latency budget.",
     )
+    copilot_mode: str = Field(
+        default="hybrid",
+        description="KC8: Copilot mode: cloud | hybrid | offline (architecture §10).",
+    )
+    copilot_max_visible_cards: int = Field(
+        default=3,
+        ge=1,
+        le=7,
+        description="KC8: Max cards shown in overlay at once (architecture: 3).",
+    )
     ring_file_path: str | None = Field(
         default=None,
         description="Ring file path; default XDG_RUNTIME_DIR/voiceforge/ring.raw",

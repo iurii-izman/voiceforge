@@ -60,6 +60,9 @@ const I18N = {
     widget_upcoming_events: "Ближайшие встречи",
     widget_costs_7d: "Затраты за 7 дней",
     widget_last_analysis: "Последний анализ",
+    widget_last_copilot: "Последний Copilot",
+    copilot_no_recent: "Нет недавнего захвата Copilot.",
+    copilot_groundedness: "Обоснованность: {value}",
     last_analysis_empty: "Нет проанализированных сессий.",
     last_analysis_open_btn: "Открыть",
     quick_listen: "Запись",
@@ -262,6 +265,9 @@ const I18N = {
     widget_upcoming_events: "Upcoming events",
     widget_costs_7d: "Costs (7 days)",
     widget_last_analysis: "Last analysis",
+    widget_last_copilot: "Last copilot",
+    copilot_no_recent: "No recent copilot capture.",
+    copilot_groundedness: "Groundedness: {value}",
     last_analysis_empty: "No analyzed sessions yet.",
     last_analysis_open_btn: "Open",
     quick_listen: "Record",
@@ -616,6 +622,7 @@ function refreshHomeDashboard() {
   loadUpcomingEvents();
   loadCostWidget();
   loadLastAnalysisWidget();
+  loadLastCopilotWidget();
 }
 
 async function refreshAfterDaemonRecovery() {
@@ -983,6 +990,39 @@ function fillLastAnalysisWithDetail(el, sessionId, session, detailRaw) {
     switchTab("sessions");
     setTimeout(() => showSessionDetail(Number(sessionId), {}), 100);
   });
+}
+
+function loadLastCopilotWidget() {
+  const el = document.getElementById("last-copilot-content");
+  if (!el) return;
+  if (!daemonOk) {
+    el.textContent = t("copilot_no_recent");
+    return;
+  }
+  el.textContent = t("loading");
+  invoke("get_copilot_capture_status")
+    .then((raw) => {
+      const env = parseEnvelope(raw);
+      const data = env?.data ?? env ?? (typeof raw === "string" ? (() => { try { return JSON.parse(raw); } catch { return {}; } })() : raw) ?? {};
+      const snippet = data.transcript_snippet && String(data.transcript_snippet).trim();
+      const groundedness = data.rag_groundedness != null ? String(data.rag_groundedness) : null;
+      if (!snippet && !groundedness) {
+        el.textContent = t("copilot_no_recent");
+        return;
+      }
+      let html = "";
+      if (snippet) {
+        const truncated = snippet.length > 200 ? snippet.slice(0, 197) + "…" : snippet;
+        html += "<p class=\"copilot-snippet\">" + escapeHtml(truncated) + "</p>";
+      }
+      if (groundedness) {
+        html += "<p class=\"copilot-groundedness\"><span class=\"badge badge--groundedness\">" + escapeHtml(tf("copilot_groundedness", { value: groundedness })) + "</span></p>";
+      }
+      el.innerHTML = html || t("copilot_no_recent");
+    })
+    .catch(() => {
+      el.textContent = t("copilot_no_recent");
+    });
 }
 
 function loadLastAnalysisWidget() {
@@ -1982,6 +2022,11 @@ const SETTINGS_LABELS = {
     pii_mode: "Режим PII",
     privacy_mode: "Режим конфиденциальности",
     language: "Язык распознавания (STT)",
+    copilot_mode: "Режим Copilot",
+    copilot_max_visible_cards: "Макс. карточек в overlay",
+    copilot_stt_model_size: "STT для Copilot",
+    copilot_pre_roll_seconds: "Pre-roll (сек)",
+    copilot_max_capture_seconds: "Макс. длина захвата (сек)",
   },
   en: {
     model_size: "Model size (diarization)",
@@ -1993,6 +2038,11 @@ const SETTINGS_LABELS = {
     pii_mode: "PII mode",
     privacy_mode: "Privacy mode",
     language: "Recognition language (STT)",
+    copilot_mode: "Copilot mode",
+    copilot_max_visible_cards: "Max visible cards (overlay)",
+    copilot_stt_model_size: "Copilot STT model",
+    copilot_pre_roll_seconds: "Pre-roll (sec)",
+    copilot_max_capture_seconds: "Max capture length (sec)",
   },
 };
 
@@ -2063,7 +2113,7 @@ const COMPACT_DEFAULT_WIDTH = 380;
 const COMPACT_DEFAULT_HEIGHT = 72;
 const DASHBOARD_ORDER_KEY = "voiceforge_dashboard_order";
 const DASHBOARD_COLLAPSED_KEY = "voiceforge_dashboard_collapsed";
-const DASHBOARD_WIDGET_IDS = ["record", "analyze", "streaming", "recent-sessions", "last-analysis", "upcoming-events", "cost-widget"];
+const DASHBOARD_WIDGET_IDS = ["record", "analyze", "streaming", "recent-sessions", "last-analysis", "last-copilot", "upcoming-events", "cost-widget"];
 const FAVORITES_KEY = "voiceforge_favorites";
 const SESSION_TAGS_KEY = "voiceforge_session_tags";
 /** Block 44 / #88: clipboard history (last N copied fragments). */
@@ -2917,6 +2967,7 @@ function initDashboardWidgets() {
   loadUpcomingEvents();
   loadCostWidget();
   loadLastAnalysisWidget();
+  loadLastCopilotWidget();
   if (localStorage.getItem(UPDATER_CHECK_ON_LAUNCH_KEY) === "true") {
     checkForUpdate(true);
   }

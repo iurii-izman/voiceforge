@@ -609,6 +609,11 @@ class VoiceForgeDaemon:
                 "calendar_autostart_enabled": getattr(c, "calendar_autostart_enabled", False),
                 "calendar_autostart_minutes": getattr(c, "calendar_autostart_minutes", 5),
                 "calendar_auto_listen": getattr(c, "calendar_auto_listen", False),
+                "copilot_mode": getattr(c, "copilot_mode", "hybrid"),
+                "copilot_max_visible_cards": getattr(c, "copilot_max_visible_cards", 3),
+                "copilot_stt_model_size": getattr(c, "copilot_stt_model_size", "tiny"),
+                "copilot_pre_roll_seconds": getattr(c, "copilot_pre_roll_seconds", 1.0),
+                "copilot_max_capture_seconds": getattr(c, "copilot_max_capture_seconds", 30.0),
             },
             ensure_ascii=False,
         )

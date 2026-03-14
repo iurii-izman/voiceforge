@@ -1,6 +1,6 @@
 # Knowledge Copilot Program Map
 
-**Updated:** 2026-03-14 (KC7 done: deep track, session memory, card priority/overflow; next = KC8)
+**Updated:** 2026-03-14 (KC8 done: main-window copilot integration and settings; next = KC9)
 **Primary source of truth:** [voiceforge-copilot-architecture.md](../voiceforge-copilot-architecture.md)
 **Execution queue:** [PROJECT-STATUS-SUMMARY.md](PROJECT-STATUS-SUMMARY.md), [next-iteration-focus.md](next-iteration-focus.md)
 **Background hardening:** [#164](https://github.com/iurii-izman/voiceforge/issues/164), [#165](https://github.com/iurii-izman/voiceforge/issues/165)
@@ -13,7 +13,7 @@ This file is the operational map for the Knowledge Copilot program. Nothing in t
 
 - `KD1-KD3` are seeded and closed as `decision-locked` policy artefacts.
 - `KC1` is complete: the program is bootstrapped, the GitHub Project is seeded, and handoff is switched to the Copilot track.
-- **Current next executable block:** [#180](https://github.com/iurii-izman/voiceforge/issues/180) `KC8 · Main-window copilot integration and settings`
+- **Current next executable block:** [#181](https://github.com/iurii-izman/voiceforge/issues/181) `KC9 · Knowledge management UI and context packs`
 - `#164` and `#165` remain open as background maintenance/security hardening and are not part of the main copilot execution order.
 
 ## Block Registry
@@ -37,7 +37,7 @@ This file is the operational map for the Knowledge Copilot program. Nothing in t
 | KC5 | [#177](https://github.com/iurii-izman/voiceforge/issues/177) | 1 | Done | Evidence-first RAG, groundedness, citations |
 | KC6 | [#178](https://github.com/iurii-izman/voiceforge/issues/178) | 1 | Done | Fast-track cards: Answer, Do/Don't, Clarify |
 | KC7 | [#179](https://github.com/iurii-izman/voiceforge/issues/179) | 2 | Done | Deep track, session memory, card priority/overflow |
-| KC8 | [#180](https://github.com/iurii-izman/voiceforge/issues/180) | 2 | Todo | Main-window copilot integration and settings |
+| KC8 | [#180](https://github.com/iurii-izman/voiceforge/issues/180) | 2 | Done | Main-window copilot integration and settings |
 | KC9 | [#181](https://github.com/iurii-izman/voiceforge/issues/181) | 2 | Todo | Knowledge management UI and context packs |
 | KC10 | [#182](https://github.com/iurii-izman/voiceforge/issues/182) | 3 | Todo | Explicit mode system, hybrid/offline maturity |
 | KC11 | [#183](https://github.com/iurii-izman/voiceforge/issues/183) | 3 | Todo | System audio and scenario presets |

@@ -27,6 +27,11 @@ def test_daemon_get_settings_returns_json_with_expected_keys(tmp_path, monkeypat
         mock_cfg.calendar_autostart_minutes = 5
         mock_cfg.calendar_auto_listen = False
         mock_cfg.stt_backend = "local"
+        mock_cfg.copilot_mode = "hybrid"
+        mock_cfg.copilot_max_visible_cards = 3
+        mock_cfg.copilot_stt_model_size = "tiny"
+        mock_cfg.copilot_pre_roll_seconds = 1.0
+        mock_cfg.copilot_max_capture_seconds = 30.0
         mock_settings.return_value = mock_cfg
 
         from voiceforge.core.daemon import VoiceForgeDaemon

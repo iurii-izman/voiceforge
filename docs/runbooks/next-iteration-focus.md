@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии**. Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-14 (KC7 done: deep track, session memory, card priority/overflow; next = KC8; `#164/#165` remain background hardening)
+**Обновлено:** 2026-03-14 (KC8 done: main-window copilot integration and settings; next = KC9; `#164/#165` remain background hardening)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** KC7 · Deep track, session memory, card priority/overflow (#179): session_context в run_analyze_pipeline + _copilot_session_turns в daemon (clear on listen_stop); CopilotDeepCards + analyze_copilot_deep() + copilot_risk/strategy/emotion в status; overlay max 3 cards by priority + overflow pill, Risk/Strategy/Emotion slots; fetchStatusAndRenderCards в analyzing. Tests: test_copilot_deep_cards_schema_kc7, test_get_copilot_capture_status_deep_track_cards_kc7, test_copilot_session_memory_clears_on_listen_stop_kc7. E2E passed. Docs: copilot-program-map, PROJECT-STATUS-SUMMARY, next-iteration-focus.
+**Сделано в сессии:** KC8 · Main-window copilot integration and settings (#180): config copilot_mode, copilot_max_visible_cards; get_settings возвращает copilot_*; виджет «Последний Copilot» на Home (get_copilot_capture_status, snippet + groundedness badge); настройки — секция Copilot (labels в SETTINGS_LABELS); E2E + visual snapshots обновлены; test_daemon_get_settings_includes_copilot_keys_kc8. Docs: copilot-program-map, PROJECT-STATUS-SUMMARY, next-iteration-focus.
 
-**Следующий шаг:** взять [#180](https://github.com/iurii-izman/voiceforge/issues/180) `KC8 · Main-window copilot integration and settings` как следующий исполняемый block.
+**Следующий шаг:** взять [#181](https://github.com/iurii-izman/voiceforge/issues/181) `KC9 · Knowledge management UI and context packs` как следующий исполняемый block.
 
 ---
 
@@ -32,8 +32,8 @@
 | **KD** | #170✓ → #172✓ | Done | Decision-locked product / UX / architecture contracts |
 | **KC bootstrap** | #173✓ | Done | Program seeding, traceability, docs handoff |
 | **Wave 1 MVP Core** | #174✓ → #175✓ → #176✓ → #177✓ → #178✓ | Done | KC6 done; Wave 1 complete |
-| **Wave 2 MVP Complete** | #179✓ → #180 | Active | KC7 done; next: KC8 main-window copilot |
-| **Wave 2 V2 Surface** | #181 | Todo | Knowledge management + context packs |
+| **Wave 2 MVP Complete** | #179✓ → #180✓ | Done | KC8 done |
+| **Wave 2 V2 Surface** | #181 | Active | Next: KC9 knowledge management + context packs |
 | **Wave 3 V2 Expansion** | #182 → #183 | Todo | Explicit mode system; offline/hybrid maturity; system audio + scenario presets |
 | **Wave 4 V3 / Frontier** | #184 → #185 → #186 | Todo | Pro cards, adaptive intelligence, copilot QA/release/perf |
 | **Manual gates** | #187 → #191 | Todo | Legal, UX sign-off, pilot validation, business gate, platform gate |
@@ -52,7 +52,7 @@
 
 Перед началом крупного блока: `./scripts/preflight_repo.sh --with-tests`. Для desktop/UI изменений: `cd desktop && npm run e2e:release-gate`. Для native/Tauri/system-level изменений дополнительно: `cd desktop && npm run e2e:native:headless`.
 
-Текущий блок: KC8 · Main-window copilot integration and settings (#180).
+Текущий блок: KC9 · Knowledge management UI and context packs (#181).
 ```
 
 ---
