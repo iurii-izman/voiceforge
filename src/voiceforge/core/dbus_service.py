@@ -174,6 +174,7 @@ class _DaemonOptionalCallbacks(TypedDict, total=False):
     get_copilot_capture_status_fn: Callable[[], str]
     refine_copilot_answer_fn: Callable[[str, str, str, str, str | None], str]
     set_system_audio_opt_in_fn: Callable[[bool, str | None], None]
+    doctor_cb: Callable[[], dict[str, object]]
 
 
 class DaemonVoiceForgeInterface(ServiceInterface):
@@ -218,6 +219,7 @@ class DaemonVoiceForgeInterface(ServiceInterface):
         self._get_copilot_capture_status = o.get("get_copilot_capture_status_fn")
         self._refine_copilot_answer = o.get("refine_copilot_answer_fn")
         self._set_system_audio_opt_in = o.get("set_system_audio_opt_in_fn")
+        self._doctor_cb = o.get("doctor_cb")
         self._analyze_sem = asyncio.Semaphore(1)
 
     ANALYZE_MAX_SECONDS = 3600
@@ -252,11 +254,27 @@ class DaemonVoiceForgeInterface(ServiceInterface):
 
     @dbus_method()
     def Status(self) -> DBusStr:
-        """Return status string (RAM, cost)."""
+        """Return status (RAM, cost, uptime, version, listen_state, copilot_active, memory_mb)."""
         status = self._status()
+        if isinstance(status, dict):
+            if _uses_ipc_envelope():
+                return _make_ipc_success(status)
+            return json.dumps(status, ensure_ascii=False)
         if _uses_ipc_envelope():
             return _make_ipc_success({"text": status})
         return status
+
+    @dbus_method()
+    def Doctor(self) -> DBusStr:
+        """Run structured health checks; return JSON diagnostic report (RCP-M1)."""
+        if self._doctor_cb is None:
+            if _uses_ipc_envelope():
+                return _make_ipc_error("NOT_AVAILABLE", "Doctor not available")
+            return "{}"
+        result = self._doctor_cb()
+        if _uses_ipc_envelope():
+            return _make_ipc_success(result)
+        return json.dumps(result, ensure_ascii=False)
 
     @dbus_method()
     def ListenStart(self) -> None:

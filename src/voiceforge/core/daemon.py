@@ -10,10 +10,13 @@ import functools
 import json
 import os
 import queue
+import shutil
 import signal
+import subprocess
 import threading
 import time
 from collections import deque
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FuturesTimeoutError
 from datetime import UTC, date, datetime, timedelta
@@ -160,6 +163,8 @@ class VoiceForgeDaemon:
         self._last_copilot_follow_up_suggestions: list[str] = []
         # KC14: idle-unload — time.monotonic() when last capture_release finished (for STT unload after idle)
         self._last_copilot_release_monotonic: float | None = None
+        # RCP-M1: uptime for Status() / Doctor()
+        self._start_time: float = time.time()
 
     def _dbus_streaming_emitter_loop(self) -> None:
         """Worker to get transcript chunks from queue and emit them as D-Bus signals."""
@@ -274,11 +279,477 @@ class VoiceForgeDaemon:
                 log.warning("daemon.analyze.log_failed", error=str(e))
         return (text, session_id)
 
-    def status(self) -> str:
-        """Return RAM + cost string."""
+    def status(self) -> dict[str, Any]:
+        """Return status dict: text, uptime_seconds, daemon_version, listen_state, copilot_active, memory_mb (RCP-M1)."""
+        import psutil
+
+        from voiceforge import __version__
         from voiceforge.main import get_status_text
 
-        return get_status_text()
+        try:
+            proc = psutil.Process()
+            memory_mb = proc.memory_info().rss / (1024 * 1024)
+        except Exception:
+            memory_mb = 0.0
+        with self._copilot_lock:
+            copilot_active = self._copilot_capture_start_time is not None
+        return {
+            "text": get_status_text(),
+            "uptime_seconds": int(time.time() - self._start_time),
+            "daemon_version": __version__,
+            "listen_state": self._listen_active,
+            "copilot_active": copilot_active,
+            "memory_mb": round(memory_mb, 1),
+        }
+
+    def _run_doctor(self) -> dict[str, Any]:
+        """Run structured health checks; return JSON for D-Bus Doctor() (RCP-M1). Timeout 2s per check."""
+        import psutil
+
+        from voiceforge import __version__
+        from voiceforge.core.fs import get_cache_home, voiceforge_data_dir
+        from voiceforge.core.preflight import check_disk_space, check_pipewire
+
+        DOCTOR_CHECK_TIMEOUT = 2
+        SCHEMA_VERSION = "1.0"
+
+        def _run_check(fn: Callable[[], dict[str, Any]]) -> dict[str, Any]:
+            try:
+                with ThreadPoolExecutor(max_workers=1) as ex:
+                    future = ex.submit(fn)
+                    return future.result(timeout=DOCTOR_CHECK_TIMEOUT)
+            except FuturesTimeoutError:
+                return {
+                    "name": getattr(fn, "__name__", "unknown"),
+                    "display_name": "Check",
+                    "status": "error",
+                    "severity": "medium",
+                    "message": "Check timed out (2s)",
+                    "hint": "Retry or check system load",
+                    "can_start_without": True,
+                }
+            except Exception as e:
+                return {
+                    "name": "unknown",
+                    "display_name": "Check",
+                    "status": "error",
+                    "severity": "medium",
+                    "message": str(e),
+                    "hint": None,
+                    "can_start_without": True,
+                }
+
+        def _check_python_env() -> dict[str, Any]:
+            vf = shutil.which("voiceforge")
+            if vf:
+                return {
+                    "name": "python_env",
+                    "display_name": "Python / CLI",
+                    "status": "ok",
+                    "severity": "critical",
+                    "message": f"voiceforge at {vf}",
+                    "hint": None,
+                    "can_start_without": False,
+                }
+            return {
+                "name": "python_env",
+                "display_name": "Python / CLI",
+                "status": "missing",
+                "severity": "critical",
+                "message": "voiceforge not found in PATH",
+                "hint": "Install voiceforge or activate the correct environment",
+                "can_start_without": False,
+            }
+
+        def _check_dbus() -> dict[str, Any]:
+            return {
+                "name": "dbus",
+                "display_name": "D-Bus session bus",
+                "status": "ok",
+                "severity": "critical",
+                "message": "Connected (Doctor() callable)",
+                "hint": None,
+                "can_start_without": False,
+            }
+
+        def _check_pipewire() -> dict[str, Any]:
+            err = check_pipewire()
+            if err is None:
+                return {
+                    "name": "pipewire",
+                    "display_name": "PipeWire Audio",
+                    "status": "ok",
+                    "severity": "high",
+                    "message": "PipeWire capture available",
+                    "hint": None,
+                    "can_start_without": True,
+                }
+            try:
+                proc = subprocess.run(
+                    ["pw-cli", "info", "0"],
+                    capture_output=True,
+                    text=True,
+                    timeout=2,
+                    check=False,
+                )
+                detail = proc.stderr.strip() or proc.stdout.strip() or err
+            except (FileNotFoundError, subprocess.TimeoutExpired, Exception):
+                detail = err
+            return {
+                "name": "pipewire",
+                "display_name": "PipeWire Audio",
+                "status": "missing" if "not" in (detail or "").lower() or "error" in (detail or "").lower() else "error",
+                "severity": "high",
+                "message": detail or "PipeWire check failed",
+                "hint": "Run: systemctl --user start pipewire.service",
+                "can_start_without": True,
+            }
+
+        def _check_stt_model() -> dict[str, Any]:
+            model_size = getattr(self._cfg, "model_size", "small")
+            cache_home = get_cache_home()
+            hub = Path(cache_home) / "huggingface" / "hub"
+            try:
+                has_whisper = hub.exists() and any(
+                    "whisper" in p.name.lower() or "ctranslate" in p.name.lower() for p in hub.iterdir()
+                )
+            except Exception:
+                has_whisper = False
+            if has_whisper:
+                return {
+                    "name": "stt_model",
+                    "display_name": "STT model (Whisper)",
+                    "status": "ok",
+                    "severity": "high",
+                    "message": f"Model '{model_size}' cached",
+                    "hint": None,
+                    "can_start_without": True,
+                }
+            return {
+                "name": "stt_model",
+                "display_name": "STT model (Whisper)",
+                "status": "missing",
+                "severity": "high",
+                "message": f"Model '{model_size}' not found in ~/.cache",
+                "hint": "Run: voiceforge download-models --size small",
+                "can_start_without": True,
+            }
+
+        def _check_config() -> dict[str, Any]:
+            try:
+                Settings()
+                return {
+                    "name": "config",
+                    "display_name": "Config",
+                    "status": "ok",
+                    "severity": "medium",
+                    "message": "voiceforge.yaml valid",
+                    "hint": None,
+                    "can_start_without": True,
+                }
+            except Exception as e:
+                return {
+                    "name": "config",
+                    "display_name": "Config",
+                    "status": "error",
+                    "severity": "medium",
+                    "message": str(e),
+                    "hint": "Check ~/voiceforge.yaml syntax",
+                    "can_start_without": True,
+                }
+
+        def _check_disk_space() -> dict[str, Any]:
+            data_dir = str(voiceforge_data_dir())
+            err_msg, warn_msg = check_disk_space(data_dir)
+            if err_msg:
+                return {
+                    "name": "disk_space",
+                    "display_name": "Disk space",
+                    "status": "error",
+                    "severity": "medium",
+                    "message": err_msg or "Low disk space",
+                    "hint": "Free up disk space (need 1GB minimum)",
+                    "can_start_without": True,
+                }
+            if warn_msg:
+                return {
+                    "name": "disk_space",
+                    "display_name": "Disk space",
+                    "status": "degraded",
+                    "severity": "medium",
+                    "message": warn_msg or "Below 1GB free",
+                    "hint": "Free up disk space (need 1GB minimum)",
+                    "can_start_without": True,
+                }
+            return {
+                "name": "disk_space",
+                "display_name": "Disk space",
+                "status": "ok",
+                "severity": "medium",
+                "message": "Sufficient free space",
+                "hint": None,
+                "can_start_without": True,
+            }
+
+        def _check_api_keys() -> dict[str, Any]:
+            try:
+                import keyring
+                from keyring.errors import KeyringError
+
+                found = []
+                for name in ("anthropic", "openai", "huggingface"):
+                    try:
+                        if keyring.get_password("voiceforge", name):
+                            found.append(name)
+                    except KeyringError:
+                        pass
+                if found:
+                    return {
+                        "name": "api_keys",
+                        "display_name": "API keys (keyring)",
+                        "status": "ok",
+                        "severity": "medium",
+                        "message": f"Keys present: {', '.join(found)}",
+                        "hint": None,
+                        "can_start_without": True,
+                    }
+                return {
+                    "name": "api_keys",
+                    "display_name": "API keys (keyring)",
+                    "status": "missing",
+                    "severity": "medium",
+                    "message": "No anthropic/openai/huggingface key in keyring",
+                    "hint": "Run: voiceforge config set-key anthropic",
+                    "can_start_without": True,
+                }
+            except Exception as e:
+                return {
+                    "name": "api_keys",
+                    "display_name": "API keys (keyring)",
+                    "status": "error",
+                    "severity": "medium",
+                    "message": str(e),
+                    "hint": "Check keyring backend",
+                    "can_start_without": True,
+                }
+
+        def _check_rag_index() -> dict[str, Any]:
+            db_path = Path(self._cfg.get_rag_db_path())
+            if not db_path.is_file():
+                return {
+                    "name": "rag_index",
+                    "display_name": "RAG index",
+                    "status": "missing",
+                    "severity": "low",
+                    "message": "RAG DB not found",
+                    "hint": "Run: voiceforge index <path>",
+                    "can_start_without": True,
+                }
+            try:
+                import sqlite3
+
+                conn = sqlite3.connect(str(db_path))
+                try:
+                    cur = conn.execute("SELECT COUNT(*) FROM chunks")
+                    n = cur.fetchone()[0] or 0
+                finally:
+                    conn.close()
+                return {
+                    "name": "rag_index",
+                    "display_name": "RAG index",
+                    "status": "ok",
+                    "severity": "low",
+                    "message": f"RAG DB exists, {n} chunks",
+                    "hint": None,
+                    "can_start_without": True,
+                }
+            except Exception as e:
+                return {
+                    "name": "rag_index",
+                    "display_name": "RAG index",
+                    "status": "error",
+                    "severity": "low",
+                    "message": str(e),
+                    "hint": None,
+                    "can_start_without": True,
+                }
+
+        def _check_pid_file() -> dict[str, Any]:
+            path = _pid_path()
+            if not path.exists():
+                return {
+                    "name": "pid_file",
+                    "display_name": "PID file",
+                    "status": "ok",
+                    "severity": "medium",
+                    "message": "No stale PID file",
+                    "hint": None,
+                    "can_start_without": True,
+                }
+            try:
+                pid = int(path.read_text().strip())
+                if psutil.pid_exists(pid):
+                    return {
+                        "name": "pid_file",
+                        "display_name": "PID file",
+                        "status": "ok",
+                        "severity": "medium",
+                        "message": f"PID file present, process {pid} running",
+                        "hint": None,
+                        "can_start_without": True,
+                    }
+            except (ValueError, OSError):
+                pass
+            return {
+                "name": "pid_file",
+                "display_name": "PID file",
+                "status": "degraded",
+                "severity": "medium",
+                "message": "Stale PID file; process not running",
+                "hint": f"Remove {path} if daemon is not running",
+                "can_start_without": True,
+            }
+
+        def _check_transcript_db() -> dict[str, Any]:
+            from voiceforge.core.transcript_log import TranscriptLog
+
+            try:
+                db_path = Path(voiceforge_data_dir()) / "transcripts.db"
+                if not db_path.parent.exists():
+                    return {
+                        "name": "transcript_db",
+                        "display_name": "Transcript DB",
+                        "status": "missing",
+                        "severity": "medium",
+                        "message": "Data dir not found",
+                        "hint": None,
+                        "can_start_without": True,
+                    }
+                log_db = TranscriptLog()
+                log_db._get_conn()
+                log_db.close()
+                return {
+                    "name": "transcript_db",
+                    "display_name": "Transcript DB",
+                    "status": "ok",
+                    "severity": "medium",
+                    "message": "transcripts.db accessible",
+                    "hint": None,
+                    "can_start_without": True,
+                }
+            except Exception as e:
+                return {
+                    "name": "transcript_db",
+                    "display_name": "Transcript DB",
+                    "status": "error",
+                    "severity": "medium",
+                    "message": str(e),
+                    "hint": "Check permissions and encryption key",
+                    "can_start_without": True,
+                }
+
+        def _check_audio_perms() -> dict[str, Any]:
+            err = check_pipewire()
+            if err is None:
+                return {
+                    "name": "audio_perms",
+                    "display_name": "Audio permissions",
+                    "status": "ok",
+                    "severity": "high",
+                    "message": "PipeWire access OK",
+                    "hint": None,
+                    "can_start_without": True,
+                }
+            return {
+                "name": "audio_perms",
+                "display_name": "Audio permissions",
+                "status": "error",
+                "severity": "high",
+                "message": err or "PipeWire or permissions issue",
+                "hint": "Check audio group membership and PipeWire",
+                "can_start_without": True,
+            }
+
+        def _check_dbus_name() -> dict[str, Any]:
+            return {
+                "name": "dbus_name",
+                "display_name": "D-Bus name",
+                "status": "ok",
+                "severity": "low",
+                "message": "com.voiceforge.App acquired",
+                "hint": None,
+                "can_start_without": True,
+            }
+
+        checks_fns = [
+            _check_python_env,
+            _check_dbus,
+            _check_pipewire,
+            _check_stt_model,
+            _check_config,
+            _check_disk_space,
+            _check_api_keys,
+            _check_rag_index,
+            _check_pid_file,
+            _check_transcript_db,
+            _check_audio_perms,
+            _check_dbus_name,
+        ]
+        checks = [_run_check(fn) for fn in checks_fns]
+
+        try:
+            proc = psutil.Process()
+            memory_mb = proc.memory_info().rss / (1024 * 1024)
+        except Exception:
+            memory_mb = 0.0
+        memory_limit_mb: float | None = None
+        try:
+            with open("/sys/fs/cgroup/memory.max") as f:
+                lim = f.read().strip()
+                if lim.isdigit():
+                    memory_limit_mb = int(lim) / (1024 * 1024)
+        except (OSError, ValueError):
+            pass
+
+        with self._copilot_lock:
+            copilot_active = self._copilot_capture_start_time is not None
+
+        daemon_info = {
+            "version": __version__,
+            "uptime_seconds": int(time.time() - self._start_time),
+            "pid": os.getpid(),
+            "memory_mb": round(memory_mb, 1),
+            "memory_limit_mb": round(memory_limit_mb, 1) if memory_limit_mb is not None else None,
+            "listen_state": self._listen_active,
+            "copilot_active": copilot_active,
+        }
+
+        blocking = [c for c in checks if c.get("status") not in ("ok", "degraded") and not c.get("can_start_without")]
+        can_start = len(blocking) == 0
+        if any(c.get("status") == "error" for c in checks):
+            overall = "unhealthy"
+        elif any(c.get("status") in ("degraded", "missing") for c in checks):
+            overall = "degraded"
+        else:
+            overall = "healthy"
+
+        result = {
+            "schema_version": SCHEMA_VERSION,
+            "timestamp": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
+            "daemon": daemon_info,
+            "checks": checks,
+            "overall": overall,
+            "can_start": can_start,
+            "blocking_issues": [c.get("name", "") for c in blocking],
+        }
+        log.info(
+            "doctor.completed",
+            overall=overall,
+            can_start=can_start,
+            checks_count=len(checks),
+            blocking_count=len(blocking),
+        )
+        return result
 
     def _load_system_audio_state(self) -> dict[str, Any]:
         """KC11: Load consent + monitor_source overlay from state file."""
@@ -506,8 +977,8 @@ class VoiceForgeDaemon:
             self._last_copilot_transcript = out_transcript[0] if out_transcript else ""
         is_error = bool(
             (text or "").startswith(_ANALYZE_ERROR_PREFIX_RU)
-        or (text or "").startswith(_ANALYZE_ERROR_PREFIX_EN)
-        or (_analyze_result_is_error_daemon(text))
+            or (text or "").startswith(_ANALYZE_ERROR_PREFIX_EN)
+            or (_analyze_result_is_error_daemon(text))
         )
         from voiceforge.i18n import t
 
@@ -1180,6 +1651,7 @@ def _wire_daemon_iface(iface: DaemonVoiceForgeInterface, daemon: VoiceForgeDaemo
     iface._get_copilot_capture_status = daemon.get_copilot_capture_status
     iface._refine_copilot_answer = daemon.refine_copilot_answer
     iface._set_system_audio_opt_in = daemon.set_system_audio_opt_in
+    iface._doctor_cb = daemon._run_doctor
 
 
 async def _run_one_retention_purge(daemon: VoiceForgeDaemon) -> tuple[int, date | None]:

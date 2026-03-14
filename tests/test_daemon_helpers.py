@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 from datetime import UTC, datetime
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
@@ -248,12 +249,18 @@ def test_daemon_get_capabilities_has_features() -> None:
     assert data["features"].get("analyze") is True
 
 
-def test_daemon_status_calls_main() -> None:
-    """status returns get_status_text from main."""
+def test_daemon_status_returns_dict_rcp_m1() -> None:
+    """status returns dict with text, uptime_seconds, daemon_version, listen_state, copilot_active, memory_mb (RCP-M1)."""
     daemon = _make_daemon()
     with patch("voiceforge.main.get_status_text", return_value="RAM 100 MB"):
         result = daemon.status()
-    assert result == "RAM 100 MB"
+    assert isinstance(result, dict)
+    assert result.get("text") == "RAM 100 MB"
+    assert "uptime_seconds" in result
+    assert "daemon_version" in result
+    assert "listen_state" in result
+    assert "copilot_active" in result
+    assert "memory_mb" in result
 
 
 def test_daemon_get_sessions_empty() -> None:
@@ -390,18 +397,20 @@ def test_retention_purge_at_startup_calls_purge() -> None:
 
 
 def test_wire_daemon_iface_status_wired() -> None:
-    """_wire_daemon_iface wires status so iface._status is daemon.status."""
+    """_wire_daemon_iface wires status so iface._status is daemon.status (returns dict)."""
     iface = DaemonVoiceForgeInterface(
         analyze_fn=lambda s, t: ("", None),
         status_fn=lambda: "idle",
         listen_start_fn=lambda: None,
-        listen_stop_fn=lambda: None,
+        listen_stop_fn=lambda: False,
         is_listening_fn=lambda: False,
     )
     daemon = _make_daemon()
     _wire_daemon_iface(iface, daemon)
     with patch("voiceforge.main.get_status_text", return_value="wired-status"):
-        assert iface._status() == "wired-status"
+        result = iface._status()
+    assert isinstance(result, dict)
+    assert result.get("text") == "wired-status"
 
 
 def test_daemon_env_flag_already_in_batch99() -> None:
@@ -504,3 +513,106 @@ def test_copilot_session_memory_clears_on_listen_stop_kc7() -> None:
     with daemon._copilot_lock:
         turns = list(daemon._copilot_session_turns)
     assert turns == []
+
+
+# --- RCP-M1 Doctor() (#195) ---
+
+EXPECTED_DOCTOR_CHECK_NAMES = [
+    "python_env",
+    "dbus",
+    "pipewire",
+    "stt_model",
+    "config",
+    "disk_space",
+    "api_keys",
+    "rag_index",
+    "pid_file",
+    "transcript_db",
+    "audio_perms",
+    "dbus_name",
+]
+
+
+def test_run_doctor_returns_schema_with_12_checks() -> None:
+    """_run_doctor returns structured JSON with schema_version, timestamp, daemon, checks (12), overall, can_start, blocking_issues."""
+    daemon = _make_daemon()
+    daemon._cfg.get_data_dir = MagicMock(return_value="/tmp/vf-data")
+    with (
+        patch("voiceforge.core.daemon.shutil.which", return_value="/usr/bin/voiceforge"),
+        patch("voiceforge.core.preflight.check_pipewire", return_value=None),
+        patch("voiceforge.core.preflight.check_disk_space", return_value=(None, None)),
+        patch("voiceforge.core.fs.voiceforge_data_dir", return_value=Path("/tmp/vf")),
+        patch.object(daemon._cfg, "get_rag_db_path", return_value="/nonexistent/rag.db"),
+    ):
+        result = daemon._run_doctor()
+    assert result["schema_version"] == "1.0"
+    assert "timestamp" in result
+    assert "daemon" in result
+    assert "checks" in result
+    assert "overall" in result
+    assert "can_start" in result
+    assert "blocking_issues" in result
+    checks = result["checks"]
+    assert len(checks) == 12
+    names = [c["name"] for c in checks]
+    for expected in EXPECTED_DOCTOR_CHECK_NAMES:
+        assert expected in names, f"Missing check: {expected}"
+
+
+def test_run_doctor_each_check_has_required_fields() -> None:
+    """Each doctor check has name, display_name, status, severity, message, hint, can_start_without."""
+    daemon = _make_daemon()
+    with (
+        patch("voiceforge.core.daemon.shutil.which", return_value="/usr/bin/voiceforge"),
+        patch("voiceforge.core.preflight.check_pipewire", return_value=None),
+        patch("voiceforge.core.preflight.check_disk_space", return_value=(None, None)),
+        patch("voiceforge.core.fs.voiceforge_data_dir", return_value=Path("/tmp/vf")),
+        patch.object(daemon._cfg, "get_rag_db_path", return_value="/nonexistent/rag.db"),
+    ):
+        result = daemon._run_doctor()
+    for i, c in enumerate(result["checks"]):
+        assert "name" in c, f"Check {i} missing name"
+        assert "display_name" in c, f"Check {i} missing display_name"
+        assert c["status"] in ("ok", "degraded", "missing", "error"), f"Check {i} invalid status: {c.get('status')}"
+        assert c["severity"] in ("critical", "high", "medium", "low"), f"Check {i} invalid severity"
+        assert "message" in c, f"Check {i} missing message"
+        assert "can_start_without" in c, f"Check {i} missing can_start_without"
+
+
+def test_run_doctor_daemon_block_has_version_uptime_pid_memory() -> None:
+    """daemon block in doctor result has version, uptime_seconds, pid, memory_mb, listen_state, copilot_active."""
+    daemon = _make_daemon()
+    with (
+        patch("voiceforge.core.daemon.shutil.which", return_value="/usr/bin/voiceforge"),
+        patch("voiceforge.core.preflight.check_pipewire", return_value=None),
+        patch("voiceforge.core.preflight.check_disk_space", return_value=(None, None)),
+        patch("voiceforge.core.fs.voiceforge_data_dir", return_value=Path("/tmp/vf")),
+        patch.object(daemon._cfg, "get_rag_db_path", return_value="/nonexistent/rag.db"),
+    ):
+        result = daemon._run_doctor()
+    d = result["daemon"]
+    assert "version" in d
+    assert "uptime_seconds" in d
+    assert "pid" in d
+    assert "memory_mb" in d
+    assert "listen_state" in d
+    assert "copilot_active" in d
+    assert result["overall"] in ("healthy", "degraded", "unhealthy")
+    assert isinstance(result["can_start"], bool)
+    assert isinstance(result["blocking_issues"], list)
+
+
+def test_wire_daemon_iface_doctor_cb_wired() -> None:
+    """_wire_daemon_iface wires doctor_cb so iface._doctor_cb is daemon._run_doctor."""
+    iface = DaemonVoiceForgeInterface(
+        analyze_fn=lambda s, t: ("", None),
+        status_fn=lambda: {},
+        listen_start_fn=lambda: None,
+        listen_stop_fn=lambda: None,
+        is_listening_fn=lambda: False,
+    )
+    daemon = _make_daemon()
+    _wire_daemon_iface(iface, daemon)
+    assert iface._doctor_cb is not None
+    assert iface._doctor_cb.__func__ is VoiceForgeDaemon._run_doctor
+    assert iface._doctor_cb.__self__ is daemon

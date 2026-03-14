@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии**. Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-14 (KC11, KC13 выполнены; программа KC 1–14 закрыта)
+**Обновлено:** 2026-03-14 (RCP-M1 #195: D-Bus Doctor() и расширенный Status())
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** **KC11** (#183): system audio opt-in (config + state file), consent UX в настройках десктопа, D-Bus SetSystemAudioOptIn, scenario preset в конфиге, тесты и доки. **KC13** (#185): контракты расширяемости в [copilot-extensibility-kc13.md](copilot-extensibility-kc13.md), Linux-only, без регрессии MVP/V2.
+**Сделано в сессии:** **RCP-M1 (#195):** D-Bus метод Doctor() в dbus_service.py, _run_doctor() в daemon.py с 12 проверками (python_env, dbus, pipewire, stt_model, config, disk_space, api_keys, rag_index, pid_file, transcript_db, audio_perms, dbus_name), таймаут 2s на проверку, расширен Status() (uptime_seconds, daemon_version, listen_state, copilot_active, memory_mb), IPC envelope для Doctor(), unit-тесты.
 
-**Следующий шаг:** Все KC (1–14) закрыты. Подготовлены: таблица вариантов по мануальным задачам в [what-user-must-do.md](what-user-must-do.md); чеклист KV2 ([kv2-overlay-signoff-checklist.md](kv2-overlay-signoff-checklist.md)) и шаблон пилота KV3 ([kv3-pilot-scenario-template.md](kv3-pilot-scenario-template.md)); в #188 и #189 оставлены комментарии со ссылками. Дальше: пройти KV2/KV3 по чеклисту/шаблону или hardening/Sonar/релиз.
+**Следующий шаг:** Реализовать **БЛОК 2 (#196)** — Tauri Daemon Lifecycle Commands: daemon_status, daemon_start, daemon_stop, daemon_restart, run_doctor(), install_service(), is_service_installed(), get_daemon_logs() в commands.rs. Перед БЛОКОМ 2 подсветить #206 (Distrobox ExecStart) при необходимости решения разработчика.
 
 ---
 

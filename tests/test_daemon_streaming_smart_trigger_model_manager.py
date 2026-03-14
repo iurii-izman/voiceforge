@@ -33,6 +33,9 @@ def test_daemon_get_settings_returns_json_with_expected_keys(tmp_path, monkeypat
         mock_cfg.copilot_pre_roll_seconds = 1.0
         mock_cfg.copilot_max_capture_seconds = 30.0
         mock_cfg.copilot_stt_idle_unload_seconds = 300.0
+        mock_cfg.system_audio_consent_given = False
+        mock_cfg.monitor_source = None
+        mock_cfg.copilot_scenario_preset = "default"
         mock_settings.return_value = mock_cfg
 
         from voiceforge.core.daemon import VoiceForgeDaemon
@@ -674,7 +677,7 @@ def test_daemon_pid_path_uses_xdg_or_cache() -> None:
 
 
 def test_daemon_status_calls_get_status_text(tmp_path, monkeypatch) -> None:
-    """Daemon status() returns get_status_text() result."""
+    """Daemon status() returns dict with text from get_status_text() (RCP-M1)."""
     monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path))
     with patch("voiceforge.core.daemon.Settings") as mock_settings:
         mock_settings.return_value = MagicMock()
@@ -682,7 +685,11 @@ def test_daemon_status_calls_get_status_text(tmp_path, monkeypatch) -> None:
             from voiceforge.core.daemon import VoiceForgeDaemon
 
             daemon = VoiceForgeDaemon(iface=None)
-            assert daemon.status() == "RAM: 100 MB"
+            result = daemon.status()
+            assert isinstance(result, dict)
+            assert result.get("text") == "RAM: 100 MB"
+            assert "uptime_seconds" in result
+            assert "daemon_version" in result
 
 
 def test_daemon_swap_model_delegates_to_model_manager(tmp_path, monkeypatch) -> None:
