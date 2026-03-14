@@ -637,6 +637,66 @@ class VoiceForgeDaemon:
             log.warning("daemon.get_indexed_paths_failed", error=str(e))
             return "[]"
 
+    def get_rag_stats(self) -> str:
+        """KC9: Return JSON with indexed_sources_count and chunks_count for Knowledge UI."""
+        try:
+            import sqlite3
+
+            db_path = self._cfg.get_rag_db_path()
+            if not Path(db_path).is_file():
+                return json.dumps({"indexed_sources_count": 0, "chunks_count": 0}, ensure_ascii=False)
+            conn = sqlite3.connect(db_path)
+            try:
+                cur = conn.execute("SELECT COUNT(DISTINCT source) FROM chunks")
+                sources = cur.fetchone()[0] or 0
+                cur = conn.execute("SELECT COUNT(*) FROM chunks")
+                chunks = cur.fetchone()[0] or 0
+                return json.dumps(
+                    {"indexed_sources_count": sources, "chunks_count": chunks},
+                    ensure_ascii=False,
+                )
+            finally:
+                conn.close()
+        except Exception as e:
+            log.warning("daemon.get_rag_stats_failed", error=str(e))
+            return json.dumps({"indexed_sources_count": 0, "chunks_count": 0}, ensure_ascii=False)
+
+    def index_paths(self, paths_json: str) -> str:
+        """KC9: Index file/dir paths (JSON array of strings). Runs voiceforge index for each; returns {ok, errors}."""
+        try:
+            paths = json.loads(paths_json)
+            if not isinstance(paths, list):
+                return json.dumps({"ok": False, "errors": ["paths must be a JSON array"]}, ensure_ascii=False)
+            errors: list[str] = []
+            for path_str in paths:
+                if not isinstance(path_str, str) or not path_str.strip():
+                    continue
+                p = Path(path_str.strip()).resolve()
+                if not p.exists():
+                    errors.append(f"not found: {p}")
+                    continue
+                try:
+                    import subprocess
+
+                    out = subprocess.run(
+                        ["voiceforge", "index", str(p)],
+                        capture_output=True,
+                        text=True,
+                        timeout=300,
+                    )
+                    if out.returncode != 0 and out.stderr:
+                        errors.append(out.stderr.strip()[:200])
+                except subprocess.TimeoutExpired:
+                    errors.append(f"timeout: {p}")
+                except Exception as e:
+                    errors.append(f"{p}: {e}")
+            return json.dumps({"ok": len(errors) == 0, "errors": errors}, ensure_ascii=False)
+        except json.JSONDecodeError as e:
+            return json.dumps({"ok": False, "errors": [str(e)]}, ensure_ascii=False)
+        except Exception as e:
+            log.warning("daemon.index_paths_failed", error=str(e))
+            return json.dumps({"ok": False, "errors": [str(e)]}, ensure_ascii=False)
+
     def search_rag(self, query: str, top_k: int = 10) -> str:
         """Return JSON array of RAG search hits: chunk_id, content, source, page, chunk_index, timestamp, score (block 75). Uses cached HybridSearcher (#100)."""
         if not query or not query.strip():
@@ -974,6 +1034,8 @@ def _wire_daemon_iface(iface: DaemonVoiceForgeInterface, daemon: VoiceForgeDaemo
     iface._search_rag = daemon.search_rag
     iface._get_settings = daemon.get_settings
     iface._get_indexed_paths = daemon.get_indexed_paths
+    iface._get_rag_stats = daemon.get_rag_stats
+    iface._index_paths = daemon.index_paths
     iface._get_session_ids_with_action_items = daemon.get_session_ids_with_action_items
     iface._get_upcoming_events = lambda: daemon.get_upcoming_events(48)
     iface._create_event_from_session = lambda session_id, calendar_url: daemon.create_event_from_session(

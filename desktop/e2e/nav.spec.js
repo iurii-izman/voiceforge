@@ -1,6 +1,16 @@
 // Block 84: E2E — navigation and tab switching (frontend only; no Tauri backend).
 import { test, expect } from "@playwright/test";
 
+import { installDesktopMocks } from "./helpers/desktopHarness";
+
+async function dismissOnboarding(page) {
+  const overlay = page.locator("#onboarding-overlay");
+  if (await overlay.isVisible().catch(() => false)) {
+    await page.locator("#onboarding-ok").click();
+    await expect(overlay).not.toBeVisible();
+  }
+}
+
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
   await page.evaluate(() => localStorage.setItem("voiceforge_onboarding_dismissed", "true"));
@@ -79,5 +89,18 @@ test.describe("Desktop UI navigation", () => {
     await expect(page.locator("#sessions-rag-search")).toBeVisible();
     await expect(page.locator("#sessions-period")).toBeVisible();
     await expect(page.locator("#sessions-export-btn")).toBeVisible();
+  });
+
+  test("knowledge tab shows management surface (KC9)", async ({ page }) => {
+    await installDesktopMocks(page, { onboardingDismissed: true });
+    await page.goto("/");
+    await dismissOnboarding(page);
+    await page.getByRole("navigation").locator("[data-tab='knowledge']").click();
+    await expect(page.locator("#tab-knowledge.active")).toBeVisible();
+    await expect(page.locator("#knowledge-stats")).toBeVisible();
+    await expect(page.locator("#knowledge-drop-zone")).toBeVisible();
+    await expect(page.locator("#knowledge-document-list")).toBeVisible();
+    await expect(page.locator("#knowledge-pack-select")).toBeVisible();
+    await expect(page.locator("#knowledge-pack-add")).toBeVisible();
   });
 });

@@ -25,6 +25,7 @@
     <nav class="sidebar" id="main-sidebar" role="navigation" aria-label="Главное меню">
       <button type="button" class="nav-item active" data-tab="home" data-i18n="nav.home" aria-current="true"><span class="nav-mnemonic">Г</span>лавная</button>
       <button type="button" class="nav-item" data-tab="sessions" data-i18n="nav.sessions" aria-current="false"><span class="nav-mnemonic">С</span>ессии</button>
+      <button type="button" class="nav-item" data-tab="knowledge" data-i18n="nav.knowledge" aria-current="false"><span class="nav-mnemonic">Б</span>аза знаний</button>
       <button type="button" class="nav-item" data-tab="costs" data-i18n="nav.costs" aria-current="false"><span class="nav-mnemonic">З</span>атраты</button>
       <button type="button" class="nav-item" data-tab="settings" data-i18n="nav.settings" aria-current="false"><span class="nav-mnemonic">Н</span>астройки</button>
     </nav>
@@ -246,6 +247,30 @@
             <div id="session-detail-tags" class="detail-tags-row" style="display:none"><span data-i18n="tags_label">Теги:</span> <input type="text" id="session-detail-tags-input" placeholder="тег1, тег2" aria-label="Теги сессии" data-i18n-placeholder="tags_placeholder" /></div>
             <div id="session-detail-body"></div>
           </dialog>
+        </div>
+      </section>
+
+      <section id="tab-knowledge" class="tab-panel" tabindex="-1" aria-labelledby="tab-knowledge-title">
+        <h1 id="tab-knowledge-title" data-i18n="tab_knowledge_title">База знаний</h1>
+        <div class="card">
+          <div id="knowledge-stats" class="muted" data-i18n="loading">Загрузка…</div>
+          <div id="knowledge-drop-zone" class="knowledge-drop-zone" data-i18n="knowledge_drop_hint" role="button" tabindex="0">
+            Перетащите файлы или папки сюда для индексации
+          </div>
+          <h3 data-i18n="knowledge_documents">Документы в индексе</h3>
+          <ul id="knowledge-document-list" class="knowledge-document-list muted"></ul>
+        </div>
+        <div class="card">
+          <h3 data-i18n="knowledge_context_packs">Контекстные наборы</h3>
+          <p class="muted" data-i18n="knowledge_packs_hint">Сохраните текущий индекс как набор и переключайтесь между наборами.</p>
+          <label><span data-i18n="knowledge_active_pack">Активный набор</span>
+            <select id="knowledge-pack-select" aria-label="Выбор набора">
+              <option value="">—</option>
+            </select>
+          </label>
+          <button type="button" class="btn small" id="knowledge-pack-pin" data-i18n="knowledge_pack_pin">Закрепить</button>
+          <button type="button" class="btn small" id="knowledge-pack-add" data-i18n="knowledge_pack_add">Сохранить текущий как набор</button>
+          <ul id="knowledge-pack-list" class="knowledge-pack-list"></ul>
         </div>
       </section>
 

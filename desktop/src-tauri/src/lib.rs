@@ -100,6 +100,9 @@ pub fn run() {
             commands::capture_start,
             commands::capture_release,
             commands::get_copilot_capture_status,
+            commands::get_indexed_paths,
+            commands::get_rag_stats,
+            commands::index_paths,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

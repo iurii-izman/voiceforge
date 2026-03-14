@@ -264,6 +264,24 @@ def test_daemon_get_indexed_paths_no_db() -> None:
     assert json.loads(out) == []
 
 
+def test_daemon_get_rag_stats_no_db_kc9() -> None:
+    """KC9: get_rag_stats returns zeros when RAG DB does not exist."""
+    daemon = _make_daemon()
+    out = daemon.get_rag_stats()
+    data = json.loads(out)
+    assert data["indexed_sources_count"] == 0
+    assert data["chunks_count"] == 0
+
+
+def test_daemon_index_paths_empty_array_kc9() -> None:
+    """KC9: index_paths with empty array returns ok true and empty errors."""
+    daemon = _make_daemon()
+    out = daemon.index_paths("[]")
+    data = json.loads(out)
+    assert data.get("ok") is True
+    assert data.get("errors") == []
+
+
 def test_daemon_search_rag_empty_query() -> None:
     """search_rag returns [] for empty or whitespace query."""
     daemon = _make_daemon()

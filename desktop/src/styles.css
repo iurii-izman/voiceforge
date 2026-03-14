@@ -230,6 +230,14 @@ table th { color: var(--muted); font-weight: 600; font-size: 0.875rem; }
 .dashboard-widget.collapsed .widget-body { display: none; }
 .dashboard-widget.collapsed .widget-toggle { transform: rotate(-90deg); }
 
+/* KC9: Knowledge tab */
+.knowledge-drop-zone { border: 2px dashed var(--border); border-radius: var(--radius); padding: 1.5rem; text-align: center; color: var(--muted); margin: 0.75rem 0; cursor: default; }
+.knowledge-drop-zone.drag-over { border-color: var(--accent); background: var(--bg); }
+.knowledge-document-list { list-style: none; padding-left: 0; max-height: 20em; overflow: auto; }
+.knowledge-pack-list { list-style: none; padding-left: 0; }
+#tab-knowledge .card { margin-bottom: 1rem; }
+#tab-knowledge h3 { font-size: 0.95rem; margin: 0.5rem 0; }
+
 /* Block 40: print-friendly — only session detail content */
 @media print {
   .sidebar, .compact-bar, .nav-mnemonic, .btn, .context-menu,

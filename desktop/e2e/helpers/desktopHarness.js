@@ -288,6 +288,12 @@ export async function installDesktopMocks(page, scenarioOverrides = {}) {
             return envelope({ hits: scenario.transcriptHits });
           case "search_rag":
             return envelope({ rag_hits: scenario.ragHits });
+          case "get_indexed_paths":
+            return envelope({ indexed_paths: scenario.indexedPaths || [] });
+          case "get_rag_stats":
+            return envelope({ rag_stats: scenario.ragStats || { indexed_sources_count: 0, chunks_count: 0 } });
+          case "index_paths":
+            return JSON.stringify({ ok: true, errors: [] });
           case "export_session":
             return `exported:${args.format}:${args.sessionId}`;
           case "set_copilot_overlay_state":

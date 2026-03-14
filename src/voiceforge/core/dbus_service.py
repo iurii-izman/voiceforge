@@ -157,6 +157,8 @@ class _DaemonOptionalCallbacks(TypedDict, total=False):
     search_rag_fn: Callable[[str, int], str]
     get_settings_fn: Callable[[], str]
     get_indexed_paths_fn: Callable[[], str]
+    get_rag_stats_fn: Callable[[], str]
+    index_paths_fn: Callable[[str], str]
     get_session_ids_with_action_items_fn: Callable[[], str]
     get_upcoming_events_fn: Callable[[], str]
     create_event_from_session_fn: Callable[[int, str], str]
@@ -197,6 +199,8 @@ class DaemonVoiceForgeInterface(ServiceInterface):
         self._search_rag = o.get("search_rag_fn")
         self._get_settings = o.get("get_settings_fn")
         self._get_indexed_paths = o.get("get_indexed_paths_fn")
+        self._get_rag_stats = o.get("get_rag_stats_fn")
+        self._index_paths = o.get("index_paths_fn")
         self._get_session_ids_with_action_items = o.get("get_session_ids_with_action_items_fn")
         self._get_upcoming_events = o.get("get_upcoming_events_fn")
         self._create_event_from_session = o.get("create_event_from_session_fn")
@@ -359,6 +363,24 @@ class DaemonVoiceForgeInterface(ServiceInterface):
         if _uses_ipc_envelope():
             return _wrap_envelope_with_json_key("indexed_paths", payload)
         return payload
+
+    @dbus_method()
+    def GetRagStats(self) -> DBusStr:
+        """KC9: Return JSON with indexed_sources_count and chunks_count."""
+        if self._get_rag_stats is None:
+            payload = '{"indexed_sources_count":0,"chunks_count":0}'
+        else:
+            payload = self._get_rag_stats()
+        if _uses_ipc_envelope():
+            return _wrap_envelope_with_json_key("rag_stats", payload)
+        return payload
+
+    @dbus_method()
+    def IndexPaths(self, paths_json: DBusStr) -> DBusStr:
+        """KC9: Index file/dir paths (JSON array). Returns {ok, errors}."""
+        if self._index_paths is None:
+            return '{"ok":false,"errors":["not available"]}'
+        return self._index_paths(paths_json or "[]")
 
     @dbus_method()
     def GetSessionIdsWithActionItems(self) -> DBusStr:

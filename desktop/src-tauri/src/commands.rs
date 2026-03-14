@@ -198,6 +198,38 @@ pub async fn get_copilot_capture_status() -> Result<String, String> {
     call_method0(&conn, "GetCopilotCaptureStatus").await
 }
 
+/// KC9: Return JSON array of indexed source paths from RAG DB.
+#[tauri::command]
+pub async fn get_indexed_paths() -> Result<String, String> {
+    let conn = connection().await?;
+    call_method0(&conn, "GetIndexedPaths").await
+}
+
+/// KC9: Return JSON { indexed_sources_count, chunks_count }.
+#[tauri::command]
+pub async fn get_rag_stats() -> Result<String, String> {
+    let conn = connection().await?;
+    call_method0(&conn, "GetRagStats").await
+}
+
+/// KC9: Index file/dir paths (JSON array of path strings). Returns JSON { ok, errors }.
+#[tauri::command]
+pub async fn index_paths(paths_json: String) -> Result<String, String> {
+    let conn = connection().await?;
+    let reply = conn
+        .call_method(
+            Some(crate::DBUS_NAME),
+            crate::DBUS_PATH,
+            Some(crate::DBUS_INTERFACE),
+            "IndexPaths",
+            &(paths_json.as_str(),),
+        )
+        .await
+        .map_err(|e| e.to_string())?;
+    let body: String = reply.body().deserialize().map_err(|e| e.to_string())?;
+    Ok(body)
+}
+
 #[tauri::command]
 pub async fn analyze(seconds: u32, template: Option<String>) -> Result<String, String> {
     let conn = connection().await?;

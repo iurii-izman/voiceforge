@@ -46,10 +46,20 @@ const STORE_KEYS = [
 /** Block 97: minimal i18n for UI language (ru/en). */
 const I18N = {
   ru: {
-    nav: { home: "Главная", sessions: "Сессии", costs: "Затраты", settings: "Настройки" },
+    nav: { home: "Главная", sessions: "Сессии", knowledge: "База знаний", costs: "Затраты", settings: "Настройки" },
     tab_home_title: "Главная",
     tab_sessions_title: "Сессии",
+    tab_knowledge_title: "База знаний",
     tab_costs_title: "Затраты",
+    knowledge_drop_hint: "Перетащите файлы или папки сюда для индексации",
+    knowledge_documents: "Документы в индексе",
+    knowledge_context_packs: "Контекстные наборы",
+    knowledge_packs_hint: "Сохраните текущий индекс как набор и переключайтесь между наборами.",
+    knowledge_active_pack: "Активный набор",
+    knowledge_pack_pin: "Закрепить",
+    knowledge_pack_add: "Сохранить текущий как набор",
+    knowledge_empty: "Нет проиндексированных документов.",
+    knowledge_stats: "{sources} источников, {chunks} чанков",
     settings_title: "Настройки",
     settings_lang_label: "Язык интерфейса",
     settings_lang_hint: "Перезагрузка не требуется.",
@@ -251,10 +261,20 @@ const I18N = {
     dashboard_collapse: "Свернуть",
   },
   en: {
-    nav: { home: "Home", sessions: "Sessions", costs: "Costs", settings: "Settings" },
+    nav: { home: "Home", sessions: "Sessions", knowledge: "Knowledge", costs: "Costs", settings: "Settings" },
     tab_home_title: "Home",
     tab_sessions_title: "Sessions",
+    tab_knowledge_title: "Knowledge",
     tab_costs_title: "Costs",
+    knowledge_drop_hint: "Drag files or folders here to index",
+    knowledge_documents: "Documents in index",
+    knowledge_context_packs: "Context packs",
+    knowledge_packs_hint: "Save current index as a pack and switch between packs.",
+    knowledge_active_pack: "Active pack",
+    knowledge_pack_pin: "Pin",
+    knowledge_pack_add: "Save current as pack",
+    knowledge_empty: "No indexed documents.",
+    knowledge_stats: "{sources} sources, {chunks} chunks",
     settings_title: "Settings",
     settings_lang_label: "Interface language",
     settings_lang_hint: "No reload required.",
@@ -693,6 +713,7 @@ function switchTab(tabId) {
     nav.setAttribute("aria-current", "true");
   }
   if (tabId === "sessions") loadSessions();
+  if (tabId === "knowledge") loadKnowledgeTab();
   if (tabId === "costs") loadAnalytics("7d");
   if (tabId === "settings") loadSettings();
   if (tabId === "home") {
@@ -1286,7 +1307,7 @@ listen("second-instance", async (e) => {
   }
 });
 
-const TAB_IDS = ["home", "sessions", "costs", "settings"];
+const TAB_IDS = ["home", "sessions", "knowledge", "costs", "settings"];
 document.addEventListener("keydown", (e) => {
   if (e.altKey && e.key >= "1" && e.key <= "4") {
     e.preventDefault();
@@ -2063,6 +2084,103 @@ function renderSettings(data) {
     html += "<div class=\"settings-item\"><span class=\"settings-key\">" + escapeHtml(label) + "</span><span class=\"settings-val\">" + escapeHtml(val) + "</span></div>";
   });
   return html;
+}
+
+const KNOWLEDGE_PACKS_KEY = "voiceforge_context_packs";
+const KNOWLEDGE_PINNED_KEY = "voiceforge_pinned_pack_id";
+
+function loadKnowledgeTab() {
+  const statsEl = document.getElementById("knowledge-stats");
+  const listEl = document.getElementById("knowledge-document-list");
+  if (!statsEl || !listEl) return;
+  if (!daemonOk) {
+    statsEl.textContent = t("empty_daemon_title");
+    listEl.innerHTML = "";
+    return;
+  }
+  statsEl.textContent = t("loading");
+  listEl.innerHTML = "";
+  Promise.all([invoke("get_indexed_paths"), invoke("get_rag_stats")])
+    .then(([pathsRaw, statsRaw]) => {
+      const pathsEnv = parseEnvelope(pathsRaw);
+      let paths = pathsEnv?.data?.indexed_paths ?? pathsEnv?.indexed_paths ?? (typeof pathsRaw === "string" ? (() => { try { const p = JSON.parse(pathsRaw); return Array.isArray(p) ? p : []; } catch { return []; } })() : []) ?? [];
+      if (typeof paths === "string") try { paths = JSON.parse(paths); } catch { paths = []; }
+      const pathsList = Array.isArray(paths) ? paths : [];
+      const statsEnv = parseEnvelope(statsRaw);
+      let stats = statsEnv?.data?.rag_stats ?? statsEnv?.rag_stats ?? {};
+      if (typeof stats === "string") try { stats = JSON.parse(stats); } catch { stats = {}; }
+      const sources = stats.indexed_sources_count ?? 0;
+      const chunks = stats.chunks_count ?? 0;
+      statsEl.textContent = tf("knowledge_stats", { sources, chunks });
+      if (pathsList.length === 0) {
+        listEl.innerHTML = "<li class=\"muted\">" + escapeHtml(t("knowledge_empty")) + "</li>";
+      } else {
+        listEl.innerHTML = pathsList.map((p) => "<li>" + escapeHtml(String(p)) + "</li>").join("");
+      }
+      renderKnowledgePacks(pathsList);
+    })
+    .catch(() => {
+      statsEl.textContent = t("error_prefix") + " —";
+      listEl.innerHTML = "<li class=\"muted\">" + escapeHtml(t("knowledge_empty")) + "</li>";
+    });
+}
+
+function renderKnowledgePacks(currentPaths) {
+  const packs = JSON.parse(localStorage.getItem(KNOWLEDGE_PACKS_KEY) || "[]");
+  const pinnedId = localStorage.getItem(KNOWLEDGE_PINNED_KEY) || "";
+  const selectEl = document.getElementById("knowledge-pack-select");
+  const listEl = document.getElementById("knowledge-pack-list");
+  if (!selectEl || !listEl) return;
+  selectEl.innerHTML = "<option value=\"\">—</option>" + packs.map((pack) => `<option value="${escapeHtml(pack.id)}" ${pack.id === pinnedId ? " selected" : ""}>${escapeHtml(pack.name)}</option>`).join("");
+  listEl.innerHTML = packs.map((pack) => `<li data-pack-id="${escapeHtml(pack.id)}">${escapeHtml(pack.name)} (${(pack.paths || []).length} paths)</li>`).join("");
+}
+
+function initKnowledgeTab() {
+  const dropZone = document.getElementById("knowledge-drop-zone");
+  const packAdd = document.getElementById("knowledge-pack-add");
+  const packPin = document.getElementById("knowledge-pack-pin");
+  const packSelect = document.getElementById("knowledge-pack-select");
+  if (dropZone) {
+    dropZone.addEventListener("dragover", (e) => { e.preventDefault(); dropZone.classList.add("drag-over"); });
+    dropZone.addEventListener("dragleave", () => { dropZone.classList.remove("drag-over"); });
+    dropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropZone.classList.remove("drag-over");
+      const files = e.dataTransfer?.files;
+      if (!files || files.length === 0) return;
+      const paths = [];
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i];
+        const path = f.path ?? f.webkitRelativePath ?? (f.filePath !== undefined ? f.filePath : null);
+        if (path) paths.push(path);
+      }
+      if (paths.length === 0) return;
+      invoke("index_paths", { paths_json: JSON.stringify(paths) })
+        .then(() => loadKnowledgeTab())
+        .catch(() => loadKnowledgeTab());
+    });
+  }
+  if (packAdd) {
+    packAdd.addEventListener("click", () => {
+      invoke("get_indexed_paths")
+        .then((raw) => {
+          const env = parseEnvelope(raw);
+          const paths = env?.data?.indexed_paths ?? env?.indexed_paths ?? (typeof raw === "string" ? (() => { try { const p = JSON.parse(raw); return Array.isArray(p) ? p : []; } catch { return []; } })() : []) ?? [];
+          const name = prompt(t("knowledge_active_pack") + " — name", "Pack " + (JSON.parse(localStorage.getItem(KNOWLEDGE_PACKS_KEY) || "[]").length + 1));
+          if (!name || !name.trim()) return;
+          const packs = JSON.parse(localStorage.getItem(KNOWLEDGE_PACKS_KEY) || "[]");
+          packs.push({ id: "pack-" + Date.now(), name: name.trim(), paths: Array.isArray(paths) ? paths : [] });
+          localStorage.setItem(KNOWLEDGE_PACKS_KEY, JSON.stringify(packs));
+          renderKnowledgePacks(paths);
+        });
+    });
+  }
+  if (packPin) {
+    packPin.addEventListener("click", () => {
+      const id = packSelect?.value || "";
+      if (id) localStorage.setItem(KNOWLEDGE_PINNED_KEY, id);
+    });
+  }
 }
 
 function loadSettings() {
@@ -2946,6 +3064,7 @@ function initDashboardWidgets() {
   initSoundOnRecordCard();
   initCompactMode();
   initSettingsPanelMode();
+  initKnowledgeTab();
   initDashboardWidgets();
   initQuickActions();
   initSessionsToolbar();
