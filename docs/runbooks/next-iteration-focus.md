@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии**. Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-14 (KC10 done: Explicit mode system, hybrid/offline maturity; next = KC11; `#164/#165` remain background hardening)
+**Обновлено:** 2026-03-14 (KC11 blocked by KV1; next-iteration-focus обновлён: варианты KC11 после KV1 или KC12)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** KC10 · Explicit mode system, hybrid/offline maturity (#182): config.get_effective_llm() учитывает copilot_mode (offline → только Ollama; cloud → только API; hybrid → API + fallback Ollama); Literal["cloud","hybrid","offline"] в Settings; daemon.get_copilot_capture_status() возвращает copilot_mode; индикатор режима в overlay (badge) и в главном окне (status bar); в архитектуре — явный scope guard для stealth mode и card history (отложены). Tests: test_config_get_effective_llm_offline/cloud_kc10, test_settings_copilot_mode_literal_kc10, test_get_copilot_capture_status_includes_copilot_mode_kc10. Docs: copilot-program-map, PROJECT-STATUS-SUMMARY, next-iteration-focus, voiceforge-copilot-architecture.
+**Сделано в сессии:** Проверка следующего блока KC11 (#183): блок заблокирован KV1 (#187) (в #183: «Do not start this block until KV1 is explicitly resolved»). Обновлён next-iteration-focus: явный gate и варианты (KC11 после разрешения KV1 или переход на KC12).
 
-**Следующий шаг:** взять [#183](https://github.com/iurii-izman/voiceforge/issues/183) `KC11 · System audio and scenario presets` как следующий исполняемый block.
+**Следующий шаг:** KC11 (#183) **заблокирован** до явного разрешения [KV1 (#187)](https://github.com/iurii-izman/voiceforge/issues/187) (legal/consent). В issue #183 указано: «Do not start this block until KV1 is explicitly resolved.» Варианты: (1) после подтверждения по legal/consent — взять KC11; (2) взять [KC12 (#184)](https://github.com/iurii-izman/voiceforge/issues/184) как следующий исполняемый блок без ожидания KV1.
 
 ---
 
@@ -52,7 +52,7 @@
 
 Перед началом крупного блока: `./scripts/preflight_repo.sh --with-tests`. Для desktop/UI изменений: `cd desktop && npm run e2e:release-gate`. Для native/Tauri/system-level изменений дополнительно: `cd desktop && npm run e2e:native:headless`.
 
-Текущий блок: KC11 · System audio and scenario presets (#183).
+KC11 заблокирован KV1. Либо: подтвердить KV1 и взять KC11 (#183); либо: взять KC12 (#184) Pro cards и answer refinement.
 ```
 
 ---
