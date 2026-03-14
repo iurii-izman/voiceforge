@@ -1,6 +1,6 @@
 # Security Decision Log
 
-**Обновлено:** 2026-03-13.
+**Обновлено:** 2026-03-14.
 
 Этот документ фиксирует открытые security wait states и принятые решения, чтобы remote alerts не выглядели как “фон без владельца”. Подробная политика зависимостей и секретов — в [security-and-dependencies.md](security-and-dependencies.md).
 
@@ -17,6 +17,8 @@
 `#65` / `CVE-2025-69872` больше не является активным wait-state: 2026-03-13 `uv run pip-audit --desc` проходит без `--ignore-vuln`.
 
 Dependabot alert `#4` / `serialize-javascript` больше не является активным tracked alert: 2026-03-13 в `desktop/e2e-native` добавлен npm override до `serialize-javascript@7.0.4`, `npm audit` для native-e2e workspace снова чист, а remote Dependabot alert уже перешёл в `fixed`.
+
+**Dependabot alerts `#5`, `#6`, `#8`, `#12`, `#13`, `#14` (undici) и `#11` (yauzl):** 2026-03-14 **Fixed**. Все — `desktop/e2e-native` (devDependencies, WebDriverIO/Playwright chain). В `package.json` добавлены overrides: `undici: ^7.24.2` (CVE WebSocket/CRLF/smuggling), `yauzl: ^3.2.1` (off-by-one). После `npm install` в e2e-native: `npm audit` 0 vulnerabilities. После merge/пуша Dependabot должен перевести алерты в fixed; при необходимости закрыть вручную в GitHub UI.
 
 ---
 

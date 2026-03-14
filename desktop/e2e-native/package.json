@@ -15,6 +15,8 @@
     "webdriverio": "^9.22.1"
   },
   "overrides": {
-    "serialize-javascript": "^7.0.4"
+    "serialize-javascript": "^7.0.4",
+    "undici": "^7.24.2",
+    "yauzl": "^3.2.1"
   }
 }
