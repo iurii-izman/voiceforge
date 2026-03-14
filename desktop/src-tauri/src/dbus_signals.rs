@@ -199,6 +199,7 @@ pub fn spawn_signal_listener(app: AppHandle) {
         let app_chunk = app.clone();
         let app_updated = app.clone();
         let app_streaming_analysis = app.clone();
+        let app_capture_state = app.clone();
 
         tauri::async_runtime::spawn(async move {
             let mut stream = stream_listen;

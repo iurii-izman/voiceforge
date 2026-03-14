@@ -54,7 +54,7 @@
 ### Сборка и тест (локально / в toolbox)
 
 **Вариант A — из готового .deb (релизный URL):**
-В манифесте указан URL на GitHub Releases и sha256. Перед первой публикацией на Flathub замените `PLACEHOLDER_REPLACE_WITH_ACTUAL_SHA256` на реальный sha256 пакета после загрузки .deb в релиз.
+В манифесте указан URL на GitHub Releases и sha256. Для v1.0.0-beta.1 sha256 в манифесте уже подставлен (сборка из дерева). Если в Release ещё нет .deb — загрузите его из `desktop/src-tauri/target/release/bundle/deb/VoiceForge_1.0.0-beta.1_amd64.deb`, чтобы `flatpak-builder` мог скачать артефакт.
 
 ```bash
 cd /path/to/voiceforge
