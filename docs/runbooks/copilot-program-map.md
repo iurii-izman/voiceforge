@@ -13,7 +13,7 @@ This file is the operational map for the Knowledge Copilot program. Nothing in t
 
 - `KD1-KD3` are seeded and closed as `decision-locked` policy artefacts.
 - `KC1` is complete: the program is bootstrapped, the GitHub Project is seeded, and handoff is switched to the Copilot track.
-- **Current next executable block:** KC11 (#183) blocked by KV1; else [#185](https://github.com/iurii-izman/voiceforge/issues/185) `KC13 · Adaptive intelligence`
+- **Current next executable block:** none unblocked — KC11 blocked by KV1 (#187), KC13 blocked by KV5 (#191)
 - `#164` and `#165` remain open as background maintenance/security hardening and are not part of the main copilot execution order.
 
 ## Block Registry

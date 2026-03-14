@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии**. Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-14 (KC12 done: Pro cards and answer refinement; next = KC13 или KC11 после KV1)
+**Обновлено:** 2026-03-14 (KC13 blocked by KV5; KC11 blocked by KV1 — нет разблокированного KC-блока)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** KC12 · Pro cards and answer refinement (#184): схема CopilotDeepCards — objections, follow_up_suggestions; CopilotRefineOutput и refine_copilot_answer (deep/rewrite/tone); daemon.refine_copilot_answer + D-Bus RefineCopilotAnswer + Tauri refine_copilot_answer; overlay: карточки Objections/Follow-up, кнопки «Подробнее»/«Короче» на answer card, onRefine с сохранением grounding. Tests: test_copilot_deep_cards_objections_followup_kc12, test_copilot_refine_output_kc12, test_refine_copilot_answer_empty_returns_error_kc12. E2E mock refine_copilot_answer. Docs: copilot-program-map, PROJECT-STATUS-SUMMARY, next-iteration-focus.
+**Сделано в сессии:** Проверка следующего блока KC13 (#185): блок заблокирован KV5 (#191) (в #185: «This block should not start until the platform-expansion gate is resolved»). Обновлён next-iteration-focus: gate KV5 для KC13, варианты дальнейших шагов.
 
-**Следующий шаг:** Взять [KC13 (#185)](https://github.com/iurii-izman/voiceforge/issues/185) `Adaptive intelligence and extensibility` или после разрешения KV1 — KC11 (#183).
+**Следующий шаг:** KC13 (#185) **заблокирован** до разрешения [KV5 (#191)](https://github.com/iurii-izman/voiceforge/issues/191) (platform expansion gate). KC11 (#183) заблокирован KV1 (#187). Варианты: (1) разрешить KV1 → взять KC11; (2) разрешить KV5 → взять KC13; (3) взять KC14 (#186) только по явному решению (зависит от KC2–KC13).
 
 ---
 
@@ -35,7 +35,7 @@
 | **Wave 2 MVP Complete** | #179✓ → #180✓ | Done | KC8 done |
 | **Wave 2 V2 Surface** | #181✓ | Done | KC9 done |
 | **Wave 3 V2 Expansion** | #182✓ → #183 (blocked) | Active | KC10 done; KC11 ждёт KV1 |
-| **Wave 4 V3 / Frontier** | #184✓ → #185 → #186 | Active | KC12 done; next: KC13 |
+| **Wave 4 V3 / Frontier** | #184✓ → #185 (blocked KV5) → #186 | Active | KC12 done; KC13 ждёт KV5 |
 | **Manual gates** | #187 → #191 | Todo | Legal, UX sign-off, pilot validation, business gate, platform gate |
 | **Background hardening** | #165, #164 | Open | Keep below copilot program unless blocking |
 
@@ -52,7 +52,7 @@
 
 Перед началом крупного блока: `./scripts/preflight_repo.sh --with-tests`. Для desktop/UI изменений: `cd desktop && npm run e2e:release-gate`. Для native/Tauri/system-level изменений дополнительно: `cd desktop && npm run e2e:native:headless`.
 
-Следующий блок: KC13 (#185) Adaptive intelligence или KC11 (#183) после разрешения KV1.
+Нет разблокированного KC: KC11 ждёт KV1, KC13 ждёт KV5. Либо разрешить gate и взять соответствующий блок, либо по решению — KC14.
 ```
 
 ---
