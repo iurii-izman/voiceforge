@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии**. Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-15 (RCP queue: выполнен #200, следующий #201)
+**Обновлено:** 2026-03-15 (RCP queue: выполнен #201, следующий #202)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** **RCP-V2.3 (#200):** Dependency auto-fix hints — Doctor() возвращает structured hint (text, command, auto_fixable, fix_action, estimated_time) для всех 12 проверок; Tauri command `fix_dependency(action)`; в System tab под каждой проблемной зависимостью блок с подсказкой, кнопками [Fix] и [Copy Command], после fix — перезапуск doctor и обновление UI.
+**Сделано в сессии:** **RCP-V2.4 (#201):** Desktop crash notifications — детект перехода reachable→unreachable при unit_state=failed; desktop notification через plugin-notification; in-app баннер (Restart, View Logs, Dismiss); баннер «recovered» при автовосстановлении; счётчик крашей 3+/час с Run Diagnostics / Safe Mode.
 
-**Следующий шаг:** RCP epic #193. Выполнен блок #200. Следующий: **#201** — RCP-V2.4 Desktop crash notifications + auto-restart suggestion. Запустить агент с промптом из `.cursor/rules/rcp-queue.mdc`.
+**Следующий шаг:** RCP epic #193. Выполнен блок #201. Следующий: **#202** — RCP-V3.1 Enable Tauri updater (auto-update check, download, apply with UI). Запустить агент с промптом из `.cursor/rules/rcp-queue.mdc`. ⚠ #202 ранее был заблокирован #207 (signing keys); #207 закрыт — проверить готовность перед реализацией.
 
 ---
 
