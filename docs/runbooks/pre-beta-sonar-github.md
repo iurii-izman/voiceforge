@@ -22,6 +22,8 @@
 
 **Итог:** Нет блокирующих замечаний по решению команды; актуальный main сканируется без падения job.
 
+**Issue #165 (Sonar Sweep):** чеклист residual triage для закрытия — [quality-audit-2026-03.md](quality-audit-2026-03.md) §7.
+
 ---
 
 ## 2. GitHub — Pull Request’ы

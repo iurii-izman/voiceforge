@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии**. Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-15 (RCP epic #193 завершён: #205 evaluation doc, эпик закрыт)
+**Обновлено:** 2026-03-15 (post-RCP #193: doc #165 triage, next = hardening/quality)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** **RCP #205 + эпик #193:** Multi-process evaluation — ADR-0008 (recommendation: no split at current scale; triggers to re-evaluate; plan if split later). Issue #205 и эпик #193 закрыты.
+**Сделано в сессии:** Подтверждён переход после RCP #193. Добавлен чеклист residual triage для #165 в [quality-audit-2026-03.md](quality-audit-2026-03.md) §7 и ссылка в [pre-beta-sonar-github.md](pre-beta-sonar-github.md). Целевые тесты (router, cost, daily_report) — зелёные.
 
-**Следующий шаг:** RCP эпик #193 полностью выполнен. Дальше — по приоритетам из copilot-program-map / next-iteration-focus (Knowledge Copilot, hardening, прочее).
+**Следующий шаг:** Взять **#165 (Sonar Sweep)** — выполнить residual triage: `uv run python scripts/sonar_fetch_issues.py` (keyring `voiceforge`/`sonar_token`), по списку: исправить или зафиксировать «принято» в issue; при необходимости точечные правки. После этого — #164 (glib) или KV2/релиз по приоритету.
 
 ---
 
@@ -52,7 +52,7 @@
 
 Перед началом крупного блока: `./scripts/preflight_repo.sh --with-tests`. Для desktop/UI изменений: `cd desktop && npm run e2e:release-gate`. Для native/Tauri/system-level изменений дополнительно: `cd desktop && npm run e2e:native:headless`.
 
-KC11 и KC13 выполнены; все KC программы закрыты. Дальше: hardening, KV2/KV3/KV4, Sonar/Dependabot, релиз.
+KC11–KC14 выполнены; все KC программы закрыты. Дальше: #165 (Sonar residual triage) → #164 (glib) → KV2/KV3/KV4, Sonar/Dependabot, релиз.
 ```
 
 ---

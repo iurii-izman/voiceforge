@@ -102,3 +102,21 @@ uv run pip-audit --desc
 ## 6. Wave completion (2026-03-09)
 
 **QA wave #152–#157 завершена.** Все блоки QA1–QA6 закрыты. Historical wait-state `#65` тоже снят. Следующий приоритет для автопилота теперь только bug-driven maintenance или новые подтверждённые задачи пользователя.
+
+---
+
+## 7. Issue #165 (Sonar Sweep) — residual triage
+
+**Контекст:** Local cleanup по QA3–QA6 выполнен. Для закрытия [#165](https://github.com/iurii-izman/voiceforge/issues/165) нужны: remote Sonar re-analysis (происходит при push в main через `sonar.yml`) и **residual triage** оставшихся замечаний.
+
+**Чеклист закрытия #165:**
+
+1. **Получить актуальный список открытых замечаний:**
+   `uv run python scripts/sonar_fetch_issues.py`
+   (Токен: keyring `voiceforge` / `sonar_token`. Без токена шаг пропустить; зафиксировать в комментарии к issue.)
+
+2. **Triage:** по каждому замечанию — исправить (если быстро и безопасно), либо зафиксировать в issue/runbook как «принято» (accepted) с кратким обоснованием.
+
+3. **Re-analysis:** после любого исправления — push в main, дождаться прохода SonarCloud job; при необходимости проверить: `./scripts/check_sonar_status.sh`.
+
+4. **Закрыть #165:** когда критические/блокирующие устранены или осознанно приняты и задокументированы.
