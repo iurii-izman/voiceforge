@@ -191,6 +191,12 @@ const I18N = {
     rcp_system_start: "Запустить",
     rcp_system_stop: "Остановить",
     rcp_system_restart: "Перезапустить",
+    rcp_system_debug_terminal: "Отладка в терминале",
+    rcp_debug_confirm: "Фоновый демон будет остановлен и запущен в окне терминала. Продолжить?",
+    rcp_debug_external_banner: "Демон запущен во внешнем терминале. Закройте терминал для остановки.",
+    rcp_debug_external_status: "Демон запущен вне systemd (внешний терминал)",
+    rcp_debug_already_external: "Демон уже запущен во внешнем терминале",
+    rcp_debug_stopped_banner: "Демон остановлен. Нажмите «Запустить» для фонового режима.",
     rcp_system_deps: "Зависимости",
     rcp_system_run_diag: "Диагностика",
     rcp_system_service: "Служба",
@@ -457,6 +463,12 @@ const I18N = {
     rcp_system_start: "Start",
     rcp_system_stop: "Stop",
     rcp_system_restart: "Restart",
+    rcp_system_debug_terminal: "Debug in Terminal",
+    rcp_debug_confirm: "This will stop the background daemon and start it in a terminal window. Continue?",
+    rcp_debug_external_banner: "Daemon running in external terminal. Close terminal to stop.",
+    rcp_debug_external_status: "Daemon running externally (not managed by systemd)",
+    rcp_debug_already_external: "Daemon already running externally",
+    rcp_debug_stopped_banner: "Daemon stopped. [Start] to return to background mode.",
     rcp_system_deps: "Dependencies",
     rcp_system_run_diag: "Run Diagnostics",
     rcp_system_service: "Service",
@@ -803,10 +815,14 @@ async function refreshDaemonState() {
 function updateDaemonStatusDot() {
   const dot = document.getElementById("daemon-status-dot");
   if (!dot) return;
-  dot.classList.remove("state-running", "state-starting", "state-stopped", "state-failed", "state-not-installed");
+  const isExternal = daemonState.reachable && daemonState.unitState !== "active";
+  dot.classList.remove("state-running", "state-starting", "state-stopped", "state-failed", "state-not-installed", "state-external");
   let stateClass = "state-stopped";
   let title = t("rcp_dot_stopped");
-  if (daemonState.reachable) {
+  if (isExternal) {
+    stateClass = "state-external";
+    title = t("rcp_debug_external_status");
+  } else if (daemonState.reachable) {
     stateClass = "state-running";
     title = t("rcp_dot_running");
   } else if (daemonState.unitState === "activating") {
@@ -2721,20 +2737,32 @@ function loadSystemTabContent() {
   const memoryMb = d?.memory_mb ?? "—";
   const memoryLimitMb = d?.memory_limit_mb;
   const memoryStr = memoryLimitMb != null ? `${memoryMb} MB / ${memoryLimitMb} MB` : (memoryMb !== "—" ? `${memoryMb} MB` : "—");
-  const statusLabel = daemonState.reachable ? t("rcp_dot_running") : (daemonState.unitState === "failed" ? t("rcp_dot_failed") : t("rcp_dot_stopped"));
+  const isExternalDaemon = daemonState.reachable && daemonState.unitState !== "active";
+  const statusLabel = isExternalDaemon
+    ? t("rcp_debug_external_status")
+    : daemonState.reachable
+      ? t("rcp_dot_running")
+      : (daemonState.unitState === "failed" ? t("rcp_dot_failed") : t("rcp_dot_stopped"));
+  const showStopRestart = daemonState.reachable && !isExternalDaemon;
+  const debugBtnLabel = isExternalDaemon ? t("rcp_debug_already_external") : t("rcp_system_debug_terminal");
   let daemonHtml = `
     <div class="card">
       <h2 class="system-section-title">${escapeHtml(t("rcp_system_daemon"))}</h2>
-      <p><span class="dep-name">${escapeHtml(t("rcp_system_status"))}:</span> ${escapeHtml(statusLabel)}${daemonState.reachable && uptimeStr ? ` (${escapeHtml(t("rcp_system_uptime"))}: ${escapeHtml(uptimeStr)})` : ""}</p>
+      <p><span class="dep-name">${escapeHtml(t("rcp_system_status"))}:</span> ${escapeHtml(statusLabel)}${daemonState.reachable && !isExternalDaemon && uptimeStr ? ` (${escapeHtml(t("rcp_system_uptime"))}: ${escapeHtml(uptimeStr)})` : ""}</p>
       <p><span class="dep-name">${escapeHtml(t("rcp_system_version"))}:</span> ${escapeHtml(String(version))}</p>
       <p><span class="dep-name">${escapeHtml(t("rcp_system_memory"))}:</span> ${escapeHtml(memoryStr)}</p>
       <div class="first-run-actions">
-        ${daemonState.reachable
-    ? `<button type="button" class="btn small" id="system-stop-btn">${escapeHtml(t("rcp_system_stop"))}</button><button type="button" class="btn small" id="system-restart-btn">${escapeHtml(t("rcp_system_restart"))}</button>`
-    : `<button type="button" class="btn small primary" id="system-start-btn">${escapeHtml(t("rcp_system_start"))}</button>`}
+        ${showStopRestart
+    ? `<button type="button" class="btn small" id="system-stop-btn">${escapeHtml(t("rcp_system_stop"))}</button><button type="button" class="btn small" id="system-restart-btn">${escapeHtml(t("rcp_system_restart"))}</button><button type="button" class="btn small" id="system-debug-terminal-btn">${escapeHtml(t("rcp_system_debug_terminal"))}</button>`
+    : !daemonState.reachable
+      ? `<button type="button" class="btn small primary" id="system-start-btn">${escapeHtml(t("rcp_system_start"))}</button><button type="button" class="btn small" id="system-debug-terminal-btn">${escapeHtml(t("rcp_system_debug_terminal"))}</button>`
+      : `<button type="button" class="btn small" id="system-debug-terminal-btn" disabled title="${escapeHtml(t("rcp_debug_already_external"))}">${escapeHtml(debugBtnLabel)}</button>`}
       </div>
       <p id="system-daemon-msg" class="muted" style="margin-top:0.5rem"></p>
     </div>`;
+  const externalBannerHtml = isExternalDaemon
+    ? `<div class="card rcp-debug-external-banner" role="status"><p class="muted">${escapeHtml(t("rcp_debug_external_banner"))}</p></div>`
+    : "";
   let depsHtml = "";
   const doctor = daemonState.doctor;
   if (doctor && Array.isArray(doctor.checks)) {
@@ -2789,7 +2817,7 @@ function loadSystemTabContent() {
       <p><span class="dep-name">${escapeHtml(t("rcp_system_status"))}:</span> ${escapeHtml(unitState)}</p>
       <button type="button" class="btn small" id="system-reinstall-btn">${escapeHtml(t("rcp_system_reinstall"))}</button>
     </div>`;
-  container.innerHTML = daemonHtml + depsHtml + logsHtml + serviceHtml;
+  container.innerHTML = externalBannerHtml + daemonHtml + depsHtml + logsHtml + serviceHtml;
   initLogsPanel(container);
   document.getElementById("system-start-btn")?.addEventListener("click", async () => {
     const msg = document.getElementById("system-daemon-msg");
@@ -2824,6 +2852,28 @@ function loadSystemTabContent() {
       loadSystemTabContent();
     } catch (e) {
       if (msg) msg.textContent = t("rcp_firstrun_error") + ": " + (e?.message || e);
+    }
+  });
+  document.getElementById("system-debug-terminal-btn")?.addEventListener("click", async () => {
+    if (daemonState.reachable && daemonState.unitState === "active") {
+      const ok = window.confirm(t("rcp_debug_confirm"));
+      if (!ok) return;
+    }
+    const msg = document.getElementById("system-daemon-msg");
+    try {
+      if (daemonState.reachable && daemonState.unitState === "active") {
+        await invoke("daemon_stop");
+        for (let i = 0; i < 20; i++) {
+          await new Promise((r) => setTimeout(r, 500));
+          await refreshDaemonState();
+          if (daemonState.unitState === "inactive" || !daemonState.reachable) break;
+        }
+      }
+      await invoke("open_terminal_with_command", { command: "voiceforge daemon --foreground" });
+      await refreshDaemonState();
+      loadSystemTabContent();
+    } catch (e) {
+      if (msg) msg.textContent = (e?.message || e) || t("rcp_firstrun_error");
     }
   });
   document.getElementById("system-run-doctor-btn")?.addEventListener("click", async () => {

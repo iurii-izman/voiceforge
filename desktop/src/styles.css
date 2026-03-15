@@ -135,6 +135,7 @@ pre { background: var(--bg); padding: 0.75rem; border-radius: 6px; overflow: aut
 }
 .daemon-status-dot:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .daemon-status-dot.state-running { background: var(--ok); }
+.daemon-status-dot.state-external { background: #f9a825; }
 .daemon-status-dot.state-starting { background: #f9a825; animation: daemon-pulse 1s ease-in-out infinite; }
 .daemon-status-dot.state-stopped,
 .daemon-status-dot.state-not-installed { background: var(--muted); }

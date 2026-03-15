@@ -558,8 +558,8 @@ pub async fn get_daemon_logs(lines: Option<u32>) -> Result<String, String> {
     Ok(String::from_utf8_lossy(&output.stdout).to_string())
 }
 
-/// Open the system default terminal with the given command (e.g. journalctl -f).
-/// Tries xdg-terminal-exec, then gnome-terminal, konsole, xfce4-terminal, xterm.
+/// Open the system default terminal with the given command (e.g. journalctl -f, voiceforge daemon --foreground).
+/// Tries xdg-terminal-exec, then gnome-terminal, konsole, xfce4-terminal, alacritty, kitty, foot, wezterm, xterm.
 #[tauri::command]
 pub async fn open_terminal_with_command(command: String) -> Result<(), String> {
     let try_spawn = |prog: &str, args: &[&str]| -> std::io::Result<_> {
@@ -578,10 +578,22 @@ pub async fn open_terminal_with_command(command: String) -> Result<(), String> {
     if try_spawn("xfce4-terminal", &["-e", &xfce_cmd]).is_ok() {
         return Ok(());
     }
+    if try_spawn("alacritty", &["-e", "bash", "-c", &command]).is_ok() {
+        return Ok(());
+    }
+    if try_spawn("kitty", &["-e", "bash", "-c", &command]).is_ok() {
+        return Ok(());
+    }
+    if try_spawn("foot", &["-e", "bash", "-c", &command]).is_ok() {
+        return Ok(());
+    }
+    if try_spawn("wezterm", &["start", "--", "bash", "-c", &command]).is_ok() {
+        return Ok(());
+    }
     if try_spawn("xterm", &["-e", "bash", "-c", &command]).is_ok() {
         return Ok(());
     }
-    Err("No terminal found (tried xdg-terminal-exec, gnome-terminal, konsole, xfce4-terminal, xterm)".to_string())
+    Err("No terminal found (tried xdg-terminal-exec, gnome-terminal, konsole, xfce4-terminal, alacritty, kitty, foot, wezterm, xterm)".to_string())
 }
 
 fn escape_shell_arg(s: &str) -> String {
