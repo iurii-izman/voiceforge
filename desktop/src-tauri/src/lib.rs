@@ -79,6 +79,14 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::ping,
+            commands::daemon_status,
+            commands::daemon_start,
+            commands::daemon_stop,
+            commands::daemon_restart,
+            commands::run_doctor,
+            commands::install_service,
+            commands::is_service_installed,
+            commands::get_daemon_logs,
             commands::get_daemon_version,
             commands::get_settings,
             commands::get_sessions,

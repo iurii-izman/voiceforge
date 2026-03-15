@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии**. Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-14 (RCP queue: следующая задача #196, заблокирована #206)
+**Обновлено:** 2026-03-15 (RCP queue: выполнен #196, следующий #197)
 
 ---
 
@@ -17,11 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** **RCP-M1 (#195):** D-Bus метод Doctor() в dbus_service.py, _run_doctor() в daemon.py с 12 проверками (python_env, dbus, pipewire, stt_model, config, disk_space, api_keys, rag_index, pid_file, transcript_db, audio_perms, dbus_name), таймаут 2s на проверку, расширен Status() (uptime_seconds, daemon_version, listen_state, copilot_active, memory_mb), IPC envelope для Doctor(), unit-тесты.
+**Сделано в сессии:** **RCP-M2 (#196):** Tauri daemon lifecycle commands в `commands.rs`: daemon_status (D-Bus Ping/Status + systemctl is-active/cat), daemon_start/stop/restart (systemctl + poll Ping 10s), run_doctor (D-Bus Doctor), install_service, is_service_installed, get_daemon_logs (journalctl JSON). Регистрация в lib.rs, tokio для timeout/process.
 
-**Следующий шаг:** RCP epic #193. Следующий открытый sub-issue: **#196** (Tauri daemon lifecycle commands). **Заблокирован #206** — требуется решение разработчика (см. блок «RCP: блокировка #196» ниже). После закрытия #206 запустить агента с промптом из `.cursor/rules/rcp-queue.mdc`.
-
-**RCP: блокировка #196.** Задача #196 (Tauri daemon lifecycle: systemctl start/stop, D-Bus status/doctor) зависит от #206. В #206 нужно выбрать стратегию параметризации ExecStart в `voiceforge.service` (варианты A–D в issue). Рекомендация в issue: вариант B — `install-service` подставляет реальный путь из `which voiceforge` в unit. После выбора и реализации в #206 можно снимать блок и выполнять #196.
+**Следующий шаг:** RCP epic #193. Выполнен блок #196. Следующий: **#197** — RCP-M3 Runtime Control Panel UI (System tab, status indicator, offline banner, first-run flow). Запустить агент с промптом из `.cursor/rules/rcp-queue.mdc`.
 
 ---
 

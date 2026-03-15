@@ -1,6 +1,9 @@
 //! Tauri commands (D-Bus bridge).
 
+use std::time::Duration;
+
 use tauri::{Emitter, Manager};
+use tokio::process::Command;
 
 use crate::{call_method0, connection};
 
@@ -350,6 +353,209 @@ pub async fn export_session(session_id: u32, format: String) -> Result<String, S
     }
     let stdout = String::from_utf8_lossy(&output.stdout);
     Ok(stdout.trim().to_string())
+}
+
+// --- RCP-M2: Daemon lifecycle commands (#196) ---
+
+/// Check daemon status: D-Bus ping + systemctl state + structured Status() if reachable.
+#[tauri::command]
+pub async fn daemon_status() -> Result<String, String> {
+    let mut daemon_reachable = false;
+    let mut details: Option<String> = None;
+
+    if let Ok(conn) = connection().await {
+        let ping_ok = tokio::time::timeout(
+            Duration::from_secs(2),
+            call_method0(&conn, "Ping"),
+        )
+        .await
+        .map(|r| r.is_ok())
+        .unwrap_or(false);
+        if ping_ok {
+            daemon_reachable = true;
+            if let Ok(s) = tokio::time::timeout(
+                Duration::from_secs(2),
+                call_method0(&conn, "Status"),
+            )
+            .await
+            {
+                details = s.ok();
+            }
+        }
+    }
+
+    let unit_installed = Command::new("systemctl")
+        .args(["--user", "cat", "voiceforge.service"])
+        .output()
+        .await
+        .map(|o| o.status.success())
+        .unwrap_or(false);
+
+    let unit_state = Command::new("systemctl")
+        .args(["--user", "is-active", "voiceforge.service"])
+        .output()
+        .await
+        .ok()
+        .map(|o| {
+            let s = String::from_utf8_lossy(if o.stdout.is_empty() { &o.stderr } else { &o.stdout });
+            let t = s.trim();
+            if t.is_empty() {
+                "unknown".to_string()
+            } else {
+                t.to_string()
+            }
+        })
+        .unwrap_or_else(|| "unknown".to_string());
+
+    let out = serde_json::json!({
+        "daemon_reachable": daemon_reachable,
+        "unit_installed": unit_installed,
+        "unit_state": unit_state,
+        "details": details,
+    });
+    Ok(out.to_string())
+}
+
+/// Start daemon via systemctl --user start voiceforge.service; poll D-Bus Ping up to 10s.
+#[tauri::command]
+pub async fn daemon_start() -> Result<String, String> {
+    let output = Command::new("systemctl")
+        .args(["--user", "start", "voiceforge.service"])
+        .output()
+        .await
+        .map_err(|e| format!("Failed to run systemctl: {e}"))?;
+
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(format!("systemctl start failed: {stderr}"));
+    }
+
+    for _ in 0..20 {
+        tokio::time::sleep(Duration::from_millis(500)).await;
+        if let Ok(conn) = connection().await {
+            if tokio::time::timeout(
+                Duration::from_secs(2),
+                call_method0(&conn, "Ping"),
+            )
+            .await
+            .map(|r| r.is_ok())
+            .unwrap_or(false)
+            {
+                return Ok(r#"{"started": true}"#.to_string());
+            }
+        }
+    }
+    Ok(r#"{"started": false, "error": "Daemon started but not reachable via D-Bus after 10s"}"#.to_string())
+}
+
+/// Stop daemon via systemctl --user stop voiceforge.service.
+#[tauri::command]
+pub async fn daemon_stop() -> Result<String, String> {
+    let output = Command::new("systemctl")
+        .args(["--user", "stop", "voiceforge.service"])
+        .output()
+        .await
+        .map_err(|e| format!("Failed to run systemctl: {e}"))?;
+    if output.status.success() {
+        Ok(r#"{"stopped": true}"#.to_string())
+    } else {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        Err(format!("systemctl stop failed: {stderr}"))
+    }
+}
+
+/// Restart daemon via systemctl --user restart; poll D-Bus Ping up to 10s.
+#[tauri::command]
+pub async fn daemon_restart() -> Result<String, String> {
+    let output = Command::new("systemctl")
+        .args(["--user", "restart", "voiceforge.service"])
+        .output()
+        .await
+        .map_err(|e| format!("Failed to run systemctl: {e}"))?;
+
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(format!("systemctl restart failed: {stderr}"));
+    }
+
+    for _ in 0..20 {
+        tokio::time::sleep(Duration::from_millis(500)).await;
+        if let Ok(conn) = connection().await {
+            if tokio::time::timeout(
+                Duration::from_secs(2),
+                call_method0(&conn, "Ping"),
+            )
+            .await
+            .map(|r| r.is_ok())
+            .unwrap_or(false)
+            {
+                return Ok(r#"{"restarted": true}"#.to_string());
+            }
+        }
+    }
+    Ok(r#"{"restarted": false, "error": "Daemon restarted but not reachable via D-Bus after 10s"}"#.to_string())
+}
+
+/// Run Doctor() D-Bus method; return structured health report JSON.
+#[tauri::command]
+pub async fn run_doctor() -> Result<String, String> {
+    let conn = connection().await?;
+    let result = tokio::time::timeout(
+        Duration::from_secs(2),
+        call_method0(&conn, "Doctor"),
+    )
+    .await
+    .map_err(|_| "Doctor() timed out after 2s".to_string())?
+    .map_err(|e| e.to_string())?;
+    Ok(result)
+}
+
+/// Install systemd user service unit (voiceforge install-service).
+#[tauri::command]
+pub async fn install_service() -> Result<String, String> {
+    let output = Command::new("voiceforge")
+        .args(["install-service"])
+        .output()
+        .await
+        .map_err(|e| format!("Failed to run install-service: {e}"))?;
+    if output.status.success() {
+        Ok(r#"{"installed": true}"#.to_string())
+    } else {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        Err(format!("install-service failed: {stderr}"))
+    }
+}
+
+/// Check if systemd user unit voiceforge.service is installed.
+#[tauri::command]
+pub async fn is_service_installed() -> Result<bool, String> {
+    let output = Command::new("systemctl")
+        .args(["--user", "cat", "voiceforge.service"])
+        .output()
+        .await
+        .map_err(|e| format!("systemctl cat failed: {e}"))?;
+    Ok(output.status.success())
+}
+
+/// Get recent daemon logs from journalctl (JSON output).
+#[tauri::command]
+pub async fn get_daemon_logs(lines: Option<u32>) -> Result<String, String> {
+    let n = lines.unwrap_or(100);
+    let output = Command::new("journalctl")
+        .args([
+            "--user",
+            "-u",
+            "voiceforge.service",
+            "--no-pager",
+            "-n",
+            &n.to_string(),
+            "-o",
+            "json",
+        ])
+        .output()
+        .await
+        .map_err(|e| format!("Failed to read logs: {e}"))?;
+    Ok(String::from_utf8_lossy(&output.stdout).to_string())
 }
 
 /// KC2: Show copilot overlay and set state (armed | recording | analyzing | error). No focus steal.
