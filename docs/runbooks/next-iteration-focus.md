@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии**. Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-15 (RCP queue: #207 закрыт вручную; #202 unblocked)
+**Обновлено:** 2026-03-15 (RCP queue: выполнен #198, следующий #199)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** **RCP-M3 (#197):** Runtime Control Panel UI — daemonState + periodic ping 5s, status dot в sidebar (click → Settings > System), offline banner после 2 failed pings с [Start] [Details], подвкладки Settings General/System, вкладка System (daemon, dependencies из Doctor, service, Run Diagnostics), first-run dialog при не установленной службе (Install/Skip).
+**Сделано в сессии:** **RCP-V2.1 (#198):** Logs & Diagnostics Panel — секция Logs в Settings > System (ниже Dependencies): загрузка логов через `get_daemon_logs`, парсинг NDJSON, цвет по уровню (DEBUG/INFO/WARN/ERROR/CRITICAL), селектор 50/100/500, авто-прокрутка, Copy All, Open in Terminal (`open_terminal_with_command`), поиск и фильтр по уровню, Load more.
 
-**Следующий шаг:** RCP epic #193. Выполнен блок #197. Следующий: **#198** — RCP-V2.1 Logs & Diagnostics Panel (journalctl viewer в UI). Запустить агент с промптом из `.cursor/rules/rcp-queue.mdc`.
+**Следующий шаг:** RCP epic #193. Выполнен блок #198. Следующий: **#199** — RCP-V2.2 Debug in Terminal (запуск демона в foreground в терминале). Запустить агент с промптом из `.cursor/rules/rcp-queue.mdc`.
 
 ---
 
