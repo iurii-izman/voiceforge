@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии**. Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-15 (RCP queue: выполнен #196, следующий #197)
+**Обновлено:** 2026-03-15 (RCP queue: выполнен #197, следующий #198)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** **RCP-M2 (#196):** Tauri daemon lifecycle commands в `commands.rs`: daemon_status (D-Bus Ping/Status + systemctl is-active/cat), daemon_start/stop/restart (systemctl + poll Ping 10s), run_doctor (D-Bus Doctor), install_service, is_service_installed, get_daemon_logs (journalctl JSON). Регистрация в lib.rs, tokio для timeout/process.
+**Сделано в сессии:** **RCP-M3 (#197):** Runtime Control Panel UI — daemonState + periodic ping 5s, status dot в sidebar (click → Settings > System), offline banner после 2 failed pings с [Start] [Details], подвкладки Settings General/System, вкладка System (daemon, dependencies из Doctor, service, Run Diagnostics), first-run dialog при не установленной службе (Install/Skip).
 
-**Следующий шаг:** RCP epic #193. Выполнен блок #196. Следующий: **#197** — RCP-M3 Runtime Control Panel UI (System tab, status indicator, offline banner, first-run flow). Запустить агент с промптом из `.cursor/rules/rcp-queue.mdc`.
+**Следующий шаг:** RCP epic #193. Выполнен блок #197. Следующий: **#198** — RCP-V2.1 Logs & Diagnostics Panel (journalctl viewer в UI). Запустить агент с промптом из `.cursor/rules/rcp-queue.mdc`.
 
 ---
 
