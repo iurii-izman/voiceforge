@@ -39,7 +39,7 @@
 - **CVE-2025-69872 (diskcache):** historical wait-state закрыт 2026-03-13. `uv run pip-audit --desc` проходит без ignore. Если GitHub Dependabot alert всё ещё открыт на remote, его нужно закрыть как fixed/obsolete и синхронизировать [security-decision-log.md](security-decision-log.md).
 - **Desktop native-e2e (`serialize-javascript`):** закрыт 2026-03-13; remote Dependabot alert уже перешёл в `fixed` после обновления `desktop/e2e-native/package-lock.json`.
 - **Desktop Rust `time`:** закрыт 2026-03-13; `desktop/src-tauri/Cargo.lock` обновлён до `0.3.47`, `cargo tauri build` и `npm --prefix desktop run e2e:release-gate` прошли на обновлённом lock, remote Dependabot alert закрыт.
-- **Desktop Rust `glib`:** остаётся tracked alert; цепочка: tauri → tray-icon (libappindicator) + tauri-runtime-wry (tao, webkit2gtk, wry) → gtk 0.18.2 → glib 0.18.5. Устранение заблокировано на миграции [tauri-apps/wry#1474](https://github.com/tauri-apps/wry/issues/1474) (gtk4/webkit6). Подробно: [security-decision-log.md](security-decision-log.md).
+- **Desktop Rust `glib` (Dependabot #2):** принятый риск (accepted risk). Транзитивный glib 0.18.5 от Tauri/wry (RUSTSEC-2024-0429); устранение заблокировано на [tauri-apps/wry#1474](https://github.com/tauri-apps/wry/issues/1474) (gtk4/webkit6). В репо закреплён glib 0.20 для своего кода. Алерт в GitHub можно закрыть через Dismiss → Risk accepted с комментарием из [security-decision-log.md](security-decision-log.md) (блок «Закрытие алерта #2»).
 
 ---
 
