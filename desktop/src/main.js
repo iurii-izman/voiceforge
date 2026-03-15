@@ -196,6 +196,21 @@ const I18N = {
     rcp_system_service: "Служба",
     rcp_system_reinstall: "Переустановить службу",
     rcp_system_unit: "Юнит",
+    rcp_logs_title: "Логи",
+    rcp_logs_lines: "Строк",
+    rcp_logs_auto_scroll: "Авто-прокрутка",
+    rcp_logs_copy_all: "Копировать всё",
+    rcp_logs_open_terminal: "В терминале",
+    rcp_logs_search_placeholder: "Поиск по логам…",
+    rcp_logs_load_more: "Загрузить ещё",
+    rcp_logs_loading: "Загрузка…",
+    rcp_logs_error: "Ошибка загрузки логов",
+    rcp_logs_show_entries: "Показано {n} из {total}",
+    rcp_logs_level_debug: "DEBUG",
+    rcp_logs_level_info: "INFO",
+    rcp_logs_level_warn: "WARN",
+    rcp_logs_level_error: "ERROR",
+    rcp_logs_refresh: "Обновить",
     sort_newest: "Сначала новые",
     sort_oldest: "Сначала старые",
     sort_duration_desc: "По длительности (↓)",
@@ -447,6 +462,21 @@ const I18N = {
     rcp_system_service: "Service",
     rcp_system_reinstall: "Reinstall Service",
     rcp_system_unit: "Unit",
+    rcp_logs_title: "Logs",
+    rcp_logs_lines: "Lines",
+    rcp_logs_auto_scroll: "Auto-scroll",
+    rcp_logs_copy_all: "Copy All",
+    rcp_logs_open_terminal: "Open in Terminal",
+    rcp_logs_search_placeholder: "Search logs…",
+    rcp_logs_load_more: "Load more",
+    rcp_logs_loading: "Loading…",
+    rcp_logs_error: "Failed to load logs",
+    rcp_logs_show_entries: "Showing {n} of {total}",
+    rcp_logs_level_debug: "DEBUG",
+    rcp_logs_level_info: "INFO",
+    rcp_logs_level_warn: "WARN",
+    rcp_logs_level_error: "ERROR",
+    rcp_logs_refresh: "Refresh",
     sort_newest: "Newest first",
     sort_oldest: "Oldest first",
     sort_duration_desc: "By duration (↓)",
@@ -652,6 +682,14 @@ let daemonState = {
   doctor: null,
   lastPing: 0,
   loading: false,
+};
+/** RCP-V2.1: Logs panel state (entries, filters, line count). */
+let logsState = {
+  entries: [],
+  lineCount: 50,
+  autoScroll: true,
+  filterText: "",
+  levels: { debug: true, info: true, warn: true, error: true },
 };
 /** Consecutive failed pings; banner shown when >= 2 */
 let failedPingCount = 0;
@@ -2506,6 +2544,157 @@ function openSettingsToSystem() {
   switchSettingsSub("system");
 }
 
+/** RCP-V2.1: Parse journalctl NDJSON and return entries { timestamp, priority, message, level }. */
+function parseJournalNdjson(raw) {
+  const entries = [];
+  const lines = (raw || "").trim().split("\n").filter(Boolean);
+  for (const line of lines) {
+    try {
+      const obj = JSON.parse(line);
+      const ts = obj.__REALTIME_TIMESTAMP != null ? Number(obj.__REALTIME_TIMESTAMP) / 1000 : 0;
+      const prio = obj.PRIORITY != null ? Number(obj.PRIORITY) : 6;
+      const msg = (obj.MESSAGE != null ? obj.MESSAGE : "").trim();
+      let level = "info";
+      if (prio <= 2) level = "critical";
+      else if (prio === 3) level = "error";
+      else if (prio === 4) level = "warning";
+      else if (prio === 5) level = "info";
+      else if (prio >= 6) level = "debug";
+      entries.push({
+        timestamp: ts,
+        priority: prio,
+        message: msg,
+        level,
+        raw: msg,
+      });
+    } catch (_) {
+      entries.push({ timestamp: 0, priority: 6, message: line, level: "info", raw: line });
+    }
+  }
+  return entries;
+}
+
+/** RCP-V2.1: Format log entry for display; filter by logsState.filterText and logsState.levels. */
+function renderLogsEntries() {
+  const el = document.getElementById("system-logs-entries");
+  const footer = document.getElementById("system-logs-footer");
+  if (!el) return;
+  const text = (logsState.filterText || "").trim().toLowerCase();
+  const filtered = logsState.entries.filter((e) => {
+    if (!logsState.levels[e.level]) return false;
+    if (text && !e.raw.toLowerCase().includes(text)) return false;
+    return true;
+  });
+  const dateFmt = (ts) => {
+    if (!ts) return "";
+    const d = new Date(ts * 1000);
+    return d.toISOString().replace("T", " ").slice(0, 19);
+  };
+  el.innerHTML = filtered
+    .map(
+      (e) =>
+        `<div class="log-line log-${e.level}" title="${escapeHtml(e.raw)}">${escapeHtml(dateFmt(e.timestamp))} ${escapeHtml(e.level.toUpperCase())} ${escapeHtml(e.message)}</div>`
+    )
+    .join("");
+  if (footer) {
+    footer.textContent = tf("rcp_logs_show_entries", { n: filtered.length, total: logsState.entries.length });
+  }
+  if (logsState.autoScroll) el.scrollTop = el.scrollHeight;
+}
+
+/** RCP-V2.1: Fetch logs and update logsState.entries, then render. */
+async function loadDaemonLogs(lines) {
+  const el = document.getElementById("system-logs-entries");
+  const footer = document.getElementById("system-logs-footer");
+  if (el) el.innerHTML = "<p class=\"muted\">" + escapeHtml(t("rcp_logs_loading")) + "</p>";
+  try {
+    const raw = await invoke("get_daemon_logs", { lines: lines ?? logsState.lineCount });
+    const str = typeof raw === "string" ? raw : String(raw);
+    logsState.entries = parseJournalNdjson(str);
+    logsState.lineCount = lines ?? logsState.lineCount;
+    renderLogsEntries();
+  } catch (e) {
+    if (el) el.innerHTML = "<p class=\"muted err\">" + escapeHtml(t("rcp_logs_error") + ": " + (e?.message || e)) + "</p>";
+    if (footer) footer.textContent = "";
+  }
+}
+
+/** RCP-V2.1: Wire logs panel controls and load initial logs. */
+function initLogsPanel(container) {
+  if (!container || !container.querySelector(".logs-panel-card")) return;
+  const lineCountSel = document.getElementById("system-logs-line-count");
+  const autoScrollCb = document.getElementById("system-logs-auto-scroll");
+  const copyBtn = document.getElementById("system-logs-copy-btn");
+  const terminalBtn = document.getElementById("system-logs-terminal-btn");
+  const refreshBtn = document.getElementById("system-logs-refresh-btn");
+  const searchInput = document.getElementById("system-logs-search");
+  const loadMoreBtn = document.getElementById("system-logs-load-more");
+  const levelCbs = {
+    debug: document.getElementById("system-logs-level-debug"),
+    info: document.getElementById("system-logs-level-info"),
+    warn: document.getElementById("system-logs-level-warn"),
+    error: document.getElementById("system-logs-level-error"),
+  };
+  if (lineCountSel) {
+    lineCountSel.addEventListener("change", () => {
+      logsState.lineCount = Number(lineCountSel.value) || 50;
+      loadDaemonLogs(logsState.lineCount);
+    });
+  }
+  if (autoScrollCb) {
+    autoScrollCb.addEventListener("change", () => {
+      logsState.autoScroll = autoScrollCb.checked;
+    });
+  }
+  if (copyBtn) {
+    copyBtn.addEventListener("click", async () => {
+      const el = document.getElementById("system-logs-entries");
+      const text = el ? Array.from(el.querySelectorAll(".log-line")).map((n) => n.textContent).join("\n") : "";
+      if (text) {
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch (_) {}
+      }
+    });
+  }
+  if (terminalBtn) {
+    terminalBtn.addEventListener("click", async () => {
+      try {
+        await invoke("open_terminal_with_command", { command: "journalctl --user -u voiceforge.service -f --no-pager" });
+      } catch (e) {
+        console.error("open_terminal_with_command failed", e);
+      }
+    });
+  }
+  if (refreshBtn) {
+    refreshBtn.addEventListener("click", () => loadDaemonLogs(logsState.lineCount));
+  }
+  if (searchInput) {
+    searchInput.addEventListener("input", () => {
+      logsState.filterText = searchInput.value;
+      renderLogsEntries();
+    });
+  }
+  Object.keys(levelCbs).forEach((level) => {
+    const cb = levelCbs[level];
+    if (cb) cb.addEventListener("change", () => {
+      logsState.levels[level] = cb.checked;
+      renderLogsEntries();
+    });
+  });
+  if (loadMoreBtn) {
+    loadMoreBtn.addEventListener("click", () => {
+      const cur = logsState.lineCount || 50;
+      const next = cur < 100 ? 100 : cur < 500 ? 500 : 500;
+      logsState.lineCount = next;
+      const sel = document.getElementById("system-logs-line-count");
+      if (sel) sel.value = String(next);
+      loadDaemonLogs(next);
+    });
+  }
+  loadDaemonLogs(logsState.lineCount);
+}
+
 /** RCP-M3: render System tab — daemon section, dependencies from Doctor(), service section */
 function loadSystemTabContent() {
   const container = document.getElementById("settings-system-content");
@@ -2568,6 +2757,31 @@ function loadSystemTabContent() {
     </div>`;
   }
   const unitState = daemonState.unitState || "unknown";
+  const logsHtml = `
+    <div class="card logs-panel-card">
+      <h2 class="system-section-title">${escapeHtml(t("rcp_logs_title"))}</h2>
+      <div class="logs-toolbar">
+        <select id="system-logs-line-count" class="logs-select" aria-label="${escapeHtml(t("rcp_logs_lines"))}">
+          <option value="50" ${logsState.lineCount === 50 ? "selected" : ""}>50</option>
+          <option value="100" ${logsState.lineCount === 100 ? "selected" : ""}>100</option>
+          <option value="500" ${logsState.lineCount === 500 ? "selected" : ""}>500</option>
+        </select>
+        <label class="logs-check"><input type="checkbox" id="system-logs-auto-scroll" ${logsState.autoScroll ? "checked" : ""}> ${escapeHtml(t("rcp_logs_auto_scroll"))}</label>
+        <button type="button" class="btn small" id="system-logs-copy-btn">${escapeHtml(t("rcp_logs_copy_all"))}</button>
+        <button type="button" class="btn small" id="system-logs-terminal-btn">${escapeHtml(t("rcp_logs_open_terminal"))}</button>
+        <button type="button" class="btn small" id="system-logs-refresh-btn">${escapeHtml(t("rcp_logs_refresh"))}</button>
+      </div>
+      <div class="logs-level-filters">
+        <label class="logs-check"><input type="checkbox" id="system-logs-level-debug" ${logsState.levels.debug ? "checked" : ""}> ${escapeHtml(t("rcp_logs_level_debug"))}</label>
+        <label class="logs-check"><input type="checkbox" id="system-logs-level-info" ${logsState.levels.info ? "checked" : ""}> ${escapeHtml(t("rcp_logs_level_info"))}</label>
+        <label class="logs-check"><input type="checkbox" id="system-logs-level-warn" ${logsState.levels.warn ? "checked" : ""}> ${escapeHtml(t("rcp_logs_level_warn"))}</label>
+        <label class="logs-check"><input type="checkbox" id="system-logs-level-error" ${logsState.levels.error ? "checked" : ""}> ${escapeHtml(t("rcp_logs_level_error"))}</label>
+      </div>
+      <input type="text" id="system-logs-search" class="logs-search-input" placeholder="${escapeHtml(t("rcp_logs_search_placeholder"))}" value="${escapeHtml(logsState.filterText)}">
+      <div id="system-logs-entries" class="logs-entries"></div>
+      <div id="system-logs-footer" class="logs-footer muted"></div>
+      <button type="button" class="btn small" id="system-logs-load-more">${escapeHtml(t("rcp_logs_load_more"))}</button>
+    </div>`;
   const serviceHtml = `
     <div class="card">
       <h2 class="system-section-title">${escapeHtml(t("rcp_system_service"))}</h2>
@@ -2575,7 +2789,8 @@ function loadSystemTabContent() {
       <p><span class="dep-name">${escapeHtml(t("rcp_system_status"))}:</span> ${escapeHtml(unitState)}</p>
       <button type="button" class="btn small" id="system-reinstall-btn">${escapeHtml(t("rcp_system_reinstall"))}</button>
     </div>`;
-  container.innerHTML = daemonHtml + depsHtml + serviceHtml;
+  container.innerHTML = daemonHtml + depsHtml + logsHtml + serviceHtml;
+  initLogsPanel(container);
   document.getElementById("system-start-btn")?.addEventListener("click", async () => {
     const msg = document.getElementById("system-daemon-msg");
     if (msg) msg.textContent = t("rcp_firstrun_installing");

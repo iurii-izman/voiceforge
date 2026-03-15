@@ -87,6 +87,7 @@ pub fn run() {
             commands::install_service,
             commands::is_service_installed,
             commands::get_daemon_logs,
+            commands::open_terminal_with_command,
             commands::get_daemon_version,
             commands::get_settings,
             commands::get_sessions,

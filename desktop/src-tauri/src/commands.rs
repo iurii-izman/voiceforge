@@ -558,6 +558,36 @@ pub async fn get_daemon_logs(lines: Option<u32>) -> Result<String, String> {
     Ok(String::from_utf8_lossy(&output.stdout).to_string())
 }
 
+/// Open the system default terminal with the given command (e.g. journalctl -f).
+/// Tries xdg-terminal-exec, then gnome-terminal, konsole, xfce4-terminal, xterm.
+#[tauri::command]
+pub async fn open_terminal_with_command(command: String) -> Result<(), String> {
+    let try_spawn = |prog: &str, args: &[&str]| -> std::io::Result<_> {
+        Command::new(prog).args(args).spawn()
+    };
+    if try_spawn("xdg-terminal-exec", &["bash", "-c", &command]).is_ok() {
+        return Ok(());
+    }
+    if try_spawn("gnome-terminal", &["--", "bash", "-c", &command]).is_ok() {
+        return Ok(());
+    }
+    if try_spawn("konsole", &["-e", "bash", "-c", &command]).is_ok() {
+        return Ok(());
+    }
+    let xfce_cmd = format!("bash -c {}", escape_shell_arg(&command));
+    if try_spawn("xfce4-terminal", &["-e", &xfce_cmd]).is_ok() {
+        return Ok(());
+    }
+    if try_spawn("xterm", &["-e", "bash", "-c", &command]).is_ok() {
+        return Ok(());
+    }
+    Err("No terminal found (tried xdg-terminal-exec, gnome-terminal, konsole, xfce4-terminal, xterm)".to_string())
+}
+
+fn escape_shell_arg(s: &str) -> String {
+    format!("'{}'", s.replace('\'', "'\"'\"'"))
+}
+
 /// KC2: Show copilot overlay and set state (armed | recording | analyzing | error). No focus steal.
 #[tauri::command]
 pub async fn set_copilot_overlay_state(

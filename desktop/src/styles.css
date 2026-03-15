@@ -171,6 +171,22 @@ pre { background: var(--bg); padding: 0.75rem; border-radius: 6px; overflow: aut
 .dep-dot.error { background: var(--error); }
 .dep-name { font-weight: 500; }
 .dep-msg { color: var(--muted); font-size: 0.9rem; }
+
+/* RCP-V2.1 Logs panel */
+.logs-panel-card .logs-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+.logs-panel-card .logs-select { padding: 0.25rem 0.5rem; background: var(--bg); border: 1px solid var(--border); color: var(--fg); border-radius: 4px; font-size: 0.9rem; }
+.logs-panel-card .logs-level-filters { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0.5rem; }
+.logs-panel-card .logs-check { font-size: 0.85rem; color: var(--muted); display: inline-flex; align-items: center; gap: 0.25rem; }
+.logs-panel-card .logs-search-input { width: 100%; max-width: 20rem; padding: 0.35rem 0.5rem; margin-bottom: 0.5rem; background: var(--bg); border: 1px solid var(--border); color: var(--fg); border-radius: 4px; font-size: 0.9rem; }
+.logs-entries { font-family: var(--mono); font-size: 0.8rem; max-height: 320px; overflow-y: auto; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 0.5rem; margin-bottom: 0.5rem; white-space: pre-wrap; word-break: break-all; }
+.log-line { padding: 0.15rem 0; border-bottom: 1px solid transparent; }
+.log-line.log-debug { color: var(--muted); }
+.log-line.log-info { color: var(--fg); }
+.log-line.log-warning { color: #e6a23c; background: rgba(230, 162, 60, 0.08); }
+.log-line.log-error { color: var(--error); background: rgba(229, 115, 115, 0.1); }
+.log-line.log-critical { color: #fff; background: rgba(229, 115, 115, 0.25); }
+.logs-footer { font-size: 0.85rem; margin-bottom: 0.5rem; }
+
 .favorite-star { background: none; border: none; cursor: pointer; font-size: 1.1rem; color: var(--muted); padding: 0.2rem; }
 .favorite-star:hover { color: var(--accent); }
 .context-menu { position: fixed; z-index: 1000; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.25rem 0; min-width: 160px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
