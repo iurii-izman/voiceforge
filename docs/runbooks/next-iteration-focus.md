@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии**. Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-15 (#165 triage: BLOCKER/CRITICAL исправлены, остаток задокументирован)
+**Обновлено:** 2026-03-15 (#164: glib chain задокументирована, блокировка на wry#1474)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Residual triage #165: исправлены S2083 (write_update_json — путь только внутри репо), S1192 (daemon.py — константы для display_name), S2583 (daemon — условия), S7682 (run_desktop_native_smoke.sh — явный exit). Итог triage в [quality-audit-2026-03.md](quality-audit-2026-03.md) §7. Тесты daemon/router — зелёные.
+**Сделано в сессии:** #164: зафиксирована транзитивная цепочка glib 0.18.5 (tauri → tray-icon, tauri-runtime-wry → gtk 0.18.2 → glib); обновлены [security-decision-log.md](security-decision-log.md) и [security-and-dependencies.md](security-and-dependencies.md); решение заблокировано на [tauri-apps/wry#1474](https://github.com/tauri-apps/wry/issues/1474) (gtk4/webkit6). Сборка desktop (cargo tauri build) успешна; pytest — 688 passed.
 
-**Следующий шаг:** После push — дождаться SonarCloud re-analysis; при желании закрыть #165 (residual принят, см. runbook). Дальше — #164 (glib) или KV2/релиз по приоритету.
+**Следующий шаг:** При желании закрыть #164 как «documented, blocked on upstream» или оставить открытым до выхода wry с gtk4. Дальше — KV2 (overlay UX sign-off) или подготовка релиза по приоритету.
 
 ---
 
