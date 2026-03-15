@@ -5,6 +5,7 @@ use tauri::Emitter;
 mod commands;
 mod dbus_signals;
 mod tray;
+mod versioning;
 
 pub const DBUS_NAME: &str = "com.voiceforge.App";
 pub const DBUS_PATH: &str = "/com/voiceforge/App";
@@ -117,6 +118,8 @@ pub fn run() {
             commands::set_system_audio_opt_in,
             commands::check_for_update,
             commands::install_update,
+            commands::get_version_info,
+            commands::rollback_version,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

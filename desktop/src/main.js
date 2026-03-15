@@ -334,6 +334,11 @@ const I18N = {
     update_downloading: "Загрузка обновления…",
     update_restart_prompt: "Обновление загружено. Перезапустите приложение.",
     update_restart_now_btn: "Перезапустить сейчас",
+    version_info_current: "Текущая версия: {version}",
+    version_info_previous: "Предыдущая: {version} (бэкап: {size} MB)",
+    rollback_btn: "Откатить к {version}",
+    rollback_confirm: "Откатить VoiceForge к версии {version}? Приложение перезапустится. Продолжить?",
+    rollback_success: "Откат к {version} выполнен. Перезапустите приложение.",
     dashboard_expand: "Развернуть",
     dashboard_collapse: "Свернуть",
   },
@@ -627,6 +632,11 @@ const I18N = {
     update_downloading: "Downloading update…",
     update_restart_prompt: "Update downloaded. Restart to apply.",
     update_restart_now_btn: "Restart Now",
+    version_info_current: "Current version: {version}",
+    version_info_previous: "Previous: {version} (backup: {size} MB)",
+    rollback_btn: "Rollback to {version}",
+    rollback_confirm: "Revert VoiceForge to version {version}? The app will restart. Continue?",
+    rollback_success: "Rolled back to {version}. Restart required.",
     dashboard_expand: "Expand",
     dashboard_collapse: "Collapse",
   },
@@ -3836,6 +3846,30 @@ async function startUpdateInstall() {
   }
 }
 
+async function refreshVersionInfo() {
+  const lineEl = document.getElementById("version-info-line");
+  const rollbackBtn = document.getElementById("rollback-btn");
+  if (!lineEl) return;
+  try {
+    const raw = await invoke("get_version_info");
+    const info = JSON.parse(raw);
+    const parts = [tf("version_info_current", { version: info.current_version })];
+    if (info.previous_version != null) {
+      const size = info.backup_size_mb != null ? Number(info.backup_size_mb).toFixed(1) : "—";
+      parts.push(tf("version_info_previous", { version: info.previous_version, size }));
+    }
+    lineEl.textContent = parts.join(" • ");
+    if (rollbackBtn) {
+      rollbackBtn.style.display = info.can_rollback ? "" : "none";
+      if (info.can_rollback) rollbackBtn.textContent = tf("rollback_btn", { version: info.previous_version });
+    }
+  } catch (e) {
+    if (e != null) console.debug("get_version_info", e);
+    lineEl.textContent = "";
+    if (rollbackBtn) rollbackBtn.style.display = "none";
+  }
+}
+
 function initUpdaterCard() {
   const cb = document.getElementById("updater-check-on-launch");
   const btn = document.getElementById("updater-check-now");
@@ -3844,6 +3878,28 @@ function initUpdaterCard() {
     cb.addEventListener("change", () => localStorage.setItem(UPDATER_CHECK_ON_LAUNCH_KEY, cb.checked ? "true" : "false"));
   }
   if (btn) btn.addEventListener("click", () => checkForUpdate(false));
+
+  void refreshVersionInfo();
+
+  const rollbackBtn = document.getElementById("rollback-btn");
+  if (rollbackBtn) {
+    rollbackBtn.addEventListener("click", async () => {
+      try {
+        const raw = await invoke("get_version_info");
+        const info = JSON.parse(raw);
+        if (!info.can_rollback || !info.previous_version) return;
+        if (!confirm(tf("rollback_confirm", { version: info.previous_version }))) return;
+        setUpdateStatus(t("update_installing"));
+        const result = await invoke("rollback_version");
+        const data = JSON.parse(result);
+        setUpdateStatus(tf("rollback_success", { version: data.rolled_back_to }));
+        showUpdateRestartPrompt();
+      } catch (e) {
+        setUpdateStatus(t("update_unavailable"));
+        if (e != null) console.debug("rollback_version", e);
+      }
+    });
+  }
 
   document.getElementById("update-now-btn")?.addEventListener("click", () => startUpdateInstall());
   document.getElementById("update-later-btn")?.addEventListener("click", hideUpdateAvailableBanner);

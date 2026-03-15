@@ -1,11 +1,13 @@
 //! Tauri commands (D-Bus bridge).
 
+use std::path::Path;
 use std::time::Duration;
 
 use tauri::{Emitter, Manager};
 use tokio::process::Command;
 
 use crate::{call_method0, connection};
+use crate::versioning;
 
 #[tauri::command]
 pub async fn ping() -> Result<String, String> {
@@ -278,10 +280,31 @@ pub async fn check_for_update(app: tauri::AppHandle) -> Result<String, String> {
     }
 }
 
-/// RCP #202: Download and install update. Emits updater-download-progress (chunk, total) and updater-download-finished.
+/// RCP #202/#203: Download and install update. Creates pre-update backup (RCP #203), then applies update.
 #[tauri::command]
 pub async fn install_update(app: tauri::AppHandle) -> Result<(), String> {
     use tauri_plugin_updater::UpdaterExt;
+    let current_version = app.package_info().version.to_string();
+    let current_exe = std::env::current_exe().map_err(|e| format!("Cannot find current binary: {e}"))?;
+
+    let previous_version = versioning::read_version_metadata(&app).ok().and_then(|m| m.previous_version);
+
+    if let Ok(backup_path) = versioning::backup_current_exe(&app, &current_version) {
+        if versioning::save_version_metadata(
+            &app,
+            &current_version,
+            &current_exe,
+            Some(&backup_path),
+            previous_version.as_deref(),
+        )
+        .is_err()
+        {
+            eprintln!("Failed to save version metadata");
+        }
+    } else {
+        eprintln!("Pre-update backup skipped (disk full or error)");
+    }
+
     let updater = app.updater().map_err(|e| e.to_string())?;
     let update = updater
         .check()
@@ -300,6 +323,87 @@ pub async fn install_update(app: tauri::AppHandle) -> Result<(), String> {
         .await
         .map_err(|e| e.to_string())?;
     Ok(())
+}
+
+/// RCP #203: Return version info for UI (current, previous, can_rollback).
+#[tauri::command]
+pub async fn get_version_info(app: tauri::AppHandle) -> Result<String, String> {
+    let running_version = app.package_info().version.to_string();
+    let current_exe = std::env::current_exe().map_err(|e| e.to_string())?;
+
+    let mut meta = match versioning::read_version_metadata(&app) {
+        Ok(m) => m,
+        Err(_) => {
+            return Ok(serde_json::json!({
+                "current_version": running_version,
+                "previous_version": null,
+                "can_rollback": false,
+                "backup_size_mb": null,
+                "updated_at": null
+            })
+            .to_string());
+        }
+    };
+
+    if meta.version != running_version {
+        let previous = meta.version.clone();
+        let backup_path = meta.backup_path.as_ref().and_then(|p| {
+            let path = Path::new(p);
+            if path.exists() {
+                Some(path)
+            } else {
+                None
+            }
+        });
+        let _ = versioning::save_version_metadata(
+            &app,
+            &running_version,
+            &current_exe,
+            backup_path,
+            Some(&previous),
+        );
+        meta.version = running_version;
+        meta.previous_version = Some(previous);
+    }
+
+    let can_rollback = meta
+        .backup_path
+        .as_ref()
+        .map(|p| Path::new(p).exists())
+        .unwrap_or(false);
+
+    Ok(serde_json::json!({
+        "current_version": meta.version,
+        "previous_version": meta.previous_version,
+        "can_rollback": can_rollback,
+        "backup_size_mb": meta.backup_size_mb,
+        "updated_at": meta.installed_at
+    })
+    .to_string())
+}
+
+/// RCP #203: Rollback to previous version (restore backup over current binary).
+#[tauri::command]
+pub async fn rollback_version(app: tauri::AppHandle) -> Result<String, String> {
+    let meta = versioning::read_version_metadata(&app)?;
+    let backup_path = meta
+        .backup_path
+        .as_ref()
+        .filter(|p| Path::new(p).exists())
+        .ok_or("No previous version available for rollback")?;
+
+    let current_exe = std::env::current_exe().map_err(|e| format!("Cannot find current binary: {e}"))?;
+    std::fs::copy(backup_path, &current_exe).map_err(|e| format!("Rollback copy failed: {e}"))?;
+
+    let rolled_to = meta
+        .previous_version
+        .as_deref()
+        .unwrap_or(&meta.version);
+    Ok(serde_json::json!({
+        "rolled_back_to": rolled_to,
+        "restart_required": true
+    })
+    .to_string())
 }
 
 /// KC12: On-demand answer refinement (deep/rewrite/tone). Returns JSON { refined, cost_usd } or { error }.
