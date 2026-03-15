@@ -169,6 +169,25 @@ def test_cli_service_install_uninstall_smoke(monkeypatch, tmp_path) -> None:
     ]
 
 
+def test_exec_start_for_service_toolbox_vs_native(monkeypatch) -> None:
+    """#206: ExecStart is distrobox line in container, native path otherwise."""
+    monkeypatch.delenv("DISTROBOX_NAME", raising=False)
+    monkeypatch.delenv("CONTAINER", raising=False)
+    native = main_mod._exec_start_for_service()
+    assert "daemon" in native
+    assert "voiceforge" in native
+
+    monkeypatch.setenv("DISTROBOX_NAME", "voiceforge")
+    in_box = main_mod._exec_start_for_service()
+    assert "distrobox enter voiceforge" in in_box
+    assert "uv run voiceforge daemon" in in_box
+
+    monkeypatch.delenv("DISTROBOX_NAME", raising=False)
+    monkeypatch.setenv("CONTAINER", "podman")
+    in_container = main_mod._exec_start_for_service()
+    assert "distrobox enter voiceforge" in in_container
+
+
 def test_cli_index_watch_smoke_with_mocks(monkeypatch, tmp_path) -> None:
     monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
     monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "runtime"))

@@ -1,5 +1,5 @@
 # Block 6.4: VoiceForge daemon — systemd user unit (autostart at login).
-# Install: voiceforge install-service
+# Install: voiceforge install-service (replaces __VOICEFORGE_EXEC_START__ by environment: toolbox vs native)
 # Logs: journalctl --user -u voiceforge -f
 
 [Unit]
@@ -9,7 +9,7 @@ PartOf=graphical-session.target
 
 [Service]
 Type=notify
-ExecStart=distrobox enter voiceforge -- uv run voiceforge daemon
+ExecStart=__VOICEFORGE_EXEC_START__
 Restart=on-failure
 RestartSec=5
 # E5 #128: watchdog + journald logging

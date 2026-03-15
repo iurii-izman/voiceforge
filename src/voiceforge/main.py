@@ -1669,15 +1669,30 @@ def _service_unit_path() -> Path:
     raise FileNotFoundError(f"{_SERVICE_UNIT_NAME} not found")
 
 
+def _exec_start_for_service() -> str:
+    """ExecStart line for systemd unit: toolbox/distrobox vs native (#206 variant B)."""
+    if os.environ.get("DISTROBOX_NAME") or os.environ.get("CONTAINER"):
+        box_name = os.environ.get("DISTROBOX_NAME", "voiceforge")
+        return f"distrobox enter {box_name} -- uv run voiceforge daemon"
+    vf = shutil.which("voiceforge")
+    return f"{vf or 'voiceforge'} daemon"
+
+
 @app.command()
 def install_service() -> None:
-    """Install systemd user service and enable it."""
+    """Install systemd user service and enable it. ExecStart is set by environment (toolbox vs native, #206)."""
     unit_src = _service_unit_path()
     xdg = os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config")
     user_dir = Path(xdg) / "systemd" / "user"
     user_dir.mkdir(parents=True, exist_ok=True)
     unit_dst = user_dir / _SERVICE_UNIT_NAME
-    shutil.copy2(unit_src, unit_dst)
+    content = unit_src.read_text(encoding="utf-8")
+    exec_start = _exec_start_for_service()
+    if "__VOICEFORGE_EXEC_START__" not in content:
+        content = content.replace("ExecStart=distrobox enter voiceforge -- uv run voiceforge daemon", f"ExecStart={exec_start}")
+    else:
+        content = content.replace("__VOICEFORGE_EXEC_START__", exec_start)
+    unit_dst.write_text(content, encoding="utf-8")
     typer.echo(t("install_service.copied", path=str(unit_dst)))
     subprocess.run(["systemctl", "--user", "daemon-reload"], check=True)  # nosec B603 B607
     subprocess.run(["systemctl", "--user", "enable", _SERVICE_UNIT_NAME], check=True)  # nosec B603 B607
