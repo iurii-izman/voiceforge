@@ -126,6 +126,12 @@ pre { background: var(--bg); padding: 0.75rem; border-radius: 6px; overflow: aut
 .daemon-off-banner { display: flex; align-items: center; flex-wrap: wrap; gap: 0.75rem; padding: 0.5rem 0.75rem; background: var(--error); color: #fff; border-radius: var(--radius); margin-bottom: 0.5rem; }
 .daemon-off-banner .btn { flex-shrink: 0; }
 .daemon-off-banner-recovered { background: var(--info, #0ea5e9); }
+.update-available-banner { display: flex; align-items: center; flex-wrap: wrap; gap: 0.75rem; padding: 0.5rem 0.75rem; background: var(--info, #0ea5e9); color: #fff; border-radius: var(--radius); margin-bottom: 0.5rem; }
+.update-available-banner .btn { flex-shrink: 0; }
+.update-download-progress { padding: 0.5rem 0.75rem; margin-bottom: 0.5rem; }
+.update-download-progress progress { width: 100%; max-width: 20rem; }
+.update-restart-prompt { display: flex; align-items: center; flex-wrap: wrap; gap: 0.75rem; padding: 0.5rem 0.75rem; background: var(--success, #22c55e); color: #fff; border-radius: var(--radius); margin-bottom: 0.5rem; }
+.update-restart-prompt .btn { flex-shrink: 0; }
 
 /* RCP-M3: daemon status dot in sidebar */
 .daemon-status-dot {

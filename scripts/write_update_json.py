@@ -30,6 +30,7 @@ def main() -> int:
     ap.add_argument("--url", default=None, help="Download URL for linux-x86_64 .deb or AppImage")
     ap.add_argument("--signature-file", type=Path, default=None, help="Path to .sig file")
     ap.add_argument("--notes", default="See CHANGELOG.md", help="Release notes")
+    ap.add_argument("--output", default=None, help="Output path (default: updates/update.json)")
     args = ap.parse_args()
 
     version = args.version or os.environ.get("VERSION", "")
@@ -65,9 +66,12 @@ def main() -> int:
         },
     }
 
-    UPDATES_JSON.parent.mkdir(parents=True, exist_ok=True)
-    UPDATES_JSON.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-    print(f"Wrote {UPDATES_JSON}")
+    out_path = Path(args.output) if args.output else UPDATES_JSON
+    if not out_path.is_absolute():
+        out_path = REPO_ROOT / out_path
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    print(f"Wrote {out_path}")
     return 0
 
 

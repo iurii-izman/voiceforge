@@ -59,6 +59,21 @@
         <button type="button" class="btn small" id="daemon-off-banner-details" data-i18n="rcp_banner_details">Подробнее</button>
         <button type="button" class="btn small" id="daemon-retry-btn" data-i18n="daemon_retry_btn">Повторить подключение</button>
       </div>
+      <div id="update-available-banner" class="update-available-banner" role="alert" aria-live="polite" style="display:none">
+        <span id="update-available-text"></span>
+        <button type="button" class="btn small primary" id="update-now-btn" data-i18n="update_now_btn">Update Now</button>
+        <button type="button" class="btn small" id="update-release-notes-btn" data-i18n="update_release_notes_btn">Release Notes</button>
+        <button type="button" class="btn small" id="update-later-btn" data-i18n="update_later_btn">Later</button>
+      </div>
+      <div id="update-download-progress" class="update-download-progress" style="display:none">
+        <span data-i18n="update_downloading">Downloading update…</span>
+        <progress id="update-progress-bar" value="0" max="100"></progress>
+      </div>
+      <div id="update-restart-prompt" class="update-restart-prompt" role="alert" style="display:none">
+        <span data-i18n="update_restart_prompt">Update downloaded. Restart to apply.</span>
+        <button type="button" class="btn small primary" id="update-restart-now-btn" data-i18n="update_restart_now_btn">Restart Now</button>
+        <button type="button" class="btn small" id="update-restart-later-btn" data-i18n="update_later_btn">Later</button>
+      </div>
 
       <section id="tab-home" class="tab-panel active" tabindex="-1">
         <h1 id="tab-home-title" data-i18n="tab_home_title">Главная</h1>

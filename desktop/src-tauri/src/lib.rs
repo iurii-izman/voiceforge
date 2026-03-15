@@ -115,6 +115,8 @@ pub fn run() {
             commands::index_paths,
             commands::refine_copilot_answer,
             commands::set_system_audio_opt_in,
+            commands::check_for_update,
+            commands::install_update,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

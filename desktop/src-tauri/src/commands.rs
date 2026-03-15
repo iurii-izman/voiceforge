@@ -252,6 +252,56 @@ pub async fn set_system_audio_opt_in(consent_given: bool, monitor_source: Option
     Ok(body)
 }
 
+/// RCP #202: Check for app update. Returns JSON { available, version?, date?, body?, current_version? }.
+#[tauri::command]
+pub async fn check_for_update(app: tauri::AppHandle) -> Result<String, String> {
+    use tauri_plugin_updater::UpdaterExt;
+    let updater = app.updater().map_err(|e| e.to_string())?;
+    match updater.check().await {
+        Ok(Some(update)) => {
+            let date_str = update
+                .date
+                .as_ref()
+                .map(|d| d.to_string())
+                .unwrap_or_else(|| String::new());
+            Ok(serde_json::json!({
+                "available": true,
+                "version": update.version,
+                "date": date_str,
+                "body": update.body,
+                "current_version": update.current_version
+            })
+            .to_string())
+        }
+        Ok(None) => Ok(r#"{"available": false}"#.to_string()),
+        Err(e) => Err(e.to_string()),
+    }
+}
+
+/// RCP #202: Download and install update. Emits updater-download-progress (chunk, total) and updater-download-finished.
+#[tauri::command]
+pub async fn install_update(app: tauri::AppHandle) -> Result<(), String> {
+    use tauri_plugin_updater::UpdaterExt;
+    let updater = app.updater().map_err(|e| e.to_string())?;
+    let update = updater
+        .check()
+        .await
+        .map_err(|e| e.to_string())?
+        .ok_or_else(|| "No update available".to_string())?;
+    update
+        .download_and_install(
+            |chunk_length, content_length| {
+                let _ = app.emit("updater-download-progress", (chunk_length, content_length));
+            },
+            || {
+                let _ = app.emit("updater-download-finished", ());
+            },
+        )
+        .await
+        .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
 /// KC12: On-demand answer refinement (deep/rewrite/tone). Returns JSON { refined, cost_usd } or { error }.
 #[tauri::command]
 pub async fn refine_copilot_answer(

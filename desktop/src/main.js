@@ -18,7 +18,6 @@ import {
   requestPermission,
   sendNotification,
   unregisterShortcut,
-  updaterCheck,
 } from "./platform";
 
 let appStore = null;
@@ -328,6 +327,13 @@ const I18N = {
     update_deferred: "Обновление отложено.",
     update_none: "Обновлений нет.",
     update_unavailable: "Обновления отключены или недоступны.",
+    update_banner_available: "Доступна версия VoiceForge {version} (текущая: {current}).",
+    update_now_btn: "Установить",
+    update_release_notes_btn: "Что нового",
+    update_later_btn: "Позже",
+    update_downloading: "Загрузка обновления…",
+    update_restart_prompt: "Обновление загружено. Перезапустите приложение.",
+    update_restart_now_btn: "Перезапустить сейчас",
     dashboard_expand: "Развернуть",
     dashboard_collapse: "Свернуть",
   },
@@ -614,6 +620,13 @@ const I18N = {
     update_deferred: "Update deferred.",
     update_none: "No updates available.",
     update_unavailable: "Updates are disabled or unavailable.",
+    update_banner_available: "VoiceForge {version} is available (current: {current}).",
+    update_now_btn: "Update Now",
+    update_release_notes_btn: "Release Notes",
+    update_later_btn: "Later",
+    update_downloading: "Downloading update…",
+    update_restart_prompt: "Update downloaded. Restart to apply.",
+    update_restart_now_btn: "Restart Now",
     dashboard_expand: "Expand",
     dashboard_collapse: "Collapse",
   },
@@ -3736,33 +3749,90 @@ function setUpdateStatus(text) {
   if (statusEl) statusEl.textContent = text;
 }
 
-async function handleUpdateFound(update, silentIfNone) {
-  if (silentIfNone) {
-    setUpdateStatus(tf("update_available_status", { version: update.version }));
-    return;
+let pendingUpdateInfo = null;
+
+function showUpdateAvailableBanner(info) {
+  pendingUpdateInfo = info;
+  const banner = document.getElementById("update-available-banner");
+  const textEl = document.getElementById("update-available-text");
+  if (banner && textEl) {
+    textEl.textContent = tf("update_banner_available", {
+      version: info.version,
+      current: info.current_version || "",
+    });
+    banner.style.display = "";
   }
-  setUpdateStatus(tf("update_found_status", { version: update.version }));
-  const install = confirm(tf("update_confirm", { version: update.version, body: update.body || "" }));
-  if (install) {
-    setUpdateStatus(t("update_installing"));
-    await update.downloadAndInstall();
-    await relaunch();
-  } else {
-    setUpdateStatus(t("update_deferred"));
-  }
+}
+
+function hideUpdateAvailableBanner() {
+  pendingUpdateInfo = null;
+  const banner = document.getElementById("update-available-banner");
+  if (banner) banner.style.display = "none";
+}
+
+function showUpdateDownloadProgress(percent) {
+  const el = document.getElementById("update-download-progress");
+  const bar = document.getElementById("update-progress-bar");
+  if (el) el.style.display = "";
+  if (bar) bar.value = percent;
+}
+
+function hideUpdateDownloadProgress() {
+  const el = document.getElementById("update-download-progress");
+  if (el) el.style.display = "none";
+}
+
+function showUpdateRestartPrompt() {
+  hideUpdateDownloadProgress();
+  const el = document.getElementById("update-restart-prompt");
+  if (el) el.style.display = "";
 }
 
 async function checkForUpdate(silentIfNone = false) {
   try {
-    const update = await updaterCheck();
-    if (update) {
-      await handleUpdateFound(update, silentIfNone);
+    const raw = await invoke("check_for_update");
+    const result = JSON.parse(raw);
+    if (result.available) {
+      setUpdateStatus(tf("update_available_status", { version: result.version }));
+      showUpdateAvailableBanner(result);
       return;
     }
     setUpdateStatus(silentIfNone ? "" : t("update_none"));
   } catch (e) {
     setUpdateStatus(t("update_unavailable"));
     if (!silentIfNone && e != null) console.debug("updater check", e);
+  }
+}
+
+async function startUpdateInstall() {
+  if (!pendingUpdateInfo) return;
+  hideUpdateAvailableBanner();
+  showUpdateDownloadProgress(0);
+  let lastPercent = 0;
+  const unlistenProgress = await listen("updater-download-progress", (event) => {
+    const [chunkLength, contentLength] = event.payload || [0, null];
+    const pct = contentLength != null && contentLength > 0
+      ? Math.min(100, Math.round((chunkLength / contentLength) * 100))
+      : lastPercent + 5;
+    lastPercent = pct;
+    showUpdateDownloadProgress(pct);
+  });
+  const unlistenFinished = await listen("updater-download-finished", () => {
+    unlistenProgress();
+    unlistenFinished();
+    showUpdateRestartPrompt();
+  });
+  try {
+    await invoke("install_update");
+    unlistenProgress();
+    unlistenFinished();
+    showUpdateRestartPrompt();
+  } catch (e) {
+    unlistenProgress();
+    unlistenFinished();
+    hideUpdateDownloadProgress();
+    setUpdateStatus(t("update_unavailable"));
+    if (e != null) console.debug("install_update", e);
   }
 }
 
@@ -3774,6 +3844,17 @@ function initUpdaterCard() {
     cb.addEventListener("change", () => localStorage.setItem(UPDATER_CHECK_ON_LAUNCH_KEY, cb.checked ? "true" : "false"));
   }
   if (btn) btn.addEventListener("click", () => checkForUpdate(false));
+
+  document.getElementById("update-now-btn")?.addEventListener("click", () => startUpdateInstall());
+  document.getElementById("update-later-btn")?.addEventListener("click", hideUpdateAvailableBanner);
+  document.getElementById("update-release-notes-btn")?.addEventListener("click", () => {
+    if (pendingUpdateInfo?.body) alert(pendingUpdateInfo.body);
+    else window.open("https://github.com/iurii-izman/voiceforge/releases", "_blank");
+  });
+  document.getElementById("update-restart-now-btn")?.addEventListener("click", () => relaunch());
+  document.getElementById("update-restart-later-btn")?.addEventListener("click", () => {
+    document.getElementById("update-restart-prompt")?.style.setProperty("display", "none");
+  });
 }
 
 async function initAutostartCard() {
@@ -4039,7 +4120,7 @@ function initDashboardWidgets() {
   loadLastAnalysisWidget();
   loadLastCopilotWidget();
   if (localStorage.getItem(UPDATER_CHECK_ON_LAUNCH_KEY) === "true") {
-    checkForUpdate(true);
+    setTimeout(() => checkForUpdate(true), 10000);
   }
   setInterval(refreshDaemonState, PING_INTERVAL_MS);
   document.addEventListener("visibilitychange", () => {

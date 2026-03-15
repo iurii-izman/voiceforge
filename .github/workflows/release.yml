@@ -87,6 +87,15 @@ jobs:
           npm ci
           npm run build
           npm run tauri build
+      - name: Generate latest.json for Tauri updater
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          APPIMAGE=$(find desktop/src-tauri/target/release/bundle/appimage -name '*.AppImage' -type f 2>/dev/null | head -1)
+          if [ -z "$APPIMAGE" ]; then echo "No AppImage found"; exit 1; fi
+          SIG="${APPIMAGE}.sig"
+          if [ ! -f "$SIG" ]; then echo "Signature not found: $SIG"; exit 1; fi
+          UPDATE_URL="https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/$(basename "$APPIMAGE")"
+          python3 scripts/write_update_json.py --version "$VERSION" --url "$UPDATE_URL" --signature-file "$SIG" --output latest.json
       - name: Build Flatpak
         run: |
           chmod +x scripts/build-flatpak.sh
@@ -95,9 +104,13 @@ jobs:
         run: |
           flatpak build-export export build
           flatpak build-bundle export com.voiceforge.app.flatpak com.voiceforge.app --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
-      - name: Upload Flatpak to release
+      - name: Upload Flatpak and updater artifacts to release
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2
         with:
-          files: com.voiceforge.app.flatpak
+          files: |
+            com.voiceforge.app.flatpak
+            latest.json
+            desktop/src-tauri/target/release/bundle/appimage/*.AppImage
+            desktop/src-tauri/target/release/bundle/appimage/*.AppImage.sig
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

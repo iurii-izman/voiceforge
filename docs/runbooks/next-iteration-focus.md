@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии**. Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-15 (RCP queue: выполнен #201, следующий #202)
+**Обновлено:** 2026-03-15 (RCP queue: выполнен #202, следующий #203)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** **RCP-V2.4 (#201):** Desktop crash notifications — детект перехода reachable→unreachable при unit_state=failed; desktop notification через plugin-notification; in-app баннер (Restart, View Logs, Dismiss); баннер «recovered» при автовосстановлении; счётчик крашей 3+/час с Run Diagnostics / Safe Mode.
+**Сделано в сессии:** **RCP-V3.1 (#202):** Enable Tauri updater — Rust commands check_for_update/install_update, auto-check on startup (10s delay), update-available banner, download progress, restart prompt; CI: signed build + latest.json upload in release workflow.
 
-**Следующий шаг:** RCP epic #193. Выполнен блок #201. Следующий: **#202** — RCP-V3.1 Enable Tauri updater (auto-update check, download, apply with UI). Запустить агент с промптом из `.cursor/rules/rcp-queue.mdc`. ⚠ #202 ранее был заблокирован #207 (signing keys); #207 закрыт — проверить готовность перед реализацией.
+**Следующий шаг:** RCP epic #193. Выполнен блок #202. Следующий: **#203** — RCP-V3.2 Rollback mechanism. Запустить агент с промптом из `.cursor/rules/rcp-queue.mdc`.
 
 ---
 
