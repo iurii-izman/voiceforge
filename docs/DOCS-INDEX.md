@@ -127,6 +127,7 @@
 | legal-consent-kv1.md                                          | KV1: черновик формулировок system audio, retention, юрисдикции; решение по scope KC11   | Актуален                         |
 | kv2-overlay-signoff-checklist.md                             | KV2: чеклист для визуального sign-off overlay (позиция, размер, интрузивность)         | Актуален                         |
 | kv3-pilot-scenario-template.md                               | KV3: шаблон сценария пилотной сессии с primary persona                                  | Актуален                         |
+| kv4-business-packaging-decisions.md                           | KV4: список решений по бизнесу/упаковке (лицензия, дистрибуция, монетизация)             | Актуален                         |
 | reflective-summary-2026-03.md                                 | Рефлексия по проекту и совместной работе (сильные/слабые стороны, улучшения)             | Актуален                         |
 | quickstart.md                                                 | Краткий сценарий; полная версия — first-meeting-5min                                    | Актуален                         |
 | rebuild-run-test-guide.md                                     | Пошаговый гайд: пересборка приложения, запуск демона и десктопа, тесты (pytest + e2e)   | Актуален                         |
@@ -174,6 +175,8 @@
 | ----------------------------- | ----------------------------------------- | -------- |
 | README.md                     | Список ADR 0001–0006                      | Актуален |
 | 0001–0006                     | Активные решения                          | Актуален |
+| 0007-rcp-systemctl-dbus-no-supervisor.md | RCP: systemctl + D-Bus (#194)        | Актуален |
+| 0008-multi-process-supervisor-evaluation.md | Multi-process: no split, defer (#205) | Актуален |
 | 0002-archive-first-cleanup.md | Superseded → [archive/adr/](archive/adr/) | Архив    |
 
 

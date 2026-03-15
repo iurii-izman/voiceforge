@@ -25,9 +25,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** KV2: в [kv2-overlay-signoff-checklist.md](kv2-overlay-signoff-checklist.md) добавлен раздел «Как закрыть KV2» и ссылка из [what-user-must-do.md](what-user-must-do.md). Подготовка к релизу: проверены check_release_metadata.py и check_release_proof.py (OK); версии и CHANGELOG согласованы; в next-iteration-focus добавлен блок «Подготовка к релизу».
+**Сделано в сессии:** KV2/KV3/KV4: подготовлены runbooks для всех трёх мануальных гейтов. Добавлен [kv4-business-packaging-decisions.md](kv4-business-packaging-decisions.md) (чеклист решений по лицензии, дистрибуции, монетизации); в [kv3-pilot-scenario-template.md](kv3-pilot-scenario-template.md) — раздел «Как закрыть KV3»; в [copilot-program-map.md](copilot-program-map.md) и [what-user-must-do.md](what-user-must-do.md) — явные ссылки на runbooks KV2–KV4; DOCS-INDEX дополнен записью по KV4.
 
-**Следующий шаг:** По желанию: пройти [kv2-overlay-signoff-checklist.md](kv2-overlay-signoff-checklist.md) и закрыть #188; или выполнить полный чеклист релиза по [release-and-quality.md](release-and-quality.md) и выставить тег. Hardening #164/#165 — по приоритету, без смены execution order.
+**Следующий шаг:** KV2/KV3/KV4: все три гейта имеют готовые runbooks (чеклист KV2, шаблон пилота KV3, список решений KV4). По желанию: пройти чеклисты и закрыть #188, #189, #190; или выполнить полный чеклист релиза по [release-and-quality.md](release-and-quality.md). Hardening #164/#165 — по приоритету.
 
 ---
 

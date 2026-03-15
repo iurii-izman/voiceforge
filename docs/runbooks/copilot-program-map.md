@@ -50,9 +50,9 @@ This file is the operational map for the Knowledge Copilot program. Nothing in t
 | Prefix | Issue | Timing | Status | Gate |
 | --- | --- | --- | --- | --- |
 | KV1 | [#187](https://github.com/iurii-izman/voiceforge/issues/187) | Before KC11 | Resolved | Legal/consent wording approved; KC11 in scope. See [legal-consent-kv1.md](legal-consent-kv1.md) |
-| KV2 | [#188](https://github.com/iurii-izman/voiceforge/issues/188) | Before KC2 completion | Todo | Overlay UX sign-off |
-| KV3 | [#189](https://github.com/iurii-izman/voiceforge/issues/189) | After KC6 | Todo | Pilot validation with primary persona |
-| KV4 | [#190](https://github.com/iurii-izman/voiceforge/issues/190) | Before commercial packaging | Todo | Business/packaging decision |
+| KV2 | [#188](https://github.com/iurii-izman/voiceforge/issues/188) | Before KC2 completion | Todo | Overlay UX sign-off. Runbook: [kv2-overlay-signoff-checklist.md](kv2-overlay-signoff-checklist.md) |
+| KV3 | [#189](https://github.com/iurii-izman/voiceforge/issues/189) | After KC6 | Todo | Pilot validation with primary persona. Runbook: [kv3-pilot-scenario-template.md](kv3-pilot-scenario-template.md) |
+| KV4 | [#190](https://github.com/iurii-izman/voiceforge/issues/190) | Before commercial packaging | Todo | Business/packaging decision. Runbook: [kv4-business-packaging-decisions.md](kv4-business-packaging-decisions.md) |
 | KV5 | [#191](https://github.com/iurii-izman/voiceforge/issues/191) | Before KC13 platform frontier | Resolved (Linux-only) | Explicit platform expansion gate; no-go, KC13 unblocked |
 
 ## Execution Order
