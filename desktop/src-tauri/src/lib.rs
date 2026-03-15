@@ -84,6 +84,7 @@ pub fn run() {
             commands::daemon_stop,
             commands::daemon_restart,
             commands::run_doctor,
+            commands::fix_dependency,
             commands::install_service,
             commands::is_service_installed,
             commands::get_daemon_logs,

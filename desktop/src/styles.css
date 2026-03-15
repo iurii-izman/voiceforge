@@ -165,6 +165,7 @@ pre { background: var(--bg); padding: 0.75rem; border-radius: 6px; overflow: aut
 .system-section-title { font-size: 0.95rem; font-weight: 600; margin: 1rem 0 0.5rem; color: var(--muted); }
 .system-section-title:first-child { margin-top: 0; }
 .dep-row { display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0; }
+.dep-row-wrap { margin-bottom: 0.25rem; }
 .dep-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .dep-dot.ok { background: var(--ok); }
 .dep-dot.degraded { background: #f9a825; }
@@ -172,6 +173,11 @@ pre { background: var(--bg); padding: 0.75rem; border-radius: 6px; overflow: aut
 .dep-dot.error { background: var(--error); }
 .dep-name { font-weight: 500; }
 .dep-msg { color: var(--muted); font-size: 0.9rem; }
+.dep-hint-block { margin-left: 1rem; padding: 0.35rem 0; border-left: 2px solid var(--muted); padding-left: 0.5rem; }
+.dep-hint-text { margin: 0 0 0.25rem 0; font-size: 0.9rem; color: var(--muted); }
+.dep-hint-time { font-size: 0.85rem; }
+.dep-hint-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.dep-fix-error { font-size: 0.85rem; margin-top: 0.25rem; }
 
 /* RCP-V2.1 Logs panel */
 .logs-panel-card .logs-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }

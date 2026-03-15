@@ -217,6 +217,11 @@ const I18N = {
     rcp_logs_level_warn: "WARN",
     rcp_logs_level_error: "ERROR",
     rcp_logs_refresh: "Обновить",
+    rcp_fix_btn: "Исправить",
+    rcp_copy_cmd_btn: "Копировать команду",
+    rcp_fixing: "Выполняю…",
+    rcp_fix_failed: "Ошибка исправления",
+    rcp_recheck: "Проверить снова",
     sort_newest: "Сначала новые",
     sort_oldest: "Сначала старые",
     sort_duration_desc: "По длительности (↓)",
@@ -489,6 +494,11 @@ const I18N = {
     rcp_logs_level_warn: "WARN",
     rcp_logs_level_error: "ERROR",
     rcp_logs_refresh: "Refresh",
+    rcp_fix_btn: "Fix",
+    rcp_copy_cmd_btn: "Copy Command",
+    rcp_fixing: "Fixing…",
+    rcp_fix_failed: "Fix failed",
+    rcp_recheck: "Recheck",
     sort_newest: "Newest first",
     sort_oldest: "Oldest first",
     sort_duration_desc: "By duration (↓)",
@@ -2769,11 +2779,22 @@ function loadSystemTabContent() {
     depsHtml = `
     <div class="card">
       <h2 class="system-section-title">${escapeHtml(t("rcp_system_deps"))}</h2>
-      <div id="system-deps-list">${doctor.checks.map((c) => {
-      const status = c.status || "ok";
-      const dotClass = status === "ok" ? "ok" : status === "degraded" ? "degraded" : status === "error" ? "error" : "missing";
-      return `<div class="dep-row"><span class="dep-dot ${dotClass}" aria-hidden="true"></span><span class="dep-name">${escapeHtml(c.display_name || c.name || "—")}</span><span class="dep-msg">${escapeHtml(c.message || "")}</span></div>`;
-    }).join("")}</div>
+      <div id="system-deps-list">${doctor.checks.map((c, idx) => {
+        const status = c.status || "ok";
+        const dotClass = status === "ok" ? "ok" : status === "degraded" ? "degraded" : status === "error" ? "error" : "missing";
+        const hint = c.hint != null ? (typeof c.hint === "string" ? { text: c.hint, command: null, auto_fixable: false } : c.hint) : null;
+        const showHint = status !== "ok" && hint && hint.text;
+        const hintBlock = showHint ? `
+          <div class="dep-hint-block" data-check-index="${idx}">
+            <p class="dep-hint-text">${escapeHtml(hint.text)}${hint.estimated_time ? ` <span class="dep-hint-time">(~${escapeHtml(hint.estimated_time)})</span>` : ""}</p>
+            <div class="dep-hint-actions">
+              ${hint.auto_fixable && hint.fix_action ? `<button type="button" class="btn small dep-fix-btn" data-fix-action="${escapeHtml(hint.fix_action)}" data-check-index="${idx}">${escapeHtml(t("rcp_fix_btn"))}</button>` : ""}
+              ${hint.command ? `<button type="button" class="btn small dep-copy-cmd-btn" data-command="${escapeHtml(hint.command)}">${escapeHtml(t("rcp_copy_cmd_btn"))}</button>` : ""}
+            </div>
+            <p class="dep-fix-error muted" id="dep-fix-error-${idx}" role="alert" style="display:none"></p>
+          </div>` : "";
+        return `<div class="dep-row-wrap"><div class="dep-row"><span class="dep-dot ${dotClass}" aria-hidden="true"></span><span class="dep-name">${escapeHtml(c.display_name || c.name || "—")}</span><span class="dep-msg">${escapeHtml(c.message || "")}</span></div>${hintBlock}</div>`;
+      }).join("")}</div>
       <button type="button" class="btn small" id="system-run-doctor-btn">${escapeHtml(t("rcp_system_run_diag"))}</button>
     </div>`;
   } else {
@@ -2887,6 +2908,39 @@ function loadSystemTabContent() {
       console.debug("run_doctor failed", e);
     }
   });
+  const depsList = document.getElementById("system-deps-list");
+  if (depsList) {
+    depsList.addEventListener("click", async (e) => {
+      const fixBtn = e.target.closest(".dep-fix-btn");
+      if (fixBtn && !fixBtn.disabled) {
+        const action = fixBtn.dataset.fixAction;
+        const idx = fixBtn.dataset.checkIndex;
+        fixBtn.disabled = true;
+        const origText = fixBtn.textContent;
+        fixBtn.textContent = t("rcp_fixing");
+        const errEl = document.getElementById(`dep-fix-error-${idx}`);
+        if (errEl) errEl.style.display = "none";
+        try {
+          await invoke("fix_dependency", { action });
+          const raw = await invoke("run_doctor");
+          const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+          daemonState.doctor = parsed?.data ?? parsed;
+          loadSystemTabContent();
+        } catch (err) {
+          fixBtn.disabled = false;
+          fixBtn.textContent = origText;
+          if (errEl) {
+            errEl.textContent = (err?.message || err) || t("rcp_fix_failed");
+            errEl.style.display = "block";
+          }
+        }
+      }
+      const copyBtn = e.target.closest(".dep-copy-cmd-btn");
+      if (copyBtn && copyBtn.dataset.command && navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(copyBtn.dataset.command).catch(() => {});
+      }
+    });
+  }
   document.getElementById("system-reinstall-btn")?.addEventListener("click", async () => {
     try {
       await invoke("install_service");

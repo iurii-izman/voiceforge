@@ -510,6 +510,50 @@ pub async fn run_doctor() -> Result<String, String> {
     Ok(result)
 }
 
+/// RCP-V2.3: Run auto-fix for a dependency check (start_pipewire, download_stt_model, remove_stale_pid).
+#[tauri::command]
+pub async fn fix_dependency(action: String) -> Result<String, String> {
+    let out = match action.as_str() {
+        "start_pipewire" => {
+            let output = Command::new("systemctl")
+                .args(["--user", "start", "pipewire.service"])
+                .output()
+                .await
+                .map_err(|e| format!("systemctl start failed: {e}"))?;
+            if output.status.success() {
+                serde_json::json!({ "ok": true, "action": "start_pipewire" })
+            } else {
+                let stderr = String::from_utf8_lossy(&output.stderr);
+                return Err(format!("PipeWire start failed: {stderr}"));
+            }
+        }
+        "download_stt_model" => {
+            let output = Command::new("voiceforge")
+                .args(["download-models", "--size", "small"])
+                .output()
+                .await
+                .map_err(|e| format!("voiceforge download-models failed: {e}"))?;
+            if output.status.success() {
+                serde_json::json!({ "ok": true, "action": "download_stt_model" })
+            } else {
+                let stderr = String::from_utf8_lossy(&output.stderr);
+                return Err(format!("Download failed: {stderr}"));
+            }
+        }
+        "remove_stale_pid" => {
+            let pid_path = std::env::var("XDG_RUNTIME_DIR")
+                .unwrap_or_else(|_| "/tmp".to_string())
+                + "/voiceforge.pid";
+            match std::fs::remove_file(&pid_path) {
+                Ok(()) => serde_json::json!({ "ok": true, "action": "remove_stale_pid" }),
+                Err(e) => return Err(format!("Failed to remove PID file: {e}")),
+            }
+        }
+        _ => return Err(format!("Unknown fix action: {action}")),
+    };
+    Ok(out.to_string())
+}
+
 /// Install systemd user service unit (voiceforge install-service).
 #[tauri::command]
 pub async fn install_service() -> Result<String, String> {

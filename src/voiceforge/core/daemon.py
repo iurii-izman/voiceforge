@@ -313,6 +313,28 @@ class VoiceForgeDaemon:
         DOCTOR_CHECK_TIMEOUT = 2
         SCHEMA_VERSION = "1.0"
 
+        def _hint(
+            text: str,
+            *,
+            command: str | None = None,
+            auto_fixable: bool = False,
+            fix_action: str | None = None,
+            estimated_time: str | None = None,
+            docs_url: str | None = None,
+        ) -> dict[str, Any]:
+            """Build RCP-V2.3 structured hint object for Doctor() (#200)."""
+            out: dict[str, Any] = {"text": text}
+            if command is not None:
+                out["command"] = command
+            out["auto_fixable"] = auto_fixable
+            if fix_action is not None:
+                out["fix_action"] = fix_action
+            if estimated_time is not None:
+                out["estimated_time"] = estimated_time
+            if docs_url is not None:
+                out["docs_url"] = docs_url
+            return out
+
         def _run_check(fn: Callable[[], dict[str, Any]]) -> dict[str, Any]:
             try:
                 with ThreadPoolExecutor(max_workers=1) as ex:
@@ -325,7 +347,7 @@ class VoiceForgeDaemon:
                     "status": "error",
                     "severity": "medium",
                     "message": "Check timed out (2s)",
-                    "hint": "Retry or check system load",
+                    "hint": _hint("Retry or check system load"),
                     "can_start_without": True,
                 }
             except Exception as e:
@@ -357,7 +379,7 @@ class VoiceForgeDaemon:
                 "status": "missing",
                 "severity": "critical",
                 "message": "voiceforge not found in PATH",
-                "hint": "Install voiceforge or activate the correct environment",
+                "hint": _hint("Install voiceforge or activate the correct environment"),
                 "can_start_without": False,
             }
 
@@ -401,7 +423,12 @@ class VoiceForgeDaemon:
                 "status": "missing" if "not" in (detail or "").lower() or "error" in (detail or "").lower() else "error",
                 "severity": "high",
                 "message": detail or "PipeWire check failed",
-                "hint": "Run: systemctl --user start pipewire.service",
+                "hint": _hint(
+                    "Start PipeWire",
+                    command="systemctl --user start pipewire.service",
+                    auto_fixable=True,
+                    fix_action="start_pipewire",
+                ),
                 "can_start_without": True,
             }
 
@@ -431,7 +458,13 @@ class VoiceForgeDaemon:
                 "status": "missing",
                 "severity": "high",
                 "message": f"Model '{model_size}' not found in ~/.cache",
-                "hint": "Run: voiceforge download-models --size small",
+                "hint": _hint(
+                    "Download the STT model",
+                    command=f"voiceforge download-models --size {model_size}",
+                    auto_fixable=True,
+                    fix_action="download_stt_model",
+                    estimated_time="2-5 minutes",
+                ),
                 "can_start_without": True,
             }
 
@@ -454,7 +487,7 @@ class VoiceForgeDaemon:
                     "status": "error",
                     "severity": "medium",
                     "message": str(e),
-                    "hint": "Check ~/voiceforge.yaml syntax",
+                    "hint": _hint("Check voiceforge.yaml syntax; edit with $EDITOR ~/.config/voiceforge/voiceforge.yaml"),
                     "can_start_without": True,
                 }
 
@@ -468,7 +501,7 @@ class VoiceForgeDaemon:
                     "status": "error",
                     "severity": "medium",
                     "message": err_msg or "Low disk space",
-                    "hint": "Free up disk space (need 1GB minimum)",
+                    "hint": _hint("Free up disk space in ~/.cache/voiceforge/ (need 1GB minimum)"),
                     "can_start_without": True,
                 }
             if warn_msg:
@@ -478,7 +511,7 @@ class VoiceForgeDaemon:
                     "status": "degraded",
                     "severity": "medium",
                     "message": warn_msg or "Below 1GB free",
-                    "hint": "Free up disk space (need 1GB minimum)",
+                    "hint": _hint("Free up disk space in ~/.cache/voiceforge/ (need 1GB minimum)"),
                     "can_start_without": True,
                 }
             return {
@@ -519,7 +552,7 @@ class VoiceForgeDaemon:
                     "status": "missing",
                     "severity": "medium",
                     "message": "No anthropic/openai/huggingface key in keyring",
-                    "hint": "Run: voiceforge config set-key anthropic",
+                    "hint": _hint("Configure API key", command="voiceforge config set-key anthropic"),
                     "can_start_without": True,
                 }
             except Exception as e:
@@ -529,7 +562,7 @@ class VoiceForgeDaemon:
                     "status": "error",
                     "severity": "medium",
                     "message": str(e),
-                    "hint": "Check keyring backend",
+                    "hint": _hint("Check keyring backend"),
                     "can_start_without": True,
                 }
 
@@ -542,7 +575,7 @@ class VoiceForgeDaemon:
                     "status": "missing",
                     "severity": "low",
                     "message": "RAG DB not found",
-                    "hint": "Run: voiceforge index <path>",
+                    "hint": _hint("Process files to build RAG index", command="voiceforge rag index ~/Documents/"),
                     "can_start_without": True,
                 }
             try:
@@ -606,7 +639,12 @@ class VoiceForgeDaemon:
                 "status": "degraded",
                 "severity": "medium",
                 "message": "Stale PID file; process not running",
-                "hint": f"Remove {path} if daemon is not running",
+                "hint": _hint(
+                    "Remove stale PID file",
+                    command=f"rm {path}",
+                    auto_fixable=True,
+                    fix_action="remove_stale_pid",
+                ),
                 "can_start_without": True,
             }
 
@@ -644,7 +682,7 @@ class VoiceForgeDaemon:
                     "status": "error",
                     "severity": "medium",
                     "message": str(e),
-                    "hint": "Check permissions and encryption key",
+                    "hint": _hint("Check permissions and encryption key for transcripts.db"),
                     "can_start_without": True,
                 }
 
@@ -666,7 +704,10 @@ class VoiceForgeDaemon:
                 "status": "error",
                 "severity": "high",
                 "message": err or "PipeWire or permissions issue",
-                "hint": "Check audio group membership and PipeWire",
+                "hint": _hint(
+                    "Add user to audio group and re-login",
+                    command="sudo usermod -aG audio $USER",
+                ),
                 "can_start_without": True,
             }
 
