@@ -18,7 +18,7 @@
 
 - **KV1 / legal-consent:** разрешён (2026-03-14). Wording в [legal-consent-kv1.md](legal-consent-kv1.md) утверждён; KC11 доступен для автопилота.
 - **KV2 / overlay UX sign-off:** KC2 реализован; до финального sign-off желателен живой просмотр overlay UX (опционально).
-- **Security hardening:** `#164/#165` остаются открытыми, но не задают основной execution order, пока не появится blocking regression.
+- **Security hardening:** #164 закрыт (цепочка glib задокументирована, риск принят). #165 (Sonar residual) остаётся открытым; не задаёт execution order, пока нет blocking regression.
 - **Legacy scope guard:** [phase-e-decision-log.md](phase-e-decision-log.md) остаётся ограничителем для старых surfaces (Web UI / Telegram / RAG watcher / calendar narrow path) и не должен silently переопределяться в copilot треке.
 
 ---
@@ -45,7 +45,7 @@
 | **Wave 3 V2 Expansion** | #182✓ → #183✓ | Done | KC10, KC11 done |
 | **Wave 4 V3 / Frontier** | #184✓ → #185✓ → #186✓ | Done | KC12, KC13, KC14 done |
 | **Manual gates** | #187✓ → #191✓ | KV1, KV5 done | KV2/KV3/KV4 остаются |
-| **Background hardening** | #165, #164 | Open | Keep below copilot program unless blocking |
+| **Background hardening** | #165 | Open | #164 закрыт (glib documented, risk accepted). #165 — Sonar residual, below copilot unless blocking |
 
 ---
 

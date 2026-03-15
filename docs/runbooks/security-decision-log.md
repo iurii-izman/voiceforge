@@ -14,7 +14,7 @@
 | Dependabot alert `#3` / `time` | GitHub Dependabot, `desktop/src-tauri/Cargo.lock` | **Fixed** (2026-03-13) | `Cargo.lock` refreshed to `time 0.3.47`; `cargo tauri build` and desktop release gate pass on the refreshed lock, and remote Dependabot alert is now closed. | — |
 | Dependabot alert `#2` / `glib` | GitHub Dependabot, `desktop/src-tauri/Cargo.lock` | **Dismissed** (Risk accepted) | Принятый риск. RUSTSEC-2024-0429 (VariantStrIter unsoundness). Транзитивный glib 0.18.5 от Tauri/wry; устранение заблокировано на [tauri-apps/wry#1474](https://github.com/tauri-apps/wry/issues/1474). В репо закреплён glib 0.20 для своего кода. Алерт в GitHub закрыт (Dismiss → Risk accepted). | Revisit: после выхода wry с gtk4/webkit6 |
 
-**Цепочка glib 0.18.5 (для #164):** `cargo tree -i 'glib@0.18.5'` в `desktop/src-tauri`: glib 0.18.5 ← gtk 0.18.2 ← atk, cairo-rs, gdk, gdk-pixbuf, gio, pango, libappindicator (tray-icon), tao, webkit2gtk, wry, tauri-runtime-wry, tauri. Прямой pin `glib = "0.20"` в Cargo.toml затрагивает только код voiceforge-desktop; транзитивные крейты Tauri продолжают использовать 0.18.5 до выхода wry с gtk4.
+**Цепочка glib 0.18.5 (issue #164 — закрыт):** цепочка зафиксирована, риск принят (Dependabot #2 dismissed). Revisit — после выхода [wry#1474](https://github.com/tauri-apps/wry/issues/1474) (gtk4/webkit6). Команда для проверки: `cargo tree -i 'glib@0.18.5'` в `desktop/src-tauri`: glib 0.18.5 ← gtk 0.18.2 ← atk, cairo-rs, gdk, gdk-pixbuf, gio, pango, libappindicator (tray-icon), tao, webkit2gtk, wry, tauri-runtime-wry, tauri. Прямой pin `glib = "0.20"` в Cargo.toml — только для кода voiceforge-desktop.
 
 `#65` / `CVE-2025-69872` больше не является активным wait-state: 2026-03-13 `uv run pip-audit --desc` проходит без `--ignore-vuln`.
 
