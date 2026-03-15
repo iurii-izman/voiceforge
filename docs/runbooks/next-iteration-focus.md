@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии**. Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-15 (RCP queue: выполнен #199, следующий #200)
+**Обновлено:** 2026-03-15 (RCP queue: выполнен #200, следующий #201)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** **RCP-V2.1 (#198):** Logs & Diagnostics Panel — секция Logs в Settings > System (ниже Dependencies): загрузка логов через `get_daemon_logs`, парсинг NDJSON, цвет по уровню (DEBUG/INFO/WARN/ERROR/CRITICAL), селектор 50/100/500, авто-прокрутка, Copy All, Open in Terminal (`open_terminal_with_command`), поиск и фильтр по уровню, Load more.
+**Сделано в сессии:** **RCP-V2.3 (#200):** Dependency auto-fix hints — Doctor() возвращает structured hint (text, command, auto_fixable, fix_action, estimated_time) для всех 12 проверок; Tauri command `fix_dependency(action)`; в System tab под каждой проблемной зависимостью блок с подсказкой, кнопками [Fix] и [Copy Command], после fix — перезапуск doctor и обновление UI.
 
-**Следующий шаг:** RCP epic #193. Выполнен блок #199. Следующий: **#200** — RCP-V2.3 Dependency auto-fix hints (actionable remediation в UI). Запустить агент с промптом из `.cursor/rules/rcp-queue.mdc`.
+**Следующий шаг:** RCP epic #193. Выполнен блок #200. Следующий: **#201** — RCP-V2.4 Desktop crash notifications + auto-restart suggestion. Запустить агент с промптом из `.cursor/rules/rcp-queue.mdc`.
 
 ---
 
