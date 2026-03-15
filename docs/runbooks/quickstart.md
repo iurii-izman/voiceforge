@@ -32,6 +32,7 @@
 6. **Десктоп (Tauri)**
    - Сборка: см. [desktop-build-deps.md](desktop-build-deps.md); из корня `./scripts/check-desktop-deps.sh`, затем `cd desktop && npm install && npm run tauri dev`.
    - Перед запуском десктопа обязательно запустите демон: `voiceforge daemon` (в отдельном терминале или как сервис).
+   - **Полный пошаговый гайд** (пересборка → запуск → тесты): [rebuild-run-test-guide.md](rebuild-run-test-guide.md).
 
 7. **Следующие шаги**
    - Action items: `uv run voiceforge action-items update --from-session 1 --next-session 2`

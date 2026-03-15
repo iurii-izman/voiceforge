@@ -49,3 +49,4 @@ tmp_plugins/
 .cursor/
 .cursorrules
 .claude/
+.vscode/

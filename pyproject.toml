@@ -114,6 +114,10 @@ known-first-party = ["voiceforge"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+# Upstream deprecations we cannot fix (PyTorch/pyannote)
+filterwarnings = [
+    "ignore:.*torch.jit.script.*Python 3.14.*:DeprecationWarning",
+]
 markers = [
     "integration: WAV-based STT integration tests (slow, real model).",
     "slow: slow tests (e.g. download model, transcribe).",

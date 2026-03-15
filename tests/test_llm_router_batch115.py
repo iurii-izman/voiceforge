@@ -347,6 +347,8 @@ def test_complete_structured_success_and_failure_paths(monkeypatch) -> None:
     monkeypatch.setattr("voiceforge.core.metrics.log_response_cache", lambda hit: log_cache_events.append(hit))
     monkeypatch.setattr("voiceforge.llm.router._complete_structured_check_budget", lambda cfg: None)
     monkeypatch.setattr("voiceforge.llm.router.set_env_keys_from_keyring", lambda: None)
+    # Avoid real network check (e.g. toolbox/CI without reachable api.openai.com)
+    monkeypatch.setattr("voiceforge.core.preflight.check_network_for_llm", lambda _: None)
     monkeypatch.setattr("voiceforge.llm.router.wrap_completion", lambda fn: fn)
     monkeypatch.setattr(
         "voiceforge.llm.router._complete_structured_finish",

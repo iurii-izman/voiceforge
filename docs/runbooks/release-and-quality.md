@@ -6,7 +6,7 @@
 
 ## 1. Release runbook
 
-**Версии:** текущая alpha2-линия — Python package `0.2.0a2`; тег `v0.2.0-alpha.2`.
+**Версии:** текущая бета-линия — Python package `1.0.0b1`; тег `v1.0.0-beta.1`. Предыдущая альфа: `0.2.0a2` / `v0.2.0-alpha.2`.
 
 **Чеклист перед релизом:**
 1. `./scripts/verify_pr.sh` — OK

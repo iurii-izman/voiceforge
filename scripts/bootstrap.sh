@@ -17,7 +17,8 @@ if command -v pipewire >/dev/null 2>&1; then
   pipewire --version 2>/dev/null || true
 fi
 
-uv sync --extra all
+# Full runtime + dev deps (tests: hypothesis, etc.; fewer skips)
+uv sync --extra all --group dev
 
 # E8: optional model pre-download (skip with --skip-models)
 SKIP_MODELS=false

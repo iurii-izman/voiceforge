@@ -14,6 +14,7 @@ from __future__ import annotations
 import importlib
 import json
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -84,6 +85,12 @@ for module_name, hard in (
             warn(f"import optional: {module_name} unavailable ({exc})")
     else:
         ok(f"import: {module_name}")
+
+# Optional: FFmpeg for pyannote/torchcodec (avoids "libavutil.so not found" warning)
+if shutil.which("ffmpeg"):
+    ok("ffmpeg available (pyannote/torchcodec)")
+else:
+    warn("ffmpeg not found — pyannote may warn about torchcodec; install: sudo dnf install ffmpeg")
 
 status = subprocess.run(
     ["uv", "run", "voiceforge", "status", "--output", "json"],

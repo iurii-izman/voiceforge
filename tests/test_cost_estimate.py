@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
+import sys
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
 from typer.testing import CliRunner
+
+# Require litellm so tests run when [llm] extra is installed; skip module otherwise (e.g. plain uv run pytest).
+pytest.importorskip("litellm", reason="optional [llm] extra (litellm) not installed")
 
 import voiceforge.main as main_mod
 from voiceforge.llm.router import estimate_analyze_cost
@@ -20,12 +25,16 @@ def test_estimate_analyze_cost_empty_returns_zero() -> None:
 
 
 def test_estimate_analyze_cost_returns_float() -> None:
-    """estimate_analyze_cost returns a non-negative float (mock litellm)."""
+    """estimate_analyze_cost returns a non-negative float (fake litellm so test runs without optional llm dep)."""
+
+    def fake_token_counter(*, model: str, messages: list) -> int:
+        return 100
 
     def fake_cost_per_token(*, model: str, prompt_tokens: int, completion_tokens: int) -> tuple[float, float]:
         return (0.001, 0.002)
 
-    with patch("litellm.token_counter", return_value=100), patch("litellm.cost_per_token", side_effect=fake_cost_per_token):
+    fake_litellm = SimpleNamespace(token_counter=fake_token_counter, cost_per_token=fake_cost_per_token)
+    with patch.dict(sys.modules, {"litellm": fake_litellm}):
         cost = estimate_analyze_cost(
             "Hello world, this is a short transcript.",
             "anthropic/claude-3-5-haiku-20241022",

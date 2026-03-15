@@ -14,8 +14,12 @@ from voiceforge.cli.digest import (
 from voiceforge.core.transcript_log import TranscriptLog
 
 
-def test_build_daily_digest_empty(tmp_path) -> None:
+def test_build_daily_digest_empty(tmp_path, monkeypatch) -> None:
     """Empty DB yields digest with no sessions and zero cost."""
+    monkeypatch.setattr(
+        "voiceforge.cli.digest.get_cost_for_date",
+        lambda _day: 0.0,
+    )
     log = TranscriptLog(db_path=tmp_path / "d.db")
     try:
         day = date.today()

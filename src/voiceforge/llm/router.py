@@ -18,6 +18,7 @@ from voiceforge.llm.schemas import CopilotDeepCards, CopilotFastCards, CopilotRe
 log = structlog.get_logger()
 TModel = TypeVar("TModel", bound=BaseModel)
 _REASON_FILE_MISSING = "file missing"
+_LLM_PROMPT_FALLBACK_MSG = "Using fallback"  # Sonar S1192
 _LOG_LLM_OLLAMA_FALLBACK = "llm.ollama_fallback"
 _OLLAMA_MODEL_PREFIX = "ollama/"
 
@@ -429,7 +430,7 @@ def _copilot_fast_prompt(
     """Build messages for copilot fast-track (short token budget)."""
     system_text = load_prompt("copilot_fast")
     if not system_text or not system_text.strip():
-        log.warning("llm.copilot_fast_prompt_missing", message="Using fallback")
+        log.warning("llm.copilot_fast_prompt_missing", message=_LLM_PROMPT_FALLBACK_MSG)
         system_text = _COPILOT_FAST_SYSTEM_FALLBACK
     hint = f" (RAG: {rag_groundedness})" if rag_groundedness else ""
     user_content = f"Context (documents):\n{context[:2000] or '(none)'}\n\nTranscript:\n{transcript[:1500]}{hint}"
@@ -478,7 +479,7 @@ def _copilot_deep_prompt(transcript: str, context: str) -> list[dict[str, Any]]:
     """Build messages for copilot deep-track (short token budget)."""
     system_text = load_prompt("copilot_deep")
     if not system_text or not system_text.strip():
-        log.warning("llm.copilot_deep_prompt_missing", message="Using fallback")
+        log.warning("llm.copilot_deep_prompt_missing", message=_LLM_PROMPT_FALLBACK_MSG)
         system_text = _COPILOT_DEEP_SYSTEM_FALLBACK
     user_content = f"Context:\n{context[:2000] or '(none)'}\n\nTranscript:\n{transcript[:1500]}"
     return [
@@ -530,7 +531,7 @@ def _copilot_refine_prompt(
     """Build messages for KC12 on-demand refinement (deep / rewrite / tone)."""
     system_text = load_prompt("copilot_refine")
     if not system_text or not system_text.strip():
-        log.warning("llm.copilot_refine_prompt_missing", message="Using fallback")
+        log.warning("llm.copilot_refine_prompt_missing", message=_LLM_PROMPT_FALLBACK_MSG)
         system_text = _COPILOT_REFINE_FALLBACK
     mode_instruction = {
         "deep": "Expand the answer with more detail while keeping the same facts and sources.",

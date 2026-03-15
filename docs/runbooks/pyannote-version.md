@@ -2,6 +2,15 @@
 
 Источник истины для версии: `pyproject.toml` (зависимость `pyannote.audio`).
 
+## FFmpeg (torchcodec)
+
+pyannote.audio тянет torchcodec для декодирования аудио; torchcodec при импорте подгружает shared-библиотеки FFmpeg (libavutil, libavdevice и т.д.). Если в окружении их нет (например, минимальный toolbox), в логах и при `pytest` появляется предупреждение: «torchcodec is not installed correctly… libavutil.so.X: cannot open shared object file».
+
+**Что сделать:** установить FFmpeg в том окружении, где запускаются тесты или демон с диаризацией:
+
+- **Fedora / toolbox:** `sudo dnf install ffmpeg`
+- После установки предупреждение при импорте pyannote исчезает (если версия libavutil совпадает с той, под которую собран torchcodec).
+
 ## Текущая версия
 
 - **4.0.4** — зафиксирована в `pyproject.toml` (alpha2).

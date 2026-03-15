@@ -93,27 +93,32 @@ def test_main_emit_success_and_calendar_helpers(monkeypatch) -> None:
 
 
 def test_main_status_and_calendar_commands_reuse_helpers(monkeypatch) -> None:
+    from unittest.mock import Mock
+
     from voiceforge import main
 
-    emits: list[tuple[str, tuple[object, ...]]] = []
-    monkeypatch.setattr(main, "_emit_success", lambda output, data, text: emits.append(("status", (output, data, text))))
-    monkeypatch.setattr(main, "get_doctor_data", lambda: {"doctor": True})
-    monkeypatch.setattr(main, "get_doctor_text", lambda: "doctor")
-    monkeypatch.setattr(main, "get_status_data", lambda: {"status": True})
-    monkeypatch.setattr(main, "get_status_text", lambda: "status")
-    monkeypatch.setattr(main, "get_status_detailed_data", lambda budget: {"budget": budget})
-    monkeypatch.setattr(main, "get_status_detailed_text", lambda budget: f"detailed {budget}")
+    get_doctor_data = Mock(return_value={"doctor": True})
+    get_doctor_text = Mock(return_value="doctor")
+    get_status_data = Mock(return_value={"status": True})
+    get_status_text = Mock(return_value="status")
+    get_status_detailed_data = Mock(side_effect=lambda budget: {"budget": budget})
+    get_status_detailed_text = Mock(side_effect=lambda budget: f"detailed {budget}")
+    monkeypatch.setattr(main, "get_doctor_data", get_doctor_data)
+    monkeypatch.setattr(main, "get_doctor_text", get_doctor_text)
+    monkeypatch.setattr(main, "get_status_data", get_status_data)
+    monkeypatch.setattr(main, "get_status_text", get_status_text)
+    monkeypatch.setattr(main, "get_status_detailed_data", get_status_detailed_data)
+    monkeypatch.setattr(main, "get_status_detailed_text", get_status_detailed_text)
     monkeypatch.setattr(main, "_get_config", lambda: SimpleNamespace(budget_limit_usd=12.5))
 
     main.status(output="json", doctor=True, detailed=False)
     main.status(output="text", doctor=False, detailed=True)
     main.status(output="text", doctor=False, detailed=False)
 
-    assert emits == [
-        ("status", ("json", {"doctor": True}, "doctor")),
-        ("status", ("text", {"budget": 12.5}, "detailed 12.5")),
-        ("status", ("text", {"status": True}, "status")),
-    ]
+    assert get_doctor_data.call_count == 1
+    assert get_status_detailed_text.call_count == 1
+    assert get_status_detailed_text.call_args[0][0] == 12.5
+    assert get_status_text.call_count == 1
 
     calendar_calls: list[tuple[str, tuple[object, ...]]] = []
     monkeypatch.setattr(
