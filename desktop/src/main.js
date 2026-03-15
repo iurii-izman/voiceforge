@@ -222,6 +222,15 @@ const I18N = {
     rcp_fixing: "Выполняю…",
     rcp_fix_failed: "Ошибка исправления",
     rcp_recheck: "Проверить снова",
+    rcp_crash_notification_title: "Демон VoiceForge аварийно завершился",
+    rcp_crash_notification_body: "Фоновая служба остановилась неожиданно. Нажмите, чтобы перезапустить.",
+    rcp_crash_banner: "Демон аварийно завершился в {time}. [Перезапустить] [Логи] [Скрыть]",
+    rcp_crash_restart: "Перезапустить",
+    rcp_crash_view_logs: "Логи",
+    rcp_crash_dismiss: "Скрыть",
+    rcp_crash_recovered: "Демон восстановился автоматически после сбоя в {time}. [Логи]",
+    rcp_crash_many: "Демон падал {n} раз за последний час. Возможна проблема конфигурации. [Диагностика] [Логи] [Безопасный режим]",
+    rcp_crash_safe_mode: "Безопасный режим",
     sort_newest: "Сначала новые",
     sort_oldest: "Сначала старые",
     sort_duration_desc: "По длительности (↓)",
@@ -499,6 +508,15 @@ const I18N = {
     rcp_fixing: "Fixing…",
     rcp_fix_failed: "Fix failed",
     rcp_recheck: "Recheck",
+    rcp_crash_notification_title: "VoiceForge Daemon Crashed",
+    rcp_crash_notification_body: "The background service has stopped unexpectedly. Click to restart.",
+    rcp_crash_banner: "Daemon crashed unexpectedly at {time}. [Restart] [View Logs] [Dismiss]",
+    rcp_crash_restart: "Restart",
+    rcp_crash_view_logs: "View Logs",
+    rcp_crash_dismiss: "Dismiss",
+    rcp_crash_recovered: "Daemon recovered automatically after crash at {time}. [View Logs]",
+    rcp_crash_many: "Daemon has crashed {n} times in the last hour. This may indicate a configuration issue. [Run Diagnostics] [View Logs] [Safe Mode]",
+    rcp_crash_safe_mode: "Safe Mode",
     sort_newest: "Newest first",
     sort_oldest: "Oldest first",
     sort_duration_desc: "By duration (↓)",
@@ -704,6 +722,13 @@ let daemonState = {
   doctor: null,
   lastPing: 0,
   loading: false,
+  /** RCP-V2.4 (#201) crash notifications */
+  crashCount: 0,
+  lastCrashTime: null,
+  crashTimesInLastHour: [],
+  autoRecovered: false,
+  crashDismissed: false,
+  crashRecoveryTime: null,
 };
 /** RCP-V2.1: Logs panel state (entries, filters, line count). */
 let logsState = {
@@ -781,16 +806,39 @@ function setDaemonDependentControlsEnabled(enabled) {
 
 const PING_INTERVAL_MS = 5000;
 
+/** RCP-V2.4 (#201): send desktop notification on daemon crash */
+async function triggerCrashNotification() {
+  try {
+    let permission = await isPermissionGranted();
+    if (!permission) {
+      const result = await requestPermission();
+      permission = result === "granted";
+    }
+    if (permission) {
+      sendNotification({
+        title: t("rcp_crash_notification_title"),
+        body: t("rcp_crash_notification_body"),
+      });
+    }
+  } catch (_) {
+    // ignore notification errors
+  }
+}
+
 /** RCP-M3: fetch daemon status via Tauri command, update daemonState and UI */
 async function refreshDaemonState() {
   if (daemonState.loading) return;
   daemonState.loading = true;
+  const prevReachable = daemonState.reachable;
+  const prevUnitState = daemonState.unitState;
   try {
     const raw = await invoke("daemon_status");
     const data = typeof raw === "string" ? JSON.parse(raw) : raw;
-    daemonState.reachable = !!data.daemon_reachable;
+    const newReachable = !!data.daemon_reachable;
+    const newUnitState = String(data.unit_state || "unknown");
+    daemonState.reachable = newReachable;
     daemonState.unitInstalled = !!data.unit_installed;
-    daemonState.unitState = String(data.unit_state || "unknown");
+    daemonState.unitState = newUnitState;
     daemonState.lastPing = Date.now();
     let details = null;
     if (data.details && typeof data.details === "string") {
@@ -802,20 +850,40 @@ async function refreshDaemonState() {
       }
     }
     daemonState.details = details;
+
+    /** RCP-V2.4 (#201): detect crash — was running via systemd, now failed (not intentional stop) */
+    const isCrash = prevReachable && !newReachable && newUnitState === "failed" && prevUnitState === "active";
+    if (isCrash) {
+      daemonState.lastCrashTime = Date.now();
+      daemonState.crashTimesInLastHour = (daemonState.crashTimesInLastHour || []).filter((ts) => Date.now() - ts < 3600000);
+      daemonState.crashTimesInLastHour.push(daemonState.lastCrashTime);
+      daemonState.crashCount = daemonState.crashTimesInLastHour.length;
+      daemonState.autoRecovered = false;
+      daemonState.crashDismissed = false;
+      daemonState.crashRecoveryTime = null;
+      triggerCrashNotification();
+    }
+
     if (daemonState.reachable) {
       failedPingCount = 0;
+      if (daemonState.lastCrashTime != null) {
+        daemonState.autoRecovered = true;
+        daemonState.crashRecoveryTime = Date.now();
+      }
       setDaemonOk();
     } else {
       failedPingCount += 1;
       setDaemonOff(t("rcp_daemon_offline"));
     }
     updateDaemonStatusDot();
+    updateDaemonOffBannerContent();
     updateDaemonOffBannerVisibility();
   } catch (e) {
     failedPingCount += 1;
     daemonState.reachable = false;
     setDaemonOff(e?.message || t("rcp_daemon_offline"));
     updateDaemonStatusDot();
+    updateDaemonOffBannerContent();
     updateDaemonOffBannerVisibility();
   } finally {
     daemonState.loading = false;
@@ -850,11 +918,71 @@ function updateDaemonStatusDot() {
   dot.setAttribute("aria-label", title);
 }
 
+/** RCP-V2.4 (#201): format time for crash banner HH:MM:SS */
+function formatCrashTime(ts) {
+  if (ts == null) return "—";
+  const d = new Date(ts);
+  const h = d.getHours().toString().padStart(2, "0");
+  const m = d.getMinutes().toString().padStart(2, "0");
+  const s = d.getSeconds().toString().padStart(2, "0");
+  return `${h}:${m}:${s}`;
+}
+
+/** RCP-V2.4 (#201): update banner content (crash / recovered / crash_many / offline) */
+function updateDaemonOffBannerContent() {
+  const banner = document.getElementById("daemon-off-banner");
+  if (!banner) return;
+  const textEl = document.getElementById("daemon-off-banner-text");
+  const reachable = daemonState.reachable;
+  const lastCrash = daemonState.lastCrashTime;
+  const dismissed = daemonState.crashDismissed;
+  const autoRecovered = daemonState.autoRecovered;
+  const recoveryTime = daemonState.crashRecoveryTime;
+  const crashCount = daemonState.crashCount || 0;
+
+  let mode = "offline";
+  if (reachable && autoRecovered && recoveryTime) mode = "recovered";
+  else if (!reachable && lastCrash && !dismissed && crashCount >= 3) mode = "crash_many";
+  else if (!reachable && lastCrash && !dismissed) mode = "crash";
+  else if (!reachable && failedPingCount >= 2) mode = "offline";
+
+  let label = "";
+  let buttonsHtml = "";
+  if (mode === "recovered") {
+    label = t("rcp_crash_recovered").replace("{time}", formatCrashTime(lastCrash));
+    buttonsHtml = `<button type="button" class="btn small primary" data-action="view-logs">${escapeHtml(t("rcp_crash_view_logs"))}</button>`;
+  } else if (mode === "crash_many") {
+    label = t("rcp_crash_many").replace("{n}", String(crashCount));
+    buttonsHtml = `<button type="button" class="btn small primary" data-action="run-diagnostics">${escapeHtml(t("rcp_system_run_diag"))}</button><button type="button" class="btn small" data-action="view-logs">${escapeHtml(t("rcp_crash_view_logs"))}</button><button type="button" class="btn small" data-action="safe-mode">${escapeHtml(t("rcp_crash_safe_mode"))}</button>`;
+  } else if (mode === "crash") {
+    label = t("rcp_crash_banner").replace("{time}", formatCrashTime(lastCrash));
+    buttonsHtml = `<button type="button" class="btn small primary" data-action="restart">${escapeHtml(t("rcp_crash_restart"))}</button><button type="button" class="btn small" data-action="view-logs">${escapeHtml(t("rcp_crash_view_logs"))}</button><button type="button" class="btn small" data-action="dismiss">${escapeHtml(t("rcp_crash_dismiss"))}</button>`;
+  } else {
+    label = t("rcp_daemon_offline");
+    buttonsHtml = `<button type="button" class="btn small primary" id="daemon-off-banner-start" data-action="start">${escapeHtml(t("rcp_banner_start"))}</button><button type="button" class="btn small" id="daemon-off-banner-details" data-action="details">${escapeHtml(t("rcp_banner_details"))}</button><button type="button" class="btn small" id="daemon-retry-btn" data-action="retry">${escapeHtml(t("daemon_retry_btn"))}</button>`;
+  }
+
+  banner.innerHTML = `<span id="daemon-off-banner-text">${escapeHtml(label)}</span><div class="daemon-off-banner-actions" style="display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center">${buttonsHtml}</div>`;
+}
+
 function updateDaemonOffBannerVisibility() {
   const banner = document.getElementById("daemon-off-banner");
   if (!banner) return;
-  const show = !firstRunDialogOpen && !daemonState.reachable && failedPingCount >= 2;
+  const reachable = daemonState.reachable;
+  const lastCrash = daemonState.lastCrashTime;
+  const dismissed = daemonState.crashDismissed;
+  const autoRecovered = daemonState.autoRecovered;
+  const recoveryTime = daemonState.crashRecoveryTime;
+  const showRecovered = reachable && autoRecovered && recoveryTime;
+  const showCrash = !reachable && lastCrash && !dismissed;
+  const showOffline = !reachable && failedPingCount >= 2 && (!lastCrash || dismissed);
+  const show = !firstRunDialogOpen && (showRecovered || showCrash || showOffline);
   banner.style.display = show ? "flex" : "none";
+  if (show) {
+    banner.classList.toggle("daemon-off-banner-recovered", showRecovered);
+  } else {
+    banner.classList.remove("daemon-off-banner-recovered");
+  }
 }
 
 const FIRST_RUN_SKIP_SESSION_KEY = "voiceforge_first_run_skip_session";
@@ -1173,6 +1301,58 @@ document.getElementById("daemon-off-banner-start")?.addEventListener("click", as
 });
 document.getElementById("daemon-off-banner-details")?.addEventListener("click", () => {
   openSettingsToSystem();
+});
+/** RCP-V2.4 (#201): delegated handler for crash/offline banner buttons (content is replaced dynamically) */
+document.getElementById("daemon-off-banner")?.addEventListener("click", async (e) => {
+  const btn = e.target.closest("button[data-action]");
+  if (!btn) return;
+  const action = btn.dataset.action;
+  if (action === "start") {
+    try {
+      await invoke("daemon_start");
+      await refreshDaemonState();
+      if (daemonOk) await refreshAfterDaemonRecovery();
+    } catch (err) {
+      console.debug("daemon_start failed", err);
+    }
+    return;
+  }
+  if (action === "details" || action === "view-logs") {
+    if (action === "view-logs" && daemonState.autoRecovered) {
+      daemonState.autoRecovered = false;
+      daemonState.crashRecoveryTime = null;
+      updateDaemonOffBannerContent();
+      updateDaemonOffBannerVisibility();
+    }
+    openSettingsToSystem();
+    return;
+  }
+  if (action === "retry") {
+    btn.disabled = true;
+    await checkDaemon();
+    if (daemonOk) await refreshAfterDaemonRecovery();
+    btn.disabled = false;
+    return;
+  }
+  if (action === "restart") {
+    try {
+      await invoke("daemon_restart");
+      await refreshDaemonState();
+      if (daemonOk) await refreshAfterDaemonRecovery();
+    } catch (err) {
+      console.debug("daemon_restart failed", err);
+    }
+    return;
+  }
+  if (action === "dismiss") {
+    daemonState.crashDismissed = true;
+    updateDaemonOffBannerContent();
+    updateDaemonOffBannerVisibility();
+    return;
+  }
+  if (action === "run-diagnostics" || action === "safe-mode") {
+    openSettingsToSystem();
+  }
 });
 document.getElementById("daemon-status-dot")?.addEventListener("click", () => {
   openSettingsToSystem();
