@@ -1,62 +1,68 @@
-# Документация VoiceForge (alpha)
+# VoiceForge documentation
 
-Единая точка входа. Структура по смыслу, без дублирования. **Индекс и актуальность:** [DOCS-INDEX.md](DOCS-INDEX.md).
+Single entry point for all docs. **Index and freshness:** [DOCS-INDEX.md](DOCS-INDEX.md).
 
-**English:** [en/README.md](en/README.md) — first meeting, installation, quickstart, runbooks (EN).
-
----
-
-## Старт
-
-| Кому | Документ |
-|------|----------|
-| **Пользователь: первая встреча** | [first-meeting-5min.md](first-meeting-5min.md) — полный сценарий за 5 минут |
-| **Краткий сценарий** | [runbooks/quickstart.md](runbooks/quickstart.md) — линейные шаги + ссылка на полную версию |
-| **Агент (Cursor/Codex/Claude)** | [runbooks/agent-context.md](runbooks/agent-context.md) — контекст, правила, keyring, чеклист конца сессии (тесты, коммит, пуш); [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md) — следующий шаг; [runbooks/phase-e-decision-log.md](runbooks/phase-e-decision-log.md) — зафиксированные границы scope для Phase E; [runbooks/ai-tooling-setup.md](runbooks/ai-tooling-setup.md) — где источник истины для AI tooling и локальных assistant configs. Правило автопилота: `.cursor/rules/agent-session-handoff.mdc` |
+**English:** [en/README.md](en/README.md) — first meeting, installation, quickstart (EN).
 
 ---
 
-## Архитектура
+## Start
 
-- [architecture/overview.md](architecture/overview.md) — пайплайн, модули, runtime flow (mermaid)
-- [architecture/voiceforge-arch.jsx](architecture/voiceforge-arch.jsx) — интерактивный визуал (нужен React)
-- [architecture/README.md](architecture/README.md) — что где лежит
-
----
-
-## План и приоритеты
-
-- [plans.md](plans.md) — планы, приоритет фич (roadmap 1–19), что сделано, текущие задачи
-- [audit/audit.md](audit/audit.md) — аудит: статус W1–W20, Phase A–D (#55–73), оставшееся до 100%
-- [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md) — фокус следующей итерации (обновляет агент)
-- [runbooks/phase-e-decision-log.md](runbooks/phase-e-decision-log.md) — решения по E19-E21; primary surface = Tauri, maintenance-only surfaces = Web UI / Telegram / RAG watcher
-- Выполненные планы и архив: [archive/README.md](archive/README.md), [DOCS-INDEX.md](DOCS-INDEX.md)
+| For whom | Document |
+| -------- | -------- |
+| **First run (5 min)** | [first-meeting-5min.md](first-meeting-5min.md) |
+| **Short scenario** | [runbooks/quickstart.md](runbooks/quickstart.md) |
+| **Install & toolbox** | [runbooks/installation-guide.md](runbooks/installation-guide.md) |
+| **Rebuild & test (toolbox)** | [runbooks/rebuild-run-test-guide.md](runbooks/rebuild-run-test-guide.md) |
+| **Agent (Cursor/Claude)** | [runbooks/agent-context.md](runbooks/agent-context.md), [runbooks/next-iteration-focus.md](runbooks/next-iteration-focus.md) |
 
 ---
 
-## Runbooks
+## Product & architecture
 
-Операционные инструкции и справочники — [runbooks/README.md](runbooks/README.md). Полный список и статусы — [DOCS-INDEX.md](DOCS-INDEX.md). Кратко:
-
-- **Контекст и агент:** agent-context, next-iteration-focus, cursor, voiceforge-cursor-tz (заглушка)
-- **AI tooling и автопилот:** ai-tooling-setup, phase-e-decision-log
-- **Конфиг и среда:** config-env-contract, keyring-keys-reference, bootstrap, installation-guide, desktop-build-deps
-- **Безопасность и зависимости:** security-and-dependencies, security-decision-log
-- **Фичи:** telegram-bot-setup (ADR-0005), pyannote-version
-- **Релизы и качество:** release-and-quality (релиз, откат, чеклисты альфа, DoD), `./scripts/preflight_repo.sh`
-- **Остальное:** quickstart, repo-governance, test-operations, web-api
+- **Knowledge Copilot (product/arch):** [voiceforge-copilot-architecture.md](voiceforge-copilot-architecture.md)
+- **Program map (traceability):** [runbooks/copilot-program-map.md](runbooks/copilot-program-map.md)
+- **Technical architecture:** [architecture/README.md](architecture/README.md), [architecture/overview.md](architecture/overview.md)
 
 ---
 
-## Десктоп (Tauri)
+## Config & keys
 
-- Сборка в toolbox: [runbooks/desktop-build-deps.md](runbooks/desktop-build-deps.md); скрипт `./scripts/setup-desktop-toolbox.sh`, затем `cd desktop && npm run tauri build`
-- Перед запуском десктопа обязательно: **voiceforge daemon**
-- Полный гайд установки и запуска (хост/toolbox, ребилд, демон, обновление): [runbooks/installation-guide.md](runbooks/installation-guide.md)
-- План реализации десктопа выполнен; история — [archive/plans/desktop-tauri-implementation-plan.md](archive/plans/desktop-tauri-implementation-plan.md)
+- [runbooks/config-env-contract.md](runbooks/config-env-contract.md) — env, config file, D-Bus
+- [runbooks/keyring-keys-reference.md](runbooks/keyring-keys-reference.md) — keyring keys (anthropic, openai, etc.)
+
+---
+
+## Desktop (Tauri)
+
+- **Build (toolbox):** [runbooks/desktop-build-deps.md](runbooks/desktop-build-deps.md), `./scripts/setup-desktop-toolbox.sh`
+- **Install & run:** [runbooks/installation-guide.md](runbooks/installation-guide.md)
+- **Rebuild & test:** [runbooks/rebuild-run-test-guide.md](runbooks/rebuild-run-test-guide.md)
+- Before running desktop: start **voiceforge daemon**
+
+---
+
+## Runbooks (full list)
+
+Operational guides — [runbooks/README.md](runbooks/README.md). Full catalog: [DOCS-INDEX.md](DOCS-INDEX.md).
+
+- **Context & agent:** agent-context, next-iteration-focus, cursor, ai-tooling-setup
+- **Config & env:** config-env-contract, keyring-keys-reference, bootstrap, installation-guide, desktop-build-deps
+- **Security & deps:** security-and-dependencies, security-decision-log
+- **Release & quality:** release-and-quality, repo-and-git-governance
+- **Features:** telegram-bot-setup, pyannote-version, calendar-integration, rag-formats
+
+---
+
+## Plans & status
+
+- [plans.md](plans.md) — roadmap, Phase A–D
+- [runbooks/PROJECT-STATUS-SUMMARY.md](runbooks/PROJECT-STATUS-SUMMARY.md) — status, Copilot program, hardening
+- [audit/audit.md](audit/audit.md) — audit snapshot
+- Archive: [archive/README.md](archive/README.md)
 
 ---
 
 ## ADR
 
-Решения по архитектуре и процессу — [adr/README.md](adr/README.md). Активные: 0001 (core scope), 0002 (action items), 0003 (version reset), 0004 (desktop Tauri D-Bus), 0005 (Telegram-бот через voiceforge web).
+Architecture decisions: [adr/README.md](adr/README.md). Active: 0001 (core scope), 0002 (action items), 0003 (version reset), 0004 (desktop Tauri D-Bus), 0005 (Telegram bot).

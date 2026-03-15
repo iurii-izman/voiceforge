@@ -1,45 +1,40 @@
-# Contributing (Lite)
+# Contributing to VoiceForge
 
-VoiceForge keeps a focused alpha scope (currently 0.2). Changes must stay minimal, testable, and reversible.
+VoiceForge is a local-first assistant for audio meetings (CLI + Tauri desktop). We keep changes minimal, testable, and reversible. Current line: **1.0.0-beta.1**.
 
 ## Branches
 
-1. Never work directly on `main`.
-2. Use short-lived branches: `feat/...`, `fix/...`, `chore/...`, `docs/...`.
-3. Direct pushes to `main` are prohibited by policy (enforced via GitHub ruleset + local pre-push hook).
+- Do not work directly on `main`.
+- Use short-lived branches: `feat/...`, `fix/...`, `chore/...`, `docs/...`.
+- Direct pushes to `main` are blocked by repo rules and pre-push hook.
 
 ## Commits
 
-1. Keep commits focused and small.
-2. Preferred format: `type(scope): summary` (for example `fix(cli): keep history json stable`).
-3. Include docs/tests in the same commit when behavior changes.
+- Use [Conventional Commits](https://www.conventionalcommits.org/): `type(scope): summary`.
+- Examples: `feat(desktop): overlay position`, `fix(cli): history json stability`, `docs(runbooks): update quickstart`.
+- Include docs/tests in the same commit when behavior changes.
+- Link issues: `Closes #123` or `Refs #124` in body when relevant.
 
-## Pull Requests
+## Pull requests
 
-1. Fill PR template fully.
-2. Required before review:
-   - `./scripts/verify_pr.sh`
-   - `./scripts/smoke_clean_env.sh`
-3. If CLI contract, DB schema, config/env contract, or release process changed, update docs and `CHANGELOG.md`.
+- Fill the [PR template](.github/pull_request_template.md).
+- Before requesting review, run:
+  - `./scripts/verify_pr.sh`
+  - `./scripts/smoke_clean_env.sh`
+- If you change CLI surface, DB schema, config/env, or release process, update the relevant docs and `CHANGELOG.md`.
 
-## CLI Contract Guardrails
+## CLI and contracts
 
-Keep the frozen set of public CLI commands (see ADR-0001); currently 9:
+- Public CLI commands are part of the supported contract. See tests and [config-env-contract](docs/runbooks/config-env-contract.md) for the current set (e.g. `voiceforge --help`).
+- Any new or removed CLI command needs explicit approval and doc update.
 
-- `listen`
-- `analyze`
-- `status`
-- `history`
-- `index`
-- `watch`
-- `daemon`
-- `install-service`
-- `uninstall-service`
+## Security
 
-Any CLI surface change requires explicit approval and a contract update.
+- Do not commit secrets. Use system keyring only; see [keyring-keys-reference](docs/runbooks/keyring-keys-reference.md).
+- Run `./scripts/verify_pr.sh` (includes gitleaks, bandit, etc.).
+- Security policy: [SECURITY.md](SECURITY.md). Dependencies and alerts: [security-and-dependencies](docs/runbooks/security-and-dependencies.md).
 
-## Security Basics
+## Docs and runbooks
 
-1. Do not commit secrets.
-2. Keep credentials in keyring only.
-3. Run security checks from `./scripts/verify_pr.sh`.
+- Single source for “what doc to read”: [docs/DOCS-INDEX.md](docs/DOCS-INDEX.md).
+- When adding or changing behavior, update the matching runbook and DOCS-INDEX if needed.
