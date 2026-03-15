@@ -5,14 +5,22 @@
 
 ---
 
-## 0. Подготовка: как запустить для проверки
+## 0. Подготовка: как запустить для проверки (в toolbox)
 
-**Нужно ли пересобирать и запускать из бинарника?** Для полноценного sign-off **рекомендуется** запустить собранное приложение (как у пользователя): пересборка → запуск из бинарника. Для быстрой проверки достаточно `npm run tauri dev`.
+Все команды ниже — **внутри toolbox** (путь к репо: `/var/home/user/Projects/voiceforge`). Демон и десктоп должны работать в **одном и том же** toolbox.
 
-| Вариант | Когда использовать | Команды |
-|--------|---------------------|--------|
-| **Из бинарника (рекомендуется)** | Итоговая проверка overlay: позиция, размер, анимации в release-сборке | 1) Демон: `uv run voiceforge daemon` (отдельный терминал). 2) Сборка: `cd desktop && npm run build && npm run tauri build`. 3) Запуск: `desktop/src-tauri/target/release/voiceforge` или из `target/release/bundle/` (AppImage / установленный .deb). |
-| **Dev-режим** | Быстрая итерация, проверка что overlay вообще появляется | Демон: `uv run voiceforge daemon`. Десктоп: `cd desktop && npm run tauri dev`. |
+**Нужно ли пересобирать и запускать из бинарника?** Для итогового sign-off **рекомендуется** запустить собранное приложение (как у пользователя). Для быстрой проверки достаточно `npm run tauri dev`.
+
+| Вариант | Когда использовать | Команды (всё в toolbox) |
+|--------|---------------------|--------------------------|
+| **Из бинарника (рекомендуется)** | Итоговая проверка overlay: позиция, размер, анимации в release-сборке | **Терминал 1:** `toolbox enter` → `cd /var/home/user/Projects/voiceforge` → `uv run voiceforge daemon`. **Терминал 2:** `toolbox enter` → `cd /var/home/user/Projects/voiceforge/desktop` → `npm run build && npm run tauri build` → запуск: `/var/home/user/Projects/voiceforge/desktop/src-tauri/target/release/voiceforge-desktop` (или установленный из `bundle/deb/` пакет — команда `voiceforge-desktop`). |
+| **Dev-режим** | Быстрая проверка, что overlay появляется | **Терминал 1:** `toolbox enter` → `cd /var/home/user/Projects/voiceforge` → `uv run voiceforge daemon`. **Терминал 2:** `toolbox enter` → `cd /var/home/user/Projects/voiceforge/desktop` → `npm run tauri dev`. |
+
+**Пути в вашей системе (toolbox):**
+
+- Корень репо: `/var/home/user/Projects/voiceforge`
+- Бинарник после сборки: `/var/home/user/Projects/voiceforge/desktop/src-tauri/target/release/voiceforge-desktop`
+- Пакеты: `desktop/src-tauri/target/release/bundle/deb/`, `bundle/rpm/` — после установки приложение запускается как `voiceforge-desktop`
 
 Полная последовательность пересборки и тестов: [rebuild-run-test-guide.md](rebuild-run-test-guide.md).
 
@@ -45,7 +53,7 @@
 
 ## 5. Как закрыть KV2
 
-1. Запустите desktop-приложение, откройте overlay (push-to-capture или через меню).
+1. Запустите desktop-приложение в toolbox, откройте overlay (push-to-capture или через меню).
 2. Пройдите пункты 1–4 выше и отметьте галочки.
 3. В [issue #188](https://github.com/iurii-izman/voiceforge/issues/188) оставьте комментарий: «Sign-off пройден по [kv2-overlay-signoff-checklist.md](kv2-overlay-signoff-checklist.md)» или перечислите требуемые правки.
 4. Закройте issue #188 (или оставьте открытым до внесения правок).
