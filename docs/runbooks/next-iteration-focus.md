@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии**. Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-15 (KV2 чеклист + путь закрытия; release scripts OK)
+**Обновлено:** 2026-03-15 (после перезагрузки: закоммичены KV2 toolbox, rebuild-run-test-guide, ADR 0007, audit runbook)
 
 ---
 
@@ -25,7 +25,7 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** KV2/KV3/KV4: подготовлены runbooks для всех трёх мануальных гейтов. Добавлен [kv4-business-packaging-decisions.md](kv4-business-packaging-decisions.md) (чеклист решений по лицензии, дистрибуции, монетизации); в [kv3-pilot-scenario-template.md](kv3-pilot-scenario-template.md) — раздел «Как закрыть KV3»; в [copilot-program-map.md](copilot-program-map.md) и [what-user-must-do.md](what-user-must-do.md) — явные ссылки на runbooks KV2–KV4; DOCS-INDEX дополнен записью по KV4.
+**Сделано в сессии:** После перезагрузки: закоммичены и запушены отложенные изменения — KV2 чеклист с путями toolbox и бинарником voiceforge-desktop; [rebuild-run-test-guide.md](rebuild-run-test-guide.md) (полный гайд под toolbox); ADR 0007 (RCP systemctl/D-Bus); [audit-vs-code-2026-03.md](audit-vs-code-2026-03.md). Ранее: runbooks KV2/KV3/KV4, kv4-business-packaging-decisions, github assets + checklist.
 
 **Следующий шаг:** KV2/KV3/KV4: все три гейта имеют готовые runbooks (чеклист KV2, шаблон пилота KV3, список решений KV4). По желанию: пройти чеклисты и закрыть #188, #189, #190; или выполнить полный чеклист релиза по [release-and-quality.md](release-and-quality.md). Hardening #164/#165 — по приоритету.
 
