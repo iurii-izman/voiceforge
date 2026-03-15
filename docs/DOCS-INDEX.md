@@ -2,7 +2,7 @@
 
 **Назначение:** один источник правды по тому, какой документ за что отвечает и актуален ли он. При изменении кода/фич обновлять соответствующий док и при необходимости этот индекс.
 
-**Обновлено:** 2026-03-13 (Knowledge Copilot program bootstrapped; copilot architecture + program map promoted to source-of-truth docs)
+**Обновлено:** 2026-03-14 (rebuild-run-test-guide: полный стек тестов, e2e:ui; DOCS-INDEX sync)
 
 ---
 
@@ -117,7 +117,7 @@
 | doc-governance.md                                             | Порядок в доках: архив, источники правды, после итерации                                | Актуален                         |
 | ai-tooling-setup.md                                           | Source of truth для Cursor / Codex / Claude / Sonar / GitHub CLI; tracked vs local setup | Актуален                         |
 | config-env-contract.md, keyring-keys-reference.md             | Конфиг и ключи                                                                          | Актуален                         |
-| installation-guide.md, desktop-build-deps.md, bootstrap.md    | Установка и сборка                                                                      | Актуален                         |
+| installation-guide.md, desktop-build-deps.md, bootstrap.md, **rebuild-run-test-guide.md** | Установка, сборка; **пошаговый гайд: пересборка, запуск, тесты**                          | Актуален                         |
 | desktop-gui-testing.md                                        | Тестирование GUI десктопа: mocked autopilot, native smoke, a11y, visual regression      | Актуален                         |
 | desktop-qa-plan.md                                            | Единый desktop QA plan: blocking gate, advisory native smoke, ручной UX checklist       | Актуален                         |
 | desktop-release-gate-matrix.md                                | Release gate matrix для desktop: automated vs native vs manual proof                    | Актуален                         |
@@ -129,6 +129,7 @@
 | kv3-pilot-scenario-template.md                               | KV3: шаблон сценария пилотной сессии с primary persona                                  | Актуален                         |
 | reflective-summary-2026-03.md                                 | Рефлексия по проекту и совместной работе (сильные/слабые стороны, улучшения)             | Актуален                         |
 | quickstart.md                                                 | Краткий сценарий; полная версия — first-meeting-5min                                    | Актуален                         |
+| rebuild-run-test-guide.md                                     | Пошаговый гайд: пересборка приложения, запуск демона и десктопа, тесты (pytest + e2e)   | Актуален                         |
 | cli-commands-and-run.md                                       | Все CLI-команды, когда пересобирать, как запускать демон и полный стек (toolbox)        | Актуален                         |
 | planning.md                                                   | Канбан, GitHub Project, batching policy; live execution order брать из next-iteration-focus и PROJECT-STATUS-SUMMARY | Актуален                         |
 | security-and-dependencies.md                                  | Безопасность, зависимости, Dependabot (объединённый runbook)                            | Актуален                         |

@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии**. Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-15 (RCP queue: выполнен #204, следующий #205)
+**Обновлено:** 2026-03-15 (RCP epic #193 завершён: #205 evaluation doc, эпик закрыт)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** **RCP-V3.2 (#203):** Rollback mechanism — versioning.rs (metadata in app_data_dir/versions), pre-update backup in install_update, get_version_info/rollback_version commands, Version section UI (current/previous, Rollback button, confirm, restart prompt).
+**Сделано в сессии:** **RCP #205 + эпик #193:** Multi-process evaluation — ADR-0008 (recommendation: no split at current scale; triggers to re-evaluate; plan if split later). Issue #205 и эпик #193 закрыты.
 
-**Следующий шаг:** RCP epic #193. Выполнен блок #203. Следующий: **#204** — RCP-V3.3 Safe mode daemon. Запустить агент с промптом из `.cursor/rules/rcp-queue.mdc`.
+**Следующий шаг:** RCP эпик #193 полностью выполнен. Дальше — по приоритетам из copilot-program-map / next-iteration-focus (Knowledge Copilot, hardening, прочее).
 
 ---
 
