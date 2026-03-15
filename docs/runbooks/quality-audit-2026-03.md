@@ -120,3 +120,8 @@ uv run pip-audit --desc
 3. **Re-analysis:** после любого исправления — push в main, дождаться прохода SonarCloud job; при необходимости проверить: `./scripts/check_sonar_status.sh`.
 
 4. **Закрыть #165:** когда критические/блокирующие устранены или осознанно приняты и задокументированы.
+
+**Triage 2026-03-15 (автопилот):**
+
+- **Исправлено:** BLOCKER S2083 `write_update_json.py` — ограничение пути вывода репозиторием (no path from user-controlled data). CRITICAL S1192 `daemon.py` — константы для дублирующихся display_name (Python/CLI, PipeWire, STT, Disk space, API keys, RAG index, PID file, Transcript DB, Audio permissions). S2583 `daemon.py` — убраны условия, всегда true (message: err_msg/warn_msg). S7682 `run_desktop_native_smoke.sh` — явный exit в конце.
+- **Принято (остаток):** S3776 (cognitive complexity) в main.py, daemon.py, config.py, preflight.py, copilot-overlay.js, main.js — рефакторинг без смены поведения вынесен в отдельные итерации. S7924/S6819 (contrast, a11y) — решения по дизайну/устройству (см. what-user-must-do). S6582/S3358/S2486 и прочие desktop/main.js — батчами в следующих сессиях или приняты. S1244 (float equality) в тестах — оставлены для явных порогов. S2083/S1192/S2583/S7682 закрыты в коде.

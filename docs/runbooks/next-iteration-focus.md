@@ -2,7 +2,7 @@
 
 Файл обновляется **агентом в конце каждой сессии**. Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-15 (post-RCP #193: doc #165 triage, next = hardening/quality)
+**Обновлено:** 2026-03-15 (#165 triage: BLOCKER/CRITICAL исправлены, остаток задокументирован)
 
 ---
 
@@ -17,9 +17,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** Подтверждён переход после RCP #193. Добавлен чеклист residual triage для #165 в [quality-audit-2026-03.md](quality-audit-2026-03.md) §7 и ссылка в [pre-beta-sonar-github.md](pre-beta-sonar-github.md). Целевые тесты (router, cost, daily_report) — зелёные.
+**Сделано в сессии:** Residual triage #165: исправлены S2083 (write_update_json — путь только внутри репо), S1192 (daemon.py — константы для display_name), S2583 (daemon — условия), S7682 (run_desktop_native_smoke.sh — явный exit). Итог triage в [quality-audit-2026-03.md](quality-audit-2026-03.md) §7. Тесты daemon/router — зелёные.
 
-**Следующий шаг:** Взять **#165 (Sonar Sweep)** — выполнить residual triage: `uv run python scripts/sonar_fetch_issues.py` (keyring `voiceforge`/`sonar_token`), по списку: исправить или зафиксировать «принято» в issue; при необходимости точечные правки. После этого — #164 (glib) или KV2/релиз по приоритету.
+**Следующий шаг:** После push — дождаться SonarCloud re-analysis; при желании закрыть #165 (residual принят, см. runbook). Дальше — #164 (glib) или KV2/релиз по приоритету.
 
 ---
 

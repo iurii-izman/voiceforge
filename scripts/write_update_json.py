@@ -66,9 +66,20 @@ def main() -> int:
         },
     }
 
+    # S2083: do not write to user-controlled absolute path; restrict to repo
     out_path = Path(args.output) if args.output else UPDATES_JSON
-    if not out_path.is_absolute():
-        out_path = REPO_ROOT / out_path
+    if out_path.is_absolute():
+        out_path = out_path.resolve()
+        if REPO_ROOT not in out_path.parents and out_path != REPO_ROOT:
+            print("Output path must be inside repo root", file=sys.stderr)
+            return 1
+    else:
+        out_path = (REPO_ROOT / out_path).resolve()
+        try:
+            out_path.relative_to(REPO_ROOT.resolve())
+        except ValueError:
+            print("Output path escapes repo root", file=sys.stderr)
+            return 1
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     print(f"Wrote {out_path}")

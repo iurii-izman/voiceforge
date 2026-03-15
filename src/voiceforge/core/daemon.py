@@ -39,6 +39,17 @@ PID_FILE_NAME = "voiceforge.pid"
 _ANALYZE_ERROR_PREFIX_RU = "Ошибка:"
 _ANALYZE_ERROR_PREFIX_EN = "Error:"
 
+# Sonar S1192: doctor check display names (duplicated literals)
+_DISPLAY_PYTHON_CLI = "Python / CLI"
+_DISPLAY_PIPEWIRE = "PipeWire Audio"
+_DISPLAY_STT_WHISPER = "STT model (Whisper)"
+_DISPLAY_AUDIO_PERMS = "Audio permissions"
+_DISPLAY_DISK_SPACE = "Disk space"
+_DISPLAY_API_KEYS = "API keys (keyring)"
+_DISPLAY_RAG_INDEX = "RAG index"
+_DISPLAY_PID_FILE = "PID file"
+_DISPLAY_TRANSCRIPT_DB = "Transcript DB"
+
 # E5 #128: systemd watchdog — send status via NOTIFY_SOCKET (no extra dependency)
 _WATCHDOG_INTERVAL_SEC = 30
 
@@ -384,7 +395,7 @@ class VoiceForgeDaemon:
             if vf:
                 return {
                     "name": "python_env",
-                    "display_name": "Python / CLI",
+                    "display_name": _DISPLAY_PYTHON_CLI,
                     "status": "ok",
                     "severity": "critical",
                     "message": f"voiceforge at {vf}",
@@ -393,7 +404,7 @@ class VoiceForgeDaemon:
                 }
             return {
                 "name": "python_env",
-                "display_name": "Python / CLI",
+                "display_name": _DISPLAY_PYTHON_CLI,
                 "status": "missing",
                 "severity": "critical",
                 "message": "voiceforge not found in PATH",
@@ -417,7 +428,7 @@ class VoiceForgeDaemon:
             if err is None:
                 return {
                     "name": "pipewire",
-                    "display_name": "PipeWire Audio",
+                    "display_name": _DISPLAY_PIPEWIRE,
                     "status": "ok",
                     "severity": "high",
                     "message": "PipeWire capture available",
@@ -437,7 +448,7 @@ class VoiceForgeDaemon:
                 detail = err
             return {
                 "name": "pipewire",
-                "display_name": "PipeWire Audio",
+                "display_name": _DISPLAY_PIPEWIRE,
                 "status": "missing" if "not" in (detail or "").lower() or "error" in (detail or "").lower() else "error",
                 "severity": "high",
                 "message": detail or "PipeWire check failed",
@@ -463,7 +474,7 @@ class VoiceForgeDaemon:
             if has_whisper:
                 return {
                     "name": "stt_model",
-                    "display_name": "STT model (Whisper)",
+                    "display_name": _DISPLAY_STT_WHISPER,
                     "status": "ok",
                     "severity": "high",
                     "message": f"Model '{model_size}' cached",
@@ -472,7 +483,7 @@ class VoiceForgeDaemon:
                 }
             return {
                 "name": "stt_model",
-                "display_name": "STT model (Whisper)",
+                "display_name": _DISPLAY_STT_WHISPER,
                 "status": "missing",
                 "severity": "high",
                 "message": f"Model '{model_size}' not found in ~/.cache",
@@ -515,26 +526,26 @@ class VoiceForgeDaemon:
             if err_msg:
                 return {
                     "name": "disk_space",
-                    "display_name": "Disk space",
+                    "display_name": _DISPLAY_DISK_SPACE,
                     "status": "error",
                     "severity": "medium",
-                    "message": err_msg or "Low disk space",
+                    "message": err_msg,
                     "hint": _hint("Free up disk space in ~/.cache/voiceforge/ (need 1GB minimum)"),
                     "can_start_without": True,
                 }
             if warn_msg:
                 return {
                     "name": "disk_space",
-                    "display_name": "Disk space",
+                    "display_name": _DISPLAY_DISK_SPACE,
                     "status": "degraded",
                     "severity": "medium",
-                    "message": warn_msg or "Below 1GB free",
+                    "message": warn_msg,
                     "hint": _hint("Free up disk space in ~/.cache/voiceforge/ (need 1GB minimum)"),
                     "can_start_without": True,
                 }
             return {
                 "name": "disk_space",
-                "display_name": "Disk space",
+                "display_name": _DISPLAY_DISK_SPACE,
                 "status": "ok",
                 "severity": "medium",
                 "message": "Sufficient free space",
@@ -557,7 +568,7 @@ class VoiceForgeDaemon:
                 if found:
                     return {
                         "name": "api_keys",
-                        "display_name": "API keys (keyring)",
+                        "display_name": _DISPLAY_API_KEYS,
                         "status": "ok",
                         "severity": "medium",
                         "message": f"Keys present: {', '.join(found)}",
@@ -566,7 +577,7 @@ class VoiceForgeDaemon:
                     }
                 return {
                     "name": "api_keys",
-                    "display_name": "API keys (keyring)",
+                    "display_name": _DISPLAY_API_KEYS,
                     "status": "missing",
                     "severity": "medium",
                     "message": "No anthropic/openai/huggingface key in keyring",
@@ -576,7 +587,7 @@ class VoiceForgeDaemon:
             except Exception as e:
                 return {
                     "name": "api_keys",
-                    "display_name": "API keys (keyring)",
+                    "display_name": _DISPLAY_API_KEYS,
                     "status": "error",
                     "severity": "medium",
                     "message": str(e),
@@ -589,7 +600,7 @@ class VoiceForgeDaemon:
             if not db_path.is_file():
                 return {
                     "name": "rag_index",
-                    "display_name": "RAG index",
+                    "display_name": _DISPLAY_RAG_INDEX,
                     "status": "missing",
                     "severity": "low",
                     "message": "RAG DB not found",
@@ -607,7 +618,7 @@ class VoiceForgeDaemon:
                     conn.close()
                 return {
                     "name": "rag_index",
-                    "display_name": "RAG index",
+                    "display_name": _DISPLAY_RAG_INDEX,
                     "status": "ok",
                     "severity": "low",
                     "message": f"RAG DB exists, {n} chunks",
@@ -617,7 +628,7 @@ class VoiceForgeDaemon:
             except Exception as e:
                 return {
                     "name": "rag_index",
-                    "display_name": "RAG index",
+                    "display_name": _DISPLAY_RAG_INDEX,
                     "status": "error",
                     "severity": "low",
                     "message": str(e),
@@ -630,7 +641,7 @@ class VoiceForgeDaemon:
             if not path.exists():
                 return {
                     "name": "pid_file",
-                    "display_name": "PID file",
+                    "display_name": _DISPLAY_PID_FILE,
                     "status": "ok",
                     "severity": "medium",
                     "message": "No stale PID file",
@@ -642,7 +653,7 @@ class VoiceForgeDaemon:
                 if psutil.pid_exists(pid):
                     return {
                         "name": "pid_file",
-                        "display_name": "PID file",
+                        "display_name": _DISPLAY_PID_FILE,
                         "status": "ok",
                         "severity": "medium",
                         "message": f"PID file present, process {pid} running",
@@ -653,7 +664,7 @@ class VoiceForgeDaemon:
                 pass
             return {
                 "name": "pid_file",
-                "display_name": "PID file",
+                "display_name": _DISPLAY_PID_FILE,
                 "status": "degraded",
                 "severity": "medium",
                 "message": "Stale PID file; process not running",
@@ -674,7 +685,7 @@ class VoiceForgeDaemon:
                 if not db_path.parent.exists():
                     return {
                         "name": "transcript_db",
-                        "display_name": "Transcript DB",
+                        "display_name": _DISPLAY_TRANSCRIPT_DB,
                         "status": "missing",
                         "severity": "medium",
                         "message": "Data dir not found",
@@ -686,7 +697,7 @@ class VoiceForgeDaemon:
                 log_db.close()
                 return {
                     "name": "transcript_db",
-                    "display_name": "Transcript DB",
+                    "display_name": _DISPLAY_TRANSCRIPT_DB,
                     "status": "ok",
                     "severity": "medium",
                     "message": "transcripts.db accessible",
@@ -696,7 +707,7 @@ class VoiceForgeDaemon:
             except Exception as e:
                 return {
                     "name": "transcript_db",
-                    "display_name": "Transcript DB",
+                    "display_name": _DISPLAY_TRANSCRIPT_DB,
                     "status": "error",
                     "severity": "medium",
                     "message": str(e),
@@ -709,7 +720,7 @@ class VoiceForgeDaemon:
             if err is None:
                 return {
                     "name": "audio_perms",
-                    "display_name": "Audio permissions",
+                    "display_name": _DISPLAY_AUDIO_PERMS,
                     "status": "ok",
                     "severity": "high",
                     "message": "PipeWire access OK",
@@ -718,7 +729,7 @@ class VoiceForgeDaemon:
                 }
             return {
                 "name": "audio_perms",
-                "display_name": "Audio permissions",
+                "display_name": _DISPLAY_AUDIO_PERMS,
                 "status": "error",
                 "severity": "high",
                 "message": err or "PipeWire or permissions issue",

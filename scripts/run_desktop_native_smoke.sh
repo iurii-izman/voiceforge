@@ -127,3 +127,4 @@ if [[ "$RC" -eq 124 ]]; then
 fi
 
 fail "native smoke failed with exit code $RC"
+exit 1
