@@ -135,7 +135,8 @@ test.describe("Desktop regression matrix", () => {
   test("daemon unavailable state recovers cleanly after retry without trapping the user", async ({ page }) => {
     await bootDesktop(page, { daemonAvailable: false, onboardingDismissed: true });
 
-    await expect(page.locator("#daemon-off-banner")).toBeVisible();
+    // Banner appears after 2 failed pings (PING_INTERVAL_MS 5s); wait for second poll
+    await expect(page.locator("#daemon-off-banner")).toBeVisible({ timeout: 12000 });
     await expect(page.locator("#listen-toggle")).toBeDisabled();
     await expect(page.locator("#analyze-btn")).toBeDisabled();
 

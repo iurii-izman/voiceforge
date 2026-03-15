@@ -1,6 +1,6 @@
 # Пошаговый гайд: пересборка, запуск и тесты (в toolbox)
 
-Линейная последовательность для **Fedora Atomic Cosmic**: всё выполняется **внутри toolbox**. Путь к репо в контейнере: **`/var/home/user/Projects/voiceforge`** (домашний каталог хоста проброшен в toolbox).
+Линейная последовательность для **Fedora Atomic Cosmic**: всё выполняется **внутри toolbox**. Путь к репо в контейнере: `**/var/home/user/Projects/voiceforge`** (домашний каталог хоста проброшен в toolbox).
 
 **Среда:** Fedora Atomic; разработка и сборка — только в toolbox. Демон и десктоп запускаются в том же toolbox (одна D-Bus-сессия).
 
@@ -135,11 +135,13 @@ cd /var/home/user/Projects/voiceforge/desktop && npm run tauri dev
 
 Все команды — из корня репо в toolbox: `cd /var/home/user/Projects/voiceforge`.
 
-| Уровень | Что проверяет | Команда |
-|--------|----------------|--------|
-| **Python** | Юнит и интеграционные тесты | `uv run pytest tests/ -q --tb=line` |
-| **Desktop UI (Playwright)** | Навигация, моки, a11y, визуальные снимки | `cd desktop && npm run e2e:release-gate` |
-| **Native (WebdriverIO)** | Реальное окно Tauri (advisory) | `cd desktop && npm run e2e:native:headless` |
+
+| Уровень                     | Что проверяет                            | Команда                                     |
+| --------------------------- | ---------------------------------------- | ------------------------------------------- |
+| **Python**                  | Юнит и интеграционные тесты              | `uv run pytest tests/ -q --tb=line` (см. ниже: если подвисает — быстрый прогон) |
+| **Desktop UI (Playwright)** | Навигация, моки, a11y, визуальные снимки | `cd desktop && npm run e2e:release-gate`    |
+| **Native (WebdriverIO)**    | Реальное окно Tauri (advisory)           | `cd desktop && npm run e2e:native:headless` |
+
 
 **Подмножество тестов (быстрее):**
 
@@ -167,12 +169,14 @@ cd desktop && npm run e2e:ui
 
 **Где лежат отчёты (в репо в toolbox):**
 
-| Отчёт | Путь в toolbox |
-|-------|-----------------|
-| Playwright HTML | `desktop/playwright-report/`; открыть: `cd desktop && npm run e2e:report` |
-| Playwright trace/screenshot | `desktop/test-results/` (при падении) |
-| Native smoke | `desktop/e2e-native/artifacts/latest/` |
-| Python coverage | корень репо: `coverage.xml`, `coverage.json` (при запуске с `--cov`) |
+
+| Отчёт                       | Путь в toolbox                                                            |
+| --------------------------- | ------------------------------------------------------------------------- |
+| Playwright HTML             | `desktop/playwright-report/`; открыть: `cd desktop && npm run e2e:report` |
+| Playwright trace/screenshot | `desktop/test-results/` (при падении)                                     |
+| Native smoke                | `desktop/e2e-native/artifacts/latest/`                                    |
+| Python coverage             | корень репо: `coverage.xml`, `coverage.json` (при запуске с `--cov`)      |
+
 
 ---
 
@@ -201,7 +205,7 @@ cd /var/home/user/Projects/voiceforge/desktop && npm run tauri dev
 # или бинарник:
 # /var/home/user/Projects/voiceforge/desktop/src-tauri/target/release/voiceforge-desktop
 
-# Тесты (из корня репо в toolbox)
+# Тесты (из корня репо в toolbox; pytest — только из корня, не из desktop/)
 cd /var/home/user/Projects/voiceforge
 uv run pytest tests/ -q --tb=line
 cd desktop && npm run e2e:release-gate
@@ -211,14 +215,18 @@ cd desktop && npm run e2e:release-gate
 
 ## Частые проблемы (toolbox)
 
-| Проблема | Решение (в toolbox) |
-|----------|----------------------|
-| `pw-record` not found | `sudo dnf install pipewire pipewire-utils` |
-| `webkit2gtk-4.1` / `gtk+-3.0` not found | `sudo dnf install webkit2gtk4.1-devel gtk3-devel` |
-| `invalid value '1' for '--ci'` при tauri build | `CI=false npm run tauri build` |
-| Десктоп не видит демон | Демон и десктоп должны быть в **одном и том же** toolbox (одна D-Bus-сессия). Запускать оба после `toolbox enter`. |
-| OOM при тестах/анализе | Закрыть лишние приложения; для diarization см. [pyannote-version.md](pyannote-version.md) |
-| Много skipped в pytest | `uv sync --extra all --group dev` или заново `./scripts/bootstrap.sh` |
-| torchcodec/pyannote «libavutil.so not found» | `sudo dnf install ffmpeg` **в toolbox**; см. [pyannote-version.md](pyannote-version.md) |
+
+| Проблема                                       | Решение (в toolbox)                                                                                                |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `pw-record` not found                          | `sudo dnf install pipewire pipewire-utils`                                                                         |
+| `webkit2gtk-4.1` / `gtk+-3.0` not found        | `sudo dnf install webkit2gtk4.1-devel gtk3-devel`                                                                  |
+| `invalid value '1' for '--ci'` при tauri build | `CI=false npm run tauri build`                                                                                     |
+| Десктоп не видит демон                         | Демон и десктоп должны быть в **одном и том же** toolbox (одна D-Bus-сессия). Запускать оба после `toolbox enter`. |
+| OOM при тестах/анализе                         | Закрыть лишние приложения; для diarization см. [pyannote-version.md](pyannote-version.md)                          |
+| Много skipped в pytest                         | `uv sync --extra all --group dev` или заново `./scripts/bootstrap.sh`                                              |
+| torchcodec/pyannote «libavutil.so not found»   | `sudo dnf install ffmpeg` **в toolbox**; см. [pyannote-version.md](pyannote-version.md)                            |
+| pytest подвисает (1–3 мин без вывода)         | **Ctrl+C**, затем: `uv run pytest tests/ -q --tb=line -m "not slow and not integration"` (исключает загрузку моделей и интеграционные тесты) |
+| pytest: «no tests ran», «file or directory not found: tests/» | Запускать **из корня репо**: `cd /var/home/user/Projects/voiceforge`, затем `uv run pytest tests/ ...` (из `desktop/` каталога нет папки `tests/`) |
+
 
 Дополнительно: [installation-guide.md](installation-guide.md) (раздел 0 — только toolbox), [desktop-build-deps.md](desktop-build-deps.md), [cli-commands-and-run.md](cli-commands-and-run.md).

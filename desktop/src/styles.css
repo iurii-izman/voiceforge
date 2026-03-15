@@ -86,7 +86,9 @@ body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--f
 .content h1 { font-size: 1.25rem; margin: 0 0 1rem; }
 .status { padding: 0.5rem; border-radius: 6px; margin-bottom: 0.5rem; }
 .status.daemon-ok { background: rgba(129,199,132,0.2); color: var(--ok); }
-.status.daemon-off { background: rgba(229,115,115,0.2); color: var(--error); }
+/* WCAG 2 AA contrast ≥4.5:1 for .status.daemon-off (axe color-contrast) */
+.status.daemon-off { background: rgba(229,115,115,0.2); color: #f8bdbd; }
+body.theme-light .status.daemon-off { color: var(--error); }
 .btn {
   background: var(--bg-card); color: var(--fg); border: 1px solid var(--border);
   padding: 0.4rem 0.8rem; border-radius: var(--radius); cursor: pointer; margin-right: 0.5rem;

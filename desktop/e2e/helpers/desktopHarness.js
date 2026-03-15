@@ -249,6 +249,22 @@ export async function installDesktopMocks(page, scenarioOverrides = {}) {
               throw new Error("mock daemon unavailable");
             }
             return "pong";
+          case "daemon_status": {
+            if (!state.daemonAvailable) {
+              return JSON.stringify({
+                daemon_reachable: false,
+                unit_installed: false,
+                unit_state: "inactive",
+                details: null,
+              });
+            }
+            return JSON.stringify({
+              daemon_reachable: true,
+              unit_installed: true,
+              unit_state: "active",
+              details: JSON.stringify({ data: { safe_mode: false } }),
+            });
+          }
           case "set_tray_theme":
             return "ok";
           case "is_listening":
@@ -315,6 +331,15 @@ export async function installDesktopMocks(page, scenarioOverrides = {}) {
             return envelope({ stt_ambiguous: false });
           case "create_event_from_session":
             return envelope({ event_uid: "vf-event-101" });
+          case "check_for_update": {
+            state.updateChecks += 1;
+            if (!scenario.updateAvailable) return JSON.stringify({ available: false });
+            return JSON.stringify({
+              available: true,
+              version: scenario.updateVersion || "0.2.0-alpha.3",
+              body: "Desktop QA build",
+            });
+          }
           case "analyze": {
             const newSessionId = 103;
             const analysisText = `Analysis done for ${args.seconds}s`;
