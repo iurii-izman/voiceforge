@@ -2,7 +2,15 @@
 
 Файл обновляется **агентом в конце каждой сессии**. Новый чат: приложить `@docs/runbooks/next-iteration-focus.md` и начать с блока «Следующий шаг» ниже.
 
-**Обновлено:** 2026-03-15 (#164: glib chain задокументирована, блокировка на wry#1474)
+**Обновлено:** 2026-03-15 (KV2 чеклист + путь закрытия; release scripts OK)
+
+---
+
+## Подготовка к релизу (текущее состояние)
+
+- `check_release_metadata.py` и `check_release_proof.py` проходят (2026-03-15).
+- Версии согласованы: pyproject 1.0.0b1, desktop 1.0.0-beta.1; CHANGELOG актуален для 1.0.0-beta.1.
+- Перед тегом: полный чеклист по [release-and-quality.md](release-and-quality.md) §1, включая `cd desktop && npm run e2e:release-gate` и при необходимости `e2e:native:headless`.
 
 ---
 
@@ -17,9 +25,9 @@
 
 ## Следующий шаг (для копирования в новый чат)
 
-**Сделано в сессии:** #164: зафиксирована транзитивная цепочка glib 0.18.5 (tauri → tray-icon, tauri-runtime-wry → gtk 0.18.2 → glib); обновлены [security-decision-log.md](security-decision-log.md) и [security-and-dependencies.md](security-and-dependencies.md); решение заблокировано на [tauri-apps/wry#1474](https://github.com/tauri-apps/wry/issues/1474) (gtk4/webkit6). Сборка desktop (cargo tauri build) успешна; pytest — 688 passed.
+**Сделано в сессии:** KV2: в [kv2-overlay-signoff-checklist.md](kv2-overlay-signoff-checklist.md) добавлен раздел «Как закрыть KV2» и ссылка из [what-user-must-do.md](what-user-must-do.md). Подготовка к релизу: проверены check_release_metadata.py и check_release_proof.py (OK); версии и CHANGELOG согласованы; в next-iteration-focus добавлен блок «Подготовка к релизу».
 
-**Следующий шаг:** При желании закрыть #164 как «documented, blocked on upstream» или оставить открытым до выхода wry с gtk4. Дальше — KV2 (overlay UX sign-off) или подготовка релиза по приоритету.
+**Следующий шаг:** По желанию: пройти [kv2-overlay-signoff-checklist.md](kv2-overlay-signoff-checklist.md) и закрыть #188; или выполнить полный чеклист релиза по [release-and-quality.md](release-and-quality.md) и выставить тег. Hardening #164/#165 — по приоритету, без смены execution order.
 
 ---
 
