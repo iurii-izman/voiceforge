@@ -123,8 +123,54 @@ pre { background: var(--bg); padding: 0.75rem; border-radius: 6px; overflow: aut
 #sessions-list tr:focus-within { background: var(--border); }
 .session-group-header { font-weight: 600; color: var(--muted); background: var(--bg); }
 .session-group-header td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); }
-.daemon-off-banner { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0.75rem; background: var(--error); color: #fff; border-radius: var(--radius); margin-bottom: 0.5rem; }
+.daemon-off-banner { display: flex; align-items: center; flex-wrap: wrap; gap: 0.75rem; padding: 0.5rem 0.75rem; background: var(--error); color: #fff; border-radius: var(--radius); margin-bottom: 0.5rem; }
 .daemon-off-banner .btn { flex-shrink: 0; }
+
+/* RCP-M3: daemon status dot in sidebar */
+.daemon-status-dot {
+  width: 10px; height: 10px; border-radius: 50%; margin: 0.5rem auto 0.25rem;
+  display: block; cursor: pointer; flex-shrink: 0;
+  border: none; padding: 0; background: var(--muted);
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+.daemon-status-dot:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.daemon-status-dot.state-running { background: var(--ok); }
+.daemon-status-dot.state-starting { background: #f9a825; animation: daemon-pulse 1s ease-in-out infinite; }
+.daemon-status-dot.state-stopped,
+.daemon-status-dot.state-not-installed { background: var(--muted); }
+.daemon-status-dot.state-failed { background: var(--error); }
+@keyframes daemon-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+/* Settings sub-tabs (General / System) */
+.settings-sub-nav { display: flex; gap: 0.25rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); }
+.settings-sub-tab {
+  padding: 0.5rem 1rem; border: none; background: transparent; color: var(--muted);
+  font: inherit; cursor: pointer; border-radius: var(--radius-sm);
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.settings-sub-tab:hover { color: var(--fg); }
+.settings-sub-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
+.settings-sub-panel { display: none; }
+.settings-sub-panel.active { display: block; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+
+/* First-run service install dialog */
+.first-run-service-dialog { max-width: 28rem; border-radius: var(--radius); padding: 1.25rem; }
+.first-run-service-dialog::backdrop { background: rgba(0,0,0,0.4); }
+.first-run-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+.first-run-progress { margin-top: 0.5rem; }
+.first-run-success { margin-top: 0.5rem; color: var(--ok); }
+.first-run-error { margin-top: 0.5rem; color: var(--error); }
+.system-section-title { font-size: 0.95rem; font-weight: 600; margin: 1rem 0 0.5rem; color: var(--muted); }
+.system-section-title:first-child { margin-top: 0; }
+.dep-row { display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0; }
+.dep-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dep-dot.ok { background: var(--ok); }
+.dep-dot.degraded { background: #f9a825; }
+.dep-dot.missing { background: var(--muted); }
+.dep-dot.error { background: var(--error); }
+.dep-name { font-weight: 500; }
+.dep-msg { color: var(--muted); font-size: 0.9rem; }
 .favorite-star { background: none; border: none; cursor: pointer; font-size: 1.1rem; color: var(--muted); padding: 0.2rem; }
 .favorite-star:hover { color: var(--accent); }
 .context-menu { position: fixed; z-index: 1000; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.25rem 0; min-width: 160px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }

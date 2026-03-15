@@ -164,6 +164,38 @@ const I18N = {
     period_today: "За сегодня",
     period_week: "За неделю",
     period_month: "За месяц",
+    rcp_daemon_offline: "Демон не запущен.",
+    rcp_banner_start: "Запустить",
+    rcp_banner_details: "Подробнее",
+    rcp_settings_general: "Общие",
+    rcp_settings_system: "Система",
+    rcp_dot_running: "Демон запущен",
+    rcp_dot_starting: "Демон запускается…",
+    rcp_dot_stopped: "Демон остановлен",
+    rcp_dot_failed: "Ошибка демона — нажмите для подробностей",
+    rcp_dot_not_installed: "Служба не установлена",
+    rcp_firstrun_title: "Служба демона не установлена",
+    rcp_firstrun_desc: "Установите службу для захвата аудио и работы с ИИ.",
+    rcp_firstrun_install: "Установить службу",
+    rcp_firstrun_skip: "Позже",
+    rcp_firstrun_installing: "Установка…",
+    rcp_firstrun_success: "Служба установлена и запущена.",
+    rcp_firstrun_error: "Ошибка установки",
+    rcp_firstrun_open_system: "Открыть настройки системы",
+    rcp_firstrun_continue: "Продолжить",
+    rcp_system_daemon: "Демон",
+    rcp_system_status: "Статус",
+    rcp_system_version: "Версия",
+    rcp_system_uptime: "Время работы",
+    rcp_system_memory: "Память",
+    rcp_system_start: "Запустить",
+    rcp_system_stop: "Остановить",
+    rcp_system_restart: "Перезапустить",
+    rcp_system_deps: "Зависимости",
+    rcp_system_run_diag: "Диагностика",
+    rcp_system_service: "Служба",
+    rcp_system_reinstall: "Переустановить службу",
+    rcp_system_unit: "Юнит",
     sort_newest: "Сначала новые",
     sort_oldest: "Сначала старые",
     sort_duration_desc: "По длительности (↓)",
@@ -383,6 +415,38 @@ const I18N = {
     period_today: "Today",
     period_week: "This week",
     period_month: "This month",
+    rcp_daemon_offline: "Daemon is not running.",
+    rcp_banner_start: "Start",
+    rcp_banner_details: "Details",
+    rcp_settings_general: "General",
+    rcp_settings_system: "System",
+    rcp_dot_running: "Daemon running",
+    rcp_dot_starting: "Daemon starting…",
+    rcp_dot_stopped: "Daemon stopped",
+    rcp_dot_failed: "Daemon error — click for details",
+    rcp_dot_not_installed: "Service not installed",
+    rcp_firstrun_title: "Daemon service not installed",
+    rcp_firstrun_desc: "Install the service to enable audio capture and AI features.",
+    rcp_firstrun_install: "Install Service",
+    rcp_firstrun_skip: "Skip for now",
+    rcp_firstrun_installing: "Installing…",
+    rcp_firstrun_success: "Service installed and started successfully.",
+    rcp_firstrun_error: "Installation failed",
+    rcp_firstrun_open_system: "Open System Settings",
+    rcp_firstrun_continue: "Continue",
+    rcp_system_daemon: "Daemon",
+    rcp_system_status: "Status",
+    rcp_system_version: "Version",
+    rcp_system_uptime: "Uptime",
+    rcp_system_memory: "Memory",
+    rcp_system_start: "Start",
+    rcp_system_stop: "Stop",
+    rcp_system_restart: "Restart",
+    rcp_system_deps: "Dependencies",
+    rcp_system_run_diag: "Run Diagnostics",
+    rcp_system_service: "Service",
+    rcp_system_reinstall: "Reinstall Service",
+    rcp_system_unit: "Unit",
     sort_newest: "Newest first",
     sort_oldest: "Oldest first",
     sort_duration_desc: "By duration (↓)",
@@ -579,6 +643,20 @@ function setStored(key, value) {
 }
 
 let daemonOk = false;
+/** RCP-M3: structured daemon state from daemon_status() for dot, banner, System tab */
+let daemonState = {
+  reachable: false,
+  unitInstalled: false,
+  unitState: "unknown",
+  details: null,
+  doctor: null,
+  lastPing: 0,
+  loading: false,
+};
+/** Consecutive failed pings; banner shown when >= 2 */
+let failedPingCount = 0;
+/** True while first-run service dialog is open; banner hidden then */
+let firstRunDialogOpen = false;
 let listenState = false;
 let streamingInterval = null;
 /** Reactive buffer from D-Bus TranscriptChunk signals (finals + partial). */
@@ -641,6 +719,140 @@ function setDaemonDependentControlsEnabled(enabled) {
   });
 }
 
+const PING_INTERVAL_MS = 5000;
+
+/** RCP-M3: fetch daemon status via Tauri command, update daemonState and UI */
+async function refreshDaemonState() {
+  if (daemonState.loading) return;
+  daemonState.loading = true;
+  try {
+    const raw = await invoke("daemon_status");
+    const data = typeof raw === "string" ? JSON.parse(raw) : raw;
+    daemonState.reachable = !!data.daemon_reachable;
+    daemonState.unitInstalled = !!data.unit_installed;
+    daemonState.unitState = String(data.unit_state || "unknown");
+    daemonState.lastPing = Date.now();
+    let details = null;
+    if (data.details && typeof data.details === "string") {
+      try {
+        const parsed = JSON.parse(data.details);
+        details = parsed?.data ?? parsed;
+      } catch {
+        details = null;
+      }
+    }
+    daemonState.details = details;
+    if (daemonState.reachable) {
+      failedPingCount = 0;
+      setDaemonOk();
+    } else {
+      failedPingCount += 1;
+      setDaemonOff(t("rcp_daemon_offline"));
+    }
+    updateDaemonStatusDot();
+    updateDaemonOffBannerVisibility();
+  } catch (e) {
+    failedPingCount += 1;
+    daemonState.reachable = false;
+    setDaemonOff(e?.message || t("rcp_daemon_offline"));
+    updateDaemonStatusDot();
+    updateDaemonOffBannerVisibility();
+  } finally {
+    daemonState.loading = false;
+  }
+}
+
+function updateDaemonStatusDot() {
+  const dot = document.getElementById("daemon-status-dot");
+  if (!dot) return;
+  dot.classList.remove("state-running", "state-starting", "state-stopped", "state-failed", "state-not-installed");
+  let stateClass = "state-stopped";
+  let title = t("rcp_dot_stopped");
+  if (daemonState.reachable) {
+    stateClass = "state-running";
+    title = t("rcp_dot_running");
+  } else if (daemonState.unitState === "activating") {
+    stateClass = "state-starting";
+    title = t("rcp_dot_starting");
+  } else if (daemonState.unitState === "failed") {
+    stateClass = "state-failed";
+    title = t("rcp_dot_failed");
+  } else if (!daemonState.unitInstalled) {
+    stateClass = "state-not-installed";
+    title = t("rcp_dot_not_installed");
+  }
+  dot.classList.add(stateClass);
+  dot.setAttribute("title", title);
+  dot.setAttribute("aria-label", title);
+}
+
+function updateDaemonOffBannerVisibility() {
+  const banner = document.getElementById("daemon-off-banner");
+  if (!banner) return;
+  const show = !firstRunDialogOpen && !daemonState.reachable && failedPingCount >= 2;
+  banner.style.display = show ? "flex" : "none";
+}
+
+const FIRST_RUN_SKIP_SESSION_KEY = "voiceforge_first_run_skip_session";
+
+/** RCP-M3: show first-run install dialog if service not installed (once per session) */
+async function tryFirstRunServiceDialog() {
+  if (sessionStorage.getItem(FIRST_RUN_SKIP_SESSION_KEY) === "1") return;
+  try {
+    const installed = await invoke("is_service_installed");
+    if (installed) return;
+  } catch {
+    return;
+  }
+  const dialog = document.getElementById("first-run-service-dialog");
+  if (!dialog) return;
+  firstRunDialogOpen = true;
+  updateDaemonOffBannerVisibility();
+  dialog.showModal();
+  document.getElementById("first-run-service-actions").hidden = false;
+  document.getElementById("first-run-service-progress").hidden = true;
+  document.getElementById("first-run-service-success").hidden = true;
+  document.getElementById("first-run-service-error").hidden = true;
+
+  const closeDialog = () => {
+    dialog.close();
+    firstRunDialogOpen = false;
+    updateDaemonOffBannerVisibility();
+  };
+
+  document.getElementById("first-run-skip-btn")?.addEventListener("click", () => {
+    sessionStorage.setItem(FIRST_RUN_SKIP_SESSION_KEY, "1");
+    closeDialog();
+  }, { once: true });
+
+  document.getElementById("first-run-install-btn")?.addEventListener("click", async () => {
+    const actions = document.getElementById("first-run-service-actions");
+    const progress = document.getElementById("first-run-service-progress");
+    const successEl = document.getElementById("first-run-service-success");
+    const errorEl = document.getElementById("first-run-service-error");
+    actions.hidden = true;
+    progress.hidden = false;
+    successEl.hidden = true;
+    errorEl.hidden = true;
+    try {
+      await invoke("install_service");
+      await invoke("daemon_start");
+      await refreshDaemonState();
+      progress.hidden = true;
+      successEl.textContent = t("rcp_firstrun_success");
+      successEl.hidden = false;
+      successEl.innerHTML = successEl.textContent + " <button type=\"button\" class=\"btn small\" id=\"first-run-open-system\">" + escapeHtml(t("rcp_firstrun_open_system")) + "</button> <button type=\"button\" class=\"btn small primary\" id=\"first-run-continue\">" + escapeHtml(t("rcp_firstrun_continue")) + "</button>";
+      document.getElementById("first-run-open-system")?.addEventListener("click", () => { closeDialog(); openSettingsToSystem(); }, { once: true });
+      document.getElementById("first-run-continue")?.addEventListener("click", () => closeDialog(), { once: true });
+    } catch (e) {
+      progress.hidden = true;
+      errorEl.textContent = t("rcp_firstrun_error") + ": " + (e?.message || e);
+      errorEl.hidden = false;
+      actions.hidden = false;
+    }
+  }, { once: true });
+}
+
 function parseEnvelope(raw) {
   if (typeof raw !== "string") return { ok: false, error: { message: "Invalid response" } };
   try {
@@ -698,19 +910,10 @@ async function invokeWithRetry(cmd, args, opts) {
   throw lastErr;
 }
 
+/** Uses daemon_status() (RCP-M3) for consistent state; returns true if reachable */
 async function checkDaemon() {
-  try {
-    const pong = await invokeWithRetry("ping", {}, { timeoutMs: 5000, retries: 1 });
-    if (pong !== "pong") {
-      setDaemonOff(tf("status_daemon_unexpected", { value: pong }));
-      return false;
-    }
-    setDaemonOk();
-    return true;
-  } catch (e) {
-    setDaemonOff(tf("status_daemon_run_hint", { message: e?.message || "" }).trim());
-    return false;
-  }
+  await refreshDaemonState();
+  return daemonOk;
 }
 
 function switchTab(tabId) {
@@ -734,7 +937,11 @@ function switchTab(tabId) {
   if (tabId === "sessions") loadSessions();
   if (tabId === "knowledge") loadKnowledgeTab();
   if (tabId === "costs") loadAnalytics("7d");
-  if (tabId === "settings") loadSettings();
+  if (tabId === "settings") {
+    const sub = document.querySelector(".settings-sub-tab.active")?.dataset.settingsSub || "general";
+    switchSettingsSub(sub);
+    if (sub === "general") loadSettings();
+  }
   if (tabId === "home") {
     refreshHomeDashboard();
   }
@@ -742,7 +949,7 @@ function switchTab(tabId) {
 
 const SETTINGS_AS_PANEL_KEY = "voiceforge_settings_as_panel";
 
-function openSettingsPanel() {
+function openSettingsPanel(subTab = "general") {
   const panel = document.getElementById("settings-slide-panel");
   const slot = document.getElementById("settings-panel-slot");
   const tabContent = document.getElementById("settings-tab-content");
@@ -752,7 +959,9 @@ function openSettingsPanel() {
   slot.appendChild(tabContent);
   panel.classList.add("open");
   panel.setAttribute("aria-hidden", "false");
-  loadSettings();
+  switchSettingsSub(subTab);
+  if (subTab === "general") loadSettings();
+  else loadSystemTabContent();
   document.getElementById("settings-panel-close")?.focus({ preventScroll: true });
 }
 
@@ -789,6 +998,15 @@ function initSettingsPanelMode() {
       setStored(SETTINGS_AS_PANEL_KEY, val);
     });
   }
+  document.querySelectorAll(".settings-sub-tab").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const sub = btn.dataset.settingsSub;
+      if (!sub) return;
+      switchSettingsSub(sub);
+      if (sub === "general") loadSettings();
+      else loadSystemTabContent();
+    });
+  });
 }
 
 function playBeep() {
@@ -879,6 +1097,27 @@ document.getElementById("daemon-retry-btn")?.addEventListener("click", async () 
   await checkDaemon();
   if (daemonOk) await refreshAfterDaemonRecovery();
   if (btn) btn.disabled = false;
+});
+document.getElementById("daemon-off-banner-start")?.addEventListener("click", async () => {
+  try {
+    await invoke("daemon_start");
+    await refreshDaemonState();
+    if (daemonOk) await refreshAfterDaemonRecovery();
+  } catch (e) {
+    console.debug("daemon_start failed", e);
+  }
+});
+document.getElementById("daemon-off-banner-details")?.addEventListener("click", () => {
+  openSettingsToSystem();
+});
+document.getElementById("daemon-status-dot")?.addEventListener("click", () => {
+  openSettingsToSystem();
+});
+document.getElementById("daemon-status-dot")?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" || e.key === " ") {
+    e.preventDefault();
+    openSettingsToSystem();
+  }
 });
 
 document.querySelectorAll(".nav-item").forEach((n) => {
@@ -2237,6 +2476,164 @@ function initKnowledgeTab() {
   }
 }
 
+/** RCP-M3: switch between General and System sub-tabs in Settings */
+function switchSettingsSub(sub) {
+  const generalPanel = document.getElementById("settings-general-panel");
+  const systemPanel = document.getElementById("settings-system-panel");
+  document.querySelectorAll(".settings-sub-tab").forEach((btn) => {
+    const isActive = btn.dataset.settingsSub === sub;
+    btn.classList.toggle("active", isActive);
+    btn.setAttribute("aria-selected", isActive ? "true" : "false");
+  });
+  if (generalPanel) {
+    generalPanel.classList.toggle("active", sub === "general");
+    generalPanel.hidden = sub !== "general";
+  }
+  if (systemPanel) {
+    systemPanel.classList.toggle("active", sub === "system");
+    systemPanel.hidden = sub !== "system";
+    if (sub === "system") loadSystemTabContent();
+  }
+}
+
+/** Open Settings and focus System sub-tab (for status dot / Details) */
+function openSettingsToSystem() {
+  if (localStorage.getItem(SETTINGS_AS_PANEL_KEY) === "true") {
+    openSettingsPanel("system");
+    return;
+  }
+  switchTab("settings");
+  switchSettingsSub("system");
+}
+
+/** RCP-M3: render System tab — daemon section, dependencies from Doctor(), service section */
+function loadSystemTabContent() {
+  const container = document.getElementById("settings-system-content");
+  if (!container) return;
+  if (daemonState.reachable && !daemonState.doctor) {
+    invoke("run_doctor")
+      .then((raw) => {
+        const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+        daemonState.doctor = parsed?.data ?? parsed;
+        loadSystemTabContent();
+      })
+      .catch(() => {});
+    container.innerHTML = "<p class=\"muted\">" + escapeHtml(t("loading")) + "</p>";
+    return;
+  }
+  const d = daemonState.details;
+  const version = d?.daemon_version ?? d?.version ?? "—";
+  const uptimeSec = d?.uptime_seconds ?? 0;
+  const uptimeStr = uptimeSec >= 3600
+    ? `${Math.floor(uptimeSec / 3600)}h ${Math.floor((uptimeSec % 3600) / 60)}m`
+    : uptimeSec >= 60
+      ? `${Math.floor(uptimeSec / 60)}m`
+      : `${uptimeSec}s`;
+  const memoryMb = d?.memory_mb ?? "—";
+  const memoryLimitMb = d?.memory_limit_mb;
+  const memoryStr = memoryLimitMb != null ? `${memoryMb} MB / ${memoryLimitMb} MB` : (memoryMb !== "—" ? `${memoryMb} MB` : "—");
+  const statusLabel = daemonState.reachable ? t("rcp_dot_running") : (daemonState.unitState === "failed" ? t("rcp_dot_failed") : t("rcp_dot_stopped"));
+  let daemonHtml = `
+    <div class="card">
+      <h2 class="system-section-title">${escapeHtml(t("rcp_system_daemon"))}</h2>
+      <p><span class="dep-name">${escapeHtml(t("rcp_system_status"))}:</span> ${escapeHtml(statusLabel)}${daemonState.reachable && uptimeStr ? ` (${escapeHtml(t("rcp_system_uptime"))}: ${escapeHtml(uptimeStr)})` : ""}</p>
+      <p><span class="dep-name">${escapeHtml(t("rcp_system_version"))}:</span> ${escapeHtml(String(version))}</p>
+      <p><span class="dep-name">${escapeHtml(t("rcp_system_memory"))}:</span> ${escapeHtml(memoryStr)}</p>
+      <div class="first-run-actions">
+        ${daemonState.reachable
+    ? `<button type="button" class="btn small" id="system-stop-btn">${escapeHtml(t("rcp_system_stop"))}</button><button type="button" class="btn small" id="system-restart-btn">${escapeHtml(t("rcp_system_restart"))}</button>`
+    : `<button type="button" class="btn small primary" id="system-start-btn">${escapeHtml(t("rcp_system_start"))}</button>`}
+      </div>
+      <p id="system-daemon-msg" class="muted" style="margin-top:0.5rem"></p>
+    </div>`;
+  let depsHtml = "";
+  const doctor = daemonState.doctor;
+  if (doctor && Array.isArray(doctor.checks)) {
+    depsHtml = `
+    <div class="card">
+      <h2 class="system-section-title">${escapeHtml(t("rcp_system_deps"))}</h2>
+      <div id="system-deps-list">${doctor.checks.map((c) => {
+      const status = c.status || "ok";
+      const dotClass = status === "ok" ? "ok" : status === "degraded" ? "degraded" : status === "error" ? "error" : "missing";
+      return `<div class="dep-row"><span class="dep-dot ${dotClass}" aria-hidden="true"></span><span class="dep-name">${escapeHtml(c.display_name || c.name || "—")}</span><span class="dep-msg">${escapeHtml(c.message || "")}</span></div>`;
+    }).join("")}</div>
+      <button type="button" class="btn small" id="system-run-doctor-btn">${escapeHtml(t("rcp_system_run_diag"))}</button>
+    </div>`;
+  } else {
+    depsHtml = `
+    <div class="card">
+      <h2 class="system-section-title">${escapeHtml(t("rcp_system_deps"))}</h2>
+      <p class="muted">${escapeHtml(t("loading"))}</p>
+      <button type="button" class="btn small" id="system-run-doctor-btn">${escapeHtml(t("rcp_system_run_diag"))}</button>
+    </div>`;
+  }
+  const unitState = daemonState.unitState || "unknown";
+  const serviceHtml = `
+    <div class="card">
+      <h2 class="system-section-title">${escapeHtml(t("rcp_system_service"))}</h2>
+      <p><span class="dep-name">${escapeHtml(t("rcp_system_unit"))}:</span> voiceforge.service (user)</p>
+      <p><span class="dep-name">${escapeHtml(t("rcp_system_status"))}:</span> ${escapeHtml(unitState)}</p>
+      <button type="button" class="btn small" id="system-reinstall-btn">${escapeHtml(t("rcp_system_reinstall"))}</button>
+    </div>`;
+  container.innerHTML = daemonHtml + depsHtml + serviceHtml;
+  document.getElementById("system-start-btn")?.addEventListener("click", async () => {
+    const msg = document.getElementById("system-daemon-msg");
+    if (msg) msg.textContent = t("rcp_firstrun_installing");
+    try {
+      await invoke("daemon_start");
+      await refreshDaemonState();
+      if (msg) msg.textContent = t("rcp_firstrun_success");
+      loadSystemTabContent();
+    } catch (e) {
+      if (msg) msg.textContent = t("rcp_firstrun_error") + ": " + (e?.message || e);
+    }
+  });
+  document.getElementById("system-stop-btn")?.addEventListener("click", async () => {
+    const msg = document.getElementById("system-daemon-msg");
+    try {
+      await invoke("daemon_stop");
+      await refreshDaemonState();
+      if (msg) msg.textContent = "";
+      loadSystemTabContent();
+    } catch (e) {
+      if (msg) msg.textContent = t("rcp_firstrun_error") + ": " + (e?.message || e);
+    }
+  });
+  document.getElementById("system-restart-btn")?.addEventListener("click", async () => {
+    const msg = document.getElementById("system-daemon-msg");
+    if (msg) msg.textContent = t("rcp_firstrun_installing");
+    try {
+      await invoke("daemon_restart");
+      await refreshDaemonState();
+      if (msg) msg.textContent = t("rcp_firstrun_success");
+      loadSystemTabContent();
+    } catch (e) {
+      if (msg) msg.textContent = t("rcp_firstrun_error") + ": " + (e?.message || e);
+    }
+  });
+  document.getElementById("system-run-doctor-btn")?.addEventListener("click", async () => {
+    try {
+      const raw = await invoke("run_doctor");
+      const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+      const report = parsed?.data ?? parsed;
+      daemonState.doctor = report;
+      loadSystemTabContent();
+    } catch (e) {
+      console.debug("run_doctor failed", e);
+    }
+  });
+  document.getElementById("system-reinstall-btn")?.addEventListener("click", async () => {
+    try {
+      await invoke("install_service");
+      await refreshDaemonState();
+      loadSystemTabContent();
+    } catch (e) {
+      const msg = document.getElementById("system-daemon-msg");
+      if (msg) msg.textContent = t("rcp_firstrun_error") + ": " + (e?.message || e);
+    }
+  });
+}
+
 function loadSettings() {
   const container = document.getElementById("settings-content");
   if (!daemonOk) {
@@ -3145,4 +3542,10 @@ function initDashboardWidgets() {
   if (localStorage.getItem(UPDATER_CHECK_ON_LAUNCH_KEY) === "true") {
     checkForUpdate(true);
   }
+  setInterval(refreshDaemonState, PING_INTERVAL_MS);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") refreshDaemonState();
+  });
+  window.addEventListener("focus", () => { refreshDaemonState(); });
+  tryFirstRunServiceDialog();
 })();

@@ -21,8 +21,22 @@
       </div>
     </div>
   </dialog>
+  <dialog id="first-run-service-dialog" class="first-run-service-dialog" aria-labelledby="first-run-service-title" aria-describedby="first-run-service-desc">
+    <h2 id="first-run-service-title" data-i18n="rcp_firstrun_title">Служба демона не установлена</h2>
+    <p id="first-run-service-desc" data-i18n="rcp_firstrun_desc">Установите службу для захвата аудио и работы с ИИ.</p>
+    <div id="first-run-service-actions" class="first-run-actions">
+      <button type="button" class="btn primary" id="first-run-install-btn" data-i18n="rcp_firstrun_install">Установить службу</button>
+      <button type="button" class="btn secondary" id="first-run-skip-btn" data-i18n="rcp_firstrun_skip">Позже</button>
+    </div>
+    <div id="first-run-service-progress" class="first-run-progress" hidden>
+      <span data-i18n="rcp_firstrun_installing">Установка…</span>
+    </div>
+    <div id="first-run-service-success" class="first-run-success muted" hidden></div>
+    <div id="first-run-service-error" class="first-run-error muted" hidden></div>
+  </dialog>
   <div class="app" id="app-root">
     <nav class="sidebar" id="main-sidebar" role="navigation" aria-label="Главное меню">
+      <div id="daemon-status-dot" class="daemon-status-dot" role="button" tabindex="0" aria-label="Daemon status" title="Daemon status"></div>
       <button type="button" class="nav-item active" data-tab="home" data-i18n="nav.home" aria-current="true"><span class="nav-mnemonic">Г</span>лавная</button>
       <button type="button" class="nav-item" data-tab="sessions" data-i18n="nav.sessions" aria-current="false"><span class="nav-mnemonic">С</span>ессии</button>
       <button type="button" class="nav-item" data-tab="knowledge" data-i18n="nav.knowledge" aria-current="false"><span class="nav-mnemonic">Б</span>аза знаний</button>
@@ -40,7 +54,9 @@
       <div id="status-bar" class="status daemon-off" data-i18n="status_checking">Проверка демона…</div>
       <button id="retry" type="button" class="btn secondary" style="display:none" data-i18n="retry_btn">Повторить</button>
       <div id="daemon-off-banner" class="daemon-off-banner" role="alert" aria-live="polite" style="display:none">
-        <span id="daemon-off-banner-text" data-i18n="status_daemon_off">Демон отключён.</span>
+        <span id="daemon-off-banner-text" data-i18n="rcp_daemon_offline">Демон не запущен.</span>
+        <button type="button" class="btn small primary" id="daemon-off-banner-start" data-i18n="rcp_banner_start">Запустить</button>
+        <button type="button" class="btn small" id="daemon-off-banner-details" data-i18n="rcp_banner_details">Подробнее</button>
         <button type="button" class="btn small" id="daemon-retry-btn" data-i18n="daemon_retry_btn">Повторить подключение</button>
       </div>
 
@@ -291,6 +307,11 @@
       <section id="tab-settings" class="tab-panel" tabindex="-1" aria-labelledby="tab-settings-title">
         <h1 id="tab-settings-title" data-i18n="settings_title">Настройки</h1>
         <div id="settings-tab-content">
+        <div class="settings-sub-nav" role="tablist" aria-label="Settings sections">
+          <button type="button" class="settings-sub-tab active" data-settings-sub="general" role="tab" aria-selected="true" data-i18n="rcp_settings_general">Общие</button>
+          <button type="button" class="settings-sub-tab" data-settings-sub="system" role="tab" aria-selected="false" data-i18n="rcp_settings_system">Система</button>
+        </div>
+        <div id="settings-general-panel" class="settings-sub-panel active" role="tabpanel">
         <div class="card" id="settings-panel-mode-card">
           <h2 data-i18n="settings_panel_mode_title">Отображение настроек</h2>
           <label class="hotkeys-toggle">
@@ -366,6 +387,11 @@
         <div class="card">
           <p class="muted settings-hint" data-i18n="settings_readonly_hint">Только чтение. Изменения — через конфиг или переменные окружения.</p>
           <div id="settings-content" class="settings-grid"></div>
+        </div>
+        </div>
+        <div id="settings-system-panel" class="settings-sub-panel" role="tabpanel" aria-labelledby="rcp-system-panel-title" hidden>
+          <h2 id="rcp-system-panel-title" class="visually-hidden" data-i18n="rcp_settings_system">Система</h2>
+          <div id="settings-system-content"></div>
         </div>
         </div>
       </section>
