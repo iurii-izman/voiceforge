@@ -195,9 +195,9 @@ E11 (narrow CalDAV scope) ✓ → E16 ✓ → E17 ✓
 
 **Post–Wave 4 (2026-03-09):** Все autopilot E-блоки (E1–E19, #124–#142) закрыты. Feature-track автопилот на этом завершён. Дальше идёт отдельная remediation wave QA1-QA6 по security, Sonar и local gates. Placeholders #148–#151 не активировать.
 
-### Post-QA: Desktop Stabilization Wave
+### Post-QA: Desktop Stabilization Wave (эпик закрыт)
 
-После закрытия QA wave следующий практический приоритет определяется уже не Sonar/quality debt, а реальными desktop UX bugs и честным desktop regression policy.
+Эпик **Desktop Stabilization Wave — UX bugs, test policy, regression** завершён: все DS1–DS7 (#159–#169) закрыты. В GitHub при наличии соответствующего Milestone или Epic — можно закрыть его.
 
 | DS | Issue | Блок | Priority | Effort | Area | Зачем |
 |---|---|---|---|---|---|---|
@@ -222,13 +222,10 @@ desktop stabilization wave complete
 |---|---|---|---|---|---|---|
 | MH1 | [#162](https://github.com/iurii-izman/voiceforge/issues/162) ✓ | Maintenance Hardening · maintenance-mode checks and wait-state recheck | P1 | S | DevOps | Добавлен weekly maintenance re-check и канонический `check_maintenance_state.py` |
 | MH2 | [#163](https://github.com/iurii-izman/voiceforge/issues/163) ✓ | Security Hardening · npm alert resolution and Rust rebaseline | P1 | S | Security | Закрыт npm native-e2e alert (`serialize-javascript`) через safe override/lock refresh |
-| MH3 | [#164](https://github.com/iurii-izman/voiceforge/issues/164) | Desktop Linux GTK Refresh · resolve remaining glib Dependabot alert | P1 | M | Security | `time` alert already closed; remaining coordinated refresh = transitive `glib 0.18.5` in Linux desktop chain |
+| MH3 | [#164](https://github.com/iurii-izman/voiceforge/issues/164) ✓ | Desktop Linux GTK Refresh · glib chain documented, risk accepted | P1 | M | Security | Цепочка зафиксирована в security-decision-log; Dependabot #2 dismissed. Revisit после wry#1474 |
 | MH4 | [#165](https://github.com/iurii-izman/voiceforge/issues/165) | Sonar Sweep · low-risk desktop and script cleanup | P1 | M | Quality | Local cleanup готов; нужен remote Sonar re-analysis и residual triage before closure |
 
-**Рекомендуемый порядок:**
-```
-#165 → #164
-```
+**Рекомендуемый порядок:** #165 (Sonar residual).
 
 ### Post-Phase-E: Quality Remediation Wave
 
