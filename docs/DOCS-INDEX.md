@@ -137,6 +137,7 @@
 | security-decision-log.md                                      | Открытые security wait states и revisit triggers                                        | Актуален                         |
 | telegram-bot-setup.md, pyannote-version.md                    | Фичи                                                                                    | Актуален                         |
 | repo-and-git-governance.md                                    | Репо, main, Git, PR, теги, issues, Sonar                                                | Актуален                         |
+| github-profile-and-repo-checklist.md                         | Чеклист: профиль GitHub, аватар, social preview, пин репо — довести до 100%             | Актуален                         |
 | release-and-quality.md                                        | Релиз, откат, alpha2 checklist; Alpha0.1 DoD сохранён как исторический baseline         | Актуален                         |
 | quality-audit-2026-03.md                                      | Post-Phase-E quality remediation wave: GitHub Security, Sonar, mypy, QA1-QA6             | Актуален                         |
 | lifecycle-smoke.md                                            | Smoke-шаги для audio/STT и RAG lifecycle (#105, #106)                                  | Актуален                         |
