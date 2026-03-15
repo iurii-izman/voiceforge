@@ -1638,10 +1638,13 @@ class _Tee:
 def daemon(
     foreground: bool = typer.Option(False, "--foreground", "-f", help="Run in foreground, log to stdout"),
     log_file: Path | None = typer.Option(None, "--log-file", path_type=Path, help="Append daemon logs to this file"),
+    safe: bool = typer.Option(False, "--safe", help="Safe mode: D-Bus only, no STT/LLM/RAG/PipeWire (RCP #204)"),
 ) -> None:
     """Run D-Bus daemon backend."""
     from voiceforge.core.daemon import run_daemon
 
+    if safe:
+        os.environ["VOICEFORGE_SAFE_MODE"] = "1"
     if foreground:
         _configure_structlog(logging.INFO, stream=sys.stdout)
     log_file_handle = None

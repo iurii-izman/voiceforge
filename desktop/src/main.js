@@ -230,6 +230,10 @@ const I18N = {
     rcp_crash_recovered: "Демон восстановился автоматически после сбоя в {time}. [Логи]",
     rcp_crash_many: "Демон падал {n} раз за последний час. Возможна проблема конфигурации. [Диагностика] [Логи] [Безопасный режим]",
     rcp_crash_safe_mode: "Безопасный режим",
+    rcp_safe_mode_banner: "Безопасный режим — запись и ИИ отключены.",
+    rcp_safe_mode_exit: "Обычный перезапуск",
+    rcp_safe_mode_why: "Зачем?",
+    rcp_safe_mode_status: "Работа в безопасном режиме",
     sort_newest: "Сначала новые",
     sort_oldest: "Сначала старые",
     sort_duration_desc: "По длительности (↓)",
@@ -528,6 +532,10 @@ const I18N = {
     rcp_crash_recovered: "Daemon recovered automatically after crash at {time}. [View Logs]",
     rcp_crash_many: "Daemon has crashed {n} times in the last hour. This may indicate a configuration issue. [Run Diagnostics] [View Logs] [Safe Mode]",
     rcp_crash_safe_mode: "Safe Mode",
+    rcp_safe_mode_banner: "Running in Safe Mode — audio capture and AI features are disabled.",
+    rcp_safe_mode_exit: "Restart Normal",
+    rcp_safe_mode_why: "Why?",
+    rcp_safe_mode_status: "Running in Safe Mode",
     sort_newest: "Newest first",
     sort_oldest: "Oldest first",
     sort_duration_desc: "By duration (↓)",
@@ -752,6 +760,8 @@ let daemonState = {
   autoRecovered: false,
   crashDismissed: false,
   crashRecoveryTime: null,
+  /** RCP #204: safe mode (minimal daemon, no STT/LLM/RAG) */
+  safe_mode: false,
 };
 /** RCP-V2.1: Logs panel state (entries, filters, line count). */
 let logsState = {
@@ -873,6 +883,7 @@ async function refreshDaemonState() {
       }
     }
     daemonState.details = details;
+    daemonState.safe_mode = !!(details && details.safe_mode);
 
     /** RCP-V2.4 (#201): detect crash — was running via systemd, now failed (not intentional stop) */
     const isCrash = prevReachable && !newReachable && newUnitState === "failed" && prevUnitState === "active";
@@ -990,16 +1001,20 @@ function updateDaemonOffBannerContent() {
 
 function updateDaemonOffBannerVisibility() {
   const banner = document.getElementById("daemon-off-banner");
+  const safeBanner = document.getElementById("safe-mode-banner");
   if (!banner) return;
   const reachable = daemonState.reachable;
+  const safeMode = daemonState.safe_mode;
   const lastCrash = daemonState.lastCrashTime;
   const dismissed = daemonState.crashDismissed;
   const autoRecovered = daemonState.autoRecovered;
   const recoveryTime = daemonState.crashRecoveryTime;
-  const showRecovered = reachable && autoRecovered && recoveryTime;
+  const showSafeMode = !firstRunDialogOpen && reachable && safeMode;
+  if (safeBanner) safeBanner.style.display = showSafeMode ? "flex" : "none";
+  const showRecovered = reachable && !safeMode && autoRecovered && recoveryTime;
   const showCrash = !reachable && lastCrash && !dismissed;
   const showOffline = !reachable && failedPingCount >= 2 && (!lastCrash || dismissed);
-  const show = !firstRunDialogOpen && (showRecovered || showCrash || showOffline);
+  const show = !firstRunDialogOpen && !showSafeMode && (showRecovered || showCrash || showOffline);
   banner.style.display = show ? "flex" : "none";
   if (show) {
     banner.classList.toggle("daemon-off-banner-recovered", showRecovered);
@@ -1325,6 +1340,20 @@ document.getElementById("daemon-off-banner-start")?.addEventListener("click", as
 document.getElementById("daemon-off-banner-details")?.addEventListener("click", () => {
   openSettingsToSystem();
 });
+/** RCP #204: safe mode banner — Exit Safe Mode / Why? */
+document.getElementById("safe-mode-exit-btn")?.addEventListener("click", async () => {
+  try {
+    await invoke("daemon_exit_safe_mode");
+    await refreshDaemonState();
+    updateDaemonOffBannerVisibility();
+    if (daemonOk) await refreshAfterDaemonRecovery();
+  } catch (e) {
+    console.debug("daemon_exit_safe_mode failed", e);
+  }
+});
+document.getElementById("safe-mode-why-btn")?.addEventListener("click", () => {
+  openSettingsToSystem();
+});
 /** RCP-V2.4 (#201): delegated handler for crash/offline banner buttons (content is replaced dynamically) */
 document.getElementById("daemon-off-banner")?.addEventListener("click", async (e) => {
   const btn = e.target.closest("button[data-action]");
@@ -1373,8 +1402,19 @@ document.getElementById("daemon-off-banner")?.addEventListener("click", async (e
     updateDaemonOffBannerVisibility();
     return;
   }
-  if (action === "run-diagnostics" || action === "safe-mode") {
+  if (action === "run-diagnostics") {
     openSettingsToSystem();
+    return;
+  }
+  if (action === "safe-mode") {
+    try {
+      await invoke("daemon_start_safe");
+      await refreshDaemonState();
+      if (daemonOk) await refreshAfterDaemonRecovery();
+    } catch (err) {
+      console.debug("daemon_start_safe failed", err);
+    }
+    return;
   }
 });
 document.getElementById("daemon-status-dot")?.addEventListener("click", () => {
@@ -2954,19 +2994,23 @@ function loadSystemTabContent() {
   const statusLabel = isExternalDaemon
     ? t("rcp_debug_external_status")
     : daemonState.reachable
-      ? t("rcp_dot_running")
+      ? (daemonState.safe_mode ? t("rcp_safe_mode_status") : t("rcp_dot_running"))
       : (daemonState.unitState === "failed" ? t("rcp_dot_failed") : t("rcp_dot_stopped"));
   const showStopRestart = daemonState.reachable && !isExternalDaemon;
   const debugBtnLabel = isExternalDaemon ? t("rcp_debug_already_external") : t("rcp_system_debug_terminal");
+  const exitSafeModeBtn = showStopRestart && daemonState.safe_mode
+    ? `<button type="button" class="btn small primary" id="system-exit-safe-mode-btn">${escapeHtml(t("rcp_safe_mode_exit"))}</button>`
+    : "";
   let daemonHtml = `
     <div class="card">
       <h2 class="system-section-title">${escapeHtml(t("rcp_system_daemon"))}</h2>
-      <p><span class="dep-name">${escapeHtml(t("rcp_system_status"))}:</span> ${escapeHtml(statusLabel)}${daemonState.reachable && !isExternalDaemon && uptimeStr ? ` (${escapeHtml(t("rcp_system_uptime"))}: ${escapeHtml(uptimeStr)})` : ""}</p>
+      <p><span class="dep-name">${escapeHtml(t("rcp_system_status"))}:</span> ${escapeHtml(statusLabel)}${daemonState.reachable && !isExternalDaemon && uptimeStr && !daemonState.safe_mode ? ` (${escapeHtml(t("rcp_system_uptime"))}: ${escapeHtml(uptimeStr)})` : ""}</p>
+      ${daemonState.safe_mode ? `<p class="muted">${escapeHtml(t("rcp_safe_mode_banner"))}</p>` : ""}
       <p><span class="dep-name">${escapeHtml(t("rcp_system_version"))}:</span> ${escapeHtml(String(version))}</p>
       <p><span class="dep-name">${escapeHtml(t("rcp_system_memory"))}:</span> ${escapeHtml(memoryStr)}</p>
       <div class="first-run-actions">
         ${showStopRestart
-    ? `<button type="button" class="btn small" id="system-stop-btn">${escapeHtml(t("rcp_system_stop"))}</button><button type="button" class="btn small" id="system-restart-btn">${escapeHtml(t("rcp_system_restart"))}</button><button type="button" class="btn small" id="system-debug-terminal-btn">${escapeHtml(t("rcp_system_debug_terminal"))}</button>`
+    ? `${exitSafeModeBtn}<button type="button" class="btn small" id="system-stop-btn">${escapeHtml(t("rcp_system_stop"))}</button><button type="button" class="btn small" id="system-restart-btn">${escapeHtml(t("rcp_system_restart"))}</button><button type="button" class="btn small" id="system-debug-terminal-btn">${escapeHtml(t("rcp_system_debug_terminal"))}</button>`
     : !daemonState.reachable
       ? `<button type="button" class="btn small primary" id="system-start-btn">${escapeHtml(t("rcp_system_start"))}</button><button type="button" class="btn small" id="system-debug-terminal-btn">${escapeHtml(t("rcp_system_debug_terminal"))}</button>`
       : `<button type="button" class="btn small" id="system-debug-terminal-btn" disabled title="${escapeHtml(t("rcp_debug_already_external"))}">${escapeHtml(debugBtnLabel)}</button>`}
@@ -2984,7 +3028,7 @@ function loadSystemTabContent() {
       <h2 class="system-section-title">${escapeHtml(t("rcp_system_deps"))}</h2>
       <div id="system-deps-list">${doctor.checks.map((c, idx) => {
         const status = c.status || "ok";
-        const dotClass = status === "ok" ? "ok" : status === "degraded" ? "degraded" : status === "error" ? "error" : "missing";
+        const dotClass = status === "ok" ? "ok" : status === "degraded" ? "degraded" : status === "error" ? "error" : status === "skipped" ? "skipped" : "missing";
         const hint = c.hint != null ? (typeof c.hint === "string" ? { text: c.hint, command: null, auto_fixable: false } : c.hint) : null;
         const showHint = status !== "ok" && hint && hint.text;
         const hintBlock = showHint ? `
@@ -3074,6 +3118,19 @@ function loadSystemTabContent() {
       await refreshDaemonState();
       if (msg) msg.textContent = t("rcp_firstrun_success");
       loadSystemTabContent();
+    } catch (e) {
+      if (msg) msg.textContent = t("rcp_firstrun_error") + ": " + (e?.message || e);
+    }
+  });
+  document.getElementById("system-exit-safe-mode-btn")?.addEventListener("click", async () => {
+    const msg = document.getElementById("system-daemon-msg");
+    if (msg) msg.textContent = t("rcp_firstrun_installing");
+    try {
+      await invoke("daemon_exit_safe_mode");
+      await refreshDaemonState();
+      if (msg) msg.textContent = t("rcp_firstrun_success");
+      loadSystemTabContent();
+      updateDaemonOffBannerVisibility();
     } catch (e) {
       if (msg) msg.textContent = t("rcp_firstrun_error") + ": " + (e?.message || e);
     }

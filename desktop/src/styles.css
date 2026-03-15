@@ -132,6 +132,9 @@ pre { background: var(--bg); padding: 0.75rem; border-radius: 6px; overflow: aut
 .update-download-progress progress { width: 100%; max-width: 20rem; }
 .update-restart-prompt { display: flex; align-items: center; flex-wrap: wrap; gap: 0.75rem; padding: 0.5rem 0.75rem; background: var(--success, #22c55e); color: #fff; border-radius: var(--radius); margin-bottom: 0.5rem; }
 .update-restart-prompt .btn { flex-shrink: 0; }
+.safe-mode-banner { display: flex; align-items: center; flex-wrap: wrap; gap: 0.75rem; padding: 0.5rem 0.75rem; background: #f59e0b; color: #fff; border-radius: var(--radius); margin-bottom: 0.5rem; }
+.safe-mode-banner .btn { flex-shrink: 0; }
+.dep-dot.skipped { background: #94a3b8; }
 
 /* RCP-M3: daemon status dot in sidebar */
 .daemon-status-dot {

@@ -84,6 +84,8 @@ pub fn run() {
             commands::daemon_start,
             commands::daemon_stop,
             commands::daemon_restart,
+            commands::daemon_start_safe,
+            commands::daemon_exit_safe_mode,
             commands::run_doctor,
             commands::fix_dependency,
             commands::install_service,

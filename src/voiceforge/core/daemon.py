@@ -108,6 +108,9 @@ class VoiceForgeDaemon:
     def __init__(self, iface: DaemonVoiceForgeInterface | None = None) -> None:
         self._iface = iface
         self._cfg = Settings()
+        self._safe_mode = _env_flag("VOICEFORGE_SAFE_MODE")
+        if self._safe_mode:
+            log.warning("daemon.safe_mode", msg="Starting in SAFE MODE — STT, LLM, RAG, PipeWire disabled")
         self._system_audio_state: dict[str, Any] = self._load_system_audio_state()
         self._model_manager = ModelManager(self._cfg)
         set_model_manager(self._model_manager)
@@ -194,7 +197,21 @@ class VoiceForgeDaemon:
     ) -> tuple[str, int | None]:
         """Run full pipeline, save session, return (formatted text, session_id). Block 62: session_id for SessionCreated.
         template: optional meeting template. Respects analyze_timeout_sec (#39).
-        KC4: if out_transcript is a list, it is filled with the raw STT transcript."""
+        KC4: if out_transcript is a list, it is filled with the raw STT transcript.
+        RCP #204: in safe mode analyze is disabled."""
+        if self._safe_mode:
+            return (
+                json.dumps(
+                    {
+                        "error": {
+                            "code": "SAFE_MODE",
+                            "message": "Analyze disabled in safe mode",
+                            "retryable": False,
+                        }
+                    }
+                ),
+                None,
+            )
         from voiceforge.core.transcript_log import TranscriptLog
         from voiceforge.main import run_analyze_pipeline
 
@@ -300,6 +317,7 @@ class VoiceForgeDaemon:
             "listen_state": self._listen_active,
             "copilot_active": copilot_active,
             "memory_mb": round(memory_mb, 1),
+            "safe_mode": self._safe_mode,
         }
 
     def _run_doctor(self) -> dict[str, Any]:
@@ -722,21 +740,40 @@ class VoiceForgeDaemon:
                 "can_start_without": True,
             }
 
-        checks_fns = [
-            _check_python_env,
-            _check_dbus,
-            _check_pipewire,
-            _check_stt_model,
-            _check_config,
-            _check_disk_space,
-            _check_api_keys,
-            _check_rag_index,
-            _check_pid_file,
-            _check_transcript_db,
-            _check_audio_perms,
-            _check_dbus_name,
+        # RCP #204: in safe mode skip checks that require STT/LLM/RAG/PipeWire
+        SAFE_MODE_SKIP_NAMES = {"pipewire", "stt_model", "rag_index", "api_keys", "audio_perms"}
+
+        def _skipped_check(name: str, display_name: str) -> dict[str, Any]:
+            return {
+                "name": name,
+                "display_name": display_name,
+                "status": "skipped",
+                "severity": "low",
+                "message": "Skipped (safe mode)",
+                "hint": None,
+                "can_start_without": True,
+            }
+
+        checks_fns_with_names: list[tuple[str, str, Callable[[], dict[str, Any]]]] = [
+            ("python_env", "Python / CLI", _check_python_env),
+            ("dbus", "D-Bus session bus", _check_dbus),
+            ("pipewire", "PipeWire Audio", _check_pipewire),
+            ("stt_model", "STT model (Whisper)", _check_stt_model),
+            ("config", "Config", _check_config),
+            ("disk_space", "Disk space", _check_disk_space),
+            ("api_keys", "API keys (keyring)", _check_api_keys),
+            ("rag_index", "RAG index", _check_rag_index),
+            ("pid_file", "PID file", _check_pid_file),
+            ("transcript_db", "Transcript DB", _check_transcript_db),
+            ("audio_perms", "Audio permissions", _check_audio_perms),
+            ("dbus_name", "D-Bus name", _check_dbus_name),
         ]
-        checks = [_run_check(fn) for fn in checks_fns]
+        checks = []
+        for name, display_name, fn in checks_fns_with_names:
+            if self._safe_mode and name in SAFE_MODE_SKIP_NAMES:
+                checks.append(_skipped_check(name, display_name))
+            else:
+                checks.append(_run_check(fn))
 
         try:
             proc = psutil.Process()
@@ -763,6 +800,7 @@ class VoiceForgeDaemon:
             "memory_limit_mb": round(memory_limit_mb, 1) if memory_limit_mb is not None else None,
             "listen_state": self._listen_active,
             "copilot_active": copilot_active,
+            "safe_mode": self._safe_mode,
         }
 
         blocking = [c for c in checks if c.get("status") not in ("ok", "degraded") and not c.get("can_start_without")]
@@ -839,7 +877,10 @@ class VoiceForgeDaemon:
 
     def listen_start(self) -> None:
         """Start ring-buffer recording in background thread.
-        If smart_trigger: start trigger loop (check every 2 s)."""
+        If smart_trigger: start trigger loop (check every 2 s).
+        RCP #204: no-op in safe mode."""
+        if self._safe_mode:
+            return
         with self._listen_lock:
             if self._listen_active:
                 return

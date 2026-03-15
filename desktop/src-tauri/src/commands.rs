@@ -650,6 +650,74 @@ pub async fn daemon_restart() -> Result<String, String> {
     Ok(r#"{"restarted": false, "error": "Daemon restarted but not reachable via D-Bus after 10s"}"#.to_string())
 }
 
+/// RCP #204: Start daemon in safe mode (VOICEFORGE_SAFE_MODE=1 + restart); poll D-Bus up to 10s.
+#[tauri::command]
+pub async fn daemon_start_safe() -> Result<String, String> {
+    let _ = Command::new("systemctl")
+        .args(["--user", "set-environment", "VOICEFORGE_SAFE_MODE=1"])
+        .output()
+        .await;
+    let output = Command::new("systemctl")
+        .args(["--user", "restart", "voiceforge.service"])
+        .output()
+        .await
+        .map_err(|e| format!("systemctl restart failed: {e}"))?;
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(format!("systemctl restart failed: {stderr}"));
+    }
+    for _ in 0..20 {
+        tokio::time::sleep(Duration::from_millis(500)).await;
+        if let Ok(conn) = connection().await {
+            if tokio::time::timeout(
+                Duration::from_secs(2),
+                call_method0(&conn, "Ping"),
+            )
+            .await
+            .map(|r| r.is_ok())
+            .unwrap_or(false)
+            {
+                return Ok(r#"{"started": true, "safe_mode": true}"#.to_string());
+            }
+        }
+    }
+    Ok(r#"{"started": false, "safe_mode": true, "error": "Daemon not reachable via D-Bus after 10s"}"#.to_string())
+}
+
+/// RCP #204: Exit safe mode (unset VOICEFORGE_SAFE_MODE + restart); poll D-Bus up to 10s.
+#[tauri::command]
+pub async fn daemon_exit_safe_mode() -> Result<String, String> {
+    let _ = Command::new("systemctl")
+        .args(["--user", "unset-environment", "VOICEFORGE_SAFE_MODE"])
+        .output()
+        .await;
+    let output = Command::new("systemctl")
+        .args(["--user", "restart", "voiceforge.service"])
+        .output()
+        .await
+        .map_err(|e| format!("systemctl restart failed: {e}"))?;
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(format!("systemctl restart failed: {stderr}"));
+    }
+    for _ in 0..20 {
+        tokio::time::sleep(Duration::from_millis(500)).await;
+        if let Ok(conn) = connection().await {
+            if tokio::time::timeout(
+                Duration::from_secs(2),
+                call_method0(&conn, "Ping"),
+            )
+            .await
+            .map(|r| r.is_ok())
+            .unwrap_or(false)
+            {
+                return Ok(r#"{"started": true, "safe_mode": false}"#.to_string());
+            }
+        }
+    }
+    Ok(r#"{"started": false, "safe_mode": false, "error": "Daemon not reachable via D-Bus after 10s"}"#.to_string())
+}
+
 /// Run Doctor() D-Bus method; return structured health report JSON.
 #[tauri::command]
 pub async fn run_doctor() -> Result<String, String> {
