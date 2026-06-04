@@ -66,7 +66,7 @@ security = [
     "sqlcipher3>=0.5.0",
 ]
 web-async = [
-    "starlette>=0.38",
+    "starlette>=1.0.1",
     "uvicorn[standard]>=0.32",
 ]
 all = ["voiceforge[rag,llm,pii,calendar,otel,security,web-async]"]
